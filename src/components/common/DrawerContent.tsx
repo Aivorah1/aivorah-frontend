@@ -78,20 +78,23 @@ const PARENT_NAV_ITEMS = [
 const TEACHER_NAV_ITEMS = [
   { label: 'Dashboard', icon: 'grid', screen: 'TeacherDashboard', group: 'MENU' },
   { label: 'Students', icon: 'users', screen: 'TeacherStudents', group: 'MENU' },
-  { label: 'My Classes', icon: 'layers', screen: 'MyClasses', group: 'MENU' },
-  { label: 'Attendance', icon: 'clipboard', screen: 'TeacherAttendance', group: 'MENU' },
-  { label: 'Assignments', icon: 'check-square', screen: 'TeacherAssignments', group: 'MENU' },
-  { label: 'Challenges', icon: 'target', screen: 'TeacherChallenges', group: 'MENU' },
-  { label: 'Schedule', icon: 'calendar', screen: 'TeacherSchedule', group: 'MENU' },
-  { label: 'Timetable', icon: 'columns', screen: 'Timetable', group: 'MENU' },
-  { label: 'Resources', icon: 'folder', screen: 'Resources', group: 'MENU' },
-  { label: 'Messages', icon: 'message-square', screen: 'TeacherMessages', group: 'MENU' },
-  { label: 'Announcements', icon: 'volume-2', screen: 'TeacherAnnouncements', group: 'MENU' },
-  { label: 'Send Announcement', icon: 'edit-3', screen: 'AnnouncementManager', group: 'MENU' },
-  { label: 'Student Progress', icon: 'bar-chart-2', screen: 'TeacherProgress', group: 'MENU' },
-  { label: 'Curriculum Upload', icon: 'upload-cloud', screen: 'TeacherCurriculumLearningPath', group: 'TEACHING DEVELOPMENT' },
-  { label: 'Learning Paths', icon: 'map', screen: 'TeacherClassLearningPaths', group: 'TEACHING DEVELOPMENT' },
-  { label: 'Professional Development', icon: 'briefcase', screen: 'TeacherLearningPaths', group: 'TEACHING DEVELOPMENT' },
+  { label: 'My Classes', icon: 'layers', screen: 'MyClasses', group: 'CLASS' },
+  { label: 'Attendance', icon: 'clipboard', screen: 'TeacherAttendance', group: 'CLASS' },
+  { label: 'Schedule', icon: 'calendar', screen: 'TeacherSchedule', group: 'CLASS' },
+  { label: 'Timetable', icon: 'columns', screen: 'Timetable', group: 'CLASS' },
+  // Same as Sidebar.tsx: "School Policies" is the Resources page, unchanged.
+  { label: 'School Policies', icon: 'folder', screen: 'Resources', group: 'RESOURCES' },
+  { label: 'Student Report', icon: 'file-text', screen: 'TeacherStudentReport', group: 'RESOURCES' },
+  { label: 'Portfolio', icon: 'image', screen: 'TeacherPortfolio', group: 'RESOURCES' },
+  { label: 'Assignments', icon: 'check-square', screen: 'TeacherAssignments', group: 'MANAGE' },
+  { label: 'Challenges', icon: 'target', screen: 'TeacherChallenges', group: 'MANAGE' },
+  { label: 'Curriculum Upload', icon: 'upload-cloud', screen: 'TeacherCurriculumLearningPath', group: 'MANAGE' },
+  { label: 'Learning Paths', icon: 'map', screen: 'TeacherClassLearningPaths', group: 'MANAGE' },
+  { label: 'Messages', icon: 'message-square', screen: 'TeacherMessages', group: 'MANAGE' },
+  { label: 'Professional Development', icon: 'briefcase', screen: 'TeacherLearningPaths', group: 'MANAGE' },
+  { label: 'Announcements', icon: 'volume-2', screen: 'TeacherAnnouncements', group: 'MANAGE' },
+  { label: 'Send Announcement', icon: 'edit-3', screen: 'AnnouncementManager', group: 'MANAGE' },
+  { label: 'Student Progress', icon: 'bar-chart-2', screen: 'TeacherProgress', group: 'MANAGE' },
   { label: 'Achievements', icon: 'award', screen: 'TeacherAchievements', group: 'TEACHING DEVELOPMENT' },
   { label: 'Project Details', icon: 'activity', screen: 'ProjectDetails', group: 'SYSTEM' },
   { label: 'Help Center', icon: 'help-circle', screen: 'TeacherHelp', group: 'SYSTEM' },
@@ -185,7 +188,7 @@ export default function DrawerContent(props: any) {
   // instead of routing to an error screen. Admin roles are always school-bound,
   // so this only applies to student/teacher/parent.
   const isB2B = !!user?.schoolId;
-  const SCHOOL_ONLY_SCREENS = ['MyClasses', 'TeacherAttendance', 'ParentAttendance', 'StudentAttendance', 'AnnouncementManager', 'Timetable', 'Resources'];
+  const SCHOOL_ONLY_SCREENS = ['MyClasses', 'TeacherAttendance', 'ParentAttendance', 'StudentAttendance', 'AnnouncementManager', 'Timetable', 'Resources', 'TeacherStudentReport', 'TeacherPortfolio'];
   const NAV_ITEMS_BASE = (!isB2B && (isTeacher || isParent || (!isSuperAdmin && !isSchoolAdmin)))
     ? NAV_ITEMS_ROLE.filter((i) => !SCHOOL_ONLY_SCREENS.includes(i.screen))
     : NAV_ITEMS_ROLE;
@@ -203,7 +206,7 @@ export default function DrawerContent(props: any) {
   // your menu). It used to ask "Leave to Home?" and sign you out.
   const homeItem = NAV_ITEMS[0];
   const goToDashboard = () => { if (homeItem) navigation.navigate(homeItem.screen, (homeItem as any).params); };
-  const groups = isAdmin ? ['MENU'] : (isSuperAdmin || isTeacher) ? ['MENU', 'TEACHING DEVELOPMENT', 'SYSTEM'] : isSchoolAdmin ? ['WORKSPACE', 'STUDENT MANAGEMENT', 'ACADEMIC STRUCTURE', 'PEOPLE', 'COMMUNICATION', 'ADMINISTRATION', 'SUPPORT'] : isParent ? ['MENU', 'CHILDREN', 'SYSTEM'] : ['MENU', 'FOCUS', 'SYSTEM'];
+  const groups = isAdmin ? ['MENU'] : isTeacher ? ['MENU', 'CLASS', 'RESOURCES', 'MANAGE', 'TEACHING DEVELOPMENT', 'SYSTEM'] : isSuperAdmin ? ['MENU', 'TEACHING DEVELOPMENT', 'SYSTEM'] : isSchoolAdmin ? ['WORKSPACE', 'STUDENT MANAGEMENT', 'ACADEMIC STRUCTURE', 'PEOPLE', 'COMMUNICATION', 'ADMINISTRATION', 'SUPPORT'] : isParent ? ['MENU', 'CHILDREN', 'SYSTEM'] : ['MENU', 'FOCUS', 'SYSTEM'];
   const { unreadCount, unreadAssignments, unreadChallenges } = useNotification();
   const { bannerAnnouncements } = useAnnouncements();
   const unreadAnnouncements = bannerAnnouncements.length;
@@ -241,6 +244,8 @@ export default function DrawerContent(props: any) {
       <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
         {groups.map((group) => {
           const items = NAV_ITEMS.filter((i) => i.group === group);
+          // A section with nothing to show (e.g. on the phone app) gets no heading.
+          if (!items.length) return null;
           return (
             <View key={group} style={styles.navGroup}>
               <Text style={styles.navLabel}>{group}</Text>
