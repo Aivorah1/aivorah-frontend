@@ -34,6 +34,8 @@ const MyClassesScreen = screens.lazyScreen(() => import('../features/classes/com
 const ClassDetailScreen = screens.lazyScreen(() => import('../features/classes/components/ClassDetailScreen'));
 const TimetableScreen = screens.lazyScreen(() => import('../screens/shared/timetable/TimetableScreen'));
 const ResourcesScreen = screens.lazyScreen(() => import('../screens/shared/resources/ResourcesScreen'));
+const StudentReportScreen = screens.lazyScreen(() => import('../screens/teacher/student-report/StudentReportScreen'));
+const TeacherPortfolioScreen = screens.lazyScreen(() => import('../features/classes/components/TeacherPortfolioScreen'));
 const ChannelsScreen = screens.lazyScreen(() => import('../features/channels/components/ChannelsScreen'));
 const HelpSupportScreen = screens.lazyScreen(() => import('../screens/shared/help-support/HelpSupportScreen'));
 
@@ -83,6 +85,8 @@ export default function TeacherNavigator() {
       <Drawer.Screen name="ClassDetail" component={ClassDetailScreen} />
       <Drawer.Screen name="Timetable" component={TimetableScreen} />
       <Drawer.Screen name="Resources" component={ResourcesScreen} />
+      <Drawer.Screen name="TeacherStudentReport" component={StudentReportScreen} />
+      <Drawer.Screen name="TeacherPortfolio" component={TeacherPortfolioScreen} />
       <Drawer.Screen name="Channels" component={ChannelsScreen} />
     </Drawer.Navigator>
   );

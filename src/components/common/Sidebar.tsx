@@ -68,11 +68,15 @@ const STUDENT_NAV_ITEMS = [
 const TEACHER_NAV_ITEMS = [
   { label: 'Dashboard', icon: 'grid', screen: 'TeacherDashboard', group: 'MENU' },
   { label: 'Students', icon: 'users', screen: 'TeacherStudents', group: 'MENU' },
-  { label: 'My Classes', icon: 'layers', screen: 'MyClasses', group: 'MENU' },
-  { label: 'Attendance', icon: 'clipboard', screen: 'TeacherAttendance', group: 'MENU' },
-  { label: 'Schedule', icon: 'calendar', screen: 'TeacherSchedule', group: 'MENU' },
-  { label: 'Timetable', icon: 'columns', screen: 'Timetable', group: 'MENU' },
-  { label: 'Resources', icon: 'folder', screen: 'Resources', group: 'MENU' },
+  { label: 'My Classes', icon: 'layers', screen: 'MyClasses', group: 'CLASS' },
+  { label: 'Attendance', icon: 'clipboard', screen: 'TeacherAttendance', group: 'CLASS' },
+  { label: 'Schedule', icon: 'calendar', screen: 'TeacherSchedule', group: 'CLASS' },
+  { label: 'Timetable', icon: 'columns', screen: 'Timetable', group: 'CLASS' },
+  // "School Policies" is the Resources page (Library), unchanged — only its menu label differs for teachers.
+  { label: 'School Policies', icon: 'folder', screen: 'Resources', group: 'RESOURCES' },
+  { label: 'Student Report', icon: 'file-text', screen: 'TeacherStudentReport', group: 'RESOURCES' },
+  // Opens the existing class Portfolio (ClassDetail) of the teacher's home class.
+  { label: 'Portfolio', icon: 'image', screen: 'TeacherPortfolio', group: 'RESOURCES', childScreens: ['ClassDetail'] },
   { label: 'Assignments', icon: 'check-square', screen: 'TeacherAssignments', group: 'MANAGE' },
   { label: 'Challenges', icon: 'target', screen: 'TeacherChallenges', group: 'MANAGE' },
   { label: 'Curriculum Upload', icon: 'upload-cloud', screen: 'TeacherCurriculumLearningPath', group: 'MANAGE' },
@@ -245,7 +249,7 @@ export default function Sidebar({ currentScreen, onNavigate }: SidebarProps) {
   // 'AnnouncementManager' (Send Announcement) is B2B-only: a teacher's announcements
   // are school-scoped, so B2C teachers (no school) have no audience for it — hide it
   // rather than route to the "not assigned to a school" dead-end.
-  const SCHOOL_ONLY_SCREENS = ['MyClasses', 'TeacherAttendance', 'ParentAttendance', 'StudentAttendance', 'AnnouncementManager', 'Timetable', 'Resources'];
+  const SCHOOL_ONLY_SCREENS = ['MyClasses', 'TeacherAttendance', 'ParentAttendance', 'StudentAttendance', 'AnnouncementManager', 'Timetable', 'Resources', 'TeacherStudentReport', 'TeacherPortfolio'];
   const NAV_ITEMS = ((!isB2B && (role === 'teacher' || role === 'parent' || role === 'student'))
     ? NAV_ITEMS_ROLE.filter((i) => !SCHOOL_ONLY_SCREENS.includes(i.screen))
     : NAV_ITEMS_ROLE).filter((i) => i.screen !== 'ReadAloud' || hasReadAloudStories(user?.grade));
@@ -253,7 +257,7 @@ export default function Sidebar({ currentScreen, onNavigate }: SidebarProps) {
   // your menu). It used to ask "Leave to Home?" and sign you out.
   const homeItem = NAV_ITEMS[0];
   const goToDashboard = () => { if (homeItem) onNavigate(homeItem.screen, (homeItem as any).params); };
-  const groups = isAdmin ? ['MENU'] : (role === 'super_admin' || role === 'teacher') ? ['MENU', 'MANAGE', 'SYSTEM'] : role === 'school_admin' ? ['WORKSPACE', 'STUDENT MANAGEMENT', 'ACADEMIC STRUCTURE', 'PEOPLE', 'COMMUNICATION', 'ADMINISTRATION', 'SUPPORT'] : role === 'parent' ? ['MENU', 'CHILDREN', 'SYSTEM'] : ['MENU', 'FOCUS', 'SYSTEM'];
+  const groups = isAdmin ? ['MENU'] : role === 'teacher' ? ['MENU', 'CLASS', 'RESOURCES', 'MANAGE', 'SYSTEM'] : role === 'super_admin' ? ['MENU', 'MANAGE', 'SYSTEM'] : role === 'school_admin' ? ['WORKSPACE', 'STUDENT MANAGEMENT', 'ACADEMIC STRUCTURE', 'PEOPLE', 'COMMUNICATION', 'ADMINISTRATION', 'SUPPORT'] : role === 'parent' ? ['MENU', 'CHILDREN', 'SYSTEM'] : ['MENU', 'FOCUS', 'SYSTEM'];
   const { colors, themeMode, setThemeMode } = useTheme();
   const { unreadCount, unreadAssignments, unreadChallenges } = useNotification();
   const { bannerAnnouncements } = useAnnouncements();
@@ -308,6 +312,8 @@ export default function Sidebar({ currentScreen, onNavigate }: SidebarProps) {
       <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }} {...({ dataSet: { sidebarScroll: 'true' } } as any)}>
         {groups.map((group) => {
           const items = NAV_ITEMS.filter((i) => i.group === group);
+          // A section with nothing to show (e.g. RESOURCES for a teacher with no school) gets no heading.
+          if (!items.length) return null;
           return (
             <View key={group} style={styles.navGroup}>
               {!collapsed && <Text style={styles.navLabel}>{group}</Text>}

@@ -107,5 +107,7 @@ export type TeacherDrawerParamList = {
   TeacherAttendance: { grade?: string; section?: string; date?: string } | undefined;
   Timetable: undefined;
   Resources: undefined;
+  TeacherStudentReport: undefined;
+  TeacherPortfolio: undefined;
   Channels: undefined;
 };
