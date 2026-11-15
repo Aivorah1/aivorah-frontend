@@ -8,33 +8,24 @@ export const makeStyles = (c: AppColors, isDark: boolean) => StyleSheet.create({
   content: { width: '100%', maxWidth: 480 },
   loadingText: { marginTop: 16, fontSize: 14, textAlign: 'center' },
 
-  // Two-panel layout
-  twoPanel: {
-    flexDirection: 'row', width: '100%', maxWidth: 800,
-    borderRadius: radius.xl, overflow: 'hidden',
-    borderWidth: 1, borderColor: c.borderColor,
-    minHeight: 480,
-  },
-  leftPanel: {
-    width: 200, flexShrink: 0,
-    padding: spacing.xl, justifyContent: 'space-between',
-  },
-  leftTop: { gap: 10 },
-  subjectIcon: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  leftSubject: { fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.8 },
-  leftTopic: { fontSize: 16, fontWeight: '800', lineHeight: 22 },
-  stepDots: { flexDirection: 'row', alignItems: 'center', gap: 5, flexWrap: 'wrap' },
-  stepDot: { height: 8, borderRadius: 4 },
-  leftBottom: { gap: 6 },
-  leftCounter: { fontSize: 42, fontWeight: '900', lineHeight: 46 },
-  leftOf: { fontSize: 13, fontWeight: '600', marginTop: -6 },
+  // Question-type tag (MCQ / Fill Blank / Speak)
   leftTypeBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, borderWidth: 1, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20, alignSelf: 'flex-start', marginTop: 4 },
   leftTypeTxt: { fontSize: 11, fontWeight: '800' },
 
-  // Right panel
-  rightPanel: { flex: 1, backgroundColor: c.cardDark },
+  // All-questions page: one card per question, stacked (QuizQuestionList)
+  qList: { width: '100%', maxWidth: 800, alignSelf: 'center', gap: spacing.lg },
+  qListScroll: { padding: spacing.xl, paddingBottom: spacing.xxl },
+  qProgressRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+  qProgressSubject: { fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.8 },
+  qCard: { width: '100%', borderRadius: radius.xl, borderWidth: 1, overflow: 'hidden' },
+  qCardHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, padding: spacing.xl },
+  qNumber: { width: 34, height: 34, borderRadius: 17, borderWidth: 1, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  qNumberText: { fontSize: 14, fontWeight: '900' },
+  qCardText: { flex: 1, fontSize: 17, fontWeight: '700', lineHeight: 27, marginTop: 3 },
+  qFooter: { alignItems: 'flex-end', gap: 6 },
+  qFooterNote: { fontSize: 12, fontWeight: '600' },
+
   divider: { height: 1 },
-  questionText: { fontSize: 17, fontWeight: '700', lineHeight: 27, padding: spacing.xl },
 
   // Keep these minimal for backward compat
   progressText: { fontSize: 12, fontWeight: '600' },

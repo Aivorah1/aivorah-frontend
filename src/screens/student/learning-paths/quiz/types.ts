@@ -26,3 +26,26 @@ export type SpokenEvaluation = {
 };
 
 export type SpokenStatus = 'idle' | 'checking' | 'error';
+
+export type FillFeedback = 'idle' | 'wrong1' | 'wrong2' | 'revealed' | 'correct';
+
+// One question's answer state on the all-questions page (see useQuiz).
+export type QuestionAnswer = {
+  mcqSelected: number | null;
+  mcqAttempts: number;   // attempts on this MCQ
+  showMcqHint: boolean;
+  mcqDone: boolean;      // locked: answered right, or wrong twice
+  fillInput: string;
+  fillAttempts: number;
+  fillFeedback: FillFeedback;
+  fillValidating: boolean;
+  explanation: string;
+  loadingExplain: boolean;
+  recorded: boolean;     // its result is saved: it counts as answered
+};
+
+export const emptyAnswer = (): QuestionAnswer => ({
+  mcqSelected: null, mcqAttempts: 0, showMcqHint: false, mcqDone: false,
+  fillInput: '', fillAttempts: 0, fillFeedback: 'idle', fillValidating: false,
+  explanation: '', loadingExplain: false, recorded: false,
+});

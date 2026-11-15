@@ -1,7 +1,8 @@
 /**
  * QuizScreen.tsx
  * Practice for any topic. Opens on a start page - Take a Test / History - then:
- * - Take a Test: a new test (questions + the spoken explanation), then its results
+ * - Take a Test: a new test (questions + the spoken explanation) with every
+ *   question on one scrolling page, answered in any order, then its results
  * - History: every past test for this topic by date & time; tap one for its report
  * - Generates mixed MCQ + fill-in-the-blank questions via Groq (/ibpyp/quiz)
  * - MCQ wrong → hint available → retry (up to 2 attempts) → explanation
@@ -18,7 +19,7 @@ import { makeStyles } from './styles';
 import { useQuiz } from './hooks/useQuiz';
 import QuizResult from './components/QuizResult';
 import { useNextTopic } from './hooks/useNextTopic';
-import QuizQuestion from './components/QuizQuestion';
+import QuizQuestionList from './components/QuizQuestionList';
 import { PracticeStart, PracticeHistoryList, formatTakenAt } from './components/PracticeHome';
 import { usePracticeHistory, useAttemptExplanations } from './hooks/usePracticeHistory';
 import type { PastAttempt } from './resultCache';
@@ -173,32 +174,23 @@ function QuizSession({ navigation, route }: any) {
     );
   }
 
-  // ── Quiz ───────────────────────────────────────────────────────
-  const q = quiz.questions[quiz.currentQ];
-
+  // ── Quiz: every question on one page ─────────────────────────
   return (
-    <QuizQuestion
-      q={q}
-      currentQ={quiz.currentQ}
+    <QuizQuestionList
       questions={quiz.questions}
+      answers={quiz.answers}
+      results={quiz.perQuestionResultsRef.current}
+      answeredCount={quiz.answeredCount}
+      allAnswered={quiz.allAnswered}
       topic={topic}
       subject={subject}
       colors={colors}
       isDark={isDark}
       styles={styles}
-      mcqSelected={quiz.mcqSelected}
-      mcqDone={quiz.mcqDone}
-      showMcqHint={quiz.showMcqHint}
-      fillInput={quiz.fillInput}
-      setFillInput={quiz.setFillInput}
-      fillFeedback={quiz.fillFeedback}
-      fillValidating={quiz.fillValidating}
-      explanation={quiz.explanation}
-      loadingExplain={quiz.loadingExplain}
       onMcqAnswer={quiz.handleMcqAnswer}
+      setFillInput={quiz.setFillInput}
       onFillSubmit={quiz.handleFillSubmit}
-      onNext={quiz.goNext}
-      onPrev={quiz.goPrev}
+      onFinish={quiz.finish}
       onBack={goBackToOrigin}
       onMenuPress={() => navigation.openDrawer()}
       spokenText={quiz.spokenText}
