@@ -66,6 +66,13 @@ export function makeStyles(c: AppColors) {
     retryBtn: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: radius.sm, borderWidth: 1, borderColor: c.borderColor },
     retryText: { fontSize: 12.5, fontWeight: '700', color: c.accentYellow },
     message: { fontSize: 12.5, color: c.textMuted },
+    // Automatic check result on a story waiting for review.
+    badgeOk: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6, fontSize: 11, fontWeight: '800', overflow: 'hidden', color: '#fff', backgroundColor: '#3E8E5E' },
+    badgeCheck: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6, fontSize: 11, fontWeight: '800', overflow: 'hidden', color: '#1C1407', backgroundColor: '#E0A93B' },
+    noteOk: { fontSize: 12, color: '#3E8E5E', lineHeight: 18 },
+    checkbox: { width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: c.borderColor, alignItems: 'center', justifyContent: 'center' },
+    checkboxOn: { borderColor: c.accentYellow, backgroundColor: c.accentYellow },
+    confirm: { borderWidth: 1, borderColor: c.accentYellow, borderRadius: 14, padding: 14, gap: 10, backgroundColor: c.bgDark },
     error: { fontSize: 12.5, color: c.accentRed },
   });
 }

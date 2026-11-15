@@ -14,7 +14,7 @@ jest.mock('@expo/vector-icons', () => ({ Feather: () => null }));
 jest.mock('../../services/currentAffairsAdminService', () => ({
   listStories: jest.fn(), getStory: jest.fn(), createStory: jest.fn(), updateStory: jest.fn(), setStoryStatus: jest.fn(),
   listQuizWeeks: jest.fn(), getQuiz: jest.fn(), updateQuestion: jest.fn(), addQuestion: jest.fn(), setQuestionStatus: jest.fn(),
-  publishQuiz: jest.fn(), getAnalytics: jest.fn(),
+  publishQuiz: jest.fn(), getAnalytics: jest.fn(), bulkSetStoryStatus: jest.fn(), getPipelineLastRun: jest.fn(),
 }));
 import * as api from '../../services/currentAffairsAdminService';
 const mocked = api as jest.Mocked<typeof api>;
@@ -44,6 +44,7 @@ beforeEach(() => {
   mocked.getStory.mockResolvedValue(story());
   mocked.listQuizWeeks.mockResolvedValue({ currentWeek: '2026-11-08', weeks: [] });
   mocked.getQuiz.mockResolvedValue([question(1), question(2)]);
+  mocked.getPipelineLastRun.mockResolvedValue(null);
 });
 
 test('the review queue shows waiting stories with their check notes', async () => {
@@ -51,6 +52,54 @@ test('the review queue shows waiting stories with their check notes', async () =
   expect(await screen.findByText('NASA tests a new rocket')).toBeTruthy();
   expect(screen.getByText('names not in source: Artemis')).toBeTruthy();
   expect(mocked.listStories).toHaveBeenCalledWith('review');
+});
+
+describe('review queue: bulk publish', () => {
+  const queue = () => [
+    story({ id: 's1', review_notes: 'AUTO: VERIFIED', title_kid: 'Verified one', what_happened_kid: 'a b c', what_happened_teen: 'a b c d e' }),
+    story({ id: 's2', review_notes: 'AUTO: CHECK - check the figure against the RBI page.', title_kid: 'Needs a check' }),
+    story({ id: 's3', review_notes: 'AUTO: VERIFIED', title_kid: 'Verified two' }),
+  ];
+
+  test('shows each story’s check result, word counts and the last automatic run', async () => {
+    mocked.listStories.mockResolvedValue(queue());
+    mocked.getPipelineLastRun.mockResolvedValue({ at: '2026-11-14T00:31:00Z', date: '2026-11-14', saved: 6, verified: 4 });
+    await render(<CurrentAffairsAdminScreen />);
+    expect(await screen.findByTestId('ca-story-verified-s1')).toBeTruthy();
+    expect(screen.getByTestId('ca-story-autocheck-s2')).toBeTruthy();
+    expect(screen.getByText('AUTO: CHECK - check the figure against the RBI page.')).toBeTruthy();
+    expect(screen.getByTestId('ca-story-counts-s1').props.children.join('')).toBe('7–12: 3 words · 13–15: 5 words · Source:');
+    expect(await screen.findByText(/^Last auto run: .* · 6 saved · 4 verified$/)).toBeTruthy();
+  });
+
+  test('select all verified, confirm, and they are published as today’s digest', async () => {
+    const user = userEvent.setup();
+    mocked.listStories.mockResolvedValue(queue());
+    mocked.bulkSetStoryStatus.mockResolvedValue({ updated: 2, results: [{ id: 's1', ok: true }, { id: 's3', ok: true }] });
+    await render(<CurrentAffairsAdminScreen />);
+    await user.press(await screen.findByTestId('ca-select-verified'));
+    expect(screen.getByText('2 selected')).toBeTruthy();
+    await user.press(screen.getByTestId('ca-publish-selected'));
+    expect(screen.getByTestId('ca-publish-confirm')).toBeTruthy();
+    expect(mocked.bulkSetStoryStatus).not.toHaveBeenCalled(); // nothing before confirming
+    await user.press(screen.getByTestId('ca-publish-confirm-yes'));
+    await waitFor(() => expect(mocked.bulkSetStoryStatus).toHaveBeenCalledWith(['s1', 's3'], 'published', 'today'));
+    expect(await screen.findByText('Published 2 stories.')).toBeTruthy();
+  });
+
+  test('cancel publishes nothing; reject selected rejects the ticked stories', async () => {
+    const user = userEvent.setup();
+    mocked.listStories.mockResolvedValue(queue());
+    mocked.bulkSetStoryStatus.mockResolvedValue({ updated: 1, results: [{ id: 's2', ok: true }] });
+    await render(<CurrentAffairsAdminScreen />);
+    await user.press(await screen.findByTestId('ca-story-check-s2'));
+    await user.press(screen.getByTestId('ca-publish-selected'));
+    await user.press(screen.getByTestId('ca-publish-confirm-no'));
+    expect(screen.queryByTestId('ca-publish-confirm')).toBeNull();
+    await user.press(screen.getByTestId('ca-reject-selected'));
+    await waitFor(() => expect(mocked.bulkSetStoryStatus).toHaveBeenCalledWith(['s2'], 'rejected', undefined));
+    expect(mocked.bulkSetStoryStatus).toHaveBeenCalledTimes(1);
+  });
 });
 
 test('an editor fixes a story and publishes it', async () => {

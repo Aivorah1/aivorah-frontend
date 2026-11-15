@@ -35,6 +35,15 @@ export const createStory = (fields: Partial<Story> & { publish?: boolean }) =>
 export const updateStory = (id: string, fields: Partial<Story>) =>
   call<{ story: Story }>(`/stories/${id}`, { method: 'PATCH', body: fields }, 'Could not save the story').then((d) => d.story);
 
+export interface BulkResult { id: string; ok: boolean; status?: ContentStatus; publish_date?: string; reason?: string }
+/** Publish or reject up to 20 stories waiting for review; 'today' puts published ones in today's digest. */
+export const bulkSetStoryStatus = (ids: string[], status: 'published' | 'rejected' | 'draft', publishDate?: 'today') =>
+  call<{ updated: number; results: BulkResult[] }>('/stories/bulk-status', { method: 'POST', body: { ids, status, publishDate } }, 'Could not change the stories');
+
+export interface PipelineRun { at: string; date: string; saved: number; verified: number }
+export const getPipelineLastRun = () =>
+  call<{ lastRun: PipelineRun | null }>('/pipeline/last-run', {}, 'Could not load the last automatic run').then((d) => d.lastRun);
+
 export const setStoryStatus = (id: string, status: ContentStatus) =>
   call<{ story: Story }>(`/stories/${id}/status`, { method: 'POST', body: { status } }, 'Could not change the story').then((d) => d.story);
 

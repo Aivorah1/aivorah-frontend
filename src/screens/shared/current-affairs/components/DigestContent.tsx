@@ -101,7 +101,7 @@ export default function DigestContent({ state, navigation, showDateRow = true }:
           <View style={styles.noteRow}>
             <Feather name="info" size={12} color={colors.textMuted} />
             <Text style={[styles.noteText, { color: colors.textMuted }]}>
-              No new stories yet today — here is the digest from {formatDigestDate(digest.date)}.
+              Today’s stories are being checked by our team. Here is the latest digest ({formatDigestDate(digest.date)}).
             </Text>
           </View>
         ) : null}

@@ -18,6 +18,11 @@ export interface StorySummary {
   is_true_fact: boolean;
   reviewed_by: string | null;
   reviewed_at: string | null;
+  /** In the list too, for word counts and the 13-15 title. */
+  what_happened_kid?: string;
+  title_teen?: string;
+  summary_teen?: string;
+  what_happened_teen?: string;
 }
 
 /** Every editable field of a story (ca_stories). */

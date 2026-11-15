@@ -132,7 +132,7 @@ test('an already finished digest shows as complete, without the button', async (
 test('says when it is showing an earlier digest', async () => {
   mocked.fetchTodayDigest.mockResolvedValue(digest({ date: '2026-11-07', isToday: false }));
   await render(<CurrentAffairsTab navigation={nav()} />);
-  expect(await screen.findByText(/No new stories yet today — here is the digest from/)).toBeTruthy();
+  expect(await screen.findByText(/^Today’s stories are being checked by our team. Here is the latest digest/)).toBeTruthy();
 });
 
 test('empty digest', async () => {
