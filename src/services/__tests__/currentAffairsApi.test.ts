@@ -1,4 +1,5 @@
 import CURRENT_AFFAIRS_SERVER_URL from '../../config/currentAffairsServerUrl';
+import WORLD_AND_YOU_SERVER_URL from '../../config/worldAndYouServerUrl';
 import {
   fetchTodayDigest, fetchDigestList, fetchStory, fetchWeeklyQuiz, checkQuizAnswer, submitQuiz,
   fetchProgress, recordDigestComplete, recordStoryRead, recordQuizComplete,
@@ -20,8 +21,9 @@ beforeEach(() => {
   global.fetch = jest.fn().mockResolvedValue(ok({})) as any;
 });
 
-test('uses the live attendance service, which hosts the API (no ai-mentor monolith)', () => {
-  expect(CURRENT_AFFAIRS_SERVER_URL).toBe('https://aivorah-attendance-service-y3t6.onrender.com');
+test('uses the live World & You service, which hosts the API (no ai-mentor monolith)', () => {
+  expect(CURRENT_AFFAIRS_SERVER_URL).toBe('https://aivorah-world-and-you-service.onrender.com');
+  expect(CURRENT_AFFAIRS_SERVER_URL).toBe(WORLD_AND_YOU_SERVER_URL);
 });
 
 describe('reads', () => {

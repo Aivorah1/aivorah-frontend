@@ -1,7 +1,7 @@
 import CURRENT_AFFAIRS_SERVER_URL from '../config/currentAffairsServerUrl';
 import { authHeader } from './authHeader';
 
-// Client for aivorah-current-affairs-service: daily digest, stories, weekly quiz,
+// Client for the Current Affairs API (aivorah-world-and-you-service, /current-affairs): daily digest, stories, weekly quiz,
 // points/streaks/badges. Every function throws on a non-2xx answer, with the
 // service's error message when it sends one.
 //

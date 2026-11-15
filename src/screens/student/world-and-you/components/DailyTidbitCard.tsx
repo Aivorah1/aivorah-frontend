@@ -3,7 +3,7 @@
  * The World & You card with the "GK Fact | Current Affairs" tabs.
  * GK Fact: today's grade-specific fact (aivorah-world-and-you-service).
  * Current Affairs: the tab switch only — the parent screen shows the daily
- * digest from aivorah-current-affairs-service below this card.
+ * digest (aivorah-world-and-you-service, /current-affairs) below this card.
  */
 import React from 'react';
 import {
