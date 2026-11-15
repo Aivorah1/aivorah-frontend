@@ -19,7 +19,7 @@ jest.mock('../../services/currentAffairsAdminService', () => ({
 import * as api from '../../services/currentAffairsAdminService';
 const mocked = api as jest.Mocked<typeof api>;
 
-const AGES = ['young', 'kid', 'teen'];
+const AGES = ['kid', 'teen'];
 const PARTS = ['title', 'summary', 'what_happened', 'why_important'];
 const story = (over: any = {}) => {
   const s: any = {
@@ -33,7 +33,7 @@ const story = (over: any = {}) => {
   return { ...s, ...over };
 };
 const question = (n: number, over: any = {}) => ({
-  id: `q${n}`, week_start: '2026-11-08', age_group: '8-12', category: 'india', question_type: 'mcq',
+  id: `q${n}`, week_start: '2026-11-08', age_group: '7-12', category: 'india', question_type: 'mcq',
   question: `Question ${n}?`, options: ['A', 'B', 'C', 'D'], correct_index: 0, explanation: 'Because.', extra_fact: null,
   status: 'review', position: n, review_notes: null, ...over,
 });
@@ -95,11 +95,11 @@ test("the weekly quiz: edit a question's right answer, then publish the week", a
   await waitFor(() => expect(mocked.updateQuestion).toHaveBeenCalledWith('q2', expect.objectContaining({ correct_index: 2, options: ['A', 'B', 'C', 'D'] })));
 
   await user.press(screen.getByTestId('ca-quiz-publish'));
-  await waitFor(() => expect(mocked.publishQuiz).toHaveBeenCalledWith('2026-11-08', '8-12'));
+  await waitFor(() => expect(mocked.publishQuiz).toHaveBeenCalledWith('2026-11-08', '7-12'));
   expect(await screen.findByText('Published 2 questions: students can play the quiz now.')).toBeTruthy();
 
   await user.press(screen.getByTestId('ca-quiz-prev'));
-  await waitFor(() => expect(mocked.getQuiz).toHaveBeenLastCalledWith('2026-11-01', '8-12'));
+  await waitFor(() => expect(mocked.getQuiz).toHaveBeenLastCalledWith('2026-11-01', '7-12'));
 });
 
 test('insights show the metrics, with a dash where there is no data yet', async () => {
@@ -124,6 +124,6 @@ test('insights show the metrics, with a dash where there is no data yet', async 
   expect(screen.getByText('—')).toBeTruthy(); // retention: no earlier month yet
   expect(screen.getByTestId('ca-day-2026-11-14')).toBeTruthy();
 
-  await user.press(screen.getByTestId('ca-insights-age-8-12'));
-  await waitFor(() => expect(mocked.getAnalytics).toHaveBeenLastCalledWith(expect.any(String), expect.any(String), '8-12'));
+  await user.press(screen.getByTestId('ca-insights-age-7-12'));
+  await waitFor(() => expect(mocked.getAnalytics).toHaveBeenLastCalledWith(expect.any(String), expect.any(String), '7-12'));
 });

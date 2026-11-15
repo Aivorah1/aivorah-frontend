@@ -1,5 +1,5 @@
 export type ContentStatus = 'draft' | 'review' | 'published' | 'rejected' | 'archived';
-export type CaAgeGroup = 'under-8' | '8-12' | '13+';
+export type CaAgeGroup = '7-12' | '13-15';
 export const CA_CATEGORIES = ['india', 'world', 'economy', 'science', 'environment', 'sports', 'society'] as const;
 export type CaCategory = (typeof CA_CATEGORIES)[number];
 
@@ -22,10 +22,10 @@ export interface StorySummary {
 
 /** Every editable field of a story (ca_stories). */
 export interface Story extends StorySummary {
-  title_young: string; title_teen: string;
-  summary_young: string; summary_teen: string;
-  what_happened_young: string; what_happened_kid: string; what_happened_teen: string;
-  why_important_young: string; why_important_kid: string; why_important_teen: string;
+  title_teen: string;
+  summary_teen: string;
+  what_happened_kid: string; what_happened_teen: string;
+  why_important_kid: string; why_important_teen: string;
   did_you_know: string | null;
   new_word_1: string | null; def_1: string | null;
   new_word_2: string | null; def_2: string | null;

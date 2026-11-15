@@ -23,11 +23,20 @@ export const CATEGORIES: Record<Category, { label: string; icon: string }> = {
 };
 
 export const AGE_GROUPS: Record<AgeGroup, { label: string; storiesPerDay: number; minutes: string }> = {
-  // Spec: 5-7 stories a day (the service picks the same numbers).
-  'under-8': { label: 'Ages 3-8', storiesPerDay: 5, minutes: '3-5' },
-  '8-12': { label: 'Ages 8-12', storiesPerDay: 6, minutes: '5-7' },
-  '13+': { label: 'Ages 13+', storiesPerDay: 7, minutes: '7-10' },
+  // The service picks the same numbers of stories a day.
+  '7-12': { label: 'Ages 7-12', storiesPerDay: 6, minutes: '5-7' },
+  '13-15': { label: 'Ages 13-15', storiesPerDay: 7, minutes: '7-10' },
 };
+
+// Old values (from an old link or a saved screen state) → the two current ones.
+const OLD_AGE_GROUPS: Record<string, AgeGroup> = { 'under-8': '7-12', '8-12': '7-12', '13+': '13-15' };
+
+/** A known age group (old values converted), or null. */
+export function normalizeAgeGroup(value?: string | null): AgeGroup | null {
+  const v = String(value ?? '').trim();
+  if (v === '7-12' || v === '13-15') return v;
+  return OLD_AGE_GROUPS[v] ?? null;
+}
 
 export const QUESTION_TYPES: Record<QuestionType, string> = {
   mcq: 'Multiple choice',
@@ -35,23 +44,43 @@ export const QUESTION_TYPES: Record<QuestionType, string> = {
   reasoning: 'Think and reason',
 };
 
-// What the service awards (aivorah-current-affairs-service/services/rewards.js).
-export const POINTS = { digest: 10, story: 5, quiz: 20, excellenceBonus: 10 };
+// What the service awards (aivorah-world-and-you-service current-affairs/services/rewards.js).
+// Only the weekly quiz gives points; reading the digest or a story gives none.
+export const POINTS = { quiz: 20, excellenceBonus: 10 };
 export const EXCELLENCE_PERCENT = 80;
 
 export const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
+/** Age group from an age in years: 12 or younger (under 8 included) → 7-12, 13 and above → 13-15. */
+export function ageGroupForAge(age: number): AgeGroup {
+  return age >= 13 ? '13-15' : '7-12';
+}
+
+/** Whole years from a date of birth (YYYY-MM-DD…) to today; null if missing or not a real date. */
+export function ageFromDob(dob?: string | null, today: Date = new Date()): number | null {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(dob || '').trim());
+  if (!m) return null;
+  const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  const born = new Date(Date.UTC(y, mo - 1, d));
+  if (born.getUTCMonth() !== mo - 1 || born.getUTCDate() !== d) return null;
+  let age = today.getUTCFullYear() - y;
+  if (today.getUTCMonth() + 1 < mo || (today.getUTCMonth() + 1 === mo && today.getUTCDate() < d)) age -= 1;
+  return age >= 0 && age < 100 ? age : null;
+}
+
 /**
- * Age group from the profile grade: Nursery / LKG / UKG → under-8,
- * Grade 1-8 → 8-12, Grade 9-12 → 13+. Anything unrecognised → 8-12.
+ * Age group from the profile grade: pre-primary (Nursery / LKG / UKG) and
+ * Grade 1-8 → 7-12, Grade 9 and above → 13-15. Anything unrecognised → 7-12.
  */
 export function ageGroupForGrade(grade?: string | null): AgeGroup {
-  const g = String(grade || '').trim().toLowerCase();
-  if (!g) return '8-12';
-  if (/nursery|pre-?k|\blkg\b|\bukg\b|^kg$|kindergarten|playgroup/.test(g)) return 'under-8';
-  const n = parseInt(g.match(/\d+/)?.[0] || '', 10);
-  if (Number.isFinite(n) && n >= 9) return '13+';
-  return '8-12';
+  const n = parseInt(String(grade || '').match(/\d+/)?.[0] || '', 10);
+  return Number.isFinite(n) && n >= 9 ? '13-15' : '7-12';
+}
+
+/** The student's age group: from the date of birth when the profile has one, otherwise from the grade. */
+export function ageGroupForStudent(user?: { dob?: string | null; grade?: string | null } | null): AgeGroup {
+  const age = ageFromDob(user?.dob);
+  return age === null ? ageGroupForGrade(user?.grade) : ageGroupForAge(age);
 }
 
 export function formatReadTime(seconds: number): string {

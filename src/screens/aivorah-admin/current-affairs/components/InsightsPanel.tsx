@@ -14,9 +14,8 @@ const RANGES = [
 ];
 const AGES = [
   { value: 'all', label: 'All ages' },
-  { value: 'under-8', label: 'Under 8' },
-  { value: '8-12', label: '8–12' },
-  { value: '13+', label: '13+' },
+  { value: '7-12', label: '7–12' },
+  { value: '13-15', label: '13–15' },
 ];
 
 type Key = keyof CaAnalytics['metrics'];

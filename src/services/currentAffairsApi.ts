@@ -1,7 +1,7 @@
 import CURRENT_AFFAIRS_SERVER_URL from '../config/currentAffairsServerUrl';
 import { authHeader } from './authHeader';
 
-// Client for aivorah-current-affairs-service: daily digest, stories, weekly quiz,
+// Client for the Current Affairs API (aivorah-world-and-you-service, /current-affairs): daily digest, stories, weekly quiz,
 // points/streaks/badges. Every function throws on a non-2xx answer, with the
 // service's error message when it sends one.
 //
@@ -9,7 +9,8 @@ import { authHeader } from './authHeader';
 // the Firebase token on its own; writes attach it explicitly with authHeader()
 // so they fail fast ("Not signed in.") instead of being refused by the service.
 
-export type AgeGroup = 'under-8' | '8-12' | '13+';
+// Two content versions; students under 8 read 7-12.
+export type AgeGroup = '7-12' | '13-15';
 export type Category = 'india' | 'world' | 'economy' | 'science' | 'environment' | 'sports' | 'society';
 export type QuestionType = 'mcq' | 'true_false' | 'reasoning';
 export type BadgeKey = 'excellence' | 'weekly_streak' | 'growth';

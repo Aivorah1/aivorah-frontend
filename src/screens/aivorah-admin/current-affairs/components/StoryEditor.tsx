@@ -7,9 +7,8 @@ import { CA_CATEGORIES, type CaCategory, type ContentStatus, type Story } from '
 import type { CaStyles } from '../styles';
 
 const AGES = [
-  { key: 'young', label: 'Under 8' },
-  { key: 'kid', label: '8–12' },
-  { key: 'teen', label: '13+' },
+  { key: 'kid', label: '7–12' },
+  { key: 'teen', label: '13–15' },
 ] as const;
 const PARTS = [
   { key: 'title', label: 'Title', multiline: false },
@@ -87,7 +86,7 @@ export default function StoryEditor({ id, styles, accent, onChanged, onClose }: 
         <View style={{ flex: 1, minWidth: 200 }}>
           <Text style={styles.cardTitle}>{isNew ? 'New story' : current.title_kid || 'Story'}</Text>
           <Text style={styles.cardSub}>
-            {isNew ? 'Write all three age versions. Save as a draft, or publish when the facts are checked.'
+            {isNew ? 'Write both age versions (7–12 and 13–15). Save as a draft, or publish when the facts are checked.'
               : `Status: ${story?.status}${story?.reviewed_by ? ` · last reviewed by ${story.reviewed_by}` : ''}`}
           </Text>
         </View>

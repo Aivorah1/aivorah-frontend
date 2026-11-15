@@ -5,7 +5,7 @@ import {
   fetchTodayDigest, fetchProgress, recordDigestComplete,
   type AgeGroup, type Digest, type Progress,
 } from '../../../../services/currentAffairsApi';
-import { ageGroupForGrade } from '../constants';
+import { ageGroupForStudent } from '../constants';
 
 export type DigestState = ReturnType<typeof useDigest>;
 
@@ -15,7 +15,7 @@ export type DigestState = ReturnType<typeof useDigest>;
 export function useDigest() {
   const { user } = useAuth();
   const email = user?.email || undefined;
-  const ageGroup: AgeGroup = ageGroupForGrade(user?.grade);
+  const ageGroup: AgeGroup = ageGroupForStudent(user);
 
   const [digest, setDigest] = useState<Digest | null>(null);
   const [progress, setProgress] = useState<Progress | null>(null);
@@ -57,7 +57,7 @@ export function useDigest() {
       setDigest({ ...digest, completed: true });
       setCompleteMessage(result.alreadyCompleted
         ? "You already finished today's digest."
-        : `Well done! +${result.pointsAwarded} points${result.newBadges.includes('weekly_streak') ? ' and a 7-day streak badge!' : ''}`);
+        : `Well done!${result.newBadges.includes('weekly_streak') ? ' You earned the 7-day streak badge!' : ''}`);
     } catch (e: any) {
       setCompleteMessage(e?.message || 'Could not save your progress');
     } finally {

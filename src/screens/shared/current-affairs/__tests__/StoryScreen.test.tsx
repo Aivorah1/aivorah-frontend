@@ -35,7 +35,7 @@ const STORY: api.Story = {
 };
 
 const nav = (canGoBack = true) => ({ navigate: jest.fn(), goBack: jest.fn(), canGoBack: () => canGoBack });
-const route = (params: any = { storyId: 's1', ageGroup: '8-12' }) => ({ params });
+const route = (params: any = { storyId: 's1', ageGroup: '7-12' }) => ({ params });
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -46,7 +46,7 @@ beforeEach(() => {
 test('shows every section of the story format', async () => {
   await render(<StoryScreen navigation={nav()} route={route()} />);
   expect(await screen.findByText('Thousands of New Sea Animals')).toBeTruthy();
-  expect(mocked.fetchStory).toHaveBeenCalledWith('s1', '8-12');
+  expect(mocked.fetchStory).toHaveBeenCalledWith('s1', '7-12');
   for (const heading of ['What happened?', 'Why is it important?', 'Did you know?', 'Learn a new word', 'Think about it']) {
     expect(screen.getByText(heading)).toBeTruthy();
   }
@@ -77,34 +77,41 @@ test('the original source opens in the browser', async () => {
   expect(open).toHaveBeenCalledWith('https://doi.org/10.1016/j.cub.2023.04.052');
 });
 
-test('marking the story read awards 5 points', async () => {
-  mocked.recordStoryRead.mockResolvedValue({ alreadyRead: false, pointsAwarded: 5, progress: {} as any });
+test('marking the story read saves it, with no points', async () => {
+  mocked.recordStoryRead.mockResolvedValue({ alreadyRead: false, pointsAwarded: 0, progress: {} as any });
   await render(<StoryScreen navigation={nav()} route={route()} />);
-  await fireEvent.press(await screen.findByText('I’ve read this (+5 points)'));
-  expect(mocked.recordStoryRead).toHaveBeenCalledWith('kid@school.in', '8-12', 's1', expect.any(Number));
-  expect(await screen.findByText('Great reading! +5 points')).toBeTruthy();
+  await fireEvent.press(await screen.findByText('I’ve read this'));
+  expect(mocked.recordStoryRead).toHaveBeenCalledWith('kid@school.in', '7-12', 's1', expect.any(Number));
+  expect(await screen.findByText('Great reading!')).toBeTruthy();
+  expect(screen.queryByText(/points/)).toBeNull();
   expect(screen.getByTestId('story-done')).toBeTruthy();
 });
 
 test('reading a story again earns nothing and says so', async () => {
   mocked.recordStoryRead.mockResolvedValue({ alreadyRead: true, pointsAwarded: 0, progress: {} as any });
   await render(<StoryScreen navigation={nav()} route={route()} />);
-  await fireEvent.press(await screen.findByText('I’ve read this (+5 points)'));
+  await fireEvent.press(await screen.findByText('I’ve read this'));
   expect(await screen.findByText('You have read this story before.')).toBeTruthy();
 });
 
 test('a failed save shows the error', async () => {
   mocked.recordStoryRead.mockRejectedValue(new Error('Not signed in.'));
   await render(<StoryScreen navigation={nav()} route={route()} />);
-  await fireEvent.press(await screen.findByText('I’ve read this (+5 points)'));
+  await fireEvent.press(await screen.findByText('I’ve read this'));
   expect(await screen.findByText('Not signed in.')).toBeTruthy();
 });
 
-test('the age group falls back to the profile grade', async () => {
+test('the age group falls back to the profile (a UKG child reads 7-12)', async () => {
   mockUser = { email: 'kid@school.in', grade: 'UKG' };
   await render(<StoryScreen navigation={nav()} route={route({ storyId: 's1' })} />);
   await screen.findByText('What happened?');
-  expect(mocked.fetchStory).toHaveBeenCalledWith('s1', 'under-8');
+  expect(mocked.fetchStory).toHaveBeenCalledWith('s1', '7-12');
+});
+
+test('an old age group in the link is converted', async () => {
+  await render(<StoryScreen navigation={nav()} route={route({ storyId: 's1', ageGroup: '13+' })} />);
+  await screen.findByText('What happened?');
+  expect(mocked.fetchStory).toHaveBeenCalledWith('s1', '13-15');
 });
 
 test('back goes to the previous screen, or The World & You → Current Affairs when there is none', async () => {
