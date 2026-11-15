@@ -96,7 +96,7 @@ export default function StoriesPanel({ styles, accent }: { styles: CaStyles; acc
       {confirming ? (
         <View style={styles.confirm} testID="ca-publish-confirm">
           <Text style={styles.listTitle}>
-            Publish {selected.length} {selected.length === 1 ? 'story' : 'stories'} as today's digest?
+            Publish {selected.length} {selected.length === 1 ? 'story' : 'stories'} as today’s digest?
           </Text>
           <Text style={styles.listMeta}>Students will see them right away. Check the facts first: each story is marked as checked by you.</Text>
           <View style={styles.row}>
