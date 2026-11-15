@@ -10,7 +10,7 @@ import { useResponsive } from '../../../hooks/useResponsive';
 import { spacing, radius } from '../../../theme';
 import type { AppColors } from '../../../theme';
 import { fetchStory, recordStoryRead, type AgeGroup, type Story } from '../../../services/currentAffairsApi';
-import { GOLD, SAGE, DEEP_SAGE, TITLE_LIGHT, CATEGORIES, POINTS, ageGroupForGrade, formatReadTime } from './constants';
+import { GOLD, SAGE, DEEP_SAGE, TITLE_LIGHT, CATEGORIES, ageGroupForGrade, formatReadTime } from './constants';
 import CategoryBadge from './components/CategoryBadge';
 
 export default function StoryScreen({ navigation, route }: any) {
@@ -67,7 +67,7 @@ export default function StoryScreen({ navigation, route }: any) {
       const seconds = Math.round((Date.now() - openedAt.current) / 1000);
       const result = await recordStoryRead(email, ageGroup, story.id, seconds);
       setDone(true);
-      setReadMessage(result.alreadyRead ? 'You have read this story before.' : `Great reading! +${result.pointsAwarded} points`);
+      setReadMessage(result.alreadyRead ? 'You have read this story before.' : 'Great reading!');
     } catch (e: any) {
       setReadMessage(e?.message || 'Could not save your progress');
     } finally {
@@ -172,7 +172,7 @@ export default function StoryScreen({ navigation, route }: any) {
                     {saving ? <ActivityIndicator color="#fff" size="small" /> : (
                       <>
                         <Feather name="check-square" size={14} color="#fff" />
-                        <Text style={styles.primaryBtnText}>I’ve read this (+{POINTS.story} points)</Text>
+                        <Text style={styles.primaryBtnText}>I’ve read this</Text>
                       </>
                     )}
                   </TouchableOpacity>

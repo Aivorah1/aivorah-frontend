@@ -77,26 +77,27 @@ test('the original source opens in the browser', async () => {
   expect(open).toHaveBeenCalledWith('https://doi.org/10.1016/j.cub.2023.04.052');
 });
 
-test('marking the story read awards 5 points', async () => {
-  mocked.recordStoryRead.mockResolvedValue({ alreadyRead: false, pointsAwarded: 5, progress: {} as any });
+test('marking the story read saves it, with no points', async () => {
+  mocked.recordStoryRead.mockResolvedValue({ alreadyRead: false, pointsAwarded: 0, progress: {} as any });
   await render(<StoryScreen navigation={nav()} route={route()} />);
-  await fireEvent.press(await screen.findByText('I’ve read this (+5 points)'));
+  await fireEvent.press(await screen.findByText('I’ve read this'));
   expect(mocked.recordStoryRead).toHaveBeenCalledWith('kid@school.in', '8-12', 's1', expect.any(Number));
-  expect(await screen.findByText('Great reading! +5 points')).toBeTruthy();
+  expect(await screen.findByText('Great reading!')).toBeTruthy();
+  expect(screen.queryByText(/points/)).toBeNull();
   expect(screen.getByTestId('story-done')).toBeTruthy();
 });
 
 test('reading a story again earns nothing and says so', async () => {
   mocked.recordStoryRead.mockResolvedValue({ alreadyRead: true, pointsAwarded: 0, progress: {} as any });
   await render(<StoryScreen navigation={nav()} route={route()} />);
-  await fireEvent.press(await screen.findByText('I’ve read this (+5 points)'));
+  await fireEvent.press(await screen.findByText('I’ve read this'));
   expect(await screen.findByText('You have read this story before.')).toBeTruthy();
 });
 
 test('a failed save shows the error', async () => {
   mocked.recordStoryRead.mockRejectedValue(new Error('Not signed in.'));
   await render(<StoryScreen navigation={nav()} route={route()} />);
-  await fireEvent.press(await screen.findByText('I’ve read this (+5 points)'));
+  await fireEvent.press(await screen.findByText('I’ve read this'));
   expect(await screen.findByText('Not signed in.')).toBeTruthy();
 });
 

@@ -57,7 +57,7 @@ export function useDigest() {
       setDigest({ ...digest, completed: true });
       setCompleteMessage(result.alreadyCompleted
         ? "You already finished today's digest."
-        : `Well done! +${result.pointsAwarded} points${result.newBadges.includes('weekly_streak') ? ' and a 7-day streak badge!' : ''}`);
+        : `Well done!${result.newBadges.includes('weekly_streak') ? ' You earned the 7-day streak badge!' : ''}`);
     } catch (e: any) {
       setCompleteMessage(e?.message || 'Could not save your progress');
     } finally {

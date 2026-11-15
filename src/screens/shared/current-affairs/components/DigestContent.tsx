@@ -169,7 +169,7 @@ export default function DigestContent({ state, navigation, showDateRow = true }:
             {completing ? <ActivityIndicator color="#fff" size="small" /> : (
               <>
                 <Feather name="check-square" size={14} color="#fff" />
-                <Text style={styles.primaryBtnText}>I’ve read all stories (+{POINTS.digest} points)</Text>
+                <Text style={styles.primaryBtnText}>I’ve read all stories</Text>
               </>
             )}
           </TouchableOpacity>

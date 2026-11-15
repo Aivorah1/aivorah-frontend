@@ -35,8 +35,9 @@ export const QUESTION_TYPES: Record<QuestionType, string> = {
   reasoning: 'Think and reason',
 };
 
-// What the service awards (aivorah-current-affairs-service/services/rewards.js).
-export const POINTS = { digest: 10, story: 5, quiz: 20, excellenceBonus: 10 };
+// What the service awards (aivorah-world-and-you-service current-affairs/services/rewards.js).
+// Only the weekly quiz gives points; reading the digest or a story gives none.
+export const POINTS = { quiz: 20, excellenceBonus: 10 };
 export const EXCELLENCE_PERCENT = 80;
 
 export const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];

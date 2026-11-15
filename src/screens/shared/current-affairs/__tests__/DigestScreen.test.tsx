@@ -98,32 +98,33 @@ test('opening a story and the weekly quiz pass the age group', async () => {
   expect(navigation.navigate).toHaveBeenCalledWith('CurrentAffairsQuiz', { ageGroup: '8-12' });
 });
 
-test('finishing the digest awards 10 points and marks it complete', async () => {
+test('finishing the digest marks it complete and grows the streak, with no points', async () => {
   mocked.recordDigestComplete.mockResolvedValue({
-    alreadyCompleted: false, pointsAwarded: 10, newBadges: [], progress: progress({ points: 55, currentStreak: 4 }),
+    alreadyCompleted: false, pointsAwarded: 0, newBadges: [], progress: progress({ points: 45, currentStreak: 4 }),
   });
   await render(<DigestScreen navigation={nav()} />);
-  await fireEvent.press(await screen.findByText('I’ve read all stories (+10 points)'));
+  await fireEvent.press(await screen.findByText('I’ve read all stories'));
   expect(mocked.recordDigestComplete).toHaveBeenCalledWith('kid@school.in', '8-12', 2);
-  expect(await screen.findByText('Well done! +10 points')).toBeTruthy();
+  expect(await screen.findByText('Well done!')).toBeTruthy();
   expect(screen.getByTestId('digest-completed')).toBeTruthy();
-  expect(screen.getByLabelText('55 Points')).toBeTruthy();
+  expect(screen.getByLabelText('45 Points')).toBeTruthy();
+  expect(screen.getByLabelText('4 Day Streak')).toBeTruthy();
 });
 
 test('a 7-day streak is celebrated', async () => {
   mocked.recordDigestComplete.mockResolvedValue({
-    alreadyCompleted: false, pointsAwarded: 10, newBadges: ['weekly_streak'], progress: progress({ currentStreak: 7 }),
+    alreadyCompleted: false, pointsAwarded: 0, newBadges: ['weekly_streak'], progress: progress({ currentStreak: 7 }),
   });
   await render(<DigestScreen navigation={nav()} />);
-  await fireEvent.press(await screen.findByText('I’ve read all stories (+10 points)'));
-  expect(await screen.findByText('Well done! +10 points and a 7-day streak badge!')).toBeTruthy();
+  await fireEvent.press(await screen.findByText('I’ve read all stories'));
+  expect(await screen.findByText('Well done! You earned the 7-day streak badge!')).toBeTruthy();
 });
 
 test('an already finished digest shows as complete, without the button', async () => {
   mocked.fetchTodayDigest.mockResolvedValue(digest({ completed: true }));
   await render(<DigestScreen navigation={nav()} />);
   expect(await screen.findByTestId('digest-completed')).toBeTruthy();
-  expect(screen.queryByText('I’ve read all stories (+10 points)')).toBeNull();
+  expect(screen.queryByText('I’ve read all stories')).toBeNull();
 });
 
 test('says when it is showing an earlier digest', async () => {
@@ -136,7 +137,7 @@ test('empty digest', async () => {
   mocked.fetchTodayDigest.mockResolvedValue(digest({ date: null, stories: [], readCount: 0 }));
   await render(<DigestScreen navigation={nav()} />);
   expect(await screen.findByText('No stories yet')).toBeTruthy();
-  expect(screen.queryByText('I’ve read all stories (+10 points)')).toBeNull();
+  expect(screen.queryByText('I’ve read all stories')).toBeNull();
 });
 
 test('a failed load shows the error and can be retried', async () => {
