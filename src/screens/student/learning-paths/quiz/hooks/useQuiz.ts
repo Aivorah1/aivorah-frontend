@@ -5,7 +5,8 @@ import LEARNING_PATHS_SERVER_URL from '../../../../../config/learningPathsServer
 import LEADERBOARD_SERVICE_URL from '../../../../../config/leaderboardServiceUrl';
 import { computeCappedQuizSeconds } from '../../../../../services/studyTime';
 import { normalizeQuizQuestions, playSound, withSpokenQuestion, countWords, MIN_SPOKEN_WORDS } from '../utils';
-import type { Question, QuizPhase, SpokenStatus } from '../types';
+import { emptyAnswer } from '../types';
+import type { Question, QuestionAnswer, QuizPhase, SpokenStatus } from '../types';
 import { saveQuizResult } from '../resultCache';
 
 export function useQuiz(params: {
@@ -24,34 +25,30 @@ export function useQuiz(params: {
   // Optional so existing callers/tests keep working — see StudentDataContext.
   recordQuizResult?: (topic: string, score: number, subject?: string) => void;
 }) {
-  const { topic, grade, subject, curriculum, passageText, topicId, keyPoints, practiceQuiz, userEmail, userRole, studentId, navigation, completeLesson, addXP, recordStudySeconds, recordQuizResult } = params;
+  const { topic, grade, subject, curriculum, passageText, topicId, keyPoints, practiceQuiz, userEmail, userRole, studentId, navigation, completeLesson, recordStudySeconds, recordQuizResult } = params;
 
   // Opens on the Practice start page; a test starts with startTest().
   const [phase, setPhase] = useState<QuizPhase>('hub');
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [currentQ, setCurrentQ] = useState(0);
   const [score, setScore] = useState(0);
 
-  // MCQ state
-  const [mcqSelected, setMcqSelected] = useState<number | null>(null);
-  const [mcqAttempts, setMcqAttempts] = useState(0); // attempts on current MCQ
-  const [showMcqHint, setShowMcqHint] = useState(false);
-  const [mcqDone, setMcqDone] = useState(false); // locked after 2nd wrong
-
-  // Fill-blank state
-  const [fillInput, setFillInput] = useState('');
-  const [fillAttempts, setFillAttempts] = useState(0);
-  const [fillFeedback, setFillFeedback] = useState<'idle' | 'wrong1' | 'wrong2' | 'revealed' | 'correct'>('idle');
-  const [fillValidating, setFillValidating] = useState(false);
+  // All questions are on one page, so each keeps its own answer state
+  // (QuestionAnswer, by question index). The ref mirrors the state so
+  // handlers always see the latest values, even before a re-render.
+  const [answers, setAnswers] = useState<QuestionAnswer[]>([]);
+  const answersRef = useRef<QuestionAnswer[]>([]);
+  const patchAnswer = useCallback((i: number, p: Partial<QuestionAnswer>) => {
+    const next = answersRef.current.slice();
+    next[i] = { ...(next[i] ?? emptyAnswer()), ...p };
+    answersRef.current = next;
+    setAnswers(next);
+  }, []);
+  const answerAt = (i: number) => answersRef.current[i] ?? emptyAnswer();
 
   // Spoken question (the last one): what the student said, and grading progress
   const [spokenText, setSpokenText] = useState('');
   const [spokenStatus, setSpokenStatus] = useState<SpokenStatus>('idle');
   const [spokenError, setSpokenError] = useState('');
-
-  // Explanation
-  const [explanation, setExplanation] = useState('');
-  const [loadingExplain, setLoadingExplain] = useState(false);
 
   // Issue #121 — attempt tracking, time tracking, per-question results
   const [attemptNumber, setAttemptNumber] = useState(1);
@@ -59,7 +56,10 @@ export function useQuiz(params: {
   const explanationsRef = useRef<Record<number, string>>({});
   const [initialStartTime] = useState(() => Date.now());
   const quizStartTimeRef = useRef(initialStartTime);
-  const questionStartTimeRef = useRef(initialStartTime);
+  // Questions can be answered in any order, so each answer's time is counted
+  // from the previous answer (or the start of the test): the per-question
+  // times add up to the time spent on the test.
+  const lastAnswerAtRef = useRef(initialStartTime);
 
   // Issue #106 — auto-loaded explanations in result screen
   const [resultExplanations, setResultExplanations] = useState<Record<number, string>>({});
@@ -100,21 +100,16 @@ export function useQuiz(params: {
     return () => handler.remove();
   }, [phase]);
 
-  function resetQuestionState() {
-    setMcqSelected(null); setMcqAttempts(0); setShowMcqHint(false); setMcqDone(false);
-    setFillInput(''); setFillAttempts(0); setFillFeedback('idle'); setFillValidating(false);
-    setExplanation(''); setLoadingExplain(false);
-  }
-
   const fetchQuiz = useCallback(async (isRetake = false) => {
     setPhase('loading');
-    setScore(0); setCurrentQ(0);
-    resetQuestionState();
+    setScore(0);
+    answersRef.current = [];
+    setAnswers([]);
     perQuestionResultsRef.current = [];
     explanationsRef.current = {};
     setResultExplanations({});
     quizStartTimeRef.current = Date.now();
-    questionStartTimeRef.current = Date.now();
+    lastAnswerAtRef.current = Date.now();
     if (isRetake) setAttemptNumber(n => n + 1);
     setSpokenText(''); setSpokenStatus('idle'); setSpokenError('');
     if (practiceQuiz?.length) {
@@ -218,70 +213,52 @@ export function useQuiz(params: {
     setPhase('result');
   }
 
-  function goNext(isCorrect: boolean) {
-    const q = questions[currentQ];
-    const qTimeSeconds = Math.round((Date.now() - questionStartTimeRef.current) / 1000);
-
-    // Record per-question result
-    const studentAnswer = q.type === 'fill_blank'
-      ? fillInput.trim()
-      : (mcqSelected != null ? q.options[mcqSelected] : '');
+  // Records a question's final result once (an answered question can't be
+  // answered again) and updates the score.
+  function recordResult(i: number, isCorrect: boolean, studentAnswer: string, extra: Record<string, any> = {}) {
+    if (perQuestionResultsRef.current[i]) return;
+    const q = questions[i];
+    const now = Date.now();
     const correctAnswer = q.type === 'fill_blank'
       ? String(q.correct)
-      : q.options[q.correct as number];
-    // By index, not push: going Previous and Next again must not record the
-    // same question twice (or count its point twice).
-    perQuestionResultsRef.current[currentQ] = {
+      : q.type === 'spoken' ? '' : q.options[q.correct as number];
+    // By index, not push: each question is recorded exactly once.
+    perQuestionResultsRef.current[i] = {
       question: q.question,
       studentAnswer,
       correctAnswer,
       isCorrect,
-      timeSeconds: qTimeSeconds,
+      timeSeconds: Math.round((now - lastAnswerAtRef.current) / 1000),
+      ...extra,
     };
-
+    lastAnswerAtRef.current = now;
     const newScore = perQuestionResultsRef.current.filter((r) => r?.isCorrect).length;
     scoreRef.current = newScore;
     setScore(newScore);
-    if (currentQ < questions.length - 1) {
-      setCurrentQ(c => c + 1);
-      resetQuestionState();
-      questionStartTimeRef.current = Date.now();
-    } else {
-      finishQuiz(newScore);
-    }
+    patchAnswer(i, { recorded: true });
   }
 
-  // Go back to a previously-answered question and restore it in review mode
-  // (their recorded answer shown, locked — no re-scoring).
-  function goPrev() {
-    if (currentQ === 0) return;
-    const prevIdx = currentQ - 1;
-    const rec = perQuestionResultsRef.current[prevIdx];
-    setCurrentQ(prevIdx);
-    resetQuestionState();
-    if (!rec) return;
-    const q = questions[prevIdx];
-    if (q.type === 'spoken') { questionStartTimeRef.current = Date.now(); return; }
-    // Restore the locked answer so the review shows what the student chose.
-    if (q.type === 'fill_blank') {
-      setFillInput(rec.studentAnswer || '');
-      setFillFeedback(rec.isCorrect ? 'correct' : 'revealed');
-    } else {
-      const idx = q.options.findIndex((o: string) => o === rec.studentAnswer);
-      setMcqSelected(idx >= 0 ? idx : null);
-      setMcqDone(true);
-    }
-    setExplanation(explanationsRef.current[prevIdx] || q.explanation || '');
-    questionStartTimeRef.current = Date.now();
+  const answeredCount = answers.filter((a) => a?.recorded).length;
+  const allAnswered = questions.length > 0 && answeredCount === questions.length;
+
+  // "See Results": only once every question has been answered.
+  const finishingRef = useRef(false);
+  useEffect(() => { if (phase !== 'quiz') finishingRef.current = false; }, [phase]);
+  function finish() {
+    if (phase !== 'quiz' || finishingRef.current) return;
+    if (!questions.length || questions.some((_, i) => !perQuestionResultsRef.current[i])) return;
+    finishingRef.current = true;
+    finishQuiz(scoreRef.current);
   }
 
   // ── Spoken question ───────────────────────────────────────────
-  // Grades what the student said against the topic's key points, records it
-  // like any other answer (correct at 6/10 or more), then moves on.
+  // Grades what the student said against the topic's key points and records
+  // it like any other answer (correct at 6/10 or more).
   async function submitSpoken() {
     const text = spokenText.trim();
+    const i = questions.findIndex((q) => q.type === 'spoken');
+    if (i < 0 || perQuestionResultsRef.current[i]) return;
     if (spokenStatus === 'checking' || countWords(text) < MIN_SPOKEN_WORDS) return;
-    const q = questions[currentQ];
     setSpokenStatus('checking'); setSpokenError('');
     try {
       const res = await fetch(`${LEARNING_PATHS_SERVER_URL}/ibpyp/evaluate-explanation`, {
@@ -292,137 +269,116 @@ export function useQuiz(params: {
       if (!res.ok || typeof data?.score !== 'number') {
         throw new Error(data?.error || 'Could not check your explanation. Check your connection and try again.');
       }
-      perQuestionResultsRef.current[currentQ] = {
-        question: q.question,
-        studentAnswer: text,
-        correctAnswer: '',
-        isCorrect: !!data.passed,
-        timeSeconds: Math.round((Date.now() - questionStartTimeRef.current) / 1000),
-        type: 'spoken',
-        evaluation: data,
-      };
-      explanationsRef.current[currentQ] = data.feedback || '';
-      setResultExplanations(prev => ({ ...prev, [currentQ]: data.feedback || '' }));
-      const newScore = perQuestionResultsRef.current.filter((r) => r?.isCorrect).length;
-      scoreRef.current = newScore;
-      setScore(newScore);
+      setExplanationFor(i, data.feedback || '');
+      recordResult(i, !!data.passed, text, { type: 'spoken', evaluation: data });
       setSpokenStatus('idle');
-      if (currentQ < questions.length - 1) {
-        setCurrentQ(c => c + 1);
-        resetQuestionState();
-        questionStartTimeRef.current = Date.now();
-      } else {
-        finishQuiz(newScore);
-      }
     } catch (e: any) {
       setSpokenStatus('error');
       setSpokenError(e?.message || 'Could not check your explanation. Please try again.');
     }
   }
 
-  async function fetchExplanation(q: Question, wrong: string, correct: string, wasCorrect: boolean) {
+  function setExplanationFor(i: number, text: string) {
+    patchAnswer(i, { explanation: text });
+    explanationsRef.current[i] = text;
+    setResultExplanations(prev => ({ ...prev, [i]: text }));
+  }
+
+  async function fetchExplanation(i: number, q: Question, wrong: string, correct: string, wasCorrect: boolean) {
     if (wasCorrect) {
-      const text = q.explanation || 'Great job! That\'s correct!';
-      setExplanation(text);
-      explanationsRef.current[currentQ] = text;
-      setResultExplanations(prev => ({ ...prev, [currentQ]: text }));
+      setExplanationFor(i, q.explanation || 'Great job! That\'s correct!');
       return;
     }
-    setLoadingExplain(true);
+    patchAnswer(i, { loadingExplain: true });
     try {
       const res = await fetch(`${LEARNING_PATHS_SERVER_URL}/ibpyp/explain-wrong`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ topic, subject, grade, question: q.question, wrongAnswer: wrong, correctAnswer: correct }),
       });
       const data = await res.json();
-      const text = data.explanation || q.explanation || 'The correct answer is highlighted above.';
-      setExplanation(text);
-      explanationsRef.current[currentQ] = text;
-      setResultExplanations(prev => ({ ...prev, [currentQ]: text }));
+      setExplanationFor(i, data.explanation || q.explanation || 'The correct answer is highlighted above.');
     } catch {
-      const text = q.explanation || 'The correct answer is highlighted above. Keep going!';
-      setExplanation(text);
-      explanationsRef.current[currentQ] = text;
-      setResultExplanations(prev => ({ ...prev, [currentQ]: text }));
+      setExplanationFor(i, q.explanation || 'The correct answer is highlighted above. Keep going!');
     } finally {
-      setLoadingExplain(false);
+      patchAnswer(i, { loadingExplain: false });
     }
   }
 
   // ── MCQ handlers ────────────────────────────────────────────────
-  async function handleMcqAnswer(optIdx: number) {
-    if (mcqDone || mcqSelected !== null) return;
-    const q = questions[currentQ];
+  // Same rules as before, now per question: correct → locked; 1st wrong →
+  // retry with a hint; 2nd wrong → locked with the explanation.
+  function handleMcqAnswer(i: number, optIdx: number) {
+    const a = answerAt(i);
+    if (a.mcqDone || a.mcqSelected !== null) return;
+    const q = questions[i];
     const isCorrect = optIdx === (q.correct as number);
-    setMcqSelected(optIdx);
-    const attempts = mcqAttempts + 1;
-    setMcqAttempts(attempts);
+    const attempts = a.mcqAttempts + 1;
+    patchAnswer(i, { mcqSelected: optIdx, mcqAttempts: attempts });
 
     if (isCorrect) {
-      setMcqDone(true);
+      patchAnswer(i, { mcqDone: true });
+      recordResult(i, true, q.options[optIdx]);
       // fetch explanation for correct answer too
-      fetchExplanation(q, q.options[optIdx], q.options[q.correct as number], true);
+      fetchExplanation(i, q, q.options[optIdx], q.options[q.correct as number], true);
     } else if (attempts < 2) {
       // 1st wrong — allow retry with hint available
       setTimeout(() => {
-        setMcqSelected(null); // unlock for retry
-        setShowMcqHint(true);
+        patchAnswer(i, { mcqSelected: null, showMcqHint: true }); // unlock for retry
       }, 900);
     } else {
       // 2nd wrong — lock and show explanation
-      setMcqDone(true);
-      fetchExplanation(q, q.options[optIdx], q.options[q.correct as number], false);
+      patchAnswer(i, { mcqDone: true });
+      recordResult(i, false, q.options[optIdx]);
+      fetchExplanation(i, q, q.options[optIdx], q.options[q.correct as number], false);
     }
   }
 
   // ── Fill-blank handlers ─────────────────────────────────────────
-  async function handleFillSubmit() {
-    if (!fillInput.trim() || fillValidating) return;
-    setFillValidating(true);
+  function setFillInput(i: number, text: string) {
+    patchAnswer(i, { fillInput: text });
+  }
+
+  async function handleFillSubmit(i: number) {
+    const a = answerAt(i);
+    const input = a.fillInput.trim();
+    if (!input || a.fillValidating || a.fillFeedback === 'correct' || a.fillFeedback === 'revealed') return;
+    const q = questions[i];
+    patchAnswer(i, { fillValidating: true });
     try {
       const resp = await fetch(`${ASSIGNMENTS_SERVER_URL}/assignments/validate-fill-blank`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ studentAnswer: fillInput.trim(), correctAnswer: questions[currentQ].correct, question: questions[currentQ].question }),
+        body: JSON.stringify({ studentAnswer: input, correctAnswer: q.correct, question: q.question }),
       });
       const { correct } = await resp.json();
       if (correct) {
-        const text = questions[currentQ].explanation || 'Excellent! That\'s correct!';
-        setFillFeedback('correct');
-        setExplanation(text);
-        explanationsRef.current[currentQ] = text;
-        setResultExplanations(prev => ({ ...prev, [currentQ]: text }));
+        patchAnswer(i, { fillFeedback: 'correct' });
+        setExplanationFor(i, q.explanation || 'Excellent! That\'s correct!');
+        recordResult(i, true, input);
       } else {
-        const attempts = fillAttempts + 1;
-        setFillAttempts(attempts);
-        if (attempts === 1) setFillFeedback('wrong1');
-        else if (attempts === 2) setFillFeedback('wrong2');
+        const attempts = answerAt(i).fillAttempts + 1;
+        if (attempts === 1) patchAnswer(i, { fillAttempts: attempts, fillFeedback: 'wrong1' });
+        else if (attempts === 2) patchAnswer(i, { fillAttempts: attempts, fillFeedback: 'wrong2' });
         else {
-          setFillFeedback('revealed');
-          const text = questions[currentQ].explanation || '';
-          setExplanation(text);
-          explanationsRef.current[currentQ] = text;
-          setResultExplanations(prev => ({ ...prev, [currentQ]: text }));
+          patchAnswer(i, { fillAttempts: attempts, fillFeedback: 'revealed' });
+          setExplanationFor(i, q.explanation || '');
+          recordResult(i, false, input);
         }
       }
     } catch {
-      setFillFeedback('correct'); // network error — give benefit of doubt
-      const text = questions[currentQ].explanation || '';
-      setExplanation(text);
-      explanationsRef.current[currentQ] = text;
-      setResultExplanations(prev => ({ ...prev, [currentQ]: text }));
+      patchAnswer(i, { fillFeedback: 'correct' }); // network error — give benefit of doubt
+      setExplanationFor(i, q.explanation || '');
+      recordResult(i, true, input);
     } finally {
-      setFillValidating(false);
+      patchAnswer(i, { fillValidating: false });
     }
   }
 
   return {
-    phase, questions, currentQ, score,
-    mcqSelected, mcqAttempts, showMcqHint, mcqDone,
-    fillInput, setFillInput, fillAttempts, fillFeedback, fillValidating,
-    explanation, loadingExplain,
+    phase, questions, score,
+    answers, answeredCount, allAnswered,
     attemptNumber, perQuestionResultsRef, explanationsRef, quizStartTimeRef,
     resultExplanations,
-    fetchQuiz, startTest, backToHub, goNext, goPrev, handleMcqAnswer, handleFillSubmit,
+    fetchQuiz, startTest, backToHub, finish, handleMcqAnswer, setFillInput, handleFillSubmit,
     spokenText, setSpokenText, spokenStatus, spokenError, submitSpoken,
   };
 }

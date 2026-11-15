@@ -1,8 +1,9 @@
 // Integration test for QuizScreen: the Practice start page (Take a Test /
 // History), the History list and a past test's report, and the live test
-// flow (loading -> question), driven by the real useQuiz / usePracticeHistory
-// hooks against a mocked fetch. QuizQuestion/QuizResult are stubbed: their own
-// behaviour is covered by useQuiz's hook tests and QuizResult's tests.
+// flow (loading -> questions), driven by the real useQuiz / usePracticeHistory
+// hooks against a mocked fetch. QuizQuestionList/QuizResult are stubbed: their
+// own behaviour is covered by QuizQuestionList.integration.test, useQuiz's
+// hook tests and QuizResult's tests.
 
 import React from 'react';
 import { clearQuizResults } from '../resultCache';
@@ -56,9 +57,9 @@ jest.mock('../components/QuizResult', () => {
   };
 });
 
-jest.mock('../components/QuizQuestion', () => {
+jest.mock('../components/QuizQuestionList', () => {
   const { Text } = require('react-native');
-  return { __esModule: true, default: (props: any) => <Text testID="quiz-question" onPress={props.onBack}>{props.q?.question}</Text> };
+  return { __esModule: true, default: (props: any) => <Text testID="quiz-question" onPress={props.onBack}>{props.questions.map((q: any) => q.question).join(' / ')}</Text> };
 });
 
 function jsonRes(data: any, ok = true) {
@@ -129,7 +130,7 @@ describe('QuizScreen — start page', () => {
   test('Take a Test -> the first question', async () => {
     await render(<QuizScreen navigation={navProp()} route={routeProp()} />);
     fireEvent.press(await screen.findByTestId('practice-take-test'));
-    expect(await screen.findByText('What is 1/2 + 1/2?')).toBeTruthy();
+    expect(await screen.findByText(/What is 1\/2 \+ 1\/2\?/)).toBeTruthy();
     expect(quizCalls()).toBe(1);
   });
 
@@ -174,7 +175,7 @@ describe('QuizScreen — history', () => {
     fireEvent.press(await screen.findByTestId('practice-history'));
     expect(await screen.findByText('No tests for this topic yet.')).toBeTruthy();
     fireEvent.press(screen.getByText('Take a Test'));
-    expect(await screen.findByText('What is 1/2 + 1/2?')).toBeTruthy();
+    expect(await screen.findByText(/What is 1\/2 \+ 1\/2\?/)).toBeTruthy();
   });
 
   test('a new test from History is numbered after the past ones', async () => {
@@ -182,7 +183,7 @@ describe('QuizScreen — history', () => {
     await render(<QuizScreen navigation={navProp()} route={routeProp()} />);
     await waitFor(() => expect(screen.getByText(/2 past tests/)).toBeTruthy());
     fireEvent.press(screen.getByTestId('practice-take-test'));
-    expect(await screen.findByText('What is 1/2 + 1/2?')).toBeTruthy();
+    expect(await screen.findByText(/What is 1\/2 \+ 1\/2\?/)).toBeTruthy();
   });
 });
 
