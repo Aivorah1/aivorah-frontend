@@ -16,6 +16,7 @@ const TeacherStudentsScreen = screens.lazyScreen(() => import('../screens/teache
 const TeacherScheduleScreen = screens.lazyScreen(() => import('../screens/teacher/schedule/TeacherScheduleScreen'));
 const TeacherAttendanceScreen = screens.lazyScreen(() => import('../screens/teacher/attendance/TeacherAttendanceScreen'));
 const TeacherAssignmentsScreen = screens.lazyScreen(() => import('../screens/teacher/assignments/TeacherAssignmentsScreen'));
+const PrepareWorksheetScreen = screens.lazyScreen(() => import('../screens/teacher/assignments/prepare-worksheet/PrepareWorksheetScreen'));
 const TeacherChallengesScreen = screens.lazyScreen(() => import('../screens/teacher/challenges/TeacherChallengesScreen'));
 // Bug tracker / Student Progress work-order (2026-08-29): the legacy screen
 // was a dummy — hardcoded "Alice Smith"/"Bob Jones", zero real backend call.
@@ -68,6 +69,7 @@ export default function TeacherNavigator() {
       <Drawer.Screen name="TeacherDashboard" component={TeacherDashboardScreen} />
       <Drawer.Screen name="TeacherStudents" component={TeacherStudentsScreen} />
       <Drawer.Screen name="TeacherAssignments" component={TeacherAssignmentsScreen} />
+      <Drawer.Screen name="TeacherPrepareWorksheet" component={PrepareWorksheetScreen} />
       <Drawer.Screen name="TeacherChallenges" component={TeacherChallengesScreen} />
       <Drawer.Screen name="TeacherSchedule" component={TeacherScheduleScreen} />
       <Drawer.Screen name="TeacherAttendance" component={TeacherAttendanceScreen} />

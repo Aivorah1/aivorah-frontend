@@ -16,7 +16,7 @@ import TEACHER_DASHBOARD_SERVER_URL from '../../../config/teacherDashboardServer
 
 import type { Assignment, StudentItem } from './types';
 import {
-  TABS, SUBJECTS, ALL_GRADES,
+  TABS, SHARED_TAB, SUBJECTS, ALL_GRADES,
   SUBJECT_COLORS,
 } from './constants';
 import { validateInteractiveQuizForPublish, findIncompleteTaskStep } from './utils/validation';
@@ -49,14 +49,22 @@ import { AIAssignmentFlow } from './components/AIAssignmentFlow';
 import { WorksheetUploadFlow } from './components/WorksheetUploadFlow';
 import { UploadWizardFooter } from './components/UploadWizardFooter';
 import { normalizeCurriculum } from '../../../utils/curriculum';
+import { useToast } from '../../../components/common/Toast';
+import { SharedToYou } from './prepare-worksheet/components/SharedToYou';
+import { preparedWorksheetFile } from './prepare-worksheet/utils/worksheetFiles';
 
-export default function TeacherAssignmentsScreen({ navigation }: any) {
+export default function TeacherAssignmentsScreen({ navigation, route }: any) {
   const { colors } = useTheme();
   const gold = colors.accentYellow;
   const { user } = useAuth();
   const styles = useMemo(() => makeStyles(colors), [colors]);
 
   const [activeTab, setActiveTab] = useState('All');
+  // Library is open: Quiz Library, or its "Shared to you" filter (Prepare Worksheet documents).
+  const inLibrary = activeTab === 'Quiz Library' || activeTab === SHARED_TAB;
+  const { showToast, ToastComponent } = useToast();
+  // Prepare Worksheet > Assign: that document is the Upload Worksheet flow's source.
+  const [preparedSource, setPreparedSource] = useState<{ id: string; title: string } | null>(null);
   const [showModal, setShowModal] = useState(false);
 
   // Form state
@@ -179,13 +187,32 @@ export default function TeacherAssignmentsScreen({ navigation }: any) {
     interactiveQuiz, setInteractiveQuiz, generatingInteractiveQuiz,
     showInteractivePreview, setShowInteractivePreview,
     uploadStep, setUploadStep, uploadScrollRef,
-    pickDoc, generateInteractiveQuiz, resetUploadState,
+    pickDoc, addPreparedWorksheet, generateInteractiveQuiz, resetUploadState,
   } = useUploadWorksheet({
     user, title, setTitle, chapter, setChapter, subject, setSubject, grade, setGrade, curriculum, setCurriculum,
     gradeOptions, effectiveGrade, effectiveCurriculum, selectedLanguage, setSelectedLanguage,
     setSuccessCriteria, setTeacherNotes, setIbWordBank, setIbStamps, setFormError,
     quizDifficulty, setQuizQuestions, setType, teacherCurricula,
   });
+
+  // Prepare Worksheet > Assign (and Library > Shared to you > Assign): the
+  // Upload Worksheet wizard, with the prepared .docx as the uploaded file.
+  function startPreparedAssign(doc: { id: string; title: string }) {
+    resetForm();
+    setPreparedSource(doc);
+    setCreateMode('upload');
+    setUploadStep(1);
+    setShowModal(true);
+    addPreparedWorksheet(() => preparedWorksheetFile(doc.id));
+  }
+  // Arriving from Prepare Worksheet > Assign (route param, once per click).
+  const assignWorksheet = route?.params?.assignWorksheet;
+  useFocusEffect(useCallback(() => {
+    if (!assignWorksheet?.id) return;
+    navigation.setParams({ assignWorksheet: undefined });
+    startPreparedAssign({ id: assignWorksheet.id, title: assignWorksheet.title });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per Assign click (nonce)
+  }, [assignWorksheet?.nonce]));
 
   const {
     librarySubject, setLibrarySubject, libraryGrade, setLibraryGrade,
@@ -347,6 +374,7 @@ export default function TeacherAssignmentsScreen({ navigation }: any) {
     setIbCentralIdea(''); setIbLinesOfInquiry([]); setIbLearnerProfile(''); setIbAtlSkill(''); setIbKeyConcept('');
     resetBulkState();
     resetUploadState();
+    setPreparedSource(null);
   }
 
 
@@ -381,7 +409,7 @@ export default function TeacherAssignmentsScreen({ navigation }: any) {
           </View>
 
           {/* Quiz Library Hook Banner */}
-          {activeTab !== 'Quiz Library' && (
+          {!inLibrary && (
             <TouchableOpacity
               activeOpacity={0.85}
               onPress={() => setActiveTab('Quiz Library')}
@@ -401,7 +429,7 @@ export default function TeacherAssignmentsScreen({ navigation }: any) {
           {/* Create button + Tabs row */}
           <View style={styles.actionsRow}>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabs}>
-              {TABS.map((tab) => (
+              {(inLibrary ? [...TABS, SHARED_TAB] : TABS).map((tab) => (
                 <TouchableOpacity
                   key={tab}
                   style={[styles.tab, activeTab === tab && styles.tabActive]}
@@ -413,12 +441,12 @@ export default function TeacherAssignmentsScreen({ navigation }: any) {
               ))}
             </ScrollView>
             <TouchableOpacity
-              style={[styles.createBtn, activeTab === 'Quiz Library' ? { backgroundColor: gold } : { backgroundColor: 'transparent', borderWidth: 1.5, borderColor: gold }]}
-              onPress={() => setActiveTab(activeTab === 'Quiz Library' ? 'All' : 'Quiz Library')}
+              style={[styles.createBtn, inLibrary ? { backgroundColor: gold } : { backgroundColor: 'transparent', borderWidth: 1.5, borderColor: gold }]}
+              onPress={() => setActiveTab(inLibrary ? 'All' : 'Quiz Library')}
               activeOpacity={0.85}
             >
-              <Feather name="book-open" size={15} color={activeTab === 'Quiz Library' ? '#0F0F0F' : gold} />
-              <Text style={[styles.createBtnText, { color: activeTab === 'Quiz Library' ? '#0F0F0F' : gold }]}>Library</Text>
+              <Feather name="book-open" size={15} color={inLibrary ? '#0F0F0F' : gold} />
+              <Text style={[styles.createBtnText, { color: inLibrary ? '#0F0F0F' : gold }]}>Library</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.createBtn} onPress={() => setShowModal(true)} activeOpacity={0.85}>
               <Feather name="plus" size={15} color="#fff" />
@@ -569,8 +597,19 @@ export default function TeacherAssignmentsScreen({ navigation }: any) {
             </View>
           )}
 
+          {/* ── SHARED TO YOU (Library) ── */}
+          {activeTab === SHARED_TAB && (
+            <SharedToYou
+              active
+              colors={colors}
+              onOpen={(d) => navigation.navigate('TeacherPrepareWorksheet', { openId: d.id, nonce: Date.now() })}
+              onAssign={(d) => startPreparedAssign({ id: d.id, title: d.title })}
+              onNotify={(t, subtitle, type) => showToast({ title: t, subtitle, type })}
+            />
+          )}
+
           {/* Assignment List */}
-          {activeTab !== 'Quiz Library' && (loading ? (
+          {!inLibrary && (loading ? (
             <ActivityIndicator color={colors.accentYellow} style={{ marginTop: 40 }} />
           ) : filtered.length === 0 ? (
             <View style={styles.empty}>
@@ -778,6 +817,9 @@ export default function TeacherAssignmentsScreen({ navigation }: any) {
                           setBulkPhase('classify');
                         } else if (createMode === 'bulk' && bulkPhase === 'assign') {
                           setBulkPhase('generate');
+                        } else if (preparedSource) {
+                          // Came from Prepare Worksheet: there is no upload choice to go back to.
+                          setShowModal(false); resetForm();
                         } else {
                           setCreateMode('choose');
                         }
@@ -838,6 +880,7 @@ export default function TeacherAssignmentsScreen({ navigation }: any) {
                       isIBPYP={isIBPYP} gold={gold} colors={colors}
                       setCreateMode={setCreateMode} setType={setType} setUploadStep={setUploadStep}
                       uploadScrollRef={uploadScrollRef} setBulkPhase={setBulkPhase} setBulkItems={setBulkItems}
+                      onPrepareWorksheet={() => { setShowModal(false); resetForm(); navigation.navigate('TeacherPrepareWorksheet'); }}
                     />
                   )}
 
@@ -882,7 +925,7 @@ export default function TeacherAssignmentsScreen({ navigation }: any) {
                       selectedStudent={selectedStudent} setSelectedStudent={setSelectedStudent}
                       studentSearch={studentSearch} setStudentSearch={setStudentSearch}
                       students={students} studentsLoaded={studentsLoaded}
-                      formError={formError}
+                      formError={formError} preparedName={preparedSource?.title}
                       colors={colors} gold={gold} styles={styles}
                     />
                   )}
@@ -959,6 +1002,7 @@ export default function TeacherAssignmentsScreen({ navigation }: any) {
           colors={colors} gold={gold} styles={styles}
         />
       </View>
+      {ToastComponent}
     </ScreenLayout>
   );
 }

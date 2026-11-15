@@ -69,6 +69,7 @@ const LINKING_SCREENS = {
   TeacherDashboard: 'teacher/dashboard',
   TeacherStudents: 'teacher/students',
   TeacherAssignments: 'teacher/assignments',
+  TeacherPrepareWorksheet: 'teacher/prepare-worksheet',
   TeacherChallenges: 'teacher/challenges',
   TeacherSchedule: 'teacher/schedule',
   TeacherProgress: 'teacher/progress',

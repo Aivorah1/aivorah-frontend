@@ -77,7 +77,7 @@ const TEACHER_NAV_ITEMS = [
   { label: 'Student Report', icon: 'file-text', screen: 'TeacherStudentReport', group: 'RESOURCES' },
   // Opens the existing class Portfolio (ClassDetail) of the teacher's home class.
   { label: 'Portfolio', icon: 'image', screen: 'TeacherPortfolio', group: 'RESOURCES', childScreens: ['ClassDetail'] },
-  { label: 'Assignments', icon: 'check-square', screen: 'TeacherAssignments', group: 'MANAGE' },
+  { label: 'Assignments', icon: 'check-square', screen: 'TeacherAssignments', group: 'MANAGE', childScreens: ['TeacherPrepareWorksheet'] },
   { label: 'Challenges', icon: 'target', screen: 'TeacherChallenges', group: 'MANAGE' },
   { label: 'Curriculum Upload', icon: 'upload-cloud', screen: 'TeacherCurriculumLearningPath', group: 'MANAGE' },
   { label: 'Learning Paths', icon: 'map', screen: 'TeacherClassLearningPaths', group: 'MANAGE' },

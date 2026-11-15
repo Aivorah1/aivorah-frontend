@@ -86,7 +86,9 @@ export type ParentDrawerParamList = {
 export type TeacherDrawerParamList = {
   TeacherDashboard: undefined;
   TeacherStudents: undefined;
-  TeacherAssignments: undefined;
+  // assignWorksheet: Prepare Worksheet > Assign opens the Upload Worksheet flow with that document.
+  TeacherAssignments: { assignWorksheet?: { id: string; title: string; nonce: number } } | undefined;
+  TeacherPrepareWorksheet: { openId?: string; nonce?: number } | undefined;
   TeacherChallenges: undefined;
   TeacherSchedule: undefined;
   TeacherProgress: undefined;

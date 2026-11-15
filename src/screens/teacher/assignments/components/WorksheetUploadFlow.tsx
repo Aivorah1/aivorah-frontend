@@ -50,6 +50,9 @@ export function WorksheetUploadFlow(props: {
   students: StudentItem[]; studentsLoaded: boolean;
   formError: string;
   colors: AppColors; gold: string; styles: any;
+  // Prepare Worksheet > Assign: the prepared document is the source, so
+  // there is no upload option (and its pages cannot be removed).
+  preparedName?: string | null;
 }) {
   const {
     uploadStep, docFiles, setDocFiles, setQuestions, setFullscreenImage, pickDoc, uploadingDoc, extractingQuestions,
@@ -60,7 +63,7 @@ export function WorksheetUploadFlow(props: {
     interactiveQuiz, generatingInteractiveQuiz, generateInteractiveQuiz, setShowInteractivePreview,
     teacherEmail, setLoadingSavedQuizzes, setShowReuseQuizModal, setSavedQuizzes, setStudentPreviewHtml,
     assignTo, setAssignTo, selectedStudent, setSelectedStudent, studentSearch, setStudentSearch,
-    students, studentsLoaded, formError, colors, gold, styles,
+    students, studentsLoaded, formError, colors, gold, styles, preparedName,
   } = props;
 
   return (
@@ -68,7 +71,7 @@ export function WorksheetUploadFlow(props: {
       {/* ── UPLOAD WORKSHEET (Step 1 of upload wizard) ── */}
       {uploadStep === 1 && (<>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Text style={styles.fieldLabel}>Upload Worksheet</Text>
+        <Text style={styles.fieldLabel}>{preparedName ? 'Prepared Worksheet' : 'Upload Worksheet'}</Text>
         {docFiles.length > 0 && <Text style={{ fontSize: 11, color: colors.textDim }}>{docFiles.length} file{docFiles.length > 1 ? 's' : ''}</Text>}
       </View>
 
@@ -90,6 +93,7 @@ export function WorksheetUploadFlow(props: {
                   <Text style={{ fontSize: 10, fontWeight: '700', color: '#fff', textAlign: 'center' }}>Page {idx + 1}</Text>
                 </View>
                 </TouchableOpacity>
+                {!preparedName && (
                 <TouchableOpacity
                   style={{ position: 'absolute', top: 4, right: 4, width: 22, height: 22, borderRadius: 11, backgroundColor: 'rgba(0,0,0,0.6)', alignItems: 'center', justifyContent: 'center' }}
                   onPress={() => { setDocFiles(prev => prev.filter((_, i) => i !== idx)); if (idx === 0) setQuestions(['']); }}
@@ -97,13 +101,27 @@ export function WorksheetUploadFlow(props: {
                 >
                   <Feather name="x" size={12} color="#fff" />
                 </TouchableOpacity>
+                )}
               </View>
             ))}
           </View>
         </ScrollView>
       )}
 
-      {/* Add / upload button */}
+      {/* Prepared document (Prepare Worksheet > Assign): shown instead of the upload button */}
+      {preparedName ? (
+        <View testID="prepared-worksheet-source" style={[styles.uploadDocBtn, { borderColor: gold + '60', borderStyle: 'solid' }]}>
+          {uploadingDoc || extractingQuestions ? (
+            <ActivityIndicator size="small" color={colors.accentYellow} />
+          ) : (
+            <Feather name="file-text" size={18} color={gold} />
+          )}
+          <Text style={[styles.uploadDocText, { color: gold }]} numberOfLines={1}>
+            {uploadingDoc ? `Preparing "${preparedName}"...` : extractingQuestions ? 'Analyzing worksheet...' : preparedName}
+          </Text>
+        </View>
+      ) : (
+      /* Add / upload button */
       <TouchableOpacity
         style={[styles.uploadDocBtn, { borderColor: colors.borderColor }]}
         onPress={pickDoc}
@@ -121,6 +139,7 @@ export function WorksheetUploadFlow(props: {
           {uploadingDoc ? 'Uploading...' : extractingQuestions ? 'Analyzing worksheet...' : docFiles.length === 0 ? 'Upload worksheet (image, PDF or DOCX)' : 'Add another page'}
         </Text>
       </TouchableOpacity>
+      )}
 
       {/* Auto-filled indicator */}
       {docFiles.length > 0 && !extractingQuestions && (
