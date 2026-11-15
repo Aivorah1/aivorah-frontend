@@ -53,6 +53,9 @@ export interface QuizQuestion {
   status: ContentStatus;
   position: number;
   review_notes: string | null;
+  story_id?: string | null;
+  /** Title of the story the question comes from (sent with the week's questions). */
+  story_title?: string | null;
 }
 
 export interface QuizWeek {

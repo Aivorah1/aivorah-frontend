@@ -43,7 +43,7 @@ beforeEach(() => {
   mocked.listStories.mockResolvedValue([story()]);
   mocked.getStory.mockResolvedValue(story());
   mocked.listQuizWeeks.mockResolvedValue({ currentWeek: '2026-11-08', weeks: [] });
-  mocked.getQuiz.mockResolvedValue([question(1), question(2)]);
+  mocked.getQuiz.mockResolvedValue([question(1, { story_id: 'st1', story_title: 'NASA tests a new rocket' }), question(2)]);
   mocked.getPipelineLastRun.mockResolvedValue(null);
 });
 
@@ -158,6 +158,7 @@ test("the weekly quiz: edit a question's right answer, then publish the week", a
   mocked.publishQuiz.mockResolvedValue({ published: 2 });
   await render(<CurrentAffairsAdminScreen />);
   await user.press(await screen.findByTestId('ca-tab-quiz'));
+  expect(await screen.findByText('From the story: NASA tests a new rocket')).toBeTruthy();
 
   expect(await screen.findByText('Week of 2026-11-08 (this week)')).toBeTruthy();
   expect(screen.getByTestId('ca-quiz-summary').props.children).toBe('2 questions · 0 published · 2 waiting for review');

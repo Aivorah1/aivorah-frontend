@@ -67,6 +67,7 @@ export default function QuestionEditor({ question, number, weekStart, ageGroup, 
         <Text style={[styles.cardTitle, { flex: 1 }]}>{question ? `Question ${number}` : 'Add a question'}</Text>
         {question ? <Text style={styles.chip}>{question.status}</Text> : null}
       </View>
+      {question?.story_title ? <Text style={[styles.listMeta, { marginTop: 6 }]} testID={`ca-question-story-${question.id}`}>From the story: {question.story_title}</Text> : null}
       {question?.review_notes ? <Text style={[styles.notes, { marginTop: 6 }]}>{question.review_notes}</Text> : null}
 
       <Text style={styles.label}>Type</Text>
