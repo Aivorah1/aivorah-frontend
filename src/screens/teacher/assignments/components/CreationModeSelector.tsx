@@ -30,22 +30,21 @@ export function CreationModeSelector({
         Choose how you want to create this assignment:
       </Text>
 
-      {/* Option 1: AI Assignment */}
+      {/* Option 1: Prepare Worksheet — write one in the Word-style editor, then assign it */}
       <TouchableOpacity
+        testID="create-mode-prepare-worksheet"
         style={{ padding: 16, borderRadius: 14, borderWidth: 1.5, borderColor: gold + '40', backgroundColor: gold + '18', gap: 8 }}
-        onPress={() => { setCreateMode('ai'); setType('assignment'); }}
+        onPress={onPrepareWorksheet}
         activeOpacity={0.8}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
           <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: gold + '20', alignItems: 'center', justifyContent: 'center' }}>
-            <Feather name="cpu" size={20} color={gold} />
+            <Feather name="edit" size={20} color={gold} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 15, fontWeight: '800', color: gold }}>
-              {isIBPYP ? 'Generate IB PYP Assignment' : 'Generate AI Assignment'}
-            </Text>
+            <Text style={{ fontSize: 15, fontWeight: '800', color: gold }}>Prepare Worksheet</Text>
             <Text style={{ fontSize: 11, color: colors.textDim, marginTop: 2 }}>
-              AI creates Purpose, Learning Outcomes, Task Steps, Word Bank, and Stamps
+              Create and edit a worksheet in a Word-style editor, then assign it to students.
             </Text>
           </View>
           <Feather name="chevron-right" size={18} color={gold} />
@@ -72,7 +71,29 @@ export function CreationModeSelector({
         </View>
       </TouchableOpacity>
 
-      {/* Option 3: Bulk Upload — several separate worksheets at once */}
+      {/* Option 3: AI Assignment */}
+      <TouchableOpacity
+        style={{ padding: 16, borderRadius: 14, borderWidth: 1.5, borderColor: gold + '40', backgroundColor: gold + '18', gap: 8 }}
+        onPress={() => { setCreateMode('ai'); setType('assignment'); }}
+        activeOpacity={0.8}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: gold + '20', alignItems: 'center', justifyContent: 'center' }}>
+            <Feather name="cpu" size={20} color={gold} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 15, fontWeight: '800', color: gold }}>
+              {isIBPYP ? 'Generate IB PYP Assignment' : 'Generate AI Assignment'}
+            </Text>
+            <Text style={{ fontSize: 11, color: colors.textDim, marginTop: 2 }}>
+              AI creates Purpose, Learning Outcomes, Task Steps, Word Bank, and Stamps
+            </Text>
+          </View>
+          <Feather name="chevron-right" size={18} color={gold} />
+        </View>
+      </TouchableOpacity>
+
+      {/* Option 4: Bulk Upload — several separate worksheets at once */}
       <TouchableOpacity
         style={{ padding: 16, borderRadius: 14, borderWidth: 1.5, borderColor: gold + '40', backgroundColor: gold + '18', gap: 8 }}
         onPress={() => { setCreateMode('bulk'); setBulkPhase('pick'); setBulkItems([]); }}
@@ -86,27 +107,6 @@ export function CreationModeSelector({
             <Text style={{ fontSize: 15, fontWeight: '800', color: gold }}>Bulk Upload (Multiple Worksheets)</Text>
             <Text style={{ fontSize: 11, color: colors.textDim, marginTop: 2 }}>
               Upload several separate worksheets at once — each becomes its own assignment
-            </Text>
-          </View>
-          <Feather name="chevron-right" size={18} color={gold} />
-        </View>
-      </TouchableOpacity>
-
-      {/* Option 4: Prepare Worksheet — write one in the Word-style editor, then assign it */}
-      <TouchableOpacity
-        testID="create-mode-prepare-worksheet"
-        style={{ padding: 16, borderRadius: 14, borderWidth: 1.5, borderColor: gold + '40', backgroundColor: gold + '18', gap: 8 }}
-        onPress={onPrepareWorksheet}
-        activeOpacity={0.8}
-      >
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-          <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: gold + '20', alignItems: 'center', justifyContent: 'center' }}>
-            <Feather name="edit" size={20} color={gold} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 15, fontWeight: '800', color: gold }}>Prepare Worksheet</Text>
-            <Text style={{ fontSize: 11, color: colors.textDim, marginTop: 2 }}>
-              Create and edit a worksheet in a Word-style editor, then assign it to students.
             </Text>
           </View>
           <Feather name="chevron-right" size={18} color={gold} />
