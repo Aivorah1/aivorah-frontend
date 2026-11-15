@@ -10,7 +10,7 @@ import type { ScrollView } from 'react-native';
 // components (2026-08-25), following the design the user specified.
 export function CreationModeSelector({
   isIBPYP, gold, colors,
-  setCreateMode, setType, setUploadStep, uploadScrollRef, setBulkPhase, setBulkItems,
+  setCreateMode, setType, setUploadStep, uploadScrollRef, setBulkPhase, setBulkItems, onPrepareWorksheet,
 }: {
   isIBPYP: boolean;
   gold: string;
@@ -21,6 +21,8 @@ export function CreationModeSelector({
   uploadScrollRef: React.RefObject<ScrollView | null>;
   setBulkPhase: (p: 'pick' | 'group' | 'classify' | 'generate' | 'assign') => void;
   setBulkItems: (items: any[]) => void;
+  // Opens the Prepare Worksheet page (its own screen, not part of this modal).
+  onPrepareWorksheet: () => void;
 }) {
   return (
     <View style={{ gap: 16 }}>
@@ -84,6 +86,27 @@ export function CreationModeSelector({
             <Text style={{ fontSize: 15, fontWeight: '800', color: gold }}>Bulk Upload (Multiple Worksheets)</Text>
             <Text style={{ fontSize: 11, color: colors.textDim, marginTop: 2 }}>
               Upload several separate worksheets at once — each becomes its own assignment
+            </Text>
+          </View>
+          <Feather name="chevron-right" size={18} color={gold} />
+        </View>
+      </TouchableOpacity>
+
+      {/* Option 4: Prepare Worksheet — write one in the Word-style editor, then assign it */}
+      <TouchableOpacity
+        testID="create-mode-prepare-worksheet"
+        style={{ padding: 16, borderRadius: 14, borderWidth: 1.5, borderColor: gold + '40', backgroundColor: gold + '18', gap: 8 }}
+        onPress={onPrepareWorksheet}
+        activeOpacity={0.8}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: gold + '20', alignItems: 'center', justifyContent: 'center' }}>
+            <Feather name="edit" size={20} color={gold} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 15, fontWeight: '800', color: gold }}>Prepare Worksheet</Text>
+            <Text style={{ fontSize: 11, color: colors.textDim, marginTop: 2 }}>
+              Create and edit a worksheet in a Word-style editor, then assign it to students.
             </Text>
           </View>
           <Feather name="chevron-right" size={18} color={gold} />

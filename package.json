@@ -52,6 +52,7 @@
     "expo-status-bar": "~55.0.4",
     "expo-web-browser": "~55.0.10",
     "firebase": "^12.11.0",
+    "jodit": "4.18.12",
     "jspdf": "^4.2.1",
     "pdfjs-dist": "^3.11.174",
     "react": "19.2.0",

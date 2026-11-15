@@ -98,7 +98,33 @@ export function useUploadWorksheet({
           reader.readAsDataURL(f);
         });
 
-      let fileDataArr = await Promise.all(files.map(readFile));
+      const picked = await Promise.all(files.map(readFile));
+      await processWorksheetFiles(picked, files[0]?.name);
+    };
+    input.click();
+  }
+
+  // Prepare Worksheet > Assign: the prepared document (.docx) goes through the
+  // exact same pipeline as a picked file, without the file picker.
+  async function addPreparedWorksheet(load: () => Promise<{ name: string; base64: string; mime: string }>) {
+    setFormError('');
+    setUploadingDoc(true);
+    let file: { name: string; base64: string; mime: string };
+    try {
+      file = await load();
+    } catch (e: any) {
+      setUploadingDoc(false);
+      setFormError(e?.message || 'Could not open this worksheet.');
+      return;
+    }
+    await processWorksheetFiles([file], file.name);
+  }
+
+  // Everything after the files are read (pickDoc or addPreparedWorksheet):
+  // docx/PDF -> page images, upload, then AI auto-fill. Expects uploadingDoc
+  // to be set already.
+  async function processWorksheetFiles(picked: { name: string; base64: string; mime: string }[], firstName?: string) {
+      let fileDataArr = picked;
 
       // Grade / curriculum / chapter from the printed header + file name — fast,
       // so the form doesn't sit on the teacher's defaults while the AI
@@ -211,8 +237,8 @@ export function useUploadWorksheet({
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(
               allBase64.length === 1
-                ? { fileBase64: allBase64[0].base64, mimeType: allBase64[0].mimeType, fileName: files[0]?.name }
-                : { files: allBase64, fileName: files[0]?.name }
+                ? { fileBase64: allBase64[0].base64, mimeType: allBase64[0].mimeType, fileName: firstName }
+                : { files: allBase64, fileName: firstName }
             ),
           });
           const jobData = await jobRes.json();
@@ -276,8 +302,6 @@ export function useUploadWorksheet({
         }
         finally { setExtractingQuestions(false); }
       }
-    };
-    input.click();
   }
 
   // Generate interactive quiz via Mistral (PDF/image → structured quiz with answers, hints, solutions)
@@ -457,6 +481,6 @@ export function useUploadWorksheet({
     interactiveQuiz, setInteractiveQuiz, generatingInteractiveQuiz, setGeneratingInteractiveQuiz,
     showInteractivePreview, setShowInteractivePreview,
     uploadStep, setUploadStep, uploadScrollRef,
-    pickDoc, generateInteractiveQuiz, generateQuizFromExtracted, resetUploadState,
+    pickDoc, addPreparedWorksheet, generateInteractiveQuiz, generateQuizFromExtracted, resetUploadState,
   };
 }

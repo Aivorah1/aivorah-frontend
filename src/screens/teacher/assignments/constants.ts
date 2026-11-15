@@ -1,6 +1,8 @@
 import type { StepType, TaskStep } from './types';
 
 export const TABS = ['All', 'Active', 'Completed'];
+// Library filter: Prepare Worksheet documents shared by other teachers of the school.
+export const SHARED_TAB = 'Shared to you';
 export const SUBJECTS = [
   'Mathematics', 'Science', 'English', 'Social Studies', 'Language Acquisition',
   'Visual Arts', 'ICT', 'Physical Education',
