@@ -9,7 +9,8 @@ import { authHeader } from './authHeader';
 // the Firebase token on its own; writes attach it explicitly with authHeader()
 // so they fail fast ("Not signed in.") instead of being refused by the service.
 
-export type AgeGroup = 'under-8' | '8-12' | '13+';
+// Two content versions; students under 8 read 7-12.
+export type AgeGroup = '7-12' | '13-15';
 export type Category = 'india' | 'world' | 'economy' | 'science' | 'environment' | 'sports' | 'society';
 export type QuestionType = 'mcq' | 'true_false' | 'reasoning';
 export type BadgeKey = 'excellence' | 'weekly_streak' | 'growth';

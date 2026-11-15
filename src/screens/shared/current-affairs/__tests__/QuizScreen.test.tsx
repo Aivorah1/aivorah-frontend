@@ -34,7 +34,7 @@ const QUESTIONS: api.QuizQuestion[] = PLAN.map(([category, type], i) => ({
 const CORRECT = 1; // every question's right answer in these tests
 
 const quiz = (overrides: Partial<api.Quiz> = {}): api.Quiz => ({
-  weekStart: '2026-11-08', ageGroup: '8-12', total: 10, questions: QUESTIONS, attempt: null, ...overrides,
+  weekStart: '2026-11-08', ageGroup: '7-12', total: 10, questions: QUESTIONS, attempt: null, ...overrides,
 });
 
 function resultFor(chosen: number[]): api.QuizResult {
@@ -48,7 +48,7 @@ function resultFor(chosen: number[]): api.QuizResult {
 }
 
 const nav = () => ({ navigate: jest.fn() });
-const route = { params: { ageGroup: '8-12' } };
+const route = { params: { ageGroup: '7-12' } };
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -73,7 +73,7 @@ async function playQuiz(right: number) {
 test('shows one question at a time with lettered options', async () => {
   await render(<QuizScreen navigation={nav()} route={route} />);
   expect(await screen.findByText('Question 1 of 10')).toBeTruthy();
-  expect(mocked.fetchWeeklyQuiz).toHaveBeenCalledWith('8-12', 'kid@school.in');
+  expect(mocked.fetchWeeklyQuiz).toHaveBeenCalledWith('7-12', 'kid@school.in');
   expect(screen.getByText('Question 1?')).toBeTruthy();
   expect(screen.getByText('Multiple choice')).toBeTruthy();
   expect(screen.getByText('India')).toBeTruthy();
@@ -95,7 +95,7 @@ test('Check Answer reveals the correct answer, explanation, extra fact and story
   expect(screen.getByText('Explanation for q1.')).toBeTruthy();
   expect(screen.getByText(/Extra fact for q1./)).toBeTruthy();
   await fireEvent.press(screen.getByText('Read the story'));
-  expect(navigation.navigate).toHaveBeenCalledWith('CurrentAffairsStory', { storyId: 's1', ageGroup: '8-12' });
+  expect(navigation.navigate).toHaveBeenCalledWith('CurrentAffairsStory', { storyId: 's1', ageGroup: '7-12' });
 
   await fireEvent.press(screen.getByText('Next Question'));
   expect(await screen.findByText('Question 2 of 10')).toBeTruthy();
@@ -116,10 +116,10 @@ test('80%+: submits, records completion, shows score, points and the excellence 
 
   expect(await screen.findByTestId('quiz-result')).toBeTruthy();
   const [email, ageGroup, answers, weekStart] = mocked.submitQuiz.mock.calls[0];
-  expect([email, ageGroup, weekStart]).toEqual(['kid@school.in', '8-12', '2026-11-08']);
+  expect([email, ageGroup, weekStart]).toEqual(['kid@school.in', '7-12', '2026-11-08']);
   expect(answers).toHaveLength(10);
   expect(answers[0]).toEqual({ questionId: 'q1', answer: CORRECT });
-  expect(mocked.recordQuizComplete).toHaveBeenCalledWith('kid@school.in', '8-12', 'att-1');
+  expect(mocked.recordQuizComplete).toHaveBeenCalledWith('kid@school.in', '7-12', 'att-1');
 
   expect(screen.getByText('8/10')).toBeTruthy();
   expect(screen.getByText('80%')).toBeTruthy();

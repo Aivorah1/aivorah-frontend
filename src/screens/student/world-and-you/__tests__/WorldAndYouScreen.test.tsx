@@ -39,7 +39,7 @@ function jsonRes(data: any, ok = true) {
 }
 
 const DIGEST = {
-  date: '2026-11-09', isToday: true, ageGroup: '8-12', target: 10, readCount: 0, completed: false,
+  date: '2026-11-09', isToday: true, ageGroup: '7-12', target: 10, readCount: 0, completed: false,
   stories: [{
     id: 's1', category: 'india', publishDate: '2026-11-09', title: 'India and Space Exploration: Chandrayaan-3',
     summary: 'India landed near the Moon’s south pole.', whatHappened: 'W', whyImportant: 'Y', didYouKnow: null,
@@ -155,9 +155,9 @@ describe('WorldAndYouScreen — loaded state', () => {
     expect(screen.getByText('Weekly Quiz')).toBeTruthy();
 
     await user.press(screen.getByText('India and Space Exploration: Chandrayaan-3'));
-    expect(navigation.navigate).toHaveBeenCalledWith('CurrentAffairsStory', { storyId: 's1', ageGroup: '8-12' });
+    expect(navigation.navigate).toHaveBeenCalledWith('CurrentAffairsStory', { storyId: 's1', ageGroup: '7-12' });
     await user.press(screen.getByText('Weekly Quiz'));
-    expect(navigation.navigate).toHaveBeenCalledWith('CurrentAffairsQuiz', { ageGroup: '8-12' });
+    expect(navigation.navigate).toHaveBeenCalledWith('CurrentAffairsQuiz', { ageGroup: '7-12' });
   });
 
   test('opening with { tab: "news" } (Back from a story or the quiz) lands on Current Affairs', async () => {

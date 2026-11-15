@@ -8,9 +8,8 @@ import type { CaAgeGroup, QuizQuestion } from '../types';
 import type { CaStyles } from '../styles';
 
 const AGE_OPTIONS: { value: CaAgeGroup; label: string }[] = [
-  { value: 'under-8', label: 'Under 8' },
-  { value: '8-12', label: '8–12' },
-  { value: '13+', label: '13+' },
+  { value: '7-12', label: '7–12' },
+  { value: '13-15', label: '13–15' },
 ];
 
 /** YYYY-MM-DD plus n days. */
@@ -22,7 +21,7 @@ export function shiftDate(date: string, days: number): string {
 
 /** The weekly quiz of one age group: every question, editable; publish the week. */
 export default function QuizPanel({ styles, accent }: { styles: CaStyles; accent: string }) {
-  const [ageGroup, setAgeGroup] = useState<CaAgeGroup>('8-12');
+  const [ageGroup, setAgeGroup] = useState<CaAgeGroup>('7-12');
   const [week, setWeek] = useState<string | null>(null);
   const weeks = useLoad(listQuizWeeks, 'Could not load quiz weeks');
   const weekStart = week || weeks.data?.currentWeek || null;

@@ -31,12 +31,12 @@ const story = (n: number, overrides: Partial<api.Story> = {}): api.Story => ({
 });
 
 const digest = (overrides: Partial<api.Digest> = {}): api.Digest => ({
-  date: '2026-11-09', isToday: true, ageGroup: '8-12', target: 10,
+  date: '2026-11-09', isToday: true, ageGroup: '7-12', target: 10,
   stories: [story(1, { read: true }), story(2, { category: 'india' })], readCount: 1, completed: false, ...overrides,
 });
 
 const progress = (overrides: Partial<api.Progress> = {}): api.Progress => ({
-  studentEmail: 'kid@school.in', ageGroup: '8-12', points: 45, currentStreak: 3, longestStreak: 5,
+  studentEmail: 'kid@school.in', ageGroup: '7-12', points: 45, currentStreak: 3, longestStreak: 5,
   digestsCompleted: 4, storiesRead: 5, quizzesCompleted: 1, bestQuizScore: 80, lastQuizScore: 80,
   badges: { excellence: true, weeklyStreak: false, growth: true }, lastDigestDate: '2026-11-08', lastQuizDate: null,
   digestCompletedToday: false, ...overrides,
@@ -67,8 +67,8 @@ test('shows the stories with category, source, read time and read checks', async
   expect(screen.getByTestId('story-read-s1')).toBeTruthy();
   expect(screen.getByTestId('story-unread-s2')).toBeTruthy();
   expect(screen.getByTestId('digest-read-count').props.children).toBe('1 of 2 stories read');
-  expect(mocked.fetchTodayDigest).toHaveBeenCalledWith('8-12', 'kid@school.in');
-  expect(mocked.fetchProgress).toHaveBeenCalledWith('kid@school.in', '8-12');
+  expect(mocked.fetchTodayDigest).toHaveBeenCalledWith('7-12', 'kid@school.in');
+  expect(mocked.fetchProgress).toHaveBeenCalledWith('kid@school.in', '7-12');
 });
 
 test('shows points, streak and badge count', async () => {
@@ -79,11 +79,12 @@ test('shows points, streak and badge count', async () => {
 });
 
 test.each([
-  ['LKG', 'under-8', 'Ages 3-8'],
-  ['Grade 8', '8-12', 'Ages 8-12'],
-  ['Grade 11', '13+', 'Ages 13+'],
-])('grade %s reads the %s digest', async (grade, ageGroup, label) => {
-  mockUser = { email: 'kid@school.in', grade };
+  [{ grade: 'LKG' }, '7-12', 'Ages 7-12'],
+  [{ grade: 'Grade 8' }, '7-12', 'Ages 7-12'],
+  [{ grade: 'Grade 11' }, '13-15', 'Ages 13-15'],
+  [{ grade: 'Grade 8', dob: '2012-01-15' }, '13-15', 'Ages 13-15'],
+])('profile %p reads the %s digest', async (profile, ageGroup, label) => {
+  mockUser = { email: 'kid@school.in', ...profile };
   await render(<DigestScreen navigation={nav()} />);
   await waitFor(() => expect(mocked.fetchTodayDigest).toHaveBeenCalledWith(ageGroup, 'kid@school.in'));
   expect(screen.getByText(label)).toBeTruthy();
@@ -93,9 +94,9 @@ test('opening a story and the weekly quiz pass the age group', async () => {
   const navigation = nav();
   await render(<DigestScreen navigation={navigation} />);
   await fireEvent.press(await screen.findByTestId('story-card-s2'));
-  expect(navigation.navigate).toHaveBeenCalledWith('CurrentAffairsStory', { storyId: 's2', ageGroup: '8-12' });
+  expect(navigation.navigate).toHaveBeenCalledWith('CurrentAffairsStory', { storyId: 's2', ageGroup: '7-12' });
   await fireEvent.press(screen.getByTestId('weekly-quiz-cta'));
-  expect(navigation.navigate).toHaveBeenCalledWith('CurrentAffairsQuiz', { ageGroup: '8-12' });
+  expect(navigation.navigate).toHaveBeenCalledWith('CurrentAffairsQuiz', { ageGroup: '7-12' });
 });
 
 test('finishing the digest marks it complete and grows the streak, with no points', async () => {
@@ -104,7 +105,7 @@ test('finishing the digest marks it complete and grows the streak, with no point
   });
   await render(<DigestScreen navigation={nav()} />);
   await fireEvent.press(await screen.findByText('I’ve read all stories'));
-  expect(mocked.recordDigestComplete).toHaveBeenCalledWith('kid@school.in', '8-12', 2);
+  expect(mocked.recordDigestComplete).toHaveBeenCalledWith('kid@school.in', '7-12', 2);
   expect(await screen.findByText('Well done!')).toBeTruthy();
   expect(screen.getByTestId('digest-completed')).toBeTruthy();
   expect(screen.getByLabelText('45 Points')).toBeTruthy();

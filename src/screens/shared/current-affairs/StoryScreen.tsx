@@ -10,7 +10,7 @@ import { useResponsive } from '../../../hooks/useResponsive';
 import { spacing, radius } from '../../../theme';
 import type { AppColors } from '../../../theme';
 import { fetchStory, recordStoryRead, type AgeGroup, type Story } from '../../../services/currentAffairsApi';
-import { GOLD, SAGE, DEEP_SAGE, TITLE_LIGHT, CATEGORIES, ageGroupForGrade, formatReadTime } from './constants';
+import { GOLD, SAGE, DEEP_SAGE, TITLE_LIGHT, CATEGORIES, ageGroupForStudent, normalizeAgeGroup, formatReadTime } from './constants';
 import CategoryBadge from './components/CategoryBadge';
 
 export default function StoryScreen({ navigation, route }: any) {
@@ -21,7 +21,7 @@ export default function StoryScreen({ navigation, route }: any) {
   const titleColor = isDark ? colors.textMain : TITLE_LIGHT;
 
   const storyId: string | undefined = route?.params?.storyId;
-  const ageGroup: AgeGroup = route?.params?.ageGroup || ageGroupForGrade(user?.grade);
+  const ageGroup: AgeGroup = normalizeAgeGroup(route?.params?.ageGroup) || ageGroupForStudent(user);
   const email = user?.email || undefined;
 
   const [story, setStory] = useState<Story | null>(null);

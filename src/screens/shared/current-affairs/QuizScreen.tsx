@@ -15,7 +15,7 @@ import {
 } from '../../../services/currentAffairsApi';
 import {
   GOLD, SAGE, DEEP_SAGE, CORRECT, WRONG, TINT_BG, TITLE_LIGHT,
-  QUESTION_TYPES, OPTION_LETTERS, EXCELLENCE_PERCENT, ageGroupForGrade,
+  QUESTION_TYPES, OPTION_LETTERS, EXCELLENCE_PERCENT, ageGroupForStudent, normalizeAgeGroup,
 } from './constants';
 import CategoryBadge from './components/CategoryBadge';
 
@@ -26,7 +26,7 @@ export default function QuizScreen({ navigation, route }: any) {
   const styles = useMemo(() => makeStyles(colors, isMobile), [colors, isMobile]);
   const titleColor = isDark ? colors.textMain : TITLE_LIGHT;
 
-  const ageGroup: AgeGroup = route?.params?.ageGroup || ageGroupForGrade(user?.grade);
+  const ageGroup: AgeGroup = normalizeAgeGroup(route?.params?.ageGroup) || ageGroupForStudent(user);
   const email = user?.email || undefined;
 
   const [quiz, setQuiz] = useState<Quiz | null>(null);
