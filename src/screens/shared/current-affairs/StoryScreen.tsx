@@ -10,8 +10,9 @@ import { useResponsive } from '../../../hooks/useResponsive';
 import { spacing, radius } from '../../../theme';
 import type { AppColors } from '../../../theme';
 import { fetchStory, recordStoryRead, type AgeGroup, type Story } from '../../../services/currentAffairsApi';
-import { GOLD, SAGE, DEEP_SAGE, TITLE_LIGHT, CATEGORIES, ageGroupForStudent, normalizeAgeGroup, formatReadTime } from './constants';
+import { GOLD, SAGE, DEEP_SAGE, TITLE_LIGHT, CATEGORIES, AGE_GROUPS, ageGroupForStudent, normalizeAgeGroup, formatReadTime } from './constants';
 import CategoryBadge from './components/CategoryBadge';
+import StoryImage from './components/StoryImage';
 
 export default function StoryScreen({ navigation, route }: any) {
   const { user } = useAuth();
@@ -112,9 +113,11 @@ export default function StoryScreen({ navigation, route }: any) {
                 <Text style={[styles.title, { color: titleColor }]}>{story.title}</Text>
                 <View style={styles.metaRow}>
                   <Feather name="clock" size={11} color={colors.textDim} />
-                  <Text style={[styles.metaText, { color: colors.textDim }]}>{formatReadTime(story.readTimeSeconds)} · {story.source}</Text>
+                  <Text style={[styles.metaText, { color: colors.textDim }]}>{formatReadTime(story.readTimeSeconds)} · {story.source} · {AGE_GROUPS[ageGroup].label} version</Text>
                 </View>
               </View>
+
+              <StoryImage url={story.imageUrl} source={story.source} captionColor={colors.textDim} frameColor={colors.borderColor} />
 
               <Section styles={styles} colors={colors} titleColor={titleColor} icon="book-open" color={GOLD} title="What happened?">
                 <Text style={[styles.body, { color: colors.textMain }]}>{story.whatHappened}</Text>

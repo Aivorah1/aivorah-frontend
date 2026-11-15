@@ -5,6 +5,7 @@ import { createStory, getStory, setStoryStatus, updateStory } from '../services/
 import { useLoad } from '../hooks/useLoad';
 import { CA_CATEGORIES, type CaCategory, type ContentStatus, type Story } from '../types';
 import type { CaStyles } from '../styles';
+import { lengthCheck, isHttpsUrl, LENGTH_LIMITS } from '../utils/storyChecks';
 
 const AGES = [
   { key: 'kid', label: '7–12' },
@@ -18,7 +19,7 @@ const PARTS = [
 ] as const;
 const SHARED = [
   'did_you_know', 'think_about_it', 'new_word_1', 'def_1', 'new_word_2', 'def_2', 'new_word_3', 'def_3',
-  'source', 'source_url', 'publish_date',
+  'source', 'source_url', 'publish_date', 'image_url',
 ] as const;
 
 type Form = Record<string, string>;
@@ -113,10 +114,21 @@ export default function StoryEditor({ id, styles, accent, onChanged, onClose }: 
         {AGES.map((a) => (
           <View key={a.key} style={styles.ageCol}>
             <Text style={styles.ageHead}>{a.label}</Text>
-            {PARTS.map((p) => (
-              <Field key={p.key} styles={styles} label={p.label} multiline={p.multiline} testID={`ca-story-${p.key}_${a.key}`}
-                value={current[`${p.key}_${a.key}`]} onChange={(v) => set(`${p.key}_${a.key}`, v)} />
-            ))}
+            {PARTS.map((p) => {
+              const field = `${p.key}_${a.key}`;
+              const check = LENGTH_LIMITS[field] ? lengthCheck(field, current[field]) : null;
+              return (
+                <View key={p.key}>
+                  <Field styles={styles} label={p.label} multiline={p.multiline} testID={`ca-story-${field}`}
+                    value={current[field]} onChange={(v) => set(field, v)} />
+                  {check ? (
+                    <Text style={check.warning ? styles.notes : styles.message} testID={`ca-story-count-${field}`}>
+                      {check.warning || `${check.words} words (aim for ${LENGTH_LIMITS[field].target})`}
+                    </Text>
+                  ) : null}
+                </View>
+              );
+            })}
           </View>
         ))}
       </View>
@@ -139,6 +151,11 @@ export default function StoryEditor({ id, styles, accent, onChanged, onClose }: 
           <Field styles={styles} label="Source link" value={current.source_url} onChange={(v) => set('source_url', v)} />
           <Field styles={styles} label="Publish date (YYYY-MM-DD)" value={current.publish_date} onChange={(v) => set('publish_date', v)} />
           <Field styles={styles} label="Priority (higher shows first)" value={current.priority} onChange={(v) => set('priority', v)} />
+          <Field styles={styles} label="Picture link (optional, https only)" value={current.image_url} onChange={(v) => set('image_url', v)} testID="ca-story-image_url"
+            placeholder="https://…" />
+          {current.image_url && !isHttpsUrl(current.image_url) ? (
+            <Text style={styles.notes} testID="ca-story-image-warning">The picture link must start with https://</Text>
+          ) : null}
         </View>
       </View>
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Linking } from 'react-native';
-import { render, screen, fireEvent } from '@testing-library/react-native';
+import { render, screen, fireEvent, act } from '@testing-library/react-native';
 import StoryScreen from '../StoryScreen';
 import * as api from '../../../../services/currentAffairsApi';
 
@@ -57,7 +57,8 @@ test('shows every section of the story format', async () => {
   expect(screen.getByText('Deep sea: ')).toBeTruthy();
   expect(screen.getByText('Why are so many animals unknown?')).toBeTruthy();
   expect(screen.getByText('World')).toBeTruthy();
-  expect(screen.getByText('1 min read · Current Biology')).toBeTruthy();
+  expect(screen.getByText('1 min read · Current Biology · Ages 7-12 version')).toBeTruthy();
+  expect(screen.queryByTestId('story-image')).toBeNull(); // no picture added
 });
 
 test('optional sections are left out when empty', async () => {
@@ -99,6 +100,32 @@ test('a failed save shows the error', async () => {
   await render(<StoryScreen navigation={nav()} route={route()} />);
   await fireEvent.press(await screen.findByText('I’ve read this'));
   expect(await screen.findByText('Not signed in.')).toBeTruthy();
+});
+
+describe('picture added by an editor', () => {
+  test('an https picture shows with its source as caption and an accessible label', async () => {
+    mocked.fetchStory.mockResolvedValue({ ...STORY, imageUrl: 'https://cdn.example.org/coral.jpg' });
+    await render(<StoryScreen navigation={nav()} route={route()} />);
+    expect(await screen.findByTestId('story-image')).toBeTruthy();
+    expect(screen.getByText('Source: Current Biology')).toBeTruthy();
+    expect(screen.getByLabelText('Picture for this story. Source: Current Biology')).toBeTruthy();
+  });
+
+  test('a non-https picture is never shown', async () => {
+    mocked.fetchStory.mockResolvedValue({ ...STORY, imageUrl: 'http://cdn.example.org/coral.jpg' });
+    await render(<StoryScreen navigation={nav()} route={route()} />);
+    await screen.findByText('What happened?');
+    expect(screen.queryByTestId('story-image')).toBeNull();
+  });
+
+  test('a picture that fails to load is hidden', async () => {
+    mocked.fetchStory.mockResolvedValue({ ...STORY, imageUrl: 'https://cdn.example.org/missing.jpg' });
+    await render(<StoryScreen navigation={nav()} route={route()} />);
+    const img = await screen.findByLabelText('Picture for this story. Source: Current Biology');
+    await act(async () => { img.props.onError(); });
+    expect(screen.queryByTestId('story-image')).toBeNull();
+    expect(screen.getByText('What happened?')).toBeTruthy();
+  });
 });
 
 test('the age group falls back to the profile (a UKG child reads 7-12)', async () => {

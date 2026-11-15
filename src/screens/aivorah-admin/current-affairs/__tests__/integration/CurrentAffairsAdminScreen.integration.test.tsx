@@ -81,6 +81,28 @@ test('a new story shows the server\'s error when a part is missing', async () =>
   expect(mocked.createStory).toHaveBeenCalledWith(expect.objectContaining({ title_kid: 'My story', category: 'india' }));
 });
 
+test('the editor counts words as you type and warns outside the target, without blocking save', async () => {
+  const user = userEvent.setup();
+  await render(<CurrentAffairsAdminScreen />);
+  await user.press(await screen.findByTestId('ca-story-row-s1'));
+  // The fixture's texts are 2 words long: both versions warn.
+  expect(await screen.findByText('2 words; aim for 50-80.')).toBeTruthy();
+  expect(screen.getByText('2 words; aim for 100-150.')).toBeTruthy();
+  const kid = screen.getByTestId('ca-story-what_happened_kid');
+  await user.clear(kid);
+  await user.type(kid, Array.from({ length: 60 }, (_, i) => `w${i}`).join(' '));
+  expect(await screen.findByText('60 words (aim for 50-80)')).toBeTruthy();
+  expect(screen.getByTestId('ca-story-save').props.accessibilityState?.disabled).toBeFalsy();
+});
+
+test('a picture link that is not https gets a note', async () => {
+  const user = userEvent.setup();
+  await render(<CurrentAffairsAdminScreen />);
+  await user.press(await screen.findByTestId('ca-story-row-s1'));
+  await user.type(await screen.findByTestId('ca-story-image_url'), 'http://x.in/a.jpg');
+  expect(await screen.findByTestId('ca-story-image-warning')).toBeTruthy();
+});
+
 test("the weekly quiz: edit a question's right answer, then publish the week", async () => {
   const user = userEvent.setup();
   mocked.updateQuestion.mockImplementation(async (id, fields) => question(2, { ...fields, id }));
