@@ -1,38 +1,122 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import type { AppColors } from '../../../../theme';
 import { SectionHead } from './common/SectionHead';
 import type { makeStyles } from '../ProfileScreen';
+import { getBuddyById, getCostumeById, type SavedLearningBuddy } from '../learningBuddyConstants';
 
 interface LearningBuddyCardProps {
   styles: ReturnType<typeof makeStyles>;
   colors: AppColors;
   isDark: boolean;
-  cartoonOptions: string[];
+  savedBuddy: SavedLearningBuddy | null;
+  onOpenCustomize: () => void;
 }
 
-// "Learning Buddy" card — Coming Soon, dimmed and non-interactive.
-export function LearningBuddyCard({ styles, colors, isDark, cartoonOptions }: LearningBuddyCardProps) {
+// "Learning Buddy" card — shows the currently selected buddy (with image +
+// costume overlay) and opens the customization modal on tap.
+export function LearningBuddyCard({
+  styles, colors, isDark, savedBuddy, onOpenCustomize,
+}: LearningBuddyCardProps) {
+  const buddy = savedBuddy ? getBuddyById(savedBuddy.buddyId) : null;
+  const costume = buddy && savedBuddy ? getCostumeById(buddy, savedBuddy.costumeId) : null;
+  const displayName = savedBuddy?.customName?.trim() || buddy?.name || null;
+
   return (
     <View style={[styles.card, { overflow: 'hidden' }]}>
       <View style={styles.cardHeadRow}>
-        <SectionHead icon="smile" iconBg={isDark ? 'rgba(195,220,216,0.15)' : 'rgba(195,220,216,0.40)'} iconColor={colors.accentYellow} title="Learning Buddy" sub="Who inspires your learning?" />
-        <View style={[styles.comingSoonBadge, { backgroundColor: colors.accentYellow + '18', borderColor: colors.accentYellow + '40' }]}>
-          <Feather name="clock" size={11} color={colors.accentYellow} />
-          <Text style={[styles.comingSoonText, { color: colors.accentYellow }]}>Coming Soon</Text>
-        </View>
+        <SectionHead
+          icon="smile"
+          iconBg={isDark ? 'rgba(195,220,216,0.15)' : 'rgba(195,220,216,0.40)'}
+          iconColor={colors.accentYellow}
+          title="Learning Buddy"
+          sub="Who inspires your learning?"
+        />
       </View>
-      {/* Content dimmed — not interactive */}
-      <View pointerEvents="none" style={{ opacity: 0.35 }}>
-        <View style={styles.interestWrap}>
-          {cartoonOptions.map(opt => (
-            <View key={opt} style={styles.interestChip}>
-              <Text style={styles.interestText}>{opt}</Text>
+
+      <TouchableOpacity onPress={onOpenCustomize} activeOpacity={0.8} style={{ paddingVertical: 8 }}>
+        {buddy && costume ? (
+          // Selected buddy — show full-body image with costume overlay
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 16,
+              padding: 16,
+              borderRadius: 20,
+              backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+              borderWidth: 1,
+              borderColor: colors.borderColor,
+            }}
+          >
+            {/* Avatar with costume gradient overlay */}
+            <View
+              style={{
+                width: 72,
+                height: 72,
+                borderRadius: 36,
+                overflow: 'hidden',
+                borderWidth: 2,
+                borderColor: colors.accentYellow + '60',
+                position: 'relative',
+              }}
+            >
+              <Image
+                source={require(buddy.image)}
+                style={{ width: 72, height: 72, borderRadius: 36 }}
+                resizeMode="cover"
+              />
+              {/* Costume gradient overlay */}
+              <LinearGradient
+                colors={[costume.overlay[0] + '66', costume.overlay[1] + '66']}
+                style={{ ...StyleSheet.absoluteFillObject, borderRadius: 36 }}
+              />
             </View>
-          ))}
-        </View>
-      </View>
+
+            <View style={{ flex: 1, gap: 4 }}>
+              <Text style={{ fontSize: 11, fontWeight: '600', color: colors.textDim }}>
+                {buddy.category === 'princess' ? '👸 Princess' :
+                 buddy.category === 'prince' ? '🤴 Prince' :
+                 buddy.category === 'hero' ? '🦸 Hero' : '🐾 Animal'}
+              </Text>
+              <Text
+                style={{ fontSize: 18, fontWeight: '800', color: colors.textMain, fontFamily: 'serif' }}
+                numberOfLines={1}
+              >
+                {displayName}
+              </Text>
+              <Text style={{ fontSize: 12, color: colors.textMuted }}>
+                {costume.label} • Tap to change
+              </Text>
+            </View>
+
+            <Feather name="chevron-right" size={20} color={colors.textDim} />
+          </View>
+        ) : (
+          // No buddy selected — show prompt
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 10,
+              padding: 20,
+              borderRadius: 20,
+              backgroundColor: isDark ? 'rgba(186,164,103,0.06)' : 'rgba(186,164,103,0.05)',
+              borderWidth: 1.5,
+              borderColor: colors.accentYellow + '40',
+              borderStyle: 'dashed',
+            }}
+          >
+            <Feather name="plus" size={18} color={colors.accentYellow} />
+            <Text style={{ fontSize: 14, fontWeight: '700', color: colors.accentYellow }}>
+              Choose your Learning Buddy
+            </Text>
+          </View>
+        )}
+      </TouchableOpacity>
     </View>
   );
 }
