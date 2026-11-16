@@ -2,8 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, TextInput, Modal, Image, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { spacing, radius, fonts } from '../../../theme';
-import type { AppColors } from '../../../theme';
+import { spacing, radius, fonts } from '../../../../theme';
+import type { AppColors } from '../../../../theme';
 import type { makeStyles } from '../ProfileScreen';
 import {
   ALL_BUDDIES,
