@@ -15,6 +15,9 @@ import type { AppColors } from '../../../theme';
 import { useWorldData } from './hooks/useWorldData';
 import DailyTidbitCard from './components/DailyTidbitCard';
 import OnThisDayCard from './components/OnThisDayCard';
+import ImportantDayCard from './components/ImportantDayCard';
+import { useImportantDay } from './hooks/useImportantDay';
+import type { GKFact } from './types';
 import BrainTeaserCard from './components/BrainTeaserCard';
 import { TEAL } from './constants';
 import CurrentAffairsTab from '../../shared/current-affairs/components/CurrentAffairsTab';
@@ -42,6 +45,14 @@ export default function WorldAndYouScreen({ navigation, route }: any) {
     if (requestedTab === 'news' || requestedTab === 'gk') setTidbitTab(requestedTab);
   }, [requestedTab]);
 
+  // The GK fact's important day, explained point by point below it (in place
+  // of On This Day, which now shows only if there is no important day).
+  const [gkFact, setGkFact] = useState<GKFact | null>(null);
+  const importantDay = useImportantDay(gkFact?.eventDate);
+  const now = new Date();
+  const todayMMDD = `${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const showImportantDay = !!gkFact?.eventDate && (importantDay.loading || !!importantDay.events?.length);
+
   return (
     <ScreenLayout>
       <View style={styles.screen}>
@@ -66,12 +77,24 @@ export default function WorldAndYouScreen({ navigation, route }: any) {
           </View>
 
           {/* ── GK + Current Affairs card ─────────────────────── */}
-          <DailyTidbitCard grade={grade} tab={tidbitTab} onTabChange={setTidbitTab} />
+          <DailyTidbitCard grade={grade} tab={tidbitTab} onTabChange={setTidbitTab} onFact={setGkFact} />
 
           {/* ── Current Affairs tab: today's stories + weekly quiz ── */}
           {tidbitTab === 'news' && <CurrentAffairsTab navigation={navigation} />}
 
-          {/* ── On This Day / Brain Teaser — GK-tab content only ─ */}
+          {/* ── Today's important day, explained — GK tab ───────── */}
+          {tidbitTab === 'gk' && showImportantDay && (
+            <ImportantDayCard
+              events={importantDay.events}
+              loading={importantDay.loading}
+              mainEventName={gkFact?.eventName}
+              isToday={gkFact?.eventDate === todayMMDD}
+              styles={styles}
+              colors={colors}
+            />
+          )}
+
+          {/* ── On This Day (only without an important day) / Brain Teaser — GK tab ─ */}
           {tidbitTab === 'gk' && (
             loading ? (
               <View style={styles.center}>
@@ -85,7 +108,7 @@ export default function WorldAndYouScreen({ navigation, route }: any) {
               </View>
             ) : worldData ? (
               <>
-                {worldData.onThisDay?.length > 0 && (
+                {!showImportantDay && worldData.onThisDay?.length > 0 && (
                   <OnThisDayCard items={worldData.onThisDay} styles={styles} colors={colors} />
                 )}
                 {worldData.funChallenge && (
