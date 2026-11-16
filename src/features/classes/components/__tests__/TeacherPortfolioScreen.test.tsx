@@ -1,16 +1,11 @@
-// Sidebar > Resources > Portfolio opens the existing class Portfolio of the teacher's home class.
+// Sidebar > Resources > Portfolio is its own (blank, for now) page: it must not
+// forward to My Classes or a class Portfolio.
 import React from 'react';
-import { render, screen, waitFor, userEvent } from '@testing-library/react-native';
+import { render, screen } from '@testing-library/react-native';
 import TeacherPortfolioScreen from '../TeacherPortfolioScreen';
-import { fetchMyClasses } from '../../api/classesApi';
 
-jest.mock('../../api/classesApi', () => ({ fetchMyClasses: jest.fn() }));
-jest.mock('@react-navigation/native', () => {
-  const R = require('react');
-  return { useFocusEffect: (cb: any) => R.useEffect(cb, [cb]) };
-});
 jest.mock('../../../../context/ThemeContext', () => ({
-  useTheme: () => ({ colors: { accentYellow: '#c90', textDim: '#999', textMuted: '#666', borderColor: '#ddd', bgDark: '#fafafa' } }),
+  useTheme: () => ({ colors: { bgDark: '#fafafa' } }),
 }));
 jest.mock('../../../../components/common/Header', () => {
   const { Text } = require('react-native');
@@ -18,31 +13,9 @@ jest.mock('../../../../components/common/Header', () => {
 });
 jest.mock('../../../../components/common/ScreenLayout', () => ({ __esModule: true, default: ({ children }: any) => children }));
 
-const CLASS = { grade: 'Grade 8', section: 'A', label: 'Grade 8 A', code: 'Grade 8A', classTeacherEmail: 't1@s.org', classTeacherName: 'T1', studentCount: 30 };
-
-beforeEach(() => jest.clearAllMocks());
-
-test('one home class: opens its Portfolio (ClassDetail)', async () => {
-  (fetchMyClasses as jest.Mock).mockResolvedValue([CLASS]);
-  const navigation = { navigate: jest.fn() };
+test('shows a Portfolio page and stays on it', async () => {
+  const navigation = { navigate: jest.fn(), openDrawer: jest.fn() };
   await render(<TeacherPortfolioScreen navigation={navigation} />);
-  await waitFor(() => expect(navigation.navigate).toHaveBeenCalledWith('ClassDetail', {
-    grade: 'Grade 8', section: 'A', label: 'Grade 8 A', code: 'Grade 8A', classTeacherEmail: 't1@s.org',
-  }));
-});
-
-test.each([[[]], [[CLASS, { ...CLASS, section: 'B' }]]])('no home class or several: opens My Classes', async (classes) => {
-  (fetchMyClasses as jest.Mock).mockResolvedValue(classes);
-  const navigation = { navigate: jest.fn() };
-  await render(<TeacherPortfolioScreen navigation={navigation} />);
-  await waitFor(() => expect(navigation.navigate).toHaveBeenCalledWith('MyClasses'));
-});
-
-test('an error can be retried', async () => {
-  (fetchMyClasses as jest.Mock).mockRejectedValueOnce(new Error('Failed to load classes')).mockResolvedValueOnce([CLASS]);
-  const navigation = { navigate: jest.fn() };
-  await render(<TeacherPortfolioScreen navigation={navigation} />);
-  expect(await screen.findByText('Failed to load classes')).toBeTruthy();
-  await userEvent.setup().press(screen.getByText('Retry'));
-  await waitFor(() => expect(navigation.navigate).toHaveBeenCalledWith('ClassDetail', expect.objectContaining({ grade: 'Grade 8' })));
+  expect(screen.getByText('Portfolio')).toBeTruthy();
+  expect(navigation.navigate).not.toHaveBeenCalled();
 });
