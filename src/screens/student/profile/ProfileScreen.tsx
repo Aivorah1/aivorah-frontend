@@ -5,13 +5,14 @@ import type { AppColors } from '../../../theme';
 import Header from '../../../components/common/Header';
 import ScreenLayout from '../../../components/common/ScreenLayout';
 import { useTheme } from '../../../context/ThemeContext';
-import { LEARNING_STYLES, SUBJECT_OPTIONS, CARTOON_OPTIONS } from './constants';
+import { LEARNING_STYLES, SUBJECT_OPTIONS } from './constants';
 import { useProfile } from './hooks/useProfile';
 import { ProfileHero } from './components/ProfileHero';
 import { AvatarPickerCard } from './components/AvatarPickerCard';
 import { LearningStyleCard } from './components/LearningStyleCard';
 import { SubjectsCard } from './components/SubjectsCard';
 import { LearningBuddyCard } from './components/LearningBuddyCard';
+import { LearningBuddyModal } from './components/LearningBuddyModal';
 import { AccountCard } from './components/AccountCard';
 import { EditProfileModal } from './components/EditProfileModal';
 import { SignOutModal } from './components/SignOutModal';
@@ -83,7 +84,8 @@ export default function ProfileScreen({ navigation }: any) {
             styles={styles}
             colors={colors}
             isDark={isDark}
-            cartoonOptions={CARTOON_OPTIONS}
+            savedBuddy={p.savedBuddy}
+            onOpenCustomize={() => p.setBuddyModalVisible(true)}
           />
 
           <AccountCard
@@ -97,6 +99,16 @@ export default function ProfileScreen({ navigation }: any) {
           />
 
         </ScrollView>
+
+        <LearningBuddyModal
+          styles={styles}
+          colors={colors}
+          isDark={isDark}
+          visible={p.buddyModalVisible}
+          onClose={() => p.setBuddyModalVisible(false)}
+          onSave={p.handleSaveBuddy}
+          currentBuddy={p.savedBuddy}
+        />
 
         <EditProfileModal
           styles={styles}

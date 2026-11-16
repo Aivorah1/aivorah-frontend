@@ -4,6 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../../../../context/AuthContext';
 import { AVATAR_STYLES } from '../../../../constants/avatarStyles';
 import { saveProfileFields, savePreferences, uploadProfilePhoto } from '../services/profileService';
+import { DEFAULT_BUDDY, type SavedLearningBuddy } from '../learningBuddyConstants';
 
 const AVATARS = AVATAR_STYLES;
 
@@ -27,6 +28,10 @@ export function useProfile() {
   const [locating, setLocating] = useState(false);
   const [saveProfileLoading, setSaveProfileLoading] = useState(false);
   const [saveProfileError, setSaveProfileError] = useState('');
+
+  // Learning Buddy state
+  const [buddyModalVisible, setBuddyModalVisible] = useState(false);
+  const savedBuddy: SavedLearningBuddy = (user as any)?.learningBuddy ?? DEFAULT_BUDDY;
 
   const currentAvatar = AVATARS.find(a => a.id === selAvatar) || AVATARS[0];
 
@@ -98,6 +103,16 @@ export function useProfile() {
     finally { setUploading(false); }
   }
 
+  async function handleSaveBuddy(buddy: SavedLearningBuddy) {
+    // Persist the learning buddy choice to the backend preferences endpoint.
+    try {
+      await savePreferences({ email: user?.email, learningBuddy: buddy });
+      updateUser({ learningBuddy: buddy } as any);
+    } catch {
+      Alert.alert('Save failed', 'Could not save your Learning Buddy. Please try again.');
+    }
+  }
+
   return {
     user, logout,
     signOutVisible, setSignOutVisible,
@@ -116,5 +131,9 @@ export function useProfile() {
     saveProfileLoading, saveProfileError,
     handleSaveProfile, handlePickPhoto,
     AVATARS,
+    // Learning Buddy
+    savedBuddy,
+    buddyModalVisible, setBuddyModalVisible,
+    handleSaveBuddy,
   };
 }
