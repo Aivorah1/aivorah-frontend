@@ -5,7 +5,7 @@
  * Current Affairs: the tab switch only — the parent screen shows the daily
  * digest (aivorah-world-and-you-service, /current-affairs) below this card.
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, ActivityIndicator,
 } from 'react-native';
@@ -14,17 +14,22 @@ import { useTheme } from '../../../../context/ThemeContext';
 import { spacing, radius } from '../../../../theme';
 import { useDailyTidbit } from '../hooks/useDailyTidbit';
 import { categoryIcon } from '../utils/quizHelpers';
+import type { GKFact } from '../types';
 
 interface Props {
   grade: string;
+  /** Reports the loaded GK fact, so the screen can explain its important day. */
+  onFact?: (gk: GKFact | null) => void;
   onTabChange?: (tab: 'gk' | 'news') => void;
   /** Controlled tab (The World & You owns it so Back can reopen Current Affairs). */
   tab?: 'gk' | 'news';
 }
 
-export default function DailyTidbitCard({ grade, onTabChange, tab: controlledTab }: Props) {
+export default function DailyTidbitCard({ grade, onTabChange, onFact, tab: controlledTab }: Props) {
   const { colors, isDark } = useTheme();
   const { tab: ownTab, setTab: setOwnTab, data, loading, error, loadTidbit } = useDailyTidbit(grade, undefined, onTabChange);
+  const gk = data?.gk ?? null;
+  useEffect(() => { onFact?.(gk); }, [gk, onFact]);
   const tab = controlledTab ?? ownTab;
   const setTab = (next: 'gk' | 'news') => (controlledTab === undefined ? setOwnTab(next) : onTabChange?.(next));
 
