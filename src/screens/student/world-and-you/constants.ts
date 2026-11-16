@@ -11,4 +11,5 @@ export const CATEGORY_ICONS: Record<string, string> = {
   'Technology':               'cpu',
   'Amazing World Records':    'award',
   'Current Affairs':          'radio',
+  'Important Day':            'calendar', // GK fact from the important-days book
 };

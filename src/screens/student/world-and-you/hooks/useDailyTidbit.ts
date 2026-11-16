@@ -19,8 +19,13 @@ export function useDailyTidbit(grade: string, onReload?: () => void, onTabChange
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  const today = new Date().toISOString().split('T')[0];
-  const cacheKey = `daily_tidbit_v3_${grade}_${today}`;
+  // The student's own calendar day: toISOString() is UTC, so in India before
+  // 5:30 AM it still gave yesterday and showed yesterday's "Today is …" fact.
+  const d = new Date();
+  const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  // v4: the fact now comes from the important-days book; v3 copies held an
+  // AI-written fact (sometimes wrong) and are not reused.
+  const cacheKey = `daily_tidbit_v4_${grade}_${today}`;
 
   async function loadTidbit() {
     setLoading(true);
