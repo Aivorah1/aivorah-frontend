@@ -75,8 +75,8 @@ const TEACHER_NAV_ITEMS = [
   // "School Policies" is the Resources page (Library), unchanged — only its menu label differs for teachers.
   { label: 'School Policies', icon: 'folder', screen: 'Resources', group: 'RESOURCES' },
   { label: 'Student Report', icon: 'file-text', screen: 'TeacherStudentReport', group: 'RESOURCES' },
-  // Opens the existing class Portfolio (ClassDetail) of the teacher's home class.
-  { label: 'Portfolio', icon: 'image', screen: 'TeacherPortfolio', group: 'RESOURCES', childScreens: ['ClassDetail'] },
+  // Its own page (blank until a Portfolio feature exists).
+  { label: 'Portfolio', icon: 'image', screen: 'TeacherPortfolio', group: 'RESOURCES' },
   { label: 'Assignments', icon: 'check-square', screen: 'TeacherAssignments', group: 'MANAGE', childScreens: ['TeacherPrepareWorksheet'] },
   { label: 'Challenges', icon: 'target', screen: 'TeacherChallenges', group: 'MANAGE' },
   { label: 'Curriculum Upload', icon: 'upload-cloud', screen: 'TeacherCurriculumLearningPath', group: 'MANAGE' },
