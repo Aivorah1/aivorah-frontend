@@ -64,7 +64,7 @@ export function LearningBuddyCard({
               }}
             >
               <Image
-                source={require(buddy.image)}
+                source={buddy.image}
                 style={{ width: 72, height: 72, borderRadius: 36 }}
                 resizeMode="cover"
               />

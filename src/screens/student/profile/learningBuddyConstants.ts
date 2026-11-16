@@ -3,8 +3,15 @@
 //   id          — unique key
 //   name        — display name
 //   category    — hero | animal | princess | prince
-//   image       — path to the base full-body PNG illustration
+//   image       — static import reference to the base full-body PNG illustration
 //   costumes    — list of costume options (each applies a gradient overlay)
+
+import {
+  img_spiderman, img_batman, img_ironman, img_superman, img_doreman, img_chotabheem,
+  img_tom, img_jerry, img_lion, img_panda, img_monkey, img_dog, img_dragon,
+  img_princess_rose, img_princess_luna, img_princess_sun, img_princess_mermaid, img_princess_forest,
+  img_prince_charm, img_prince_bold, img_prince_wise, img_prince_sky, img_prince_forest,
+} from './learningBuddyImages';
 
 export type BuddyCategory = 'hero' | 'animal' | 'princess' | 'prince';
 
@@ -20,19 +27,16 @@ export type LearningBuddy = {
   name: string;
   category: BuddyCategory;
   type?: 'princess' | 'prince';
-  image: string; // relative path to base PNG in assets/learning-buddies/
+  image: any; // static React Native image import (number handle)
   costumes: BuddyCostume[];
 };
-
-// Base image directory (relative to frontend repo root)
-const IMG = '../../assets/learning-buddies/';
 
 // ── Heroes ───────────────────────────────────────────────────────────────────
 const SPIDER_MAN: LearningBuddy = {
   id: 'spiderman',
   name: 'Spider-Man',
   category: 'hero',
-  image: `${IMG}spiderman_base.png`,
+  image: img_spiderman,
   costumes: [
     { id: 'classic-red', label: 'Classic Red', icon: 'shield', overlay: ['#E53935', '#8E0000'] },
     { id: 'blue-suit', label: 'Blue Suit', icon: 'droplet', overlay: ['#1E88E5', '#0D47A1'] },
@@ -45,7 +49,7 @@ const BATMAN: LearningBuddy = {
   id: 'batman',
   name: 'Batman',
   category: 'hero',
-  image: `${IMG}batman_base.png`,
+  image: img_batman,
   costumes: [
     { id: 'classic-black', label: 'Classic Black', icon: 'shield', overlay: ['#263238', '#000000'] },
     { id: 'grey-armor', label: 'Grey Armor', icon: 'box', overlay: ['#546E7A', '#263238'] },
@@ -58,7 +62,7 @@ const IRON_MAN: LearningBuddy = {
   id: 'ironman',
   name: 'Iron Man',
   category: 'hero',
-  image: `${IMG}ironman_base.png`,
+  image: img_ironman,
   costumes: [
     { id: 'classic-red-gold', label: 'Red & Gold', icon: 'shield', overlay: ['#E53935', '#FFD54F'] },
     { id: 'silver-centurion', label: 'Silver Centurion', icon: 'box', overlay: ['#B0BEC5', '#546E7A'] },
@@ -71,7 +75,7 @@ const SUPERMAN: LearningBuddy = {
   id: 'superman',
   name: 'Superman',
   category: 'hero',
-  image: `${IMG}superman_base.png`,
+  image: img_superman,
   costumes: [
     { id: 'classic-blue', label: 'Classic Blue', icon: 'shield', overlay: ['#1E88E5', '#0D47A1'] },
     { id: 'red-cape', label: 'Red Cape', icon: 'flag', overlay: ['#E53935', '#8E0000'] },
@@ -84,7 +88,7 @@ const DOREMAN: LearningBuddy = {
   id: 'doreman',
   name: 'Doreman',
   category: 'hero',
-  image: `${IMG}doreman_base.png`,
+  image: img_doreman,
   costumes: [
     { id: 'classic-blue', label: 'Classic Blue', icon: 'smile', overlay: ['#42A5F5', '#1E88E5'] },
     { id: 'red-nose', label: 'Red Nose', icon: 'circle', overlay: ['#E53935', '#FFD54F'] },
@@ -97,7 +101,7 @@ const CHOTA_BHEEM: LearningBuddy = {
   id: 'chotabheem',
   name: 'Chhota Bheem',
   category: 'hero',
-  image: `${IMG}chotabheem_base.png`,
+  image: img_chotabheem,
   costumes: [
     { id: 'classic', label: 'Classic', icon: 'smile', overlay: ['#FFB300', '#FF8F00'] },
     { id: 'royal', label: 'Royal', icon: 'crown', overlay: ['#E53935', '#FFD54F'] },
@@ -111,7 +115,7 @@ const TOM: LearningBuddy = {
   id: 'tom',
   name: 'Tom',
   category: 'animal',
-  image: `${IMG}tom_base.png`,
+  image: img_tom,
   costumes: [
     { id: 'grey-cat', label: 'Grey Cat', icon: 'smile', overlay: ['#90A4AE', '#607D8B'] },
     { id: 'sleeper', label: 'Sleeper', icon: 'moon', overlay: ['#78909C', '#37474F'] },
@@ -124,7 +128,7 @@ const JERRY: LearningBuddy = {
   id: 'jerry',
   name: 'Jerry',
   category: 'animal',
-  image: `${IMG}jerry_base.png`,
+  image: img_jerry,
   costumes: [
     { id: 'brown-mouse', label: 'Brown Mouse', icon: 'smile', overlay: ['#BCAAA4', '#8D6E63'] },
     { id: 'cheese-lover', label: 'Cheese Lover', icon: 'coffee', overlay: ['#FFD54F', '#FF8F00'] },
@@ -137,7 +141,7 @@ const LION: LearningBuddy = {
   id: 'lion',
   name: 'Lion',
   category: 'animal',
-  image: `${IMG}lion_base.png`,
+  image: img_lion,
   costumes: [
     { id: 'king', label: 'King of Jungle', icon: 'crown', overlay: ['#FFB300', '#E65100'] },
     { id: 'warrior', label: 'Warrior', icon: 'shield', overlay: ['#D84315', '#BF360C'] },
@@ -150,7 +154,7 @@ const PANDA: LearningBuddy = {
   id: 'panda',
   name: 'Panda',
   category: 'animal',
-  image: `${IMG}panda_base.png`,
+  image: img_panda,
   costumes: [
     { id: 'bamboo', label: 'Bamboo', icon: 'leaf', overlay: ['#66BB6A', '#2E7D32'] },
     { id: 'ninja', label: 'Ninja Panda', icon: 'shield', overlay: ['#263238', '#000000'] },
@@ -163,7 +167,7 @@ const MONKEY: LearningBuddy = {
   id: 'monkey',
   name: 'Monkey',
   category: 'animal',
-  image: `${IMG}monkey_base.png`,
+  image: img_monkey,
   costumes: [
     { id: 'playful', label: 'Playful', icon: 'smile', overlay: ['#A1887F', '#6D4C41'] },
     { id: 'ninja-monkey', label: 'Ninja', icon: 'zap', overlay: ['#263238', '#000000'] },
@@ -176,7 +180,7 @@ const DOG: LearningBuddy = {
   id: 'dog',
   name: 'Dog',
   category: 'animal',
-  image: `${IMG}dog_base.png`,
+  image: img_dog,
   costumes: [
     { id: 'puppy', label: 'Puppy', icon: 'smile', overlay: ['#D7CCC8', '#A1887F'] },
     { id: 'guard', label: 'Guard', icon: 'shield', overlay: ['#5D4037', '#3E2723'] },
@@ -189,7 +193,7 @@ const DRAGON: LearningBuddy = {
   id: 'dragon',
   name: 'Dragon',
   category: 'animal',
-  image: `${IMG}dragon_base.png`,
+  image: img_dragon,
   costumes: [
     { id: 'fire', label: 'Fire Dragon', icon: 'flame', overlay: ['#E53935', '#FF8F00'] },
     { id: 'ice', label: 'Ice Dragon', icon: 'snowflake', overlay: ['#42A5F5', '#1565C0'] },
@@ -199,7 +203,7 @@ const DRAGON: LearningBuddy = {
 };
 
 // ── Princess (Female) ────────────────────────────────────────────────────────
-const makePrincess = (id: string, name: string, image: string, type: [string, string]): LearningBuddy => ({
+const makePrincess = (id: string, name: string, image: any): LearningBuddy => ({
   id,
   name,
   category: 'princess',
@@ -213,14 +217,14 @@ const makePrincess = (id: string, name: string, image: string, type: [string, st
   ],
 });
 
-const PRINCESS_1 = makePrincess('princess-rose', 'Princess Rose', `${IMG}princess-rose_base.png`, ['#F48FB1', '#880E4F']);
-const PRINCESS_2 = makePrincess('princess-luna', 'Princess Luna', `${IMG}princess-luna_base.png`, ['#9575CD', '#4527A0']);
-const PRINCESS_3 = makePrincess('princess-sun', 'Princess Sun', `${IMG}princess-sun_base.png`, ['#FFD54F', '#E65100']);
-const PRINCESS_4 = makePrincess('princess-mermaid', 'Princess Mermaid', `${IMG}princess-mermaid_base.png`, ['#4DD0E1', '#006064']);
-const PRINCESS_5 = makePrincess('princess-forest', 'Princess Forest', `${IMG}princess-forest_base.png`, ['#81C784', '#1B5E20']);
+const PRINCESS_1 = makePrincess('princess-rose', 'Princess Rose', img_princess_rose);
+const PRINCESS_2 = makePrincess('princess-luna', 'Princess Luna', img_princess_luna);
+const PRINCESS_3 = makePrincess('princess-sun', 'Princess Sun', img_princess_sun);
+const PRINCESS_4 = makePrincess('princess-mermaid', 'Princess Mermaid', img_princess_mermaid);
+const PRINCESS_5 = makePrincess('princess-forest', 'Princess Forest', img_princess_forest);
 
 // ── Prince (Male) ────────────────────────────────────────────────────────────
-const makePrince = (id: string, name: string, image: string, type: [string, string]): LearningBuddy => ({
+const makePrince = (id: string, name: string, image: any): LearningBuddy => ({
   id,
   name,
   category: 'prince',
@@ -234,11 +238,11 @@ const makePrince = (id: string, name: string, image: string, type: [string, stri
   ],
 });
 
-const PRINCE_1 = makePrince('prince-charm', 'Prince Charm', `${IMG}prince-charm_base.png`, ['#90CAF9', '#0D47A1']);
-const PRINCE_2 = makePrince('prince-bold', 'Prince Bold', `${IMG}prince-bold_base.png`, ['#EF5350', '#B71C1C']);
-const PRINCE_3 = makePrince('prince-wise', 'Prince Wise', `${IMG}prince-wise_base.png`, ['#7E57C2', '#311B92']);
-const PRINCE_4 = makePrince('prince-sky', 'Prince Sky', `${IMG}prince-sky_base.png`, ['#4DD0E1', '#006064']);
-const PRINCE_5 = makePrince('prince-forest', 'Prince Forest', `${IMG}prince-forest_base.png`, ['#81C784', '#1B5E20']);
+const PRINCE_1 = makePrince('prince-charm', 'Prince Charm', img_prince_charm);
+const PRINCE_2 = makePrince('prince-bold', 'Prince Bold', img_prince_bold);
+const PRINCE_3 = makePrince('prince-wise', 'Prince Wise', img_prince_wise);
+const PRINCE_4 = makePrince('prince-sky', 'Prince Sky', img_prince_sky);
+const PRINCE_5 = makePrince('prince-forest', 'Prince Forest', img_prince_forest);
 
 // ── All buddies, grouped ─────────────────────────────────────────────────────
 export const HEROES: LearningBuddy[] = [SPIDER_MAN, BATMAN, IRON_MAN, SUPERMAN, DOREMAN, CHOTA_BHEEM];
