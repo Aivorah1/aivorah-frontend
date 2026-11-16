@@ -7,7 +7,7 @@
 
 const WARM_INTERVAL_MS = 5 * 60 * 1000; // every 5 min
 
-export function keepServicesWarm(serviceUrls: string[]): () => void {
+export function warmServices(serviceUrls: string[]): () => void {
   if (typeof window === 'undefined' || typeof fetch !== 'function') {
     return () => {};
   }
@@ -47,3 +47,6 @@ export function keepServicesWarm(serviceUrls: string[]): () => void {
     clearInterval(timer);
   };
 }
+
+// Alias kept for callers that import keepServicesWarm (navigation/lazyScreens.tsx).
+export const keepServicesWarm = warmServices;
