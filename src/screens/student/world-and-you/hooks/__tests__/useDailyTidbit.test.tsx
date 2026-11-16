@@ -56,9 +56,13 @@ describe('useDailyTidbit — cache miss (fresh fetch)', () => {
 });
 
 describe('useDailyTidbit — cache hit', () => {
-  test('a real cached entry for today is served without hitting the network', async () => {
-    const today = new Date().toISOString().split('T')[0];
-    await AsyncStorage.setItem(`daily_tidbit_v3_Grade 4_${today}`, JSON.stringify({ gk: { fact: 'Cached fact.' } }));
+  const localDay = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
+
+  test('a real cached entry for today (local date) is served without hitting the network', async () => {
+    await AsyncStorage.setItem(`daily_tidbit_v4_Grade 4_${localDay()}`, JSON.stringify({ gk: { fact: 'Cached fact.' } }));
     global.fetch = jest.fn() as any;
 
     await render(<Harness />);
@@ -66,6 +70,16 @@ describe('useDailyTidbit — cache hit', () => {
     await waitFor(() => expect(screen.getByTestId('loading').props.children).toBe('false'));
     expect(screen.getByTestId('gkFact').props.children).toBe('Cached fact.');
     expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  test("an old v3 copy (AI-written fact) is not reused: today's fact is fetched", async () => {
+    await AsyncStorage.setItem(`daily_tidbit_v3_Grade 4_${localDay()}`, JSON.stringify({ gk: { fact: 'Old AI fact.' } }));
+    global.fetch = jest.fn().mockResolvedValue(jsonRes({ gk: { fact: 'Today is Republic Day! A real fact.' } })) as any;
+
+    await render(<Harness />);
+
+    await waitFor(() => expect(screen.getByTestId('gkFact').props.children).toBe('Today is Republic Day! A real fact.'));
+    expect(global.fetch).toHaveBeenCalledTimes(1);
   });
 });
 
