@@ -17,25 +17,31 @@ import { keepServicesWarm } from '../utils/warmServices';
 type ScreenModule = { default: React.ComponentType<any> };
 type Loader = () => Promise<ScreenModule>;
 
-const RELOAD_FLAG = 'aivorah_chunk_reload';
+const RELOAD_FLAG = 'aivorah_chunk_reload_ts';
+const RELOAD_COOLDOWN_MS = 30 * 1000; // don't reload more than once per 30s
+
+function lastReloadTime(): number {
+  try { return Number(sessionStorage.getItem(RELOAD_FLAG) || '0') || 0; } catch { return 0; }
+}
+
+function setLastReloadTime() {
+  try { sessionStorage.setItem(RELOAD_FLAG, String(Date.now())); } catch {}
+}
 
 // A chunk can fail to load on a flaky network (retry once) or because a new
 // deploy replaced the old chunk files while this tab was open (reload the page
-// once to pick up the new build). The sessionStorage flag stops reload loops.
+// once to pick up the new build). A 30s cooldown prevents a reload loop when
+// several chunks fail in quick succession (e.g. a bad deploy): without it, one
+// chunk failing, the page reloading, another chunk failing, reloading again…
 function withRetry(loader: Loader): Loader {
   return () =>
     loader()
       .catch(() => new Promise<void>((r) => setTimeout(r, 800)).then(loader))
-      .then((mod) => {
-        try { if (Platform.OS === 'web') sessionStorage.removeItem(RELOAD_FLAG); } catch {}
-        return mod;
-      })
       .catch((err) => {
         if (Platform.OS === 'web' && typeof window !== 'undefined' && navigator.onLine !== false) {
-          let alreadyReloaded = false;
-          try { alreadyReloaded = sessionStorage.getItem(RELOAD_FLAG) === '1'; } catch {}
-          if (!alreadyReloaded) {
-            try { sessionStorage.setItem(RELOAD_FLAG, '1'); } catch {}
+          const now = Date.now();
+          if (now - lastReloadTime() > RELOAD_COOLDOWN_MS) {
+            setLastReloadTime();
             window.location.reload();
             return new Promise<ScreenModule>(() => {}); // page is reloading
           }
