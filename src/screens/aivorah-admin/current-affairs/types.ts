@@ -32,6 +32,7 @@ export interface Story extends StorySummary {
   new_word_3: string | null; def_3: string | null;
   think_about_it: string | null;
   image_url: string | null;
+  updated_at: string | null;
 }
 
 export interface QuizQuestion {

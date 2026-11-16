@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { View, Text, Linking, ActivityIndicator } from 'react-native';
 import { Button, Field, Segment } from './ui';
-import { createStory, getStory, setStoryStatus, updateStory } from '../services/currentAffairsAdminService';
+import { createStory, getStory, setStoryStatus, updateStory, updateStoryOptimistic } from '../services/currentAffairsAdminService';
 import { useLoad } from '../hooks/useLoad';
 import { CA_CATEGORIES, type CaCategory, type ContentStatus, type Story } from '../types';
 import type { CaStyles } from '../styles';
@@ -54,7 +54,7 @@ export default function StoryEditor({ id, styles, accent, onChanged, onClose }: 
   const current = form || (loading ? null : toForm(story));
   const set = (key: string, value: string) => setForm({ ...(current as Form), [key]: value });
 
-  async function run(action: () => Promise<Story>, done: string) {
+  async function run(action: () => Promise<Story>, done: string, optimistic = false) {
     setBusy(true); setMessage(''); setProblem('');
     try {
       const saved = await action();
@@ -63,18 +63,26 @@ export default function StoryEditor({ id, styles, accent, onChanged, onClose }: 
       setMessage(done);
       onChanged();
     } catch (e: any) {
-      setProblem(e?.message || 'Could not save. Please try again.');
+      // Optimistic concurrency conflict (HTTP 409): someone else edited it first.
+      if (optimistic && (e?.message || '').includes('edited by someone else')) {
+        setProblem('This story was edited by someone else. Reload to see their changes, then try again.');
+      } else {
+        setProblem(e?.message || 'Could not save. Please try again.');
+      }
     } finally {
       setBusy(false);
     }
   }
 
-  const save = () => run(() => (isNew ? createStory(toFields(current as Form)) : updateStory(id, toFields(current as Form))), 'Saved.');
+  const save = () => run(() => isNew
+    ? createStory(toFields(current as Form))
+    : updateStoryOptimistic(id, { ...toFields(current as Form), updated_at: story?.updated_at }),
+    'Saved.', !isNew);
   const publish = () => run(async () => {
     if (isNew) return createStory({ ...toFields(current as Form), publish: true });
-    await updateStory(id, toFields(current as Form));
+    await updateStoryOptimistic(id, { ...toFields(current as Form), updated_at: story?.updated_at });
     return setStoryStatus(id, 'published');
-  }, 'Published: students can read it now.');
+  }, 'Published: students can read it now.', true);
   const changeStatus = (status: ContentStatus, done: string) => run(() => setStoryStatus(id, status), done);
 
   if (loading || !current) return <View style={styles.card}><ActivityIndicator color={accent} /></View>;

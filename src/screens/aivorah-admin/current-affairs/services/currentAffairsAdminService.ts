@@ -35,6 +35,12 @@ export const createStory = (fields: Partial<Story> & { publish?: boolean }) =>
 export const updateStory = (id: string, fields: Partial<Story>) =>
   call<{ story: Story }>(`/stories/${id}`, { method: 'PATCH', body: fields }, 'Could not save the story').then((d) => d.story);
 
+// Optimistic-concurrency variant: sends updated_at so the service rejects with
+// HTTP 409 if the story changed since it was loaded. Callers can catch the
+// error and prompt the editor to reload.
+export const updateStoryOptimistic = (id: string, fields: Partial<Story> & { updated_at?: string }) =>
+  call<{ story: Story }>(`/stories/${id}`, { method: 'PATCH', body: fields }, 'Could not save the story').then((d) => d.story);
+
 export const setStoryStatus = (id: string, status: ContentStatus) =>
   call<{ story: Story }>(`/stories/${id}/status`, { method: 'POST', body: { status } }, 'Could not change the story').then((d) => d.story);
 
