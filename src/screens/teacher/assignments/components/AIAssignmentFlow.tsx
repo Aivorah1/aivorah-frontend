@@ -40,6 +40,7 @@ export function AIAssignmentFlow(props: {
   quizType: 'mcq' | 'fill_blank' | 'mixed'; setQuizType: (v: 'mcq' | 'fill_blank' | 'mixed') => void;
   quizDifficulty: 'easy' | 'medium' | 'hard'; setQuizDifficulty: (v: 'easy' | 'medium' | 'hard') => void;
   quizCount: number; setQuizCount: (v: number) => void;
+  requireReasoning: 'off' | 'optional' | 'required'; setRequireReasoning: (v: 'off' | 'optional' | 'required') => void;
   formError: string; setFormError: (v: string) => void;
   generatingQuiz: boolean; generateQuiz: () => void;
   unitOfInquiry: string; setUnitOfInquiry: (v: string) => void;
@@ -75,7 +76,7 @@ export function AIAssignmentFlow(props: {
     createMode, docFilesLength, title, setTitle, subject, setSubject, selectedLanguage, setSelectedLanguage,
     grade, setGrade, effectiveGrade, gradeOptions, setCurriculum, effectiveCurriculum, curriculumOptions, teacherCurriculum,
     chapter, setChapter, topicsLoading, availableTopics, dueDate, setDueDate,
-    quizType, setQuizType, quizDifficulty, setQuizDifficulty, quizCount, setQuizCount,
+    quizType, setQuizType, quizDifficulty, setQuizDifficulty, quizCount, setQuizCount, requireReasoning, setRequireReasoning,
     formError, setFormError, generatingQuiz, generateQuiz,
     unitOfInquiry, setUnitOfInquiry, generatingIB, generatingSteps, generateIBAssignment, generateSteps, stepsError,
     ibPurpose, setIbPurpose, ibCentralIdea, setIbCentralIdea, ibLinesOfInquiry,
@@ -179,6 +180,28 @@ export function AIAssignmentFlow(props: {
                   activeOpacity={0.75}
                 >
                   <Text style={{ fontSize: 13, fontWeight: '800', color: quizCount === n ? '#BAA467' : colors.textMuted }}>{n}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          {/* Reasoning Requirement */}
+          <View style={{ gap: 6 }}>
+            <Text style={styles.fieldLabel}>Reasoning Requirement</Text>
+            <Text style={{ fontSize: 11, color: colors.textDim, lineHeight: 16 }}>
+              Ask students to explain why they chose each answer.
+            </Text>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              {([['off', 'Off', 'x'], ['optional', 'Optional', 'edit-3'], ['required', 'Required', 'check-circle']] as const).map(([val, label, icon]) => (
+                <TouchableOpacity key={val}
+                  style={{ flex: 1, alignItems: 'center', paddingVertical: 8, borderRadius: 10, borderWidth: 1.5,
+                    borderColor: requireReasoning === val ? '#BAA467' : colors.borderColor,
+                    backgroundColor: requireReasoning === val ? '#BAA46718' : 'transparent' }}
+                  onPress={() => setRequireReasoning(val)}
+                  activeOpacity={0.75}
+                >
+                  <Feather name={icon as any} size={12} color={requireReasoning === val ? '#BAA467' : colors.textMuted} />
+                  <Text style={{ fontSize: 12, fontWeight: '700', color: requireReasoning === val ? '#BAA467' : colors.textMuted, textTransform: 'capitalize' }}>{label}</Text>
                 </TouchableOpacity>
               ))}
             </View>

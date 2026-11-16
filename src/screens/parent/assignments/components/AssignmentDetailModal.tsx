@@ -26,10 +26,12 @@ export default function AssignmentDetailModal({ assignment, colors, childName, o
 
   let feedback: any = {};
   let perQuestion: any[] = [];
+  let perQuestionComments: any[] = [];
   if (a.aiFeedback) {
     try {
       feedback = JSON.parse(a.aiFeedback);
       perQuestion = Array.isArray(feedback.perQuestion) ? feedback.perQuestion : [];
+      perQuestionComments = Array.isArray(feedback.perQuestionComments) ? feedback.perQuestionComments : [];
     } catch {
       feedback = { text: a.aiFeedback };
     }
@@ -232,6 +234,18 @@ export default function AssignmentDetailModal({ assignment, colors, childName, o
                                   <Text style={{ fontFamily: fonts.serif, fontSize: 12, color: colors.textMain, lineHeight: 18 }}>{pq.explanation}</Text>
                                 </View>
                               )}
+                              {(() => {
+                                const comment = perQuestionComments.find((c: any) => c.number === idx + 1);
+                                return comment && comment.comment ? (
+                                  <View style={{ padding: 10, borderRadius: 8, backgroundColor: colors.accentCyan + '18', marginTop: 2, borderWidth: 1, borderColor: colors.accentCyan + '30' }}>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 2 }}>
+                                      <Feather name="user" size={11} color={colors.accentCyan} />
+                                      <Text style={{ fontFamily: fonts.serif, fontSize: 10, fontWeight: '700', color: colors.accentCyan, textTransform: 'uppercase' }}>Teacher comment</Text>
+                                    </View>
+                                    <Text style={{ fontFamily: fonts.serif, fontSize: 12, color: colors.textMain, lineHeight: 18 }}>{comment.comment}</Text>
+                                  </View>
+                                ) : null;
+                              })()}
                             </View>
                           )}
                         </View>

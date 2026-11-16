@@ -91,6 +91,8 @@ export default function TeacherAssignmentsScreen({ navigation, route }: any) {
   const [teacherNotes, setTeacherNotes] = useState('');
   const [creating, setCreating] = useState(false);
   const [formError, setFormError] = useState('');
+  // Reasoning requirement for quiz questions: 'off' | 'optional' | 'required'
+  const [requireReasoning, setRequireReasoning] = useState<'off' | 'optional' | 'required'>('off');
   // When set, the Preview/Edit Answers modal below is editing a BULK item
   // (not the single-worksheet interactiveQuiz) — reusing the exact same,
   // already-built modal instead of duplicating an edit-answers UI per item.
@@ -343,7 +345,7 @@ export default function TeacherAssignmentsScreen({ navigation, route }: any) {
         teacherEmail, grade, curriculum, questions, uploadedExtracted, extractedQuestions,
         ibLearningOutcomes, successCriteria, taskSteps, ibWordBank, quizQuestions, interactiveQuiz, docFiles,
         ibPurpose, note, unitOfInquiry, selectedLanguage, ibCentralIdea, ibLinesOfInquiry,
-        ibLearnerProfile, ibAtlSkill, ibKeyConcept,
+        ibLearnerProfile, ibAtlSkill, ibKeyConcept, requireReasoning,
       });
 
       const result = await postCreateAssignment(payload);
@@ -365,7 +367,7 @@ export default function TeacherAssignmentsScreen({ navigation, route }: any) {
     setSubject('Mathematics');
     setGrade(user?.teaches?.[0]?.grade || 'Grade 3');
     setCurriculum(user?.teaches?.[0]?.curriculum || user?.curriculum || 'CBSE');
-    setType('assignment'); setQuestions(['']); setSuccessCriteria(['']); setTaskSteps([]); setQuizQuestions([]); setTeacherNotes(''); setFormError('');
+    setType('assignment'); setQuestions(['']); setSuccessCriteria(['']); setTaskSteps([]); setQuizQuestions([]); setTeacherNotes(''); setFormError(''); setRequireReasoning('off');
     setAssignTo('all'); setSelectedStudent(null); setStudentSearch('');
     setCreateMode('choose');
     setShowReuseQuizModal(false); setSavedQuizzes([]);
@@ -944,6 +946,7 @@ export default function TeacherAssignmentsScreen({ navigation, route }: any) {
                       quizType={quizType} setQuizType={setQuizType}
                       quizDifficulty={quizDifficulty} setQuizDifficulty={setQuizDifficulty}
                       quizCount={quizCount} setQuizCount={setQuizCount}
+                      requireReasoning={requireReasoning} setRequireReasoning={setRequireReasoning}
                       formError={formError} setFormError={setFormError}
                       generatingQuiz={generatingQuiz} generateQuiz={generateQuiz}
                       unitOfInquiry={unitOfInquiry} setUnitOfInquiry={setUnitOfInquiry}

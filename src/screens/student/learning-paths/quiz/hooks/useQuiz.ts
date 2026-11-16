@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, BackHandler, Platform } from 'react-native';
+
+// Speech recognition ref for voice-to-text reasoning input
+const recognitionRef = useRef<any>(null);
 import ASSIGNMENTS_SERVER_URL from '../../../../../config/assignmentsServerUrl';
 import LEARNING_PATHS_SERVER_URL from '../../../../../config/learningPathsServerUrl';
 import LEADERBOARD_SERVICE_URL from '../../../../../config/leaderboardServiceUrl';
@@ -64,6 +67,68 @@ export function useQuiz(params: {
   // Issue #106 — auto-loaded explanations in result screen
   const [resultExplanations, setResultExplanations] = useState<Record<number, string>>({});
 
+  // Optional reasoning box per question ("Why did you choose this?") + voice input
+  const [reasoningByIndex, setReasoningByIndex] = useState<Record<number, string>>({});
+  const reasoningByIndexRef = useRef<Record<number, string>>({});
+  const [listeningIndex, setListeningIndex] = useState<number | null>(null);
+
+  const patchReasoning = useCallback((i: number, text: string) => {
+    const next = { ...reasoningByIndexRef.current, [i]: text };
+    reasoningByIndexRef.current = next;
+    setReasoningByIndex(next);
+  }, []);
+
+  const toggleReasoningVoice = useCallback((i: number) => {
+    if (Platform.OS !== 'web') {
+      Alert.alert('Not Supported', 'Voice input is only available in Chrome on web.');
+      return;
+    }
+    if (listeningIndex === i) {
+      // stop listening — handled by recognition.onend
+      setListeningIndex(null);
+      recognitionRef.current?.stop();
+      return;
+    }
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      Alert.alert('Not Supported', 'Voice input is not supported in this browser. Try Chrome.');
+      return;
+    }
+    // stop any current listening
+    if (listeningIndex !== null) {
+      recognitionRef.current?.stop();
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-IN';
+    recognition.interimResults = true;
+    recognition.continuous = false;
+    recognition.maxAlternatives = 1;
+    recognitionRef.current = recognition;
+    let finalTranscript = '';
+    recognition.onstart = () => setListeningIndex(i);
+    recognition.onresult = (event: any) => {
+      let interim = '';
+      for (let idx = event.resultIndex; idx < event.results.length; idx++) {
+        const transcript = event.results[idx][0].transcript;
+        if (event.results[idx].isFinal) finalTranscript += transcript;
+        else interim += transcript;
+      }
+      patchReasoning(i, finalTranscript || interim);
+    };
+    recognition.onerror = (event: any) => {
+      console.warn('Speech recognition error:', event.error);
+      setListeningIndex(null);
+      if (event.error === 'not-allowed') {
+        Alert.alert('Microphone Access', 'Please allow microphone access in your browser settings.');
+      }
+    };
+    recognition.onend = () => {
+      setListeningIndex(null);
+      if (finalTranscript.trim().length > 2) patchReasoning(i, finalTranscript.trim());
+    };
+    recognition.start();
+  }, [listeningIndex, patchReasoning]);
+
   const scoreRef = useRef(score);
   useEffect(() => { scoreRef.current = score; }, [score]);
 
@@ -108,6 +173,10 @@ export function useQuiz(params: {
     perQuestionResultsRef.current = [];
     explanationsRef.current = {};
     setResultExplanations({});
+    reasoningByIndexRef.current = {};
+    setReasoningByIndex({});
+    setListeningIndex(null);
+    recognitionRef.current?.stop();
     quizStartTimeRef.current = Date.now();
     lastAnswerAtRef.current = Date.now();
     if (isRetake) setAttemptNumber(n => n + 1);
@@ -147,10 +216,21 @@ export function useQuiz(params: {
     const pct = Math.round((finalScore / questions.length) * 100);
     const totalTimeSeconds = Math.round((Date.now() - quizStartTimeRef.current) / 1000);
 
-    // Legacy analytics
+    // Legacy analytics + persist reasoning to topic_attempts
+    const reasoningSnapshot = reasoningByIndexRef.current;
+    const perQuestionResultsWithReasoning = perQuestionResultsRef.current.map((r, i) => ({
+      ...(r || {}),
+      reasoning: reasoningSnapshot[i] || '',
+    }));
     fetch(`${LEARNING_PATHS_SERVER_URL}/ibpyp/track-result`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userEmail, role: userRole, topic, subject, grade, score: pct, totalQuestions: questions.length, correctAnswers: finalScore, firstAttemptCorrect: finalScore, attemptNumber, perQuestionAttempts: [] }),
+      body: JSON.stringify({
+        userEmail, role: userRole, topic, subject, grade, score: pct,
+        totalQuestions: questions.length, correctAnswers: finalScore,
+        firstAttemptCorrect: finalScore, attemptNumber, perQuestionAttempts: [],
+        studentId,
+        perQuestionResults: perQuestionResultsWithReasoning,
+      }),
     }).catch(() => {});
 
     // Local copy of the result, so the dashboard shows it the moment the
@@ -380,5 +460,6 @@ export function useQuiz(params: {
     resultExplanations,
     fetchQuiz, startTest, backToHub, finish, handleMcqAnswer, setFillInput, handleFillSubmit,
     spokenText, setSpokenText, spokenStatus, spokenError, submitSpoken,
+    reasoningByIndex, setReasoning: patchReasoning, toggleReasoningVoice, listeningIndex,
   };
 }

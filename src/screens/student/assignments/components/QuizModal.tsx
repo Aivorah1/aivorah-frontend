@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Modal, Alert } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Modal, Alert, TextInput, Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { fonts } from '../../../../theme';
 import type { AppColors } from '../../../../theme';
@@ -15,6 +15,9 @@ import type { Assignment, QuizQuestion, PerQ, GradeResult } from '../types';
 import { AssignmentErrorBoundary } from './AssignmentErrorBoundary';
 import { ModalTopBar } from './ModalTopBar';
 import { ConfirmCloseOverlay } from './ConfirmCloseOverlay';
+
+// Speech recognition ref for voice-to-text reasoning input
+const recognitionRef = useRef<any>(null);
 
 // ── Quiz Modal ────────────────────────────────────────────────────────────────
 
@@ -45,6 +48,10 @@ export function QuizModal({ assignment, colors, onClose, onSubmitted }: {
   // Which attempt # the student got it correct (1 = full points, 2 = partial, revealed = 0)
   const [fillCorrectAttempt, setFillCorrectAttempt] = useState<Record<number, number>>({});
   const [showCheckNudge,   setShowCheckNudge]   = useState(false);
+  // Reasoning box ("Why did you choose this?") + voice input
+  const [reasoning, setReasoning] = useState<Record<number, string>>({});
+  const reasoningRef = useRef<Record<number, string>>({});
+  const [listeningQ, setListeningQ] = useState<number | null>(null);
 
   const q         = questions[currentQ];
   const langCode  = resolveTypingLang(assignment.subject, q?.question, assignmentLanguageText(assignment));
@@ -54,6 +61,8 @@ export function QuizModal({ assignment, colors, onClose, onSubmitted }: {
   // For fill_blank: has the student typed something but not yet checked?
   const fillTypedNotChecked = isFillQ && !answered && !!(fillInput[currentQ] || '').trim();
   const stamp     = result ? getStamp(result.score) : null;
+  const requireReasoning = assignment.requireReasoning || 'off';
+  const showReasoningBox = requireReasoning === 'optional' || requireReasoning === 'required';
 
   function selectOption(option: string) {
     setAnswers(prev => ({ ...prev, [currentQ]: option }));
@@ -66,6 +75,58 @@ export function QuizModal({ assignment, colors, onClose, onSubmitted }: {
   }
   function next() { setShowHint(false); setShortInput(''); setShowCheckNudge(false); setCurrentQ(i => i + 1); }
   function prev() { setShowHint(false); setShortInput(''); setShowCheckNudge(false); setCurrentQ(i => i - 1); }
+
+  // Voice-to-text for reasoning box
+  const toggleReasoningVoice = useCallback(() => {
+    if (Platform.OS !== 'web') {
+      Alert.alert('Not Supported', 'Voice input is only available in Chrome on web.');
+      return;
+    }
+    if (listeningQ === currentQ) {
+      recognitionRef.current?.stop();
+      setListeningQ(null);
+      return;
+    }
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      Alert.alert('Not Supported', 'Voice input is not supported in this browser. Try Chrome.');
+      return;
+    }
+    if (listeningQ !== null) {
+      recognitionRef.current?.stop();
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-IN';
+    recognition.interimResults = true;
+    recognition.continuous = false;
+    recognition.maxAlternatives = 1;
+    recognitionRef.current = recognition;
+    let finalTranscript = '';
+    recognition.onstart = () => setListeningQ(currentQ);
+    recognition.onresult = (event: any) => {
+      let interim = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) finalTranscript += transcript;
+        else interim += transcript;
+      }
+      setReasoning(prev => ({ ...prev, [currentQ]: finalTranscript || interim }));
+    };
+    recognition.onerror = (event: any) => {
+      console.warn('Speech recognition error:', event.error);
+      setListeningQ(null);
+      if (event.error === 'not-allowed') {
+        Alert.alert('Microphone Access', 'Please allow microphone access in your browser settings.');
+      }
+    };
+    recognition.onend = () => {
+      setListeningQ(null);
+      if (finalTranscript.trim().length > 2) {
+        setReasoning(prev => ({ ...prev, [currentQ]: finalTranscript.trim() }));
+      }
+    };
+    recognition.start();
+  }, [currentQ, listeningQ]);
 
   async function submitFillBlank() {
     const currentInput = (fillInput[currentQ] || '').trim();
@@ -108,8 +169,10 @@ export function QuizModal({ assignment, colors, onClose, onSubmitted }: {
 
   async function handleSubmit() {
     setShowReview(false); setSubmitting(true);
+    // Sync reasoning ref before submit
+    reasoningRef.current = reasoning;
     try {
-      const quizAnswers = questions.map((_, i) => ({ answer: answers[i] || '' }));
+      const quizAnswers = questions.map((_, i) => ({ answer: answers[i] || '', reasoning: reasoning[i] || '' }));
       const ctrl1 = new AbortController();
       const t1 = setTimeout(() => ctrl1.abort(), 120_000);
       const res = await fetch(`${ASSIGNMENTS_SERVER_URL}/assignments/${assignment.id}/submit`, {
@@ -626,6 +689,52 @@ export function QuizModal({ assignment, colors, onClose, onSubmitted }: {
                 </View>
               );
             })()}
+
+            {/* Reasoning Box (optional) — "Why did you choose this?" */}
+            {showReasoningBox && answered && !isFillQ && (
+              <View style={{ width: '100%', gap: 6 }}>
+                <TouchableOpacity
+                  onPress={toggleReasoningVoice}
+                  activeOpacity={0.8}
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
+                >
+                  <Feather name="message-square" size={13} color={color} />
+                  <Text style={{ fontSize: 12, color, fontWeight: '700' }}>Why did you choose this?</Text>
+                  <Feather
+                    name="mic"
+                    size={13}
+                    color={listeningQ === currentQ ? colors.accentRed : colors.textDim}
+                    style={{ marginLeft: 'auto' }}
+                  />
+                </TouchableOpacity>
+                <TextInput
+                  style={{
+                    minHeight: 56,
+                    textAlignVertical: 'top',
+                    lineHeight: 20,
+                    fontSize: 13,
+                    color: colors.textMain,
+                    backgroundColor: colors.bgDark,
+                    borderColor: color + '50',
+                    borderWidth: 1,
+                    borderRadius: 10,
+                    paddingHorizontal: 12,
+                    paddingVertical: 10,
+                  }}
+                  placeholder="Optional: explain your thinking or tap the mic to speak..."
+                  placeholderTextColor={colors.textDim}
+                  value={reasoning[currentQ] || ''}
+                  onChangeText={text => setReasoning(prev => ({ ...prev, [currentQ]: text }))}
+                  multiline
+                  maxLength={500}
+                />
+                {(reasoning[currentQ] || '').length > 0 && (
+                  <Text style={{ fontSize: 10, color: colors.textDim, textAlign: 'right' }}>
+                    {(reasoning[currentQ] || '').length}/500
+                  </Text>
+                )}
+              </View>
+            )}
 
             {/* Check nudge for fill_blank */}
             {showCheckNudge && (

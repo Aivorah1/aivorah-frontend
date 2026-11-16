@@ -17,7 +17,7 @@ export function SubmittedResultModal({
 }) {
   const sc = SUBJECT_COLOR[a.subject] ?? colors.accentYellow;
   const stamp = getStamp(data.score ?? data.score);
-  let feedbackText = ''; let wellDone = ''; let improve = ''; let pq: any[] = []; let teacherFb = '';
+  let feedbackText = ''; let wellDone = ''; let improve = ''; let pq: any[] = []; let teacherFb = ''; let perQuestionComments: any[] = [];
   try {
     const parsed = JSON.parse(data.aiFeedback || '{}');
     feedbackText = parsed.text || '';
@@ -25,6 +25,7 @@ export function SubmittedResultModal({
     improve = parsed.improve || '';
     pq = Array.isArray(parsed.perQuestion) ? parsed.perQuestion : [];
     teacherFb = parsed.teacherFeedback || '';
+    perQuestionComments = Array.isArray(parsed.perQuestionComments) ? parsed.perQuestionComments : [];
   } catch {
     feedbackText = data.aiFeedback || '';
     pq = Array.isArray(data.perQuestion) ? data.perQuestion : [];
@@ -112,6 +113,19 @@ export function SubmittedResultModal({
                         ) : null}
                       </View>
                     ) : null}
+                    {/* Teacher per-question comment */}
+                    {(() => {
+                      const comment = perQuestionComments.find((c: any) => c.number === idx + 1);
+                      return comment && comment.comment ? (
+                        <View style={{ padding: 10, paddingTop: 0, gap: 4, borderTopWidth: 1, borderTopColor: colors.accentCyan + '25' }}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                            <Feather name="user" size={11} color={colors.accentCyan} />
+                            <Text style={{ fontSize: 10, color: colors.accentCyan, fontWeight: '700' }}>Teacher comment</Text>
+                          </View>
+                          <Text style={{ fontSize: 12, color: colors.textMain, lineHeight: 18 }}>{comment.comment}</Text>
+                        </View>
+                      ) : null;
+                    })()}
                   </View>
                 );
               })}

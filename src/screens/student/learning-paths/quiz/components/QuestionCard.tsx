@@ -3,9 +3,11 @@
  * page (QuizQuestionList): number, question text, type tag, then the options
  * (MCQ), the answer box (fill-in-the-blank) or the mic (spoken), and the
  * explanation once it is answered. Same colours and answer rules as before.
+ * Also includes an OPTIONAL reasoning box ("Why did you choose this?") with
+ * voice-to-text support for students who prefer speaking over typing.
  */
-import React from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useCallback, useRef, useState } from 'react';
+import { View, Text, TouchableOpacity, ActivityIndicator, TextInput, Alert, Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import TransliterationInput, { resolveTypingLang } from '../../../../../components/common/TransliterationInput';
 import type { AppColors } from '../../../../../theme';
@@ -23,6 +25,7 @@ export default function QuestionCard({
   index, q, answer, isCorrect, topic, subject, colors, isDark, styles,
   onMcqAnswer, setFillInput, onFillSubmit,
   spokenText, setSpokenText, spokenStatus, spokenError, onSpokenSubmit,
+  reasoning, setReasoning, toggleReasoningVoice, isListening,
 }: {
   index: number;
   q: Question;
@@ -42,6 +45,10 @@ export default function QuestionCard({
   spokenStatus: SpokenStatus;
   spokenError: string;
   onSpokenSubmit: () => void;
+  reasoning: string;
+  setReasoning: (s: string) => void;
+  toggleReasoningVoice: () => void;
+  isListening: boolean;
 }) {
   const accent = colors.accentYellow;
   const CORRECT = correctGreen(isDark);
@@ -200,6 +207,55 @@ export default function QuestionCard({
                 }
               </TouchableOpacity>
             </>
+          )}
+        </View>
+      )}
+
+      {/* ── Reasoning Box (optional) — "Why did you choose this?" ── */}
+      {!isSpoken && (
+        <View style={{ marginTop: 10, paddingHorizontal: 2 }}>
+          <TouchableOpacity
+            onPress={toggleReasoningVoice}
+            activeOpacity={0.8}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 }}
+          >
+            <Feather name="message-square" size={13} color={accent} />
+            <Text style={{ fontSize: 12, color: accent, fontWeight: '700' }}>Why did you choose this?</Text>
+            <Feather
+              name={isListening ? 'mic' : 'mic'}
+              size={13}
+              color={isListening ? colors.accentRed : colors.textDim}
+              style={{ marginLeft: 'auto' }}
+            />
+          </TouchableOpacity>
+          <TextInput
+            style={[
+              styles.fillInput,
+              {
+                minHeight: 56,
+                textAlignVertical: 'top',
+                lineHeight: 20,
+                fontSize: 13,
+                color: colors.textMain,
+                backgroundColor: isDark ? colors.bgDark : '#F8FAFA',
+                borderColor: accent + '50',
+                borderWidth: 1,
+                borderRadius: 10,
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+              },
+            ]}
+            placeholder="Optional: explain your thinking or tap the mic to speak..."
+            placeholderTextColor={colors.textDim}
+            value={reasoning}
+            onChangeText={setReasoning}
+            multiline
+            maxLength={500}
+          />
+          {reasoning.length > 0 && (
+            <Text style={{ fontSize: 10, color: colors.textDim, textAlign: 'right', marginTop: 2 }}>
+              {reasoning.length}/500
+            </Text>
           )}
         </View>
       )}

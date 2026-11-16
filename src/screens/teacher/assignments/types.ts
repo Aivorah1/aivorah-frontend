@@ -20,6 +20,7 @@ export type Assignment = {
   taskSteps?: any[];
   successCriteria?: string[];
   documentUrls?: string[];
+  requireReasoning?: 'off' | 'optional' | 'required';
 };
 
 export interface StudentItem { id: string; name: string; grade: string; curriculum?: string | null; }

@@ -28,6 +28,7 @@ export interface Assignment {
   atlSkill?: string | null;
   keyConcept?: string | null;
   interactiveQuizHtml?: string | null;
+  requireReasoning?: 'off' | 'optional' | 'required';
 }
 
 export interface QuizQuestion {

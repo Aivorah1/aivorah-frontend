@@ -42,10 +42,13 @@ export type QuestionAnswer = {
   explanation: string;
   loadingExplain: boolean;
   recorded: boolean;     // its result is saved: it counts as answered
+  reasoning: string;     // student's reasoning ("why did you choose this?")
+  reasoningListening: boolean; // voice input active state
 };
 
 export const emptyAnswer = (): QuestionAnswer => ({
   mcqSelected: null, mcqAttempts: 0, showMcqHint: false, mcqDone: false,
   fillInput: '', fillAttempts: 0, fillFeedback: 'idle', fillValidating: false,
   explanation: '', loadingExplain: false, recorded: false,
+  reasoning: '', reasoningListening: false,
 });

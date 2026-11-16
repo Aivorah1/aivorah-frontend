@@ -19,6 +19,7 @@ export default function QuizQuestionList({
   topic, subject, colors, isDark, styles,
   onMcqAnswer, setFillInput, onFillSubmit, onFinish, onBack, onMenuPress,
   spokenText, setSpokenText, spokenStatus, spokenError, onSpokenSubmit,
+  reasoningByIndex, setReasoningByIndex, toggleReasoningVoiceByIndex, listeningIndex,
 }: {
   questions: Question[];
   answers: QuestionAnswer[];
@@ -42,6 +43,10 @@ export default function QuizQuestionList({
   spokenStatus: SpokenStatus;
   spokenError: string;
   onSpokenSubmit: () => void;
+  reasoningByIndex: Record<number, string>;
+  setReasoningByIndex: (qIdx: number, s: string) => void;
+  toggleReasoningVoiceByIndex: (qIdx: number) => void;
+  listeningIndex: number | null;
 }) {
   const accent = colors.accentYellow;
   const total = questions.length;
@@ -86,6 +91,10 @@ export default function QuizQuestionList({
                 spokenStatus={spokenStatus}
                 spokenError={spokenError}
                 onSpokenSubmit={onSpokenSubmit}
+                reasoning={reasoningByIndex[i] || ''}
+                setReasoning={(s) => setReasoningByIndex(i, s)}
+                toggleReasoningVoice={() => toggleReasoningVoiceByIndex(i)}
+                isListening={listeningIndex === i}
               />
             ))}
 

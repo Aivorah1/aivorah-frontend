@@ -40,14 +40,24 @@ export function useAssignmentDetail(teacherEmail?: string) {
       .finally(() => setLoadingSubmissions(false));
   }, [detailAssignment?.id]);
 
-  async function sendFeedback(assignmentId: string, studentId: string) {
-    if (!teacherFeedback.trim()) return;
+  async function sendFeedback(assignmentId: string, studentId: string, perQuestionComments?: Record<number, string>) {
+    if (!teacherFeedback.trim() && (!perQuestionComments || Object.keys(perQuestionComments).length === 0)) return;
     setSendingFeedback(true);
     try {
+      const commentsArray = perQuestionComments
+        ? Object.entries(perQuestionComments)
+            .filter(([, v]) => v.trim().length > 0)
+            .map(([k, v]) => ({ number: parseInt(k, 10), comment: v.trim() }))
+        : [];
       const res = await fetch(`${ASSIGNMENTS_SERVER_URL}/assignments/${assignmentId}/teacher-feedback`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ studentId, feedback: teacherFeedback.trim(), teacherEmail }),
+        body: JSON.stringify({
+          studentId,
+          feedback: teacherFeedback.trim(),
+          perQuestionComments: commentsArray,
+          teacherEmail,
+        }),
       });
       if (res.ok) {
         // Update the local submission with teacher feedback
@@ -56,12 +66,16 @@ export function useAssignmentDetail(teacherEmail?: string) {
           let fbObj: any = {};
           try { fbObj = JSON.parse(s.aiFeedback || '{}'); } catch { fbObj = { text: s.aiFeedback || '' }; }
           const now = new Date().toISOString();
-          if (fbObj.teacherFeedback) fbObj.teacherFeedbackEditedAt = now;
-          else fbObj.teacherFeedbackAt = now;
-          fbObj.teacherFeedback = teacherFeedback.trim();
+          if (teacherFeedback.trim()) {
+            if (fbObj.teacherFeedback) fbObj.teacherFeedbackEditedAt = now;
+            else fbObj.teacherFeedbackAt = now;
+            fbObj.teacherFeedback = teacherFeedback.trim();
+          }
+          if (commentsArray.length > 0) {
+            fbObj.perQuestionComments = commentsArray.map(c => ({ ...c, commentedAt: now }));
+          }
           return { ...s, aiFeedback: JSON.stringify(fbObj) };
         }));
-        setTeacherFeedback(teacherFeedback.trim());
         setEditingFeedbackFor(null);
       }
     } catch {/* ignore */}

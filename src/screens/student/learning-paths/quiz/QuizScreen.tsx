@@ -198,6 +198,10 @@ function QuizSession({ navigation, route }: any) {
       spokenStatus={quiz.spokenStatus}
       spokenError={quiz.spokenError}
       onSpokenSubmit={quiz.submitSpoken}
+      reasoningByIndex={quiz.reasoningByIndex}
+      setReasoningByIndex={quiz.setReasoning}
+      toggleReasoningVoiceByIndex={quiz.toggleReasoningVoice}
+      listeningIndex={quiz.listeningIndex}
     />
   );
 }

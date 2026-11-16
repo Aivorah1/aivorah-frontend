@@ -25,6 +25,8 @@ export interface Assignment {
   documentUrl?: string | null;
   documentUrls?: string[];
   successCriteria?: string[];
+  requireReasoning?: 'off' | 'optional' | 'required';
+  perQuestion?: any[];
 }
 
 export const FILTERS = ['All', 'School', 'Parent', 'Done'];

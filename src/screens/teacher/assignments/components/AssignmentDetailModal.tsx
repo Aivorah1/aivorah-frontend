@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, Image, Modal, Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { spacing, radius } from '../../../../theme';
@@ -30,7 +30,7 @@ export function AssignmentDetailModal({
   teacherFeedback: string;
   setTeacherFeedback: (v: string) => void;
   sendingFeedback: boolean;
-  sendFeedback: (assignmentId: string, studentId: string) => void;
+  sendFeedback: (assignmentId: string, studentId: string, perQuestionComments?: Record<number, string>) => void;
   editingFeedbackFor?: string | null;
   setEditingFeedbackFor?: (id: string | null) => void;
   markComplete: (id: string) => void;
@@ -42,12 +42,40 @@ export function AssignmentDetailModal({
   gold: string;
   styles: any;
 }) {
+  // Per-question teacher comment state: number -> comment text
+  const [perQuestionComments, setPerQuestionComments] = useState<Record<number, string>>({});
+  const perQuestionCommentsRef = React.useRef<Record<number, string>>({});
   const a = assignment;
   const sc = SUBJECT_COLORS[a.subject] || gold;
   const due = daysUntil(a.dueDate);
   const completedCount = detailSubmissions.filter(s => s.status === 'completed').length;
   const totalCount = detailTotalLinked || detailSubmissions.length;
   const completionPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
+  // Initialize per-question comment inputs from existing saved comments when a
+  // student submission is expanded — so teachers can edit existing comments.
+  useEffect(() => {
+    if (!expandedStudent) {
+      setPerQuestionComments({});
+      perQuestionCommentsRef.current = {};
+      return;
+    }
+    const sub = detailSubmissions.find(s => s.studentId === expandedStudent);
+    if (sub) {
+      let fbObj: any = {};
+      try { fbObj = JSON.parse(sub.aiFeedback || '{}'); } catch { fbObj = { text: sub.aiFeedback || '' }; }
+      const comments: Record<number, string> = {};
+      if (Array.isArray(fbObj.perQuestionComments)) {
+        fbObj.perQuestionComments.forEach((c: any) => {
+          if (c && typeof c.number === 'number' && typeof c.comment === 'string') {
+            comments[c.number] = c.comment;
+          }
+        });
+      }
+      setPerQuestionComments(comments);
+      perQuestionCommentsRef.current = comments;
+    }
+  }, [expandedStudent, detailSubmissions]);
   const allQs: any[] = (a as any).quizQuestions?.length > 0
     ? (a as any).quizQuestions
     : (a.questions?.length ?? 0) > 0
@@ -360,6 +388,13 @@ export function AssignmentDetailModal({
                                             <Text style={{ fontSize: 12, color: colors.textMain, lineHeight: 18, backgroundColor: colors.cardDark, borderRadius: 6, padding: 8 }}>{studentAnswerText}</Text>
                                           </View>
                                         ) : null}
+                                        {/* Student reasoning ("Why did you choose this?") */}
+                                        {q.reasoning && q.reasoning.trim().length > 0 ? (
+                                          <View style={{ gap: 2 }}>
+                                            <Text style={{ fontSize: 10, color: colors.accentYellow, fontWeight: '600' }}>Student's reasoning:</Text>
+                                            <Text style={{ fontSize: 12, color: colors.textMain, lineHeight: 18, backgroundColor: colors.accentYellow + '12', borderRadius: 6, padding: 8, fontStyle: 'italic' }}>"{q.reasoning}"</Text>
+                                          </View>
+                                        ) : null}
                                         <View style={{ flexDirection: 'row', gap: 12, marginTop: 4 }}>
                                           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                                             <Feather name="refresh-cw" size={10} color={colors.textDim} />
@@ -380,6 +415,37 @@ export function AssignmentDetailModal({
                                             </Text>
                                           </View>
                                         ) : null}
+                                        {/* Existing teacher per-question comment (read-only display) */}
+                                        {fbObj.perQuestionComments && Array.isArray(fbObj.perQuestionComments) ? (
+                                          (() => {
+                                            const existing = fbObj.perQuestionComments.find((c: any) => c.number === (q.number || qi + 1));
+                                            return existing && existing.comment ? (
+                                              <View style={{ gap: 4 }}>
+                                                <Text style={{ fontSize: 10, color: sc, fontWeight: '600' }}>Teacher comment:</Text>
+                                                <Text style={{ fontSize: 12, color: colors.textMain, lineHeight: 18, backgroundColor: sc + '12', borderRadius: 6, padding: 8 }}>{existing.comment}</Text>
+                                                {existing.commentedAt ? <Text style={{ fontSize: 9, color: colors.textDim }}>Posted {formatDate(existing.commentedAt)}</Text> : null}
+                                              </View>
+                                            ) : null;
+                                          })()
+                                        ) : null}
+                                        {/* Teacher per-question comment input */}
+                                        {done && (
+                                          <View style={{ gap: 4 }}>
+                                            <Text style={{ fontSize: 10, color: sc, fontWeight: '600' }}>Your comment (optional):</Text>
+                                            <TextInput
+                                              style={{ minHeight: 40, textAlignVertical: 'top', fontSize: 12, color: colors.textMain, backgroundColor: colors.cardDark, borderRadius: 6, padding: 8, borderWidth: 1, borderColor: colors.borderColor }}
+                                              placeholder="Add a comment for this question..."
+                                              placeholderTextColor={colors.textDim}
+                                              value={perQuestionComments[q.number || qi + 1] || ''}
+                                              onChangeText={text => {
+                                                const next = { ...perQuestionComments, [q.number || qi + 1]: text };
+                                                setPerQuestionComments(next);
+                                                perQuestionCommentsRef.current = next;
+                                              }}
+                                              multiline
+                                            />
+                                          </View>
+                                        )}
                                       </View>
                                     );
                                   })}
@@ -465,7 +531,12 @@ export function AssignmentDetailModal({
                                   />
                                   <TouchableOpacity
                                     style={[styles.modalSaveBtn, { backgroundColor: sc, opacity: canSendFb ? 1 : 0.5 }]}
-                                    onPress={() => sendFeedback(a.id, sub.studentId)}
+                                    onPress={() => {
+                                      const commentsArray = Object.entries(perQuestionCommentsRef.current)
+                                        .filter(([, v]) => v.trim().length > 0)
+                                        .map(([k, v]) => ({ number: parseInt(k, 10), comment: v.trim() }));
+                                      sendFeedback(a.id, sub.studentId, commentsArray.length > 0 ? perQuestionCommentsRef.current : undefined);
+                                    }}
                                     disabled={!canSendFb || sendingFeedback}
                                     activeOpacity={0.8}
                                   >

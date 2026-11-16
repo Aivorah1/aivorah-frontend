@@ -60,6 +60,7 @@ export interface BuildAssignmentPayloadArgs {
   ibLearnerProfile: string;
   ibAtlSkill: string;
   ibKeyConcept: string;
+  requireReasoning: 'off' | 'optional' | 'required';
 }
 
 // Pure mapping from form state -> the /assignments POST body — extracted
@@ -72,7 +73,7 @@ export function buildAssignmentPayload(args: BuildAssignmentPayloadArgs) {
     title, subject, chapter, dueDate, type, assignTo, selectedStudentId, teacherEmail, grade, curriculum,
     questions, uploadedExtracted, extractedQuestions, ibLearningOutcomes, successCriteria, taskSteps, ibWordBank,
     quizQuestions, interactiveQuiz, docFiles, ibPurpose, note, unitOfInquiry, selectedLanguage,
-    ibCentralIdea, ibLinesOfInquiry, ibLearnerProfile, ibAtlSkill, ibKeyConcept,
+    ibCentralIdea, ibLinesOfInquiry, ibLearnerProfile, ibAtlSkill, ibKeyConcept, requireReasoning,
   } = args;
 
   return {
@@ -86,6 +87,7 @@ export function buildAssignmentPayload(args: BuildAssignmentPayloadArgs) {
     createdByRole: 'teacher',
     grade,
     curriculum,
+    requireReasoning,
     // Merge plain questions + extracted questions from worksheet as structured objects
     questions: (() => {
       const plain = questions.filter(q => q.trim());
