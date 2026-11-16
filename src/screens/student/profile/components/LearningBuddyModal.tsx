@@ -109,7 +109,7 @@ export function LearningBuddyModal({
           }}
         >
           <Image
-            source={require(buddy.image)}
+            source={buddy.image}
             style={{ width: '100%', height: '100%', borderRadius: radius.md }}
             resizeMode="cover"
           />
@@ -270,7 +270,7 @@ export function LearningBuddyModal({
                 }}
               >
                 <Image
-                  source={require(selectedBuddy.image)}
+                  source={selectedBuddy.image}
                   style={{ width: 72, height: 72, borderRadius: 36 }}
                   resizeMode="cover"
                 />
