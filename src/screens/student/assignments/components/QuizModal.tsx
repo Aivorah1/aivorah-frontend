@@ -16,9 +16,6 @@ import { AssignmentErrorBoundary } from './AssignmentErrorBoundary';
 import { ModalTopBar } from './ModalTopBar';
 import { ConfirmCloseOverlay } from './ConfirmCloseOverlay';
 
-// Speech recognition ref for voice-to-text reasoning input
-const recognitionRef = useRef<any>(null);
-
 // ── Quiz Modal ────────────────────────────────────────────────────────────────
 
 export function QuizModal({ assignment, colors, onClose, onSubmitted }: {
@@ -52,6 +49,11 @@ export function QuizModal({ assignment, colors, onClose, onSubmitted }: {
   const [reasoning, setReasoning] = useState<Record<number, string>>({});
   const reasoningRef = useRef<Record<number, string>>({});
   const [listeningQ, setListeningQ] = useState<number | null>(null);
+  // Speech recognition for the reasoning box's mic. Must live inside the
+  // component: a hook called at module level throws as soon as this file
+  // loads, which crashed the whole student Assignments page.
+  const recognitionRef = useRef<any>(null);
+  useEffect(() => () => { try { recognitionRef.current?.stop(); } catch { /* already stopped */ } }, []);
 
   const q         = questions[currentQ];
   const langCode  = resolveTypingLang(assignment.subject, q?.question, assignmentLanguageText(assignment));
@@ -168,6 +170,19 @@ export function QuizModal({ assignment, colors, onClose, onSubmitted }: {
   }
 
   async function handleSubmit() {
+    // "Required" reasoning: every answered question that shows the reasoning
+    // box (all but fill-in-the-blank) needs a reason. Check here so the
+    // student is taken to the question instead of getting a server error.
+    if (requireReasoning === 'required') {
+      const missing = questions.findIndex((qq, i) =>
+        qq?.type !== 'fill_blank' && !!(answers[i] || '').trim() && !(reasoning[i] || '').trim());
+      if (missing >= 0) {
+        setShowReview(false);
+        setCurrentQ(missing);
+        Alert.alert('Explain your thinking', `Please add a short reason for question ${missing + 1} before submitting.`);
+        return;
+      }
+    }
     setShowReview(false); setSubmitting(true);
     // Sync reasoning ref before submit
     reasoningRef.current = reasoning;
@@ -721,7 +736,9 @@ export function QuizModal({ assignment, colors, onClose, onSubmitted }: {
                     paddingHorizontal: 12,
                     paddingVertical: 10,
                   }}
-                  placeholder="Optional: explain your thinking or tap the mic to speak..."
+                  placeholder={requireReasoning === 'required'
+                    ? 'Required: explain your thinking or tap the mic to speak...'
+                    : 'Optional: explain your thinking or tap the mic to speak...'}
                   placeholderTextColor={colors.textDim}
                   value={reasoning[currentQ] || ''}
                   onChangeText={text => setReasoning(prev => ({ ...prev, [currentQ]: text }))}
