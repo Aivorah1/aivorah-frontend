@@ -6,14 +6,15 @@
  * Also includes an OPTIONAL reasoning box ("Why did you choose this?") with
  * voice-to-text support for students who prefer speaking over typing.
  */
-import React, { useCallback, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, TextInput, Alert, Platform } from 'react-native';
+import React from 'react';
+import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import TransliterationInput, { resolveTypingLang } from '../../../../../components/common/TransliterationInput';
 import type { AppColors } from '../../../../../theme';
 import type { makeStyles } from '../styles';
 import type { Question, QuestionAnswer, SpokenStatus } from '../types';
 import SpokenQuestion from './SpokenQuestion';
+import ReasoningBox, { reasoningLabel } from '../../../../../components/common/ReasoningBox';
 
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 const WRONG = '#C98A8A'; // warm amber-red for wrong
@@ -213,50 +214,16 @@ export default function QuestionCard({
 
       {/* ── Reasoning Box (optional) — "Why did you choose this?" ── */}
       {!isSpoken && (
-        <View style={{ marginTop: 10, paddingHorizontal: 2 }}>
-          <TouchableOpacity
-            onPress={toggleReasoningVoice}
-            activeOpacity={0.8}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 }}
-          >
-            <Feather name="message-square" size={13} color={accent} />
-            <Text style={{ fontSize: 12, color: accent, fontWeight: '700' }}>Why did you choose this?</Text>
-            <Feather
-              name={isListening ? 'mic' : 'mic'}
-              size={13}
-              color={isListening ? colors.accentRed : colors.textDim}
-              style={{ marginLeft: 'auto' }}
-            />
-          </TouchableOpacity>
-          <TextInput
-            style={[
-              styles.fillInput,
-              {
-                minHeight: 56,
-                textAlignVertical: 'top',
-                lineHeight: 20,
-                fontSize: 13,
-                color: colors.textMain,
-                backgroundColor: isDark ? colors.bgDark : '#F8FAFA',
-                borderColor: accent + '50',
-                borderWidth: 1,
-                borderRadius: 10,
-                paddingHorizontal: 12,
-                paddingVertical: 10,
-              },
-            ]}
-            placeholder="Optional: explain your thinking or tap the mic to speak..."
-            placeholderTextColor={colors.textDim}
+        <View style={{ marginTop: 12 }}>
+          <ReasoningBox
+            label={reasoningLabel(q.type)}
             value={reasoning}
             onChangeText={setReasoning}
-            multiline
-            maxLength={500}
+            onToggleMic={toggleReasoningVoice}
+            listening={isListening}
+            requirement="optional"
+            testID={`reasoning-${index}`}
           />
-          {reasoning.length > 0 && (
-            <Text style={{ fontSize: 10, color: colors.textDim, textAlign: 'right', marginTop: 2 }}>
-              {reasoning.length}/500
-            </Text>
-          )}
         </View>
       )}
 

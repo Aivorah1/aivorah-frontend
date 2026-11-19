@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Modal } from 'react-native';
+import { ReasoningDisplay } from '../../../../components/common/ReasoningBox';
 import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../theme';
 import { SUBJECT_COLOR } from '../constants';
@@ -113,16 +114,15 @@ export function SubmittedResultModal({
                         ) : null}
                       </View>
                     ) : null}
-                    {/* Teacher per-question comment */}
+                    {/* The student's reasoning and the teacher's comment for this question */}
                     {(() => {
-                      const comment = perQuestionComments.find((c: any) => c.number === idx + 1);
-                      return comment && comment.comment ? (
-                        <View style={{ padding: 10, paddingTop: 0, gap: 4, borderTopWidth: 1, borderTopColor: colors.accentCyan + '25' }}>
-                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-                            <Feather name="user" size={11} color={colors.accentCyan} />
-                            <Text style={{ fontSize: 10, color: colors.accentCyan, fontWeight: '700' }}>Teacher comment</Text>
-                          </View>
-                          <Text style={{ fontSize: 12, color: colors.textMain, lineHeight: 18 }}>{comment.comment}</Text>
+                      const comment = perQuestionComments.find((c: any) => c && c.number === (q.number || idx + 1));
+                      const hasReason = !!(q.reasoning && String(q.reasoning).trim());
+                      const hasComment = !!(comment && comment.comment && String(comment.comment).trim());
+                      return hasReason || hasComment ? (
+                        <View style={{ padding: 10, paddingTop: 0, gap: 8 }}>
+                          <ReasoningDisplay label="Your reasoning" text={q.reasoning || ''} testID={`my-reasoning-${idx}`} />
+                          <ReasoningDisplay label="Teacher's comment" tone="amber" text={hasComment ? comment.comment : ''} testID={`teacher-comment-view-${idx}`} />
                         </View>
                       ) : null;
                     })()}

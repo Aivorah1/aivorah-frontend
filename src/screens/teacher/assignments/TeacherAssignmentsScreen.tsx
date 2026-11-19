@@ -92,7 +92,7 @@ export default function TeacherAssignmentsScreen({ navigation, route }: any) {
   const [creating, setCreating] = useState(false);
   const [formError, setFormError] = useState('');
   // Reasoning requirement for quiz questions: 'off' | 'optional' | 'required'
-  const [requireReasoning, setRequireReasoning] = useState<'off' | 'optional' | 'required'>('off');
+  const [requireReasoning, setRequireReasoning] = useState<'off' | 'optional' | 'required'>('optional');
   // When set, the Preview/Edit Answers modal below is editing a BULK item
   // (not the single-worksheet interactiveQuiz) — reusing the exact same,
   // already-built modal instead of duplicating an edit-answers UI per item.
@@ -367,7 +367,7 @@ export default function TeacherAssignmentsScreen({ navigation, route }: any) {
     setSubject('Mathematics');
     setGrade(user?.teaches?.[0]?.grade || 'Grade 3');
     setCurriculum(user?.teaches?.[0]?.curriculum || user?.curriculum || 'CBSE');
-    setType('assignment'); setQuestions(['']); setSuccessCriteria(['']); setTaskSteps([]); setQuizQuestions([]); setTeacherNotes(''); setFormError(''); setRequireReasoning('off');
+    setType('assignment'); setQuestions(['']); setSuccessCriteria(['']); setTaskSteps([]); setQuizQuestions([]); setTeacherNotes(''); setFormError(''); setRequireReasoning('optional');
     setAssignTo('all'); setSelectedStudent(null); setStudentSearch('');
     setCreateMode('choose');
     setShowReuseQuizModal(false); setSavedQuizzes([]);

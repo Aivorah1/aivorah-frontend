@@ -8,7 +8,7 @@
  */
 import React from 'react';
 import { Alert } from 'react-native';
-import { render, screen, userEvent, waitFor } from '@testing-library/react-native';
+import { render, screen, userEvent, waitFor, fireEvent } from '@testing-library/react-native';
 import { QuizModal } from '../QuizModal';
 import type { Assignment } from '../../types';
 
@@ -76,4 +76,51 @@ test('"required": with a reason, the answer and reason are sent to the server', 
   await waitFor(() => expect(onSubmitted).toHaveBeenCalled());
   const submitCall = (global.fetch as jest.Mock).mock.calls.find(c => String(c[0]).includes('/assignments/a1/submit'));
   expect(JSON.parse(submitCall[1].body).quizAnswers).toEqual([{ answer: 'Four', reasoning: '2 and 2 make 4' }]);
+});
+
+function fillQuiz(requireReasoning: 'off' | 'optional' | 'required'): Assignment {
+  return {
+    id: 'a2', title: 'Plants', subject: 'Science', chapter: 'Leaves', type: 'quiz',
+    dueDate: '2099-01-01', status: 'pending', requireReasoning,
+    quizQuestions: [{ id: 'q1', question: 'Plants make food by ____.', type: 'fill_blank', options: [], correct: 'photosynthesis' }],
+  } as any;
+}
+
+test('"optional": the box shows an Optional tag and has no length limit', async () => {
+  const user = userEvent.setup();
+  await render(<QuizModal assignment={quiz('optional')} colors={COLORS} onClose={jest.fn()} onSubmitted={jest.fn()} />);
+  await user.press(screen.getByText('Four'));
+  expect(screen.getByText('Why did you choose this?')).toBeTruthy();
+  expect(screen.getByTestId('reasoning-0-optional')).toBeTruthy();
+  const input = screen.getByTestId('reasoning-0-input');
+  expect(input.props.maxLength).toBeUndefined();
+  expect(screen.getByTestId('reasoning-0-mic')).toBeTruthy();
+});
+
+test('fill-in-the-blank gets the box too ("Why did you write this answer?"), and "required" applies to it', async () => {
+  const user = userEvent.setup();
+  const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  global.fetch = jest.fn(async (url: string) => ({
+    ok: true,
+    json: async () => (String(url).includes('validate-fill-blank') ? { correct: true } : { score: 100, aiFeedback: '{}' }),
+  })) as any;
+  const onSubmitted = jest.fn();
+  await render(<QuizModal assignment={fillQuiz('required')} colors={COLORS} onClose={jest.fn()} onSubmitted={onSubmitted} />);
+
+  await user.type(screen.getByPlaceholderText('Type your answer here...'), 'photosynthesis');
+  await user.press(screen.getByText('Check Answer'));
+  expect(await screen.findByText('Why did you write this answer?')).toBeTruthy();
+  expect(screen.getByTestId('reasoning-0-required')).toBeTruthy();
+
+  await user.press(screen.getByText('Review & Submit'));
+  await user.press(screen.getByText('Submit Quiz'));
+  expect(alertSpy).toHaveBeenCalledWith('Explain your thinking', expect.stringContaining('question 1'));
+
+  const long = 'Leaves use sunlight to make food. '.repeat(30); // far more than 50 words / 500 characters
+  await fireEvent.changeText(screen.getByTestId('reasoning-0-input'), long);
+  await user.press(screen.getByText('Review & Submit'));
+  await user.press(screen.getByText('Submit Quiz'));
+  await waitFor(() => expect(onSubmitted).toHaveBeenCalled());
+  const submitCall = (global.fetch as jest.Mock).mock.calls.find(c => String(c[0]).includes('/assignments/a2/submit'));
+  expect(JSON.parse(submitCall[1].body).quizAnswers[0].reasoning).toBe(long);
 });
