@@ -41,6 +41,15 @@ export const updateStory = (id: string, fields: Partial<Story>) =>
 export const updateStoryOptimistic = (id: string, fields: Partial<Story> & { updated_at?: string }) =>
   call<{ story: Story }>(`/stories/${id}`, { method: 'PATCH', body: fields }, 'Could not save the story').then((d) => d.story);
 
+/**
+ * Asks the AI to rewrite a story (both age versions) from its source page,
+ * with an optional instruction. The result is saved for review, never published.
+ * Can take up to a minute.
+ */
+export const regenerateStory = (id: string, request?: string) =>
+  call<{ story: Story }>(`/stories/${id}/regenerate`, { method: 'POST', body: { request: request || '' } }, 'Could not rewrite the story')
+    .then((d) => d.story);
+
 /** A story's approval history, newest first. available is false until the history table exists. */
 export const getStoryHistory = (id: string) =>
   call<{ available: boolean; entries: HistoryEntry[] }>(`/stories/${id}/history`, {}, 'Could not load the history');
