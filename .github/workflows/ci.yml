@@ -1,0 +1,30 @@
+name: CI
+
+# Lint and tests on every pull request and push to master (GitHub Actions; the
+# CircleCI config does not run on this repository). The web build itself is
+# checked by Vercel, which builds every pull request as a preview.
+# "Run workflow" starts it by hand.
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Unit tests
+        run: npm run test:unit -- --ci --maxWorkers=2
+      - name: Integration tests
+        run: npm run test:integration -- --ci --maxWorkers=2
