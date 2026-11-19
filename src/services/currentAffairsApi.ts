@@ -99,11 +99,15 @@ export interface QuizResult {
 
 export interface Quiz {
   weekStart: string;
+  /** Last day the quiz can be taken (the Saturday, YYYY-MM-DD): no time limit before then. */
+  dueDate?: string;
   ageGroup: AgeGroup;
   total: number;
   questions: QuizQuestion[];
   /** The student's result if they already took this week's quiz. */
   attempt: QuizResult | null;
+  /** Answers already given to a quiz not yet submitted (saved one by one), to resume it. */
+  progress?: AnswerReveal[];
 }
 
 export interface Progress {

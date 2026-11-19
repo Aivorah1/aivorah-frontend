@@ -193,7 +193,7 @@ export default function DigestContent({ state, navigation, showDateRow = true }:
         </View>
         <View style={{ flex: 1 }}>
           <Text style={[styles.cardTitle, { color: titleColor }]}>Weekly Quiz</Text>
-          <Text style={[styles.cardSub, { color: colors.textMuted }]}>10 questions on this week’s news · +{POINTS.quiz} points</Text>
+          <Text style={[styles.cardSub, { color: colors.textMuted }]}>10 questions on the past week’s news · no time limit · open until Saturday · +{POINTS.quiz} points</Text>
         </View>
         <Feather name="chevron-right" size={18} color={colors.textMuted} />
       </TouchableOpacity>
