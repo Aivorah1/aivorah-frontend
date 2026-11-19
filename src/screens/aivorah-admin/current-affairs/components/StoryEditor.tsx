@@ -76,11 +76,11 @@ export default function StoryEditor({ id, styles, accent, onChanged, onClose }: 
 
   const save = () => run(() => isNew
     ? createStory(toFields(current as Form))
-    : updateStoryOptimistic(id, { ...toFields(current as Form), updated_at: story?.updated_at }),
+    : updateStoryOptimistic(id, { ...toFields(current as Form), updated_at: story?.updated_at ?? undefined }),
     'Saved.', !isNew);
   const publish = () => run(async () => {
     if (isNew) return createStory({ ...toFields(current as Form), publish: true });
-    await updateStoryOptimistic(id, { ...toFields(current as Form), updated_at: story?.updated_at });
+    await updateStoryOptimistic(id, { ...toFields(current as Form), updated_at: story?.updated_at ?? undefined });
     return setStoryStatus(id, 'published');
   }, 'Published: students can read it now.', true);
   const changeStatus = (status: ContentStatus, done: string) => run(() => setStoryStatus(id, status), done);
@@ -152,7 +152,12 @@ export default function StoryEditor({ id, styles, accent, onChanged, onClose }: 
 
       <View style={[styles.row, { marginTop: 16 }]}>
         <Button styles={styles} label={isNew ? 'Save as draft' : 'Save changes'} icon="save" onPress={save} disabled={busy} testID="ca-story-save" />
-        <Button styles={styles} label="Publish" icon="check" kind="primary" onPress={publish} disabled={busy} testID="ca-story-publish" />
+        {story?.status === 'rejected' ? (
+          // A rejected story is never published (the server refuses it too).
+          <Text style={styles.notes} testID="ca-story-rejected-note">Rejected: this story can no longer be published.</Text>
+        ) : (
+          <Button styles={styles} label="Publish" icon="check" kind="primary" onPress={publish} disabled={busy} testID="ca-story-publish" />
+        )}
         {!isNew && story?.status !== 'rejected' ? (
           <Button styles={styles} label="Reject" icon="x-circle" kind="danger" onPress={() => changeStatus('rejected', 'Rejected: it will not be shown.')} disabled={busy} testID="ca-story-reject" />
         ) : null}

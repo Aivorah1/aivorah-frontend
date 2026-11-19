@@ -199,14 +199,13 @@ export function fetchWeeklyQuiz(ageGroup: AgeGroup, studentEmail?: string): Prom
   return getJSON<Quiz>(`/quiz/week${query({ ageGroup, studentEmail })}`, "Could not load this week's quiz");
 }
 
-/** Reveals one question's answer, explanation and extra fact after the student picks. */
-export async function checkQuizAnswer(questionId: string, answer: number): Promise<AnswerReveal> {
-  const res = await fetch(`${BASE}/quiz/check`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ questionId, answer }),
-  });
-  return parseOrThrow<AnswerReveal>(res, 'Could not check the answer');
+/**
+ * Records the student's answer to one question and reveals its answer,
+ * explanation and extra fact. Needs the student's sign-in. The first answer
+ * to a question is final: `selected` in the reply is the answer that counts.
+ */
+export function checkQuizAnswer(studentEmail: string, ageGroup: AgeGroup, questionId: string, answer: number): Promise<AnswerReveal> {
+  return postJSON<AnswerReveal>('/quiz/check', { studentEmail, ageGroup, questionId, answer }, 'Could not check the answer');
 }
 
 export function submitQuiz(studentEmail: string, ageGroup: AgeGroup, answers: QuizAnswer[], weekStart?: string): Promise<QuizResult> {

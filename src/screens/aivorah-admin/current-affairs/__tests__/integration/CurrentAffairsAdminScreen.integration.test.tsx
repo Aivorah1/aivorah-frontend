@@ -12,7 +12,7 @@ jest.mock('../../../../../components/common/Header', () => {
 jest.mock('../../../../../components/common/ScreenLayout', () => ({ __esModule: true, default: ({ children }: any) => children }));
 jest.mock('@expo/vector-icons', () => ({ Feather: () => null }));
 jest.mock('../../services/currentAffairsAdminService', () => ({
-  listStories: jest.fn(), getStory: jest.fn(), createStory: jest.fn(), updateStory: jest.fn(), setStoryStatus: jest.fn(),
+  listStories: jest.fn(), getStory: jest.fn(), createStory: jest.fn(), updateStory: jest.fn(), updateStoryOptimistic: jest.fn(), setStoryStatus: jest.fn(),
   listQuizWeeks: jest.fn(), getQuiz: jest.fn(), updateQuestion: jest.fn(), addQuestion: jest.fn(), setQuestionStatus: jest.fn(),
   publishQuiz: jest.fn(), getAnalytics: jest.fn(),
 }));
@@ -55,7 +55,7 @@ test('the review queue shows waiting stories with their check notes', async () =
 
 test('an editor fixes a story and publishes it', async () => {
   const user = userEvent.setup();
-  mocked.updateStory.mockImplementation(async (_id, fields) => story(fields));
+  mocked.updateStoryOptimistic.mockImplementation(async (_id, fields) => story(fields));
   mocked.setStoryStatus.mockResolvedValue(story({ title_kid: 'NASA tests its Artemis rocket', status: 'published', reviewed_by: 'admin@aivorah.ai' }));
   await render(<CurrentAffairsAdminScreen />);
   await user.press(await screen.findByTestId('ca-story-row-s1'));
@@ -65,7 +65,7 @@ test('an editor fixes a story and publishes it', async () => {
   await user.press(screen.getByTestId('ca-story-publish'));
 
   await waitFor(() => expect(mocked.setStoryStatus).toHaveBeenCalledWith('s1', 'published'));
-  expect(mocked.updateStory).toHaveBeenCalledWith('s1', expect.objectContaining({ title_kid: 'NASA tests its Artemis rocket', category: 'science', priority: 10 }));
+  expect(mocked.updateStoryOptimistic).toHaveBeenCalledWith('s1', expect.objectContaining({ title_kid: 'NASA tests its Artemis rocket', category: 'science', priority: 10 }));
   expect(await screen.findByText('Published: students can read it now.')).toBeTruthy();
   expect(mocked.listStories).toHaveBeenCalledTimes(2); // the list refreshes
 });
@@ -126,4 +126,15 @@ test('insights show the metrics, with a dash where there is no data yet', async 
 
   await user.press(screen.getByTestId('ca-insights-age-7-12'));
   await waitFor(() => expect(mocked.getAnalytics).toHaveBeenLastCalledWith(expect.any(String), expect.any(String), '7-12'));
+});
+
+test('a rejected story cannot be published: no Publish button, a note instead', async () => {
+  const user = userEvent.setup();
+  mocked.listStories.mockResolvedValue([story({ status: 'rejected' })]);
+  mocked.getStory.mockResolvedValue(story({ status: 'rejected' }));
+  await render(<CurrentAffairsAdminScreen />);
+  await user.press(await screen.findByTestId('ca-story-row-s1'));
+  expect(await screen.findByTestId('ca-story-rejected-note')).toBeTruthy();
+  expect(screen.queryByTestId('ca-story-publish')).toBeNull();
+  expect(mocked.setStoryStatus).not.toHaveBeenCalled();
 });

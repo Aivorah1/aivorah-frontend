@@ -77,11 +77,16 @@ export default function QuizScreen({ navigation, route }: any) {
 
   const onCheck = async () => {
     if (selected === null || !question) return;
+    if (!email) { setActionError('Please sign in to take the quiz.'); return; }
     setBusy(true);
     setActionError(null);
     try {
-      setReveal(await checkQuizAnswer(question.id, selected));
-      setAnswers((prev) => [...prev.filter((a) => a.questionId !== question.id), { questionId: question.id, answer: selected }]);
+      const revealed = await checkQuizAnswer(email, ageGroup, question.id, selected);
+      // The server keeps the first answer given to a question; show that one.
+      const counted = Number.isInteger(revealed.selected) ? (revealed.selected as number) : selected;
+      setSelected(counted);
+      setReveal(revealed);
+      setAnswers((prev) => [...prev.filter((a) => a.questionId !== question.id), { questionId: question.id, answer: counted }]);
     } catch (e: any) {
       setActionError(e?.message || 'Could not check the answer');
     } finally {
