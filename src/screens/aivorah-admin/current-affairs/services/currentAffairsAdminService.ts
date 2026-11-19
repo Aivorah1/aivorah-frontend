@@ -2,7 +2,7 @@
 // Aivorah team's accounts are allowed; the service checks the sign-in.
 import CURRENT_AFFAIRS_SERVER_URL from '../../../../config/currentAffairsServerUrl';
 import { authHeader } from '../../../../services/authHeader';
-import type { CaAnalytics, ContentStatus, QuizQuestion, QuizWeek, Story, StorySummary } from '../types';
+import type { BulkResult, CaAnalytics, ContentStatus, HistoryEntry, QuizQuestion, QuizWeek, Story, StorySummary } from '../types';
 
 const BASE = `${CURRENT_AFFAIRS_SERVER_URL}/current-affairs/admin`;
 
@@ -40,6 +40,26 @@ export const updateStory = (id: string, fields: Partial<Story>) =>
 // error and prompt the editor to reload.
 export const updateStoryOptimistic = (id: string, fields: Partial<Story> & { updated_at?: string }) =>
   call<{ story: Story }>(`/stories/${id}`, { method: 'PATCH', body: fields }, 'Could not save the story').then((d) => d.story);
+
+/** A story's approval history, newest first. available is false until the history table exists. */
+export const getStoryHistory = (id: string) =>
+  call<{ available: boolean; entries: HistoryEntry[] }>(`/stories/${id}/history`, {}, 'Could not load the history');
+
+const BULK_SIZE = 20; // the service takes up to 20 stories per call
+/**
+ * Approves (or rejects) many stories at once, e.g. a whole day's digest.
+ * publishDate: 'today', 'tomorrow' or YYYY-MM-DD; without it each story keeps its own date.
+ */
+export async function bulkStoryStatus(ids: string[], status: 'published' | 'rejected' | 'draft', publishDate?: string): Promise<BulkResult[]> {
+  const results: BulkResult[] = [];
+  for (let i = 0; i < ids.length; i += BULK_SIZE) {
+    const d = await call<{ updated: number; results: BulkResult[] }>('/stories/bulk-status', {
+      method: 'POST', body: { ids: ids.slice(i, i + BULK_SIZE), status, ...(publishDate ? { publishDate } : {}) },
+    }, 'Could not change the stories');
+    results.push(...d.results);
+  }
+  return results;
+}
 
 export const setStoryStatus = (id: string, status: ContentStatus) =>
   call<{ story: Story }>(`/stories/${id}/status`, { method: 'POST', body: { status } }, 'Could not change the story').then((d) => d.story);

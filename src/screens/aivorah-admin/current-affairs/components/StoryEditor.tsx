@@ -1,9 +1,10 @@
 import React, { useCallback, useState } from 'react';
 import { View, Text, Linking, ActivityIndicator } from 'react-native';
 import { Button, Field, Segment } from './ui';
-import { createStory, getStory, setStoryStatus, updateStory, updateStoryOptimistic } from '../services/currentAffairsAdminService';
+import { createStory, getStory, getStoryHistory, setStoryStatus, updateStory, updateStoryOptimistic } from '../services/currentAffairsAdminService';
 import { useLoad } from '../hooks/useLoad';
-import { CA_CATEGORIES, type CaCategory, type ContentStatus, type Story } from '../types';
+import { indiaToday, publicationLabel } from '../utils/dates';
+import { CA_CATEGORIES, type CaCategory, type ContentStatus, type HistoryEntry, type Story } from '../types';
 import type { CaStyles } from '../styles';
 
 const AGES = [
@@ -23,7 +24,27 @@ const SHARED = [
 
 type Form = Record<string, string>;
 
-const today = () => new Date().toISOString().slice(0, 10);
+// The digest day is India's date (the service's time zone), not UTC.
+const today = () => indiaToday();
+
+// The editor's message after approving: students see it now, or on its day.
+function approvedMessage(saved: Story): string {
+  const when = publicationLabel(saved.publish_date);
+  if (when.kind === 'scheduled') return `Approved. ${when.label} (${saved.publish_date}).`;
+  return 'Published: students can read it now.';
+}
+
+const ACTIONS: Record<string, string> = {
+  'story.collected': 'Collected by the news pipeline',
+  'story.create': 'Written',
+  'story.create_published': 'Written and approved',
+  'story.edit': 'Edited',
+  'story.published': 'Approved',
+  'story.review': 'Moved back to review',
+  'story.rejected': 'Rejected',
+  'story.draft': 'Moved to drafts',
+  'story.archived': 'Archived',
+};
 
 function toForm(story: Story | null): Form {
   const form: Form = { category: story?.category || 'india', priority: String(story?.priority ?? 0) };
@@ -49,19 +70,29 @@ export default function StoryEditor({ id, styles, accent, onChanged, onClose }: 
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [problem, setProblem] = useState('');
+  const [history, setHistory] = useState<{ available: boolean; entries: HistoryEntry[] } | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyProblem, setHistoryProblem] = useState('');
+
+  async function loadHistory() {
+    setHistoryProblem('');
+    try { setHistory(await getStoryHistory(id)); } catch (e: any) { setHistoryProblem(e?.message || 'Could not load the history'); }
+  }
+  const toggleHistory = () => { const next = !historyOpen; setHistoryOpen(next); if (next) loadHistory(); };
 
   // The form starts from the loaded story (or blank) and keeps the editor's changes.
   const current = form || (loading ? null : toForm(story));
   const set = (key: string, value: string) => setForm({ ...(current as Form), [key]: value });
 
-  async function run(action: () => Promise<Story>, done: string, optimistic = false) {
+  async function run(action: () => Promise<Story>, done: string | ((saved: Story) => string), optimistic = false) {
     setBusy(true); setMessage(''); setProblem('');
     try {
       const saved = await action();
       setStory(saved);
       setForm(toForm(saved));
-      setMessage(done);
+      setMessage(typeof done === 'function' ? done(saved) : done);
       onChanged();
+      if (historyOpen) loadHistory();
     } catch (e: any) {
       // Optimistic concurrency conflict (HTTP 409): someone else edited it first.
       if (optimistic && (e?.message || '').includes('edited by someone else')) {
@@ -82,7 +113,7 @@ export default function StoryEditor({ id, styles, accent, onChanged, onClose }: 
     if (isNew) return createStory({ ...toFields(current as Form), publish: true });
     await updateStoryOptimistic(id, { ...toFields(current as Form), updated_at: story?.updated_at ?? undefined });
     return setStoryStatus(id, 'published');
-  }, 'Published: students can read it now.', true);
+  }, approvedMessage, true);
   const changeStatus = (status: ContentStatus, done: string) => run(() => setStoryStatus(id, status), done);
 
   if (loading || !current) return <View style={styles.card}><ActivityIndicator color={accent} /></View>;
@@ -95,7 +126,7 @@ export default function StoryEditor({ id, styles, accent, onChanged, onClose }: 
           <Text style={styles.cardTitle}>{isNew ? 'New story' : current.title_kid || 'Story'}</Text>
           <Text style={styles.cardSub}>
             {isNew ? 'Write both age versions (7–12 and 13–15). Save as a draft, or publish when the facts are checked.'
-              : `Status: ${story?.status}${story?.reviewed_by ? ` · last reviewed by ${story.reviewed_by}` : ''}`}
+              : `Status: ${story?.status}${story?.status === 'published' && story.publish_date ? ` · ${publicationLabel(story.publish_date).label}` : ''}${story?.reviewed_by ? ` · last reviewed by ${story.reviewed_by}` : ''}`}
           </Text>
         </View>
         <Button styles={styles} label="Close" icon="x" onPress={onClose} testID="ca-story-close" />
@@ -168,6 +199,33 @@ export default function StoryEditor({ id, styles, accent, onChanged, onClose }: 
         {message ? <Text style={styles.message} testID="ca-story-message">{message}</Text> : null}
         {problem ? <Text style={styles.error} testID="ca-story-error">{problem}</Text> : null}
       </View>
+
+      {!isNew ? (
+        <View style={{ marginTop: 16 }}>
+          <Text style={[styles.listMeta, { textDecorationLine: 'underline' }]} onPress={toggleHistory} testID="ca-story-history-toggle">
+            {historyOpen ? 'Hide approval history' : 'Show approval history'}
+          </Text>
+          {historyOpen ? (
+            <View style={{ marginTop: 8, gap: 6 }} testID="ca-story-history">
+              {historyProblem ? <Text style={styles.error}>{historyProblem}</Text> : null}
+              {!history && !historyProblem ? <ActivityIndicator color={accent} /> : null}
+              {history && !history.available ? (
+                <Text style={styles.notes}>History is not switched on yet: the ca_audit_log table (aivorah-db 0029) has not been added to the database.</Text>
+              ) : null}
+              {history?.available && !history.entries.length ? <Text style={styles.listMeta}>No changes recorded yet.</Text> : null}
+              {history?.entries.map((h) => (
+                <View key={h.id} testID={`ca-history-${h.id}`}>
+                  <Text style={styles.listMeta}>
+                    {new Date(h.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' })}
+                    {' · '}{ACTIONS[h.action] || h.action}{' · '}{h.actor}
+                  </Text>
+                  {h.detail ? <Text style={styles.message}>{h.detail}</Text> : null}
+                </View>
+              ))}
+            </View>
+          ) : null}
+        </View>
+      ) : null}
     </View>
   );
 }

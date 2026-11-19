@@ -35,6 +35,26 @@ export interface Story extends StorySummary {
   updated_at: string | null;
 }
 
+/** One row of a story's approval history (who changed what, when). */
+export interface HistoryEntry {
+  id: number;
+  actor: string;
+  action: string;
+  before: Record<string, unknown> | null;
+  after: Record<string, unknown> | null;
+  detail: string | null;
+  created_at: string;
+}
+
+/** The result for one story of "approve all" / bulk status. */
+export interface BulkResult {
+  id: string;
+  ok: boolean;
+  status?: ContentStatus;
+  publish_date?: string;
+  reason?: string;
+}
+
 export interface QuizQuestion {
   id: string;
   week_start: string;

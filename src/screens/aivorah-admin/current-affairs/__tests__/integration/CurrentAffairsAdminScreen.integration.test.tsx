@@ -14,9 +14,10 @@ jest.mock('@expo/vector-icons', () => ({ Feather: () => null }));
 jest.mock('../../services/currentAffairsAdminService', () => ({
   listStories: jest.fn(), getStory: jest.fn(), createStory: jest.fn(), updateStory: jest.fn(), updateStoryOptimistic: jest.fn(), setStoryStatus: jest.fn(),
   listQuizWeeks: jest.fn(), getQuiz: jest.fn(), updateQuestion: jest.fn(), addQuestion: jest.fn(), setQuestionStatus: jest.fn(),
-  publishQuiz: jest.fn(), getAnalytics: jest.fn(),
+  publishQuiz: jest.fn(), getAnalytics: jest.fn(), bulkStoryStatus: jest.fn(), getStoryHistory: jest.fn(),
 }));
 import * as api from '../../services/currentAffairsAdminService';
+import { addDays, indiaToday } from '../../utils/dates';
 const mocked = api as jest.Mocked<typeof api>;
 
 const AGES = ['kid', 'teen'];
@@ -137,4 +138,89 @@ test('a rejected story cannot be published: no Publish button, a note instead', 
   expect(await screen.findByTestId('ca-story-rejected-note')).toBeTruthy();
   expect(screen.queryByTestId('ca-story-publish')).toBeNull();
   expect(mocked.setStoryStatus).not.toHaveBeenCalled();
+});
+
+// ── Phase 2: tomorrow's digest, approve all, scheduled, history ──────────────
+const TODAY = indiaToday();
+const TOMORROW = addDays(TODAY, 1);
+
+test("To review groups stories by day; Approve all asks once, then approves that day's digest", async () => {
+  const user = userEvent.setup();
+  mocked.listStories.mockResolvedValue([
+    story({ id: 'a', publish_date: TOMORROW, title_kid: 'Story A' }),
+    story({ id: 'b', publish_date: TOMORROW, title_kid: 'Story B' }),
+  ]);
+  mocked.bulkStoryStatus.mockResolvedValue([
+    { id: 'a', ok: true, status: 'published', publish_date: TOMORROW },
+    { id: 'b', ok: true, status: 'published', publish_date: TOMORROW },
+  ]);
+  await render(<CurrentAffairsAdminScreen />);
+  expect(await screen.findByText(`For Tomorrow · ${TOMORROW} · 2 stories`)).toBeTruthy();
+  await user.press(screen.getByTestId(`ca-approve-day-${TOMORROW}`));
+  expect(mocked.bulkStoryStatus).not.toHaveBeenCalled(); // asks first
+  await user.press(screen.getByTestId(`ca-approve-confirm-${TOMORROW}`));
+  await waitFor(() => expect(mocked.bulkStoryStatus).toHaveBeenCalledWith(['a', 'b'], 'published'));
+  expect((await screen.findByTestId('ca-bulk-message')).props.children).toBe(`Approved 2 stories for ${TOMORROW} (scheduled for tomorrow).`);
+});
+
+test('a day that has passed cannot be approved from the list', async () => {
+  mocked.listStories.mockResolvedValue([story({ id: 'old', publish_date: addDays(TODAY, -2) })]);
+  await render(<CurrentAffairsAdminScreen />);
+  expect(await screen.findByText(/This day has passed/)).toBeTruthy();
+  expect(screen.queryByTestId(`ca-approve-day-${addDays(TODAY, -2)}`)).toBeNull();
+});
+
+test('stories that could not be approved are listed with the reason', async () => {
+  const user = userEvent.setup();
+  mocked.listStories.mockResolvedValue([story({ id: 'a', publish_date: TODAY }), story({ id: 'b', publish_date: TODAY })]);
+  mocked.bulkStoryStatus.mockResolvedValue([
+    { id: 'a', ok: true, status: 'published', publish_date: TODAY },
+    { id: 'b', ok: false, reason: 'not waiting for review (it is rejected)' },
+  ]);
+  await render(<CurrentAffairsAdminScreen />);
+  await user.press(await screen.findByTestId(`ca-approve-day-${TODAY}`));
+  await user.press(screen.getByTestId(`ca-approve-confirm-${TODAY}`));
+  expect((await screen.findByTestId('ca-bulk-message')).props.children).toBe(`Approved 1 story for ${TODAY} (live now).`);
+  expect(screen.getByTestId('ca-bulk-error').props.children).toBe('1 not approved: not waiting for review (it is rejected)');
+});
+
+test('Published shows which stories are live today and which are scheduled', async () => {
+  const user = userEvent.setup();
+  mocked.listStories.mockImplementation(async (status?: string) => (status === 'published'
+    ? [story({ id: 'later', status: 'published', publish_date: TOMORROW }), story({ id: 'now', status: 'published', publish_date: TODAY })]
+    : []) as any);
+  await render(<CurrentAffairsAdminScreen />);
+  await user.press(await screen.findByText('Published'));
+  expect((await screen.findByTestId('ca-story-when-later')).props.children).toBe('Scheduled · students see it tomorrow');
+  expect(screen.getByTestId('ca-story-when-now').props.children).toBe('Live today');
+});
+
+test('approving a story for tomorrow says it is scheduled, not live', async () => {
+  const user = userEvent.setup();
+  mocked.getStory.mockResolvedValue(story({ publish_date: TOMORROW }));
+  mocked.updateStoryOptimistic.mockImplementation(async (_id, fields) => story(fields));
+  mocked.setStoryStatus.mockResolvedValue(story({ status: 'published', publish_date: TOMORROW }));
+  await render(<CurrentAffairsAdminScreen />);
+  await user.press(await screen.findByTestId('ca-story-row-s1'));
+  await user.press(await screen.findByTestId('ca-story-publish'));
+  expect((await screen.findByTestId('ca-story-message')).props.children).toBe(`Approved. Scheduled · students see it tomorrow (${TOMORROW}).`);
+});
+
+test('the approval history lists who did what; says so when history is not switched on', async () => {
+  const user = userEvent.setup();
+  mocked.getStoryHistory.mockResolvedValueOnce({ available: true, entries: [
+    { id: 2, actor: 'admin@aivorah.ai', action: 'story.published', before: null, after: null, detail: `Approved, scheduled: students see it on ${TOMORROW}`, created_at: '2026-11-19T10:00:00Z' },
+    { id: 1, actor: 'pipeline', action: 'story.collected', before: null, after: null, detail: 'Collected from The Hindu', created_at: '2026-11-19T01:00:00Z' },
+  ] });
+  await render(<CurrentAffairsAdminScreen />);
+  await user.press(await screen.findByTestId('ca-story-row-s1'));
+  await user.press(await screen.findByTestId('ca-story-history-toggle'));
+  expect(await screen.findByText(/Approved · admin@aivorah.ai/)).toBeTruthy();
+  expect(screen.getByText(/Collected by the news pipeline · pipeline/)).toBeTruthy();
+  expect(mocked.getStoryHistory).toHaveBeenCalledWith('s1');
+
+  mocked.getStoryHistory.mockResolvedValueOnce({ available: false, entries: [] });
+  await user.press(screen.getByTestId('ca-story-history-toggle')); // hide
+  await user.press(screen.getByTestId('ca-story-history-toggle')); // show again: reloads
+  expect(await screen.findByText(/History is not switched on yet/)).toBeTruthy();
 });
