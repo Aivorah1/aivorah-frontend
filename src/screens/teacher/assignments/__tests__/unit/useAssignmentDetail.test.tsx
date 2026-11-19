@@ -21,6 +21,7 @@ function Harness() {
       <TouchableOpacity testID="open" onPress={() => h.setDetailAssignment(ASSIGNMENT)} />
       <TouchableOpacity testID="close" onPress={() => h.setDetailAssignment(null)} />
       <TouchableOpacity testID="send" onPress={() => h.sendFeedback('a1', 'stu-1')} />
+      <TouchableOpacity testID="sendComments" onPress={() => h.sendFeedback('a1', 'stu-1', { 1: '', 2: ' Check the units ' })} />
       <Text testID="feedback0">{h.detailSubmissions[0]?.aiFeedback ?? ''}</Text>
       <Text testID="editing">{String(h.editingFeedbackFor)}</Text>
       <TouchableOpacity testID="edit" onPress={() => h.setEditingFeedbackFor('stu-1')} />
@@ -101,5 +102,43 @@ describe('useAssignmentDetail', () => {
     const fb = JSON.parse(screen.getByTestId('feedback0').props.children);
     expect(fb.teacherFeedback).toBe('Good, show your working');
     expect(fb.teacherFeedbackEditedAt).toBeTruthy();
+  });
+});
+
+describe('useAssignmentDetail — per-question comments', () => {
+  test('comments alone (no overall feedback) are sent, and an emptied comment is sent so the server removes it', async () => {
+    const user = userEvent.setup();
+    global.fetch = jest.fn()
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ submissions: [{ studentId: 'stu-1', aiFeedback: JSON.stringify({
+        perQuestionComments: [{ number: 1, comment: 'Old note' }] }) }], totalLinked: 1 }) })
+      .mockResolvedValueOnce({ ok: true });
+    await render(<Harness />);
+    await user.press(screen.getByTestId('open'));
+    await waitFor(() => expect(screen.getByTestId('subCount').props.children).toBe('1'));
+    await user.press(screen.getByTestId('sendComments'));
+
+    const put = (global.fetch as jest.Mock).mock.calls.find(c => String(c[0]).includes('teacher-feedback'));
+    expect(put).toBeTruthy();
+    expect(JSON.parse(put[1].body)).toMatchObject({
+      studentId: 'stu-1', feedback: '',
+      perQuestionComments: [{ number: 1, comment: '' }, { number: 2, comment: 'Check the units' }],
+    });
+    await waitFor(() => {
+      const fb = JSON.parse(screen.getByTestId('feedback0').props.children);
+      expect(fb.perQuestionComments).toEqual([{ number: 2, comment: 'Check the units', commentedAt: expect.any(String) }]);
+    });
+  });
+
+  test("uses the server's saved feedback when it returns one", async () => {
+    const user = userEvent.setup();
+    const saved = { teacherFeedback: 'Kept', perQuestionComments: [{ number: 2, comment: 'Check the units', commentedAt: '2026-11-19T00:00:00.000Z' }] };
+    global.fetch = jest.fn()
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ submissions: [{ studentId: 'stu-1', aiFeedback: '{}' }], totalLinked: 1 }) })
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ ok: true, feedback: saved }) });
+    await render(<Harness />);
+    await user.press(screen.getByTestId('open'));
+    await waitFor(() => expect(screen.getByTestId('subCount').props.children).toBe('1'));
+    await user.press(screen.getByTestId('sendComments'));
+    await waitFor(() => expect(JSON.parse(screen.getByTestId('feedback0').props.children)).toEqual(saved));
   });
 });

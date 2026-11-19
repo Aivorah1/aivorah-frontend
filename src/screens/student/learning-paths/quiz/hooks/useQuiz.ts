@@ -1,8 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, BackHandler, Platform } from 'react-native';
-
-// Speech recognition ref for voice-to-text reasoning input
-const recognitionRef = useRef<any>(null);
 import ASSIGNMENTS_SERVER_URL from '../../../../../config/assignmentsServerUrl';
 import LEARNING_PATHS_SERVER_URL from '../../../../../config/learningPathsServerUrl';
 import LEADERBOARD_SERVICE_URL from '../../../../../config/leaderboardServiceUrl';
@@ -71,6 +68,10 @@ export function useQuiz(params: {
   const [reasoningByIndex, setReasoningByIndex] = useState<Record<number, string>>({});
   const reasoningByIndexRef = useRef<Record<number, string>>({});
   const [listeningIndex, setListeningIndex] = useState<number | null>(null);
+  // Speech recognition for the reasoning box's mic. Must live inside the hook:
+  // a hook called at module level throws as soon as this file loads.
+  const recognitionRef = useRef<any>(null);
+  useEffect(() => () => { try { recognitionRef.current?.stop(); } catch { /* already stopped */ } }, []);
 
   const patchReasoning = useCallback((i: number, text: string) => {
     const next = { ...reasoningByIndexRef.current, [i]: text };

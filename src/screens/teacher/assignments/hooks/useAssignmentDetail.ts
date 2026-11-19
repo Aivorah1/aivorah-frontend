@@ -44,10 +44,12 @@ export function useAssignmentDetail(teacherEmail?: string) {
     if (!teacherFeedback.trim() && (!perQuestionComments || Object.keys(perQuestionComments).length === 0)) return;
     setSendingFeedback(true);
     try {
+      // Empty comments are sent too: the server treats them as "remove this
+      // question's comment", so a teacher can clear one they wrote earlier.
       const commentsArray = perQuestionComments
         ? Object.entries(perQuestionComments)
-            .filter(([, v]) => v.trim().length > 0)
             .map(([k, v]) => ({ number: parseInt(k, 10), comment: v.trim() }))
+            .filter(c => Number.isInteger(c.number) && c.number > 0)
         : [];
       const res = await fetch(`${ASSIGNMENTS_SERVER_URL}/assignments/${assignmentId}/teacher-feedback`, {
         method: 'PUT',
@@ -60,9 +62,14 @@ export function useAssignmentDetail(teacherEmail?: string) {
         }),
       });
       if (res.ok) {
+        // The server answers with the merged feedback it saved; use it so the
+        // screen shows exactly what the student and parent will see.
+        let saved: any = null;
+        try { saved = (await res.json())?.feedback ?? null; } catch { saved = null; }
         // Update the local submission with teacher feedback
         setDetailSubmissions(prev => prev.map(s => {
           if (s.studentId !== studentId) return s;
+          if (saved && typeof saved === 'object') return { ...s, aiFeedback: JSON.stringify(saved) };
           let fbObj: any = {};
           try { fbObj = JSON.parse(s.aiFeedback || '{}'); } catch { fbObj = { text: s.aiFeedback || '' }; }
           const now = new Date().toISOString();
@@ -72,7 +79,14 @@ export function useAssignmentDetail(teacherEmail?: string) {
             fbObj.teacherFeedback = teacherFeedback.trim();
           }
           if (commentsArray.length > 0) {
-            fbObj.perQuestionComments = commentsArray.map(c => ({ ...c, commentedAt: now }));
+            const byNumber = new Map<number, any>();
+            (Array.isArray(fbObj.perQuestionComments) ? fbObj.perQuestionComments : [])
+              .forEach((c: any) => { if (c && typeof c.number === 'number') byNumber.set(c.number, c); });
+            commentsArray.forEach(c => {
+              if (!c.comment) byNumber.delete(c.number);
+              else if (byNumber.get(c.number)?.comment !== c.comment) byNumber.set(c.number, { ...c, commentedAt: now });
+            });
+            fbObj.perQuestionComments = [...byNumber.values()].sort((x, y) => x.number - y.number);
           }
           return { ...s, aiFeedback: JSON.stringify(fbObj) };
         }));

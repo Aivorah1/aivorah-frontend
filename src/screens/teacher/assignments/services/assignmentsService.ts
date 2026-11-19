@@ -60,7 +60,7 @@ export interface BuildAssignmentPayloadArgs {
   ibLearnerProfile: string;
   ibAtlSkill: string;
   ibKeyConcept: string;
-  requireReasoning: 'off' | 'optional' | 'required';
+  requireReasoning?: 'off' | 'optional' | 'required';
 }
 
 // Pure mapping from form state -> the /assignments POST body — extracted
@@ -73,7 +73,7 @@ export function buildAssignmentPayload(args: BuildAssignmentPayloadArgs) {
     title, subject, chapter, dueDate, type, assignTo, selectedStudentId, teacherEmail, grade, curriculum,
     questions, uploadedExtracted, extractedQuestions, ibLearningOutcomes, successCriteria, taskSteps, ibWordBank,
     quizQuestions, interactiveQuiz, docFiles, ibPurpose, note, unitOfInquiry, selectedLanguage,
-    ibCentralIdea, ibLinesOfInquiry, ibLearnerProfile, ibAtlSkill, ibKeyConcept, requireReasoning,
+    ibCentralIdea, ibLinesOfInquiry, ibLearnerProfile, ibAtlSkill, ibKeyConcept, requireReasoning = 'off',
   } = args;
 
   return {
