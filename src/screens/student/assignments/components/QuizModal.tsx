@@ -15,6 +15,7 @@ import type { Assignment, QuizQuestion, PerQ, GradeResult } from '../types';
 import { AssignmentErrorBoundary } from './AssignmentErrorBoundary';
 import { ModalTopBar } from './ModalTopBar';
 import { ConfirmCloseOverlay } from './ConfirmCloseOverlay';
+import ReasoningBox, { reasoningLabel } from '../../../../components/common/ReasoningBox';
 
 // ── Quiz Modal ────────────────────────────────────────────────────────────────
 
@@ -48,6 +49,7 @@ export function QuizModal({ assignment, colors, onClose, onSubmitted }: {
   // Reasoning box ("Why did you choose this?") + voice input
   const [reasoning, setReasoning] = useState<Record<number, string>>({});
   const reasoningRef = useRef<Record<number, string>>({});
+  useEffect(() => { reasoningRef.current = reasoning; }, [reasoning]); // the mic adds to what is already typed
   const [listeningQ, setListeningQ] = useState<number | null>(null);
   // Speech recognition for the reasoning box's mic. Must live inside the
   // component: a hook called at module level throws as soon as this file
@@ -100,11 +102,16 @@ export function QuizModal({ assignment, colors, onClose, onSubmitted }: {
     const recognition = new SpeechRecognition();
     recognition.lang = 'en-IN';
     recognition.interimResults = true;
-    recognition.continuous = false;
+    // Keeps listening until the mic is tapped again; what is spoken is added
+    // after what the student already typed (never replaces it).
+    recognition.continuous = true;
     recognition.maxAlternatives = 1;
     recognitionRef.current = recognition;
+    const q0 = currentQ;
+    const typed = (reasoningRef.current[q0] || '').trim();
+    const withTyped = (spoken: string) => [typed, spoken.trim()].filter(Boolean).join(' ');
     let finalTranscript = '';
-    recognition.onstart = () => setListeningQ(currentQ);
+    recognition.onstart = () => setListeningQ(q0);
     recognition.onresult = (event: any) => {
       let interim = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -112,7 +119,7 @@ export function QuizModal({ assignment, colors, onClose, onSubmitted }: {
         if (event.results[i].isFinal) finalTranscript += transcript;
         else interim += transcript;
       }
-      setReasoning(prev => ({ ...prev, [currentQ]: finalTranscript || interim }));
+      setReasoning(prev => ({ ...prev, [q0]: withTyped(`${finalTranscript} ${interim}`) }));
     };
     recognition.onerror = (event: any) => {
       console.warn('Speech recognition error:', event.error);
@@ -123,9 +130,7 @@ export function QuizModal({ assignment, colors, onClose, onSubmitted }: {
     };
     recognition.onend = () => {
       setListeningQ(null);
-      if (finalTranscript.trim().length > 2) {
-        setReasoning(prev => ({ ...prev, [currentQ]: finalTranscript.trim() }));
-      }
+      setReasoning(prev => ({ ...prev, [q0]: withTyped(finalTranscript) }));
     };
     recognition.start();
   }, [currentQ, listeningQ]);
@@ -170,12 +175,12 @@ export function QuizModal({ assignment, colors, onClose, onSubmitted }: {
   }
 
   async function handleSubmit() {
-    // "Required" reasoning: every answered question that shows the reasoning
-    // box (all but fill-in-the-blank) needs a reason. Check here so the
-    // student is taken to the question instead of getting a server error.
+    // "Required" reasoning: every answered question (multiple choice and
+    // fill-in-the-blank) needs a reason. Check here so the student is taken
+    // to the question instead of getting a server error.
     if (requireReasoning === 'required') {
-      const missing = questions.findIndex((qq, i) =>
-        qq?.type !== 'fill_blank' && !!(answers[i] || '').trim() && !(reasoning[i] || '').trim());
+      const missing = questions.findIndex((_qq, i) =>
+        !!(answers[i] || '').trim() && !(reasoning[i] || '').trim());
       if (missing >= 0) {
         setShowReview(false);
         setCurrentQ(missing);
@@ -705,52 +710,17 @@ export function QuizModal({ assignment, colors, onClose, onSubmitted }: {
               );
             })()}
 
-            {/* Reasoning Box (optional) — "Why did you choose this?" */}
-            {showReasoningBox && answered && !isFillQ && (
-              <View style={{ width: '100%', gap: 6 }}>
-                <TouchableOpacity
-                  onPress={toggleReasoningVoice}
-                  activeOpacity={0.8}
-                  style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
-                >
-                  <Feather name="message-square" size={13} color={color} />
-                  <Text style={{ fontSize: 12, color, fontWeight: '700' }}>Why did you choose this?</Text>
-                  <Feather
-                    name="mic"
-                    size={13}
-                    color={listeningQ === currentQ ? colors.accentRed : colors.textDim}
-                    style={{ marginLeft: 'auto' }}
-                  />
-                </TouchableOpacity>
-                <TextInput
-                  style={{
-                    minHeight: 56,
-                    textAlignVertical: 'top',
-                    lineHeight: 20,
-                    fontSize: 13,
-                    color: colors.textMain,
-                    backgroundColor: colors.bgDark,
-                    borderColor: color + '50',
-                    borderWidth: 1,
-                    borderRadius: 10,
-                    paddingHorizontal: 12,
-                    paddingVertical: 10,
-                  }}
-                  placeholder={requireReasoning === 'required'
-                    ? 'Required: explain your thinking or tap the mic to speak...'
-                    : 'Optional: explain your thinking or tap the mic to speak...'}
-                  placeholderTextColor={colors.textDim}
-                  value={reasoning[currentQ] || ''}
-                  onChangeText={text => setReasoning(prev => ({ ...prev, [currentQ]: text }))}
-                  multiline
-                  maxLength={500}
-                />
-                {(reasoning[currentQ] || '').length > 0 && (
-                  <Text style={{ fontSize: 10, color: colors.textDim, textAlign: 'right' }}>
-                    {(reasoning[currentQ] || '').length}/500
-                  </Text>
-                )}
-              </View>
+            {/* Reasoning Box — "Why did you choose this?" (MCQ) / "Why did you write this answer?" (fill-in-the-blank) */}
+            {showReasoningBox && answered && (
+              <ReasoningBox
+                label={reasoningLabel(isFillQ ? 'fill_blank' : 'mcq')}
+                value={reasoning[currentQ] || ''}
+                onChangeText={text => setReasoning(prev => ({ ...prev, [currentQ]: text }))}
+                onToggleMic={toggleReasoningVoice}
+                listening={listeningQ === currentQ}
+                requirement={requireReasoning === 'required' ? 'required' : 'optional'}
+                testID={`reasoning-${currentQ}`}
+              />
             )}
 
             {/* Check nudge for fill_blank */}

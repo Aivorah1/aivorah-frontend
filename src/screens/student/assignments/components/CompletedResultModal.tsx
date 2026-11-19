@@ -9,6 +9,7 @@ import ASSIGNMENTS_SERVER_URL from '../../../../config/assignmentsServerUrl';
 import { SUBJECT_ICON, SUBJECT_COLOR } from '../constants';
 import { getStamp } from '../utils';
 import type { Assignment } from '../types';
+import { ReasoningDisplay } from '../../../../components/common/ReasoningBox';
 
 // ── Completed Result Detail Modal ──
 export function CompletedResultModal({
@@ -23,6 +24,7 @@ export function CompletedResultModal({
   const { isDark } = useTheme();
   const sc = SUBJECT_COLOR[a.subject] ?? colors.accentYellow;
   let feedbackText = ''; let wellDone = ''; let improve = ''; let pq: any[] = []; let teacherFb = '';
+  let perQuestionComments: any[] = [];
   try {
     const parsed = JSON.parse(a.aiFeedback || '{}');
     feedbackText = parsed.text || '';
@@ -30,11 +32,18 @@ export function CompletedResultModal({
     improve = parsed.improve || '';
     pq = Array.isArray(parsed.perQuestion) ? parsed.perQuestion : [];
     teacherFb = parsed.teacherFeedback || '';
+    perQuestionComments = Array.isArray(parsed.perQuestionComments) ? parsed.perQuestionComments : [];
   } catch { feedbackText = a.aiFeedback || ''; }
   // Interactive quizzes store answers in submission_text (surfaced as
   // a.perQuestion by the server), not ai_feedback — prefer that.
   if ((a as any).perQuestion?.length) pq = (a as any).perQuestion;
   const stampData = getStamp(a.score);
+  // Questions with the student's reasoning or a teacher comment, in order.
+  const notes = pq.map((q: any, i: number) => {
+    const number = (q && q.number) || i + 1;
+    const comment = perQuestionComments.find((c: any) => c && c.number === number);
+    return { number, question: (q && (q.question || q.stepLabel)) || '', reasoning: String((q && q.reasoning) || '').trim(), comment: String((comment && comment.comment) || '').trim() };
+  }).filter((n) => n.reasoning || n.comment);
 
   return (
     <Modal visible animationType="fade" transparent onRequestClose={onClose}>
@@ -259,6 +268,20 @@ export function CompletedResultModal({
               })}
             </View>
           )}
+
+          {/* Your reasoning and the teacher's comment, question by question */}
+          {notes.length > 0 ? (
+            <View style={{ gap: 10 }} testID="reasoning-and-comments">
+              <Text style={{ fontSize: 12, fontWeight: '700', color: colors.textDim, textTransform: 'uppercase', letterSpacing: 0.5 }}>Your reasoning &amp; teacher comments</Text>
+              {notes.map((n) => (
+                <View key={n.number} style={{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.borderColor, backgroundColor: colors.cardDark, gap: 8 }}>
+                  <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textMain, lineHeight: 19 }}>Q{n.number}. {n.question}</Text>
+                  <ReasoningDisplay label="Your reasoning" text={n.reasoning} />
+                  <ReasoningDisplay label="Teacher's comment" tone="amber" text={n.comment} />
+                </View>
+              ))}
+            </View>
+          ) : null}
 
           {/* Teacher feedback */}
           {teacherFb ? (

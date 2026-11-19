@@ -187,13 +187,13 @@ export function AIAssignmentFlow(props: {
 
           {/* Reasoning Requirement */}
           <View style={{ gap: 6 }}>
-            <Text style={styles.fieldLabel}>Reasoning Requirement</Text>
+            <Text style={styles.fieldLabel}>&quot;Why did you choose this?&quot; box</Text>
             <Text style={{ fontSize: 11, color: colors.textDim, lineHeight: 16 }}>
-              Ask students to explain why they chose each answer.
+              Under every multiple-choice and fill-in-the-blank question, students explain their answer by typing or with the mic. Optional: they may skip it. Compulsory: they must write a reason before submitting.
             </Text>
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              {([['off', 'Off', 'x'], ['optional', 'Optional', 'edit-3'], ['required', 'Required', 'check-circle']] as const).map(([val, label, icon]) => (
-                <TouchableOpacity key={val}
+              {([['off', 'Off', 'x'], ['optional', 'Optional', 'edit-3'], ['required', 'Compulsory', 'check-circle']] as const).map(([val, label, icon]) => (
+                <TouchableOpacity key={val} testID={`reasoning-setting-${val}`}
                   style={{ flex: 1, alignItems: 'center', paddingVertical: 8, borderRadius: 10, borderWidth: 1.5,
                     borderColor: requireReasoning === val ? '#BAA467' : colors.borderColor,
                     backgroundColor: requireReasoning === val ? '#BAA46718' : 'transparent' }}

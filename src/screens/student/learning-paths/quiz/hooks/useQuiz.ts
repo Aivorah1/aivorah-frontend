@@ -102,9 +102,13 @@ export function useQuiz(params: {
     const recognition = new SpeechRecognition();
     recognition.lang = 'en-IN';
     recognition.interimResults = true;
-    recognition.continuous = false;
+    // Keeps listening until the mic is tapped again; what is spoken is added
+    // after what the student already typed (never replaces it).
+    recognition.continuous = true;
     recognition.maxAlternatives = 1;
     recognitionRef.current = recognition;
+    const typed = (reasoningByIndexRef.current[i] || '').trim();
+    const withTyped = (spoken: string) => [typed, spoken.trim()].filter(Boolean).join(' ');
     let finalTranscript = '';
     recognition.onstart = () => setListeningIndex(i);
     recognition.onresult = (event: any) => {
@@ -114,7 +118,7 @@ export function useQuiz(params: {
         if (event.results[idx].isFinal) finalTranscript += transcript;
         else interim += transcript;
       }
-      patchReasoning(i, finalTranscript || interim);
+      patchReasoning(i, withTyped(`${finalTranscript} ${interim}`));
     };
     recognition.onerror = (event: any) => {
       console.warn('Speech recognition error:', event.error);
@@ -125,7 +129,7 @@ export function useQuiz(params: {
     };
     recognition.onend = () => {
       setListeningIndex(null);
-      if (finalTranscript.trim().length > 2) patchReasoning(i, finalTranscript.trim());
+      patchReasoning(i, withTyped(finalTranscript));
     };
     recognition.start();
   }, [listeningIndex, patchReasoning]);

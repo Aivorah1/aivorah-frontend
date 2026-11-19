@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, Image, Modal, Platform } from 'react-native';
+import ReasoningBox, { ReasoningDisplay } from '../../../../components/common/ReasoningBox';
 import { Feather } from '@expo/vector-icons';
 import { spacing, radius } from '../../../../theme';
 import type { AppColors } from '../../../../theme';
@@ -389,12 +390,11 @@ export function AssignmentDetailModal({
                                           </View>
                                         ) : null}
                                         {/* Student reasoning ("Why did you choose this?") */}
-                                        {q.reasoning && q.reasoning.trim().length > 0 ? (
-                                          <View style={{ gap: 2 }}>
-                                            <Text style={{ fontSize: 10, color: colors.accentYellow, fontWeight: '600' }}>Student&apos;s reasoning:</Text>
-                                            <Text style={{ fontSize: 12, color: colors.textMain, lineHeight: 18, backgroundColor: colors.accentYellow + '12', borderRadius: 6, padding: 8, fontStyle: 'italic' }}>&ldquo;{q.reasoning}&rdquo;</Text>
-                                          </View>
-                                        ) : null}
+                                        <ReasoningDisplay
+                                          label="Student's reasoning"
+                                          text={q.reasoning || ''}
+                                          testID={`teacher-reasoning-${qi}`}
+                                        />
                                         <View style={{ flexDirection: 'row', gap: 12, marginTop: 4 }}>
                                           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                                             <Feather name="refresh-cw" size={10} color={colors.textDim} />
@@ -415,35 +415,27 @@ export function AssignmentDetailModal({
                                             </Text>
                                           </View>
                                         ) : null}
-                                        {/* Existing teacher per-question comment (read-only display) */}
-                                        {fbObj.perQuestionComments && Array.isArray(fbObj.perQuestionComments) ? (
-                                          (() => {
-                                            const existing = fbObj.perQuestionComments.find((c: any) => c.number === (q.number || qi + 1));
-                                            return existing && existing.comment ? (
-                                              <View style={{ gap: 4 }}>
-                                                <Text style={{ fontSize: 10, color: sc, fontWeight: '600' }}>Teacher comment:</Text>
-                                                <Text style={{ fontSize: 12, color: colors.textMain, lineHeight: 18, backgroundColor: sc + '12', borderRadius: 6, padding: 8 }}>{existing.comment}</Text>
-                                                {existing.commentedAt ? <Text style={{ fontSize: 9, color: colors.textDim }}>Posted {formatDate(existing.commentedAt)}</Text> : null}
-                                              </View>
-                                            ) : null;
-                                          })()
+                                        {/* Teacher per-question comment: saved one (read-only) until the submission is done, then editable */}
+                                        {!done && fbObj.perQuestionComments && Array.isArray(fbObj.perQuestionComments) ? (
+                                          <ReasoningDisplay
+                                            label="Your comment"
+                                            tone="amber"
+                                            text={(fbObj.perQuestionComments.find((c: any) => c.number === (q.number || qi + 1)) || {}).comment || ''}
+                                          />
                                         ) : null}
-                                        {/* Teacher per-question comment input */}
                                         {done && (
-                                          <View style={{ gap: 4 }}>
-                                            <Text style={{ fontSize: 10, color: sc, fontWeight: '600' }}>Your comment (optional):</Text>
-                                            <TextInput
-                                              style={{ minHeight: 40, textAlignVertical: 'top', fontSize: 12, color: colors.textMain, backgroundColor: colors.cardDark, borderRadius: 6, padding: 8, borderWidth: 1, borderColor: colors.borderColor }}
-                                              placeholder="Add a comment for this question..."
-                                              placeholderTextColor={colors.textDim}
-                                              value={perQuestionComments[q.number || qi + 1] || ''}
-                                              onChangeText={text => {
-                                                const next = { ...perQuestionComments, [q.number || qi + 1]: text };
-                                                setPerQuestionComments(next);
-                                              }}
-                                              multiline
-                                            />
-                                          </View>
+                                          <ReasoningBox
+                                            label="Your comment for this question"
+                                            requirement="optional"
+                                            tone="amber"
+                                            placeholder="Optional: write a comment the student will see with this question…"
+                                            value={perQuestionComments[q.number || qi + 1] || ''}
+                                            onChangeText={text => {
+                                              const next = { ...perQuestionComments, [q.number || qi + 1]: text };
+                                              setPerQuestionComments(next);
+                                            }}
+                                            testID={`teacher-comment-${qi}`}
+                                          />
                                         )}
                                       </View>
                                     );
