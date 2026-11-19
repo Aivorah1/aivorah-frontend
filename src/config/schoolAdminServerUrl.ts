@@ -6,7 +6,7 @@ import { Platform } from 'react-native';
 // the local service port (default 3018, see aivorah-school-admin-service/index.js).
 declare const __DEV__: boolean;
 
-const LIVE_SERVICE = 'https://aivorah-school-admin-service-w0xk.onrender.com';
+const LIVE_SERVICE = 'https://aivorah-school-admin-service-klxq.onrender.com';
 
 // EXPO_PUBLIC_SCHOOL_ADMIN_URL points only this service elsewhere (e.g. a local copy).
 const SCHOOL_ADMIN_SERVER_URL =
