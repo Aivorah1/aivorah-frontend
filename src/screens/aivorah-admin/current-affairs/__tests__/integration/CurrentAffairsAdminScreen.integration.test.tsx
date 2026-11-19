@@ -14,7 +14,7 @@ jest.mock('@expo/vector-icons', () => ({ Feather: () => null }));
 jest.mock('../../services/currentAffairsAdminService', () => ({
   listStories: jest.fn(), getStory: jest.fn(), createStory: jest.fn(), updateStory: jest.fn(), updateStoryOptimistic: jest.fn(), setStoryStatus: jest.fn(),
   listQuizWeeks: jest.fn(), getQuiz: jest.fn(), updateQuestion: jest.fn(), addQuestion: jest.fn(), setQuestionStatus: jest.fn(),
-  publishQuiz: jest.fn(), getAnalytics: jest.fn(), bulkStoryStatus: jest.fn(), getStoryHistory: jest.fn(),
+  publishQuiz: jest.fn(), getAnalytics: jest.fn(), bulkStoryStatus: jest.fn(), getStoryHistory: jest.fn(), regenerateStory: jest.fn(),
 }));
 import * as api from '../../services/currentAffairsAdminService';
 import { addDays, indiaToday } from '../../utils/dates';
@@ -223,4 +223,55 @@ test('the approval history lists who did what; says so when history is not switc
   await user.press(screen.getByTestId('ca-story-history-toggle')); // hide
   await user.press(screen.getByTestId('ca-story-history-toggle')); // show again: reloads
   expect(await screen.findByText(/History is not switched on yet/)).toBeTruthy();
+});
+
+// ── Phase 3: rewrite from source; two editors ─────────────────────────────────
+test('Rewrite from source sends the editor request and shows the rewritten story', async () => {
+  const user = userEvent.setup();
+  mocked.regenerateStory.mockResolvedValue(story({ title_kid: 'Rewritten title', review_notes: 'AUTO: REGENERATED - VERIFIED' }));
+  await render(<CurrentAffairsAdminScreen />);
+  await user.press(await screen.findByTestId('ca-story-row-s1'));
+  await user.type(await screen.findByTestId('ca-story-rewrite-request'), 'Simpler words');
+  await user.press(screen.getByTestId('ca-story-rewrite'));
+  await waitFor(() => expect(mocked.regenerateStory).toHaveBeenCalledWith('s1', 'Simpler words'));
+  expect((await screen.findByTestId('ca-story-message')).props.children).toMatch(/Rewritten from the source/);
+  expect(screen.getByTestId('ca-story-title_kid').props.value).toBe('Rewritten title');
+  expect(mocked.setStoryStatus).not.toHaveBeenCalled(); // never approves by itself
+});
+
+test('Rewrite refuses to replace unsaved edits', async () => {
+  const user = userEvent.setup();
+  await render(<CurrentAffairsAdminScreen />);
+  await user.press(await screen.findByTestId('ca-story-row-s1'));
+  await user.type(await screen.findByTestId('ca-story-title_kid'), ' (edited)');
+  await user.press(screen.getByTestId('ca-story-rewrite'));
+  expect((await screen.findByTestId('ca-story-error')).props.children).toMatch(/Save your changes first/);
+  expect(mocked.regenerateStory).not.toHaveBeenCalled();
+});
+
+test('no Rewrite for a published story', async () => {
+  const user = userEvent.setup();
+  mocked.getStory.mockResolvedValue(story({ status: 'published', publish_date: TODAY }));
+  await render(<CurrentAffairsAdminScreen />);
+  await user.press(await screen.findByTestId('ca-story-row-s1'));
+  expect(await screen.findByTestId('ca-story-save')).toBeTruthy();
+  expect(screen.queryByTestId('ca-story-rewrite')).toBeNull();
+});
+
+test('no Rewrite for a story without a source link', async () => {
+  const user = userEvent.setup();
+  mocked.getStory.mockResolvedValue(story({ source_url: null }));
+  await render(<CurrentAffairsAdminScreen />);
+  await user.press(await screen.findByTestId('ca-story-row-s1'));
+  expect(await screen.findByTestId('ca-story-save')).toBeTruthy();
+  expect(screen.queryByTestId('ca-story-rewrite')).toBeNull();
+});
+
+test('if another editor saved first, the editor is told to reload (nothing is overwritten)', async () => {
+  const user = userEvent.setup();
+  mocked.updateStoryOptimistic.mockRejectedValue(new Error('This story was edited by someone else after you opened it. Reload to see their changes, then try again.'));
+  await render(<CurrentAffairsAdminScreen />);
+  await user.press(await screen.findByTestId('ca-story-row-s1'));
+  await user.press(await screen.findByTestId('ca-story-save'));
+  expect((await screen.findByTestId('ca-story-error')).props.children).toMatch(/edited by someone else/);
 });

@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { View, Text, Linking, ActivityIndicator } from 'react-native';
 import { Button, Field, Segment } from './ui';
-import { createStory, getStory, getStoryHistory, setStoryStatus, updateStory, updateStoryOptimistic } from '../services/currentAffairsAdminService';
+import { createStory, getStory, getStoryHistory, regenerateStory, setStoryStatus, updateStory, updateStoryOptimistic } from '../services/currentAffairsAdminService';
 import { useLoad } from '../hooks/useLoad';
 import { indiaToday, publicationLabel } from '../utils/dates';
 import { CA_CATEGORIES, type CaCategory, type ContentStatus, type HistoryEntry, type Story } from '../types';
@@ -39,6 +39,7 @@ const ACTIONS: Record<string, string> = {
   'story.create': 'Written',
   'story.create_published': 'Written and approved',
   'story.edit': 'Edited',
+  'story.regenerate': 'Rewritten from the source by the AI',
   'story.published': 'Approved',
   'story.review': 'Moved back to review',
   'story.rejected': 'Rejected',
@@ -116,6 +117,20 @@ export default function StoryEditor({ id, styles, accent, onChanged, onClose }: 
   }, approvedMessage, true);
   const changeStatus = (status: ContentStatus, done: string) => run(() => setStoryStatus(id, status), done);
 
+  // "Rewrite from source": the AI rewrites both versions from the source page.
+  // Unsaved edits would be replaced, so they must be saved (or undone) first.
+  const [rewriteRequest, setRewriteRequest] = useState('');
+  const canRewrite = !isNew && !!story?.source_url && (story?.status === 'review' || story?.status === 'draft');
+  const hasUnsaved = !!form && !!story && JSON.stringify(form) !== JSON.stringify(toForm(story));
+  const rewrite = () => {
+    if (hasUnsaved) { setMessage(''); setProblem('Save your changes first: rewriting replaces the story text.'); return; }
+    run(async () => {
+      const saved = await regenerateStory(id, rewriteRequest.trim());
+      setRewriteRequest('');
+      return saved;
+    }, 'Rewritten from the source. Read it and check it against the source before approving.');
+  };
+
   if (loading || !current) return <View style={styles.card}><ActivityIndicator color={accent} /></View>;
   if (error) return <View style={styles.card}><Text style={styles.error}>{error}</Text></View>;
 
@@ -181,8 +196,17 @@ export default function StoryEditor({ id, styles, accent, onChanged, onClose }: 
         </View>
       </View>
 
+      {canRewrite ? (
+        <View style={{ marginTop: 16 }}>
+          <Field styles={styles} label="Ask the AI to rewrite it from the source (optional: what should change?)" value={rewriteRequest}
+            onChange={setRewriteRequest} placeholder="e.g. Simpler words for 7–12; the date in the headline is wrong" testID="ca-story-rewrite-request" />
+        </View>
+      ) : null}
       <View style={[styles.row, { marginTop: 16 }]}>
         <Button styles={styles} label={isNew ? 'Save as draft' : 'Save changes'} icon="save" onPress={save} disabled={busy} testID="ca-story-save" />
+        {canRewrite ? (
+          <Button styles={styles} label="Rewrite from source" icon="refresh-cw" onPress={rewrite} disabled={busy} testID="ca-story-rewrite" />
+        ) : null}
         {story?.status === 'rejected' ? (
           // A rejected story is never published (the server refuses it too).
           <Text style={styles.notes} testID="ca-story-rejected-note">Rejected: this story can no longer be published.</Text>
