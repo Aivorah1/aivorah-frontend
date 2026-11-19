@@ -11,13 +11,40 @@ import { spacing, radius, fonts } from '../../../theme';
 import type { AppColors } from '../../../theme';
 import {
   fetchWeeklyQuiz, checkQuizAnswer, submitQuiz, recordQuizComplete,
-  type AgeGroup, type AnswerReveal, type Quiz, type QuizAnswer, type QuizCompleteResult, type QuizResult,
+  type AgeGroup, type AnswerReveal, type Quiz, type QuizAnswer, type QuizCompleteResult, type QuizQuestion, type QuizResult,
 } from '../../../services/currentAffairsApi';
 import {
   GOLD, SAGE, DEEP_SAGE, CORRECT, WRONG, TINT_BG, TITLE_LIGHT,
   QUESTION_TYPES, OPTION_LETTERS, EXCELLENCE_PERCENT, ageGroupForStudent, normalizeAgeGroup,
 } from './constants';
 import CategoryBadge from './components/CategoryBadge';
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+/** '2026-11-28' -> 'Saturday, 28 Nov'. */
+export function formatDueDate(date?: string): string | null {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date || '');
+  if (!m) return null;
+  const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+  return `${DAYS[d.getUTCDay()]}, ${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]}`;
+}
+
+/**
+ * Where to resume a quiz from the answers already saved on the server: the
+ * first unanswered question, or the last one (shown answered, ready to
+ * submit) when every question has an answer.
+ */
+export function resumePoint(questions: QuizQuestion[], progress: AnswerReveal[] = []) {
+  const byId = new Map(progress.filter((p) => Number.isInteger(p.selected)).map((p) => [p.questionId, p]));
+  const answers: QuizAnswer[] = questions
+    .filter((q) => byId.has(q.id))
+    .map((q) => ({ questionId: q.id, answer: byId.get(q.id)!.selected as number }));
+  const firstOpen = questions.findIndex((q) => !byId.has(q.id));
+  if (firstOpen >= 0) return { index: firstOpen, answers, reveal: null as AnswerReveal | null };
+  const last = questions.length - 1;
+  return { index: Math.max(last, 0), answers, reveal: last >= 0 ? byId.get(questions[last].id) || null : null };
+}
 
 export default function QuizScreen({ navigation, route }: any) {
   const { user } = useAuth();
@@ -38,6 +65,7 @@ export default function QuizScreen({ navigation, route }: any) {
   const [reveal, setReveal] = useState<AnswerReveal | null>(null);
   const [answers, setAnswers] = useState<QuizAnswer[]>([]);
   const [busy, setBusy] = useState(false);
+  const [resumedCount, setResumedCount] = useState(0);
   const [actionError, setActionError] = useState<string | null>(null);
 
   const [result, setResult] = useState<QuizResult | null>(null);
@@ -52,7 +80,14 @@ export default function QuizScreen({ navigation, route }: any) {
       setQuiz(q);
       // Already taken this week → straight to the result.
       setResult(q.attempt);
-      setIndex(0); setSelected(null); setReveal(null); setAnswers([]); setAward(null); setAwardError(null);
+      setAward(null); setAwardError(null);
+      // Started earlier → continue where the student left off (answers are saved one by one).
+      const resume = resumePoint(q.questions || [], q.attempt ? [] : q.progress);
+      setIndex(resume.index);
+      setAnswers(resume.answers);
+      setReveal(resume.reveal);
+      setSelected(resume.reveal ? (resume.reveal.selected as number) : null);
+      setResumedCount(resume.answers.length);
     } catch (e: any) {
       setError(e?.message || "Could not load this week's quiz");
     } finally {
@@ -162,8 +197,20 @@ export default function QuizScreen({ navigation, route }: any) {
       </View>
     );
   } else if (question) {
+    const due = formatDueDate(quiz.dueDate);
     body = (
       <>
+        <View style={styles.infoRow} testID="quiz-info">
+          <Feather name="clock" size={12} color={colors.textMuted} />
+          <Text style={[styles.infoText, { color: colors.textMuted }]}>
+            No time limit{due ? ` · open until ${due}` : ''} · your answers are saved as you go
+          </Text>
+        </View>
+        {resumedCount > 0 ? (
+          <Text style={[styles.infoText, { color: GOLD }]} testID="quiz-resumed">
+            Welcome back! You answered {resumedCount} of {questions.length} questions. Carry on from here.
+          </Text>
+        ) : null}
         <View style={[styles.card, { backgroundColor: colors.cardDark, borderColor: colors.borderColor }]}>
           <View style={styles.counterRow}>
             <Text style={[styles.counter, { color: colors.textMuted }]}>Question {index + 1} of {questions.length}</Text>
@@ -364,6 +411,8 @@ function ResultView({ styles, colors, titleColor, isDark, result, award, awardEr
 }
 
 const makeStyles = (c: AppColors, isMobile: boolean) => StyleSheet.create({
+  infoRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
+  infoText: { fontSize: 12, fontWeight: '600' },
   screen: { flex: 1, backgroundColor: c.bgDark },
   content: { padding: isMobile ? spacing.lg : spacing.xl, paddingBottom: 56, gap: spacing.md },
   center: { alignItems: 'center', paddingVertical: 60, gap: 10 },

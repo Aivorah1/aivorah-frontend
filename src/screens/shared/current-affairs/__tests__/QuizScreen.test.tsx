@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react-native';
-import QuizScreen from '../QuizScreen';
+import QuizScreen, { formatDueDate, resumePoint } from '../QuizScreen';
 import * as api from '../../../../services/currentAffairsApi';
 
 jest.mock('../../../../services/currentAffairsApi');
@@ -216,4 +216,68 @@ test('the first answer to a question counts: the screen shows the one the server
   await fireEvent.press(screen.getByText('Check Answer'));
   expect(await screen.findByText('Kept.')).toBeTruthy();
   expect(screen.queryByText(/Not quite/)).toBeNull();
+});
+
+const saved = (i: number, selected: number): api.AnswerReveal => ({
+  questionId: `q${i + 1}`, selected, correct: selected === CORRECT, correctIndex: CORRECT,
+  explanation: `Saved explanation ${i + 1}.`, extraFact: null, storyId: null,
+});
+
+describe('no time limit, due date and resuming', () => {
+  test('shows there is no time limit and the due date', async () => {
+    mocked.fetchWeeklyQuiz.mockResolvedValue(quiz({ dueDate: '2026-11-14' }));
+    await render(<QuizScreen navigation={nav()} route={route} />);
+    await screen.findByText('Question 1 of 10');
+    expect(screen.getByText('No time limit · open until Saturday, 14 Nov · your answers are saved as you go')).toBeTruthy();
+    expect(screen.queryByTestId('quiz-resumed')).toBeNull();
+  });
+
+  test('a quiz left after 3 answers resumes at question 4 and submits all the saved answers', async () => {
+    mocked.fetchWeeklyQuiz.mockResolvedValue(quiz({ progress: [saved(0, CORRECT), saved(1, 0), saved(2, CORRECT)] }));
+    mocked.submitQuiz.mockImplementation(async (_e, _a, answers) => resultFor(answers.map((a) => a.answer)));
+    mocked.recordQuizComplete.mockResolvedValue({
+      alreadyRecorded: false, pointsAwarded: 20, newBadges: [], percentage: 90, excellence: true, progress: {} as any,
+    });
+    await render(<QuizScreen navigation={nav()} route={route} />);
+    expect(await screen.findByText('Question 4 of 10')).toBeTruthy();
+    expect(screen.getByText('Welcome back! You answered 3 of 10 questions. Carry on from here.')).toBeTruthy();
+    expect(screen.queryByTestId('answer-feedback')).toBeNull();
+
+    for (let i = 3; i < 10; i++) {
+      expect(await screen.findByText(`Question ${i + 1} of 10`)).toBeTruthy();
+      await fireEvent.press(screen.getByTestId(`option-${CORRECT}`));
+      await fireEvent.press(screen.getByText('Check Answer'));
+      await screen.findByTestId('answer-feedback');
+      await fireEvent.press(screen.getByText(i === 9 ? 'Submit Quiz' : 'Next Question'));
+    }
+    expect(await screen.findByTestId('quiz-result')).toBeTruthy();
+    const answers = mocked.submitQuiz.mock.calls[0][2];
+    expect(answers).toHaveLength(10);
+    expect(answers.slice(0, 3)).toEqual([
+      { questionId: 'q1', answer: CORRECT }, { questionId: 'q2', answer: 0 }, { questionId: 'q3', answer: CORRECT },
+    ]);
+    expect(mocked.checkQuizAnswer).toHaveBeenCalledTimes(7); // the 3 saved answers are not asked again
+  });
+
+  test('every question answered but not submitted: opens on the last one, ready to submit', async () => {
+    mocked.fetchWeeklyQuiz.mockResolvedValue(quiz({ progress: QUESTIONS.map((_, i) => saved(i, CORRECT)) }));
+    await render(<QuizScreen navigation={nav()} route={route} />);
+    expect(await screen.findByText('Question 10 of 10')).toBeTruthy();
+    expect(screen.getByTestId('answer-feedback')).toBeTruthy();
+    expect(screen.getByText('Submit Quiz')).toBeTruthy();
+  });
+
+  test('a submitted quiz shows its result, never the saved progress', async () => {
+    mocked.fetchWeeklyQuiz.mockResolvedValue(quiz({ attempt: resultFor(QUESTIONS.map(() => CORRECT)), progress: [saved(0, 0)] }));
+    await render(<QuizScreen navigation={nav()} route={route} />);
+    expect(await screen.findByTestId('quiz-result')).toBeTruthy();
+  });
+
+  test('helpers', () => {
+    expect(formatDueDate('2026-11-28')).toBe('Saturday, 28 Nov');
+    expect(formatDueDate(undefined)).toBeNull();
+    expect(resumePoint(QUESTIONS, [])).toMatchObject({ index: 0, answers: [], reveal: null });
+    expect(resumePoint(QUESTIONS, [saved(4, 2)])).toMatchObject({ index: 0, answers: [{ questionId: 'q5', answer: 2 }] });
+    expect(resumePoint([], [])).toMatchObject({ index: 0, answers: [], reveal: null });
+  });
 });
