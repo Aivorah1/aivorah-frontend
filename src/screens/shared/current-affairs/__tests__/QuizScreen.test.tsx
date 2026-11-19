@@ -53,7 +53,7 @@ const route = { params: { ageGroup: '7-12' } };
 beforeEach(() => {
   jest.clearAllMocks();
   mocked.fetchWeeklyQuiz.mockResolvedValue(quiz());
-  mocked.checkQuizAnswer.mockImplementation(async (questionId, answer) => ({
+  mocked.checkQuizAnswer.mockImplementation(async (_email, _ageGroup, questionId, answer) => ({
     questionId, selected: answer, correct: answer === CORRECT, correctIndex: CORRECT,
     explanation: `Explanation for ${questionId}.`, extraFact: `Extra fact for ${questionId}.`, storyId: questionId === 'q1' ? 's1' : null,
   }));
@@ -90,7 +90,7 @@ test('Check Answer reveals the correct answer, explanation, extra fact and story
 
   await fireEvent.press(screen.getByTestId('option-0'));
   await fireEvent.press(screen.getByText('Check Answer'));
-  expect(mocked.checkQuizAnswer).toHaveBeenCalledWith('q1', 0);
+  expect(mocked.checkQuizAnswer).toHaveBeenCalledWith('kid@school.in', '7-12', 'q1', 0);
   expect(await screen.findByText('Not quite — the answer is B: Bravo')).toBeTruthy();
   expect(screen.getByText('Explanation for q1.')).toBeTruthy();
   expect(screen.getByText(/Extra fact for q1./)).toBeTruthy();
@@ -202,4 +202,18 @@ test('a failed submit keeps the student on the last question with the error', as
   expect(await screen.findByText('Not signed in.')).toBeTruthy();
   expect(screen.getByText('Submit Quiz')).toBeTruthy();
   expect(mocked.recordQuizComplete).not.toHaveBeenCalled();
+});
+
+test('the first answer to a question counts: the screen shows the one the server kept', async () => {
+  // Checked earlier (e.g. before a reload) with B; picking A now does not change it.
+  mocked.checkQuizAnswer.mockImplementationOnce(async (_email, _ageGroup, questionId) => ({
+    questionId, selected: CORRECT, correct: true, correctIndex: CORRECT,
+    explanation: 'Kept.', extraFact: null, storyId: null,
+  }));
+  await render(<QuizScreen navigation={nav()} route={route} />);
+  await screen.findByText('Question 1 of 10');
+  await fireEvent.press(screen.getByTestId('option-0'));
+  await fireEvent.press(screen.getByText('Check Answer'));
+  expect(await screen.findByText('Kept.')).toBeTruthy();
+  expect(screen.queryByText(/Not quite/)).toBeNull();
 });

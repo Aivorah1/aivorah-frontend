@@ -103,11 +103,18 @@ describe('writes', () => {
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
-  test('checkQuizAnswer needs no sign-in', async () => {
-    mockUser = null;
+  test('checkQuizAnswer is sent with the student and their sign-in (the answer is recorded)', async () => {
     fetchMock().mockResolvedValueOnce(ok({ correct: true, correctIndex: 1 }));
-    await expect(checkQuizAnswer('q1', 1)).resolves.toEqual({ correct: true, correctIndex: 1 });
-    expect(JSON.parse(lastCall()[1].body)).toEqual({ questionId: 'q1', answer: 1 });
+    await expect(checkQuizAnswer('a@b.in', '7-12', 'q1', 1)).resolves.toEqual({ correct: true, correctIndex: 1 });
+    expect(lastCall()[0]).toBe(`${BASE}/quiz/check`);
+    expect(lastCall()[1].headers.Authorization).toBe('Bearer tok-1');
+    expect(JSON.parse(lastCall()[1].body)).toEqual({ studentEmail: 'a@b.in', ageGroup: '7-12', questionId: 'q1', answer: 1 });
+  });
+
+  test('checkQuizAnswer is not sent without a sign-in', async () => {
+    mockUser = null;
+    await expect(checkQuizAnswer('a@b.in', '7-12', 'q1', 1)).rejects.toThrow('Not signed in.');
+    expect(global.fetch).not.toHaveBeenCalled();
   });
 
   test('a failed write throws the service message', async () => {
