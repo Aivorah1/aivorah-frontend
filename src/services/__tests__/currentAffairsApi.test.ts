@@ -22,7 +22,7 @@ beforeEach(() => {
 });
 
 test('uses the live World & You service, which hosts the API (no ai-mentor monolith)', () => {
-  expect(CURRENT_AFFAIRS_SERVER_URL).toBe('https://aivorah-world-and-you-service.onrender.com');
+  expect(CURRENT_AFFAIRS_SERVER_URL).toBe('https://aivorah-world-and-you-service-1.onrender.com');
   expect(CURRENT_AFFAIRS_SERVER_URL).toBe(WORLD_AND_YOU_SERVER_URL);
 });
 
