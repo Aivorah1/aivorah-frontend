@@ -37,15 +37,18 @@ export function LearningBuddyModal({
   const [customName, setCustomName] = useState<string>(currentBuddy.customName ?? '');
   const [selectedCostumeId, setSelectedCostumeId] = useState<string>(currentBuddy.costumeId);
 
-  // Reset selection when modal opens
-  React.useEffect(() => {
+  // Reset the selection each time the modal opens (adjusting state during
+  // render when `visible` changes, as React recommends, instead of an effect).
+  const [wasVisible, setWasVisible] = useState(visible);
+  if (visible !== wasVisible) {
+    setWasVisible(visible);
     if (visible) {
       setActiveCategory('all');
       setSelectedBuddyId(currentBuddy.buddyId);
       setCustomName(currentBuddy.customName ?? '');
       setSelectedCostumeId(currentBuddy.costumeId);
     }
-  }, [visible, currentBuddy]);
+  }
 
   const selectedBuddy = useMemo(
     () => getBuddyById(selectedBuddyId) ?? ALL_BUDDIES[0],
