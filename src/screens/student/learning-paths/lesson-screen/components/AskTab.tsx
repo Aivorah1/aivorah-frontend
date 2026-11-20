@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Platform } from 'react-native';
+import { View, Text, Platform, ScrollView } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../../theme';
 import { spacing } from '../../../../../theme';
@@ -43,7 +43,15 @@ export default function AskTab({
   const hasRealPdf = Platform.OS === 'web' && !!topic.pdfFile && !!topic.pdfPage;
   return (
     <View style={styles.dualPane}>
-      <View style={[hasRealPdf ? styles.leftPane : styles.leftPaneFull, { padding: spacing.xl }]}>
+      <View style={hasRealPdf ? styles.leftPane : styles.leftPaneFull}>
+        {/* Scrolls as one column: the practice panel, then the chat. */}
+        <ScrollView
+          style={styles.leftScroll}
+          contentContainerStyle={{ padding: spacing.xl, flexGrow: 1 }}
+          showsVerticalScrollIndicator
+          keyboardShouldPersistTaps="handled"
+          testID="ask-tab-scroll"
+        >
         <View style={[styles.contextPill, { backgroundColor: colors.primary + '18', marginBottom: 10 }]}>
           <Feather name="zap" size={11} color={colors.primary} />
           <Text style={[styles.contextPillText, { color: colors.primary }]}>
@@ -64,15 +72,19 @@ export default function AskTab({
             onGoToPractice={onGoToPractice}
           />
         </View>
-        <TopicAICoach
-          topic={topic.name}
-          subject={subject}
-          grade={grade}
-          curriculum={curriculum}
-          chapter={chapter.title}
-          autoOpen
-          inline
-        />
+        {/* The chat keeps its own scrolling at a usable height inside the column. */}
+        <View style={{ height: 560, minHeight: 420 }}>
+          <TopicAICoach
+            topic={topic.name}
+            subject={subject}
+            grade={grade}
+            curriculum={curriculum}
+            chapter={chapter.title}
+            autoOpen
+            inline
+          />
+        </View>
+        </ScrollView>
       </View>
 
       {hasRealPdf && (
