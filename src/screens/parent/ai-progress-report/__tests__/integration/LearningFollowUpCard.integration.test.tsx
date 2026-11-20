@@ -1,6 +1,10 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react-native';
+import { fireEvent } from '@testing-library/react-native';
 import LearningFollowUpCard, { followUpSummary } from '../../components/LearningFollowUpCard';
+
+const mockDownload = jest.fn(async (_id: string) => 'Aivorah_Learning_Report_Anaya_2026-11-20.pdf');
+jest.mock('../../../../shared/learning-report/learningReport', () => ({ downloadLearningReport: (id: string) => mockDownload(id) }));
 
 const mockParentChild = jest.fn();
 jest.mock('../../../../student/learning-paths/practice-followup/services/practiceFollowupApi', () => ({
@@ -37,4 +41,13 @@ test('no child selected renders nothing (the "Go to My Kids" state stays as it i
   await render(<LearningFollowUpCard childId={undefined} colors={COLORS} />);
   expect(screen.queryByTestId('learning-followup-card')).toBeNull();
   expect(mockParentChild).not.toHaveBeenCalled();
+});
+
+test('Download Report downloads the selected child’s learning report', async () => {
+  mockParentChild.mockResolvedValue({ childId: 'c1', hasAssessments: true, followups: [done] });
+  await render(<LearningFollowUpCard childId="c1" childName="Anaya" colors={COLORS} />);
+  await fireEvent.press(screen.getByTestId('learning-report-download'));
+  await waitFor(() => expect(screen.getByTestId('learning-report-msg')).toBeTruthy());
+  expect(mockDownload).toHaveBeenCalledWith('c1');
+  expect(screen.getByText('Downloaded Aivorah_Learning_Report_Anaya_2026-11-20.pdf')).toBeTruthy();
 });

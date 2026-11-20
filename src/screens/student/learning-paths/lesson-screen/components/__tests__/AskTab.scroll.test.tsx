@@ -20,7 +20,7 @@ const COLORS: any = { primary: '#B8860B', textMain: '#111', textMuted: '#666', b
 test('the practice panel and the chat are inside one scrollable column', async () => {
   await render(
     <AskTab
-      followupId="f1"
+      coachRequest={{ attemptId: "a1", questionIndex: 0, mode: "explain" }}
       topic={{ name: 'Wisdom Paves the Way' }}
       chapter={{ title: 'Wit and Wisdom' }}
       grade="Grade 8" subject="English" curriculum="CBSE" chapterIndex={0}

@@ -33,6 +33,8 @@ export default function QuizResult({
   takenAt,
   review = false,
   followupSlot,
+  wrongActions,
+  wrongLabel,
 }: {
   topic: string;
   score: number;
@@ -56,8 +58,12 @@ export default function QuizResult({
   // A past test opened from History: when it was taken; no celebration, no next-topic.
   takenAt?: string;
   review?: boolean;
-  // Practise This Skill recommendations, shown right under the score.
+  // Optional content right under the score.
   followupSlot?: React.ReactNode;
+  // Under each wrong question: Explain This Question / Practise This Skill
+  // and "What you worked on"; and the skill label shown above the question.
+  wrongActions?: (questionIndex: number) => React.ReactNode;
+  wrongLabel?: (questionIndex: number) => string | null;
 }) {
   const accent = colors.accentYellow;
   const gold = colors.accentYellow;
@@ -265,6 +271,11 @@ export default function QuizResult({
                     borderColor: '#C5BD9630',
                     borderLeftColor: '#C5BD96',
                   }]}>
+                    {!!wrongLabel?.(r.idx) && (
+                      <View style={{ alignSelf: 'flex-start', backgroundColor: colors.bgDark, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4, marginBottom: 8 }} testID={`wrong-label-${r.idx}`}>
+                        <Text style={{ fontSize: 12.5, fontWeight: '800', color: colors.textMain }}>{wrongLabel(r.idx)}</Text>
+                      </View>
+                    )}
                     {/* question */}
                     <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 12 }}>
                       <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: '#C5BD9620', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
@@ -303,6 +314,7 @@ export default function QuizResult({
                         </>
                       )}
                     </View>
+                    {wrongActions?.(r.idx)}
                   </View>
                 );
               })}

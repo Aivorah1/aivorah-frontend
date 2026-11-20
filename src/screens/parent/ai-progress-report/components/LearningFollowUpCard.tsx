@@ -5,7 +5,8 @@
  * that this parent is linked to the child.
  */
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
+import { downloadLearningReport } from '../../../shared/learning-report/learningReport';
 import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../theme';
 import { followupApi, type ParentFollowup } from '../../../student/learning-paths/practice-followup/services/practiceFollowupApi';
@@ -33,13 +34,27 @@ export function followUpSummary(f: ParentFollowup): string {
 
 export default function LearningFollowUpCard({ childId, childName, colors }: { childId?: string; childName?: string; colors: AppColors }) {
   const { loading, error, items, hasAssessments } = useChildFollowups(childId);
+  const [dl, setDl] = useState<{ busy: boolean; msg: string }>({ busy: false, msg: '' });
   if (!childId) return null;
+  const download = async () => {
+    setDl({ busy: true, msg: '' });
+    try { const name = await downloadLearningReport(childId); setDl({ busy: false, msg: `Downloaded ${name}` }); }
+    catch (e: any) { setDl({ busy: false, msg: e?.message || 'Could not download the report.' }); }
+  };
   const first = (childName || 'Your child').split(' ')[0];
   const green = colors.accentGreen;
 
   return (
     <View style={[styles.card, { backgroundColor: colors.cardDark, borderColor: colors.borderColor }]} testID="learning-followup-card">
-      <Text style={[styles.title, { color: colors.textMain }]}>Learning Follow-up</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+        <Text style={[styles.title, { color: colors.textMain }]}>Learning Follow-up</Text>
+        <TouchableOpacity onPress={download} disabled={dl.busy} accessibilityRole="button" testID="learning-report-download"
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 1, borderColor: colors.accentYellow, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6, opacity: dl.busy ? 0.6 : 1 }}>
+          {dl.busy ? <ActivityIndicator size="small" color={colors.accentYellow} /> : <Feather name="download" size={13} color={colors.accentYellow} />}
+          <Text style={{ fontSize: 13, fontWeight: '800', color: colors.accentYellow }}>Download Report</Text>
+        </TouchableOpacity>
+      </View>
+      {!!dl.msg && <Text style={[styles.muted, { color: colors.textMuted }]} testID="learning-report-msg">{dl.msg}</Text>}
       {loading && <ActivityIndicator color={colors.accentYellow} style={{ marginVertical: 8 }} />}
       {!loading && !!error && <Text style={[styles.muted, { color: colors.textMuted }]}>{error}</Text>}
       {!loading && !error && items.length === 0 && (

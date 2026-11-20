@@ -116,15 +116,20 @@ export default function LessonScreen({ navigation, route, embedded = false, prac
     return 'read';
   })();
   const [mode, setMode] = useState<Mode>(initialMode);
-  // Practise This Skill (from a Test Report) opens Ask Aivorah on this topic
-  // with the exact follow-up. The drawer keeps this screen mounted, so a new
-  // request (new nonce) switches to the Ask tab even if it is already open.
-  const followupId = route?.params?.followupId as string | undefined;
-  const followupNonce = route?.params?.followupNonce;
+  // Explain This Question / Practise This Skill (from a Test Report) open Ask
+  // Aivorah on this topic for one wrong question of one test. The drawer keeps
+  // this screen mounted, so a new request (new nonce) switches to the Ask tab.
+  const p = route?.params || {};
+  const followupNonce = p.followupNonce;
+  const coachRequest = useMemo(() => (p.attemptId && Number.isInteger(Number(p.questionIndex)) && (p.coachMode === 'explain' || p.coachMode === 'practice')
+    ? { attemptId: String(p.attemptId), questionIndex: Number(p.questionIndex), mode: p.coachMode as 'explain' | 'practice', nonce: followupNonce }
+    : null
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ), [p.attemptId, p.questionIndex, p.coachMode, followupNonce]);
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- navigation param → tab
-    if (followupId) setMode('ask');
-  }, [followupId, followupNonce]);
+    if (coachRequest) setMode('ask');
+  }, [coachRequest]);
   const backToReport = (attemptId: string) => {
     const back = route?.params?.followupReturn;
     navigation.navigate('Quiz', { ...(back?.params || {}), openAttemptId: attemptId, openNonce: Date.now() });
@@ -334,7 +339,7 @@ export default function LessonScreen({ navigation, route, embedded = false, prac
 
             {mode === 'ask' && (
               <AskTab
-                followupId={followupId}
+                coachRequest={coachRequest}
                 onBackToReport={backToReport}
                 onGoToLearn={() => setMode('read')}
                 onGoToPractice={() => setMode('practice')}

@@ -6,10 +6,10 @@ import { spacing } from '../../../../../theme';
 import TopicAICoach from '../../../../../components/common/TopicAICoach';
 import { makeStyles } from '../styles';
 import BookPane from './BookPane';
-import TopicPractice, { lessonTextOf } from '../../practice-followup/components/TopicPractice';
+import TopicPractice, { lessonTextOf, type CoachRequest } from '../../practice-followup/components/TopicPractice';
 
 export default function AskTab({
-  followupId,
+  coachRequest,
   onBackToReport,
   onGoToLearn,
   onGoToPractice,
@@ -24,8 +24,8 @@ export default function AskTab({
   styles,
   onReadFullBook,
 }: {
-  // Practise This Skill: the follow-up to teach and check here.
-  followupId?: string;
+  // Explain This Question / Practise This Skill from a Test Report.
+  coachRequest?: CoachRequest | null;
   onBackToReport?: (attemptId: string) => void;
   onGoToLearn?: () => void;
   onGoToPractice?: () => void;
@@ -61,14 +61,13 @@ export default function AskTab({
         {/* Practise This Skill: the follow-up from the Test Report, or this topic's open one */}
         <View style={{ marginBottom: 16 }}>
           <TopicPractice
-            followupId={followupId}
+            request={coachRequest}
             topicName={topic.name}
             subject={subject}
             topicId={topicId}
             lessonText={lessonTextOf(topic)}
             colors={colors}
             onBackToReport={(id) => onBackToReport?.(id)}
-            onGoToLearn={onGoToLearn}
             onGoToPractice={onGoToPractice}
           />
         </View>

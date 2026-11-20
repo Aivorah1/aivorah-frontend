@@ -35,7 +35,7 @@ export default function PracticeTab({
   // can bring the student back to this exact topic.
   lessonParams?: Record<string, any>;
 }) {
-  const { mode: _mode, followupId: _f, followupNonce: _n, followupReturn: _r, ...ownParams } = lessonParams || {};
+  const { mode: _mode, followupId: _f, followupNonce: _n, followupReturn: _r, attemptId: _a, questionIndex: _q, coachMode: _c, ...ownParams } = lessonParams || {};
   if (locked) {
     return (
       <View style={[styles.card, { borderColor: colors.borderColor, backgroundColor: colors.cardDark }]}>
