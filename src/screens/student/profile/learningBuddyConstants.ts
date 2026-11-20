@@ -12,6 +12,7 @@ import {
   img_princess_rose, img_princess_luna, img_princess_sun, img_princess_mermaid, img_princess_forest,
   img_prince_charm, img_prince_bold, img_prince_wise, img_prince_sky, img_prince_forest,
 } from './learningBuddyImages';
+import { DEFAULT_EMOTION, DEFAULT_OUTFIT, getPictureCharacter } from './buddyPictureOptions';
 
 export type BuddyCategory = 'hero' | 'animal' | 'princess' | 'prince';
 
@@ -266,17 +267,31 @@ export const BUDDY_CATEGORIES = [
 ] as const;
 
 // ── Saved buddy state shape ──────────────────────────────────────────────────
+// A picture buddy (Aarav, Meera, Leo...) uses buddyId = character id, costumeId = outfit id and
+// `emotion`; a classic character uses buddyId + costumeId only.
 export type SavedLearningBuddy = {
   buddyId: string;
   customName: string | null; // null = use default character name
   costumeId: string;
+  emotion?: string;
 };
 
 export const DEFAULT_BUDDY: SavedLearningBuddy = {
+  buddyId: 'aarav',
+  customName: null,
+  costumeId: DEFAULT_OUTFIT,
+  emotion: DEFAULT_EMOTION,
+};
+
+export const DEFAULT_CLASSIC_BUDDY: SavedLearningBuddy = {
   buddyId: SPIDER_MAN.id,
   customName: null,
   costumeId: SPIDER_MAN.costumes[0].id,
 };
+
+export function isPictureBuddy(saved: SavedLearningBuddy | null | undefined): boolean {
+  return !!getPictureCharacter(saved?.buddyId);
+}
 
 export function getBuddyById(id: string): LearningBuddy | undefined {
   return ALL_BUDDIES.find(b => b.id === id);
