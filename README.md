@@ -29,6 +29,7 @@ All optional; none are secrets (they are bundled into the client).
 | `EXPO_PUBLIC_USE_LOCAL_SERVICES` | `1` = point every service URL at localhost (web dev only) |
 | `EXPO_PUBLIC_ASSIGNMENTS_URL` | Override the assignments service URL |
 | `EXPO_PUBLIC_STUDENTS_URL` | Override the students service URL |
+| `EXPO_PUBLIC_LEARNING_PATHS_URL` | Override the learning-paths service URL (e.g. `http://localhost:3015`) |
 | `EXPO_PUBLIC_SCHOOL_ADMIN_URL` | Override the school-admin service URL |
 | `EXPO_PUBLIC_PARENTAL_CONTROLS_URL` | Override the parental-controls service URL |
 | `EXPO_PUBLIC_PLATFORM_ADMIN_URL` | Override the platform-admin service URL |
