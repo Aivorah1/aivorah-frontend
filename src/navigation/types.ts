@@ -15,6 +15,7 @@ export type DrawerParamList = {
   Profile: undefined;
   LearningPaths: undefined;
   AICoach: undefined;
+  AITeacher: undefined;
   Schedule: undefined;
   Timetable: { grade?: string; section?: string; label?: string } | undefined;
   Resources: undefined;

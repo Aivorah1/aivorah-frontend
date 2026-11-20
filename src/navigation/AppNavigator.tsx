@@ -16,6 +16,7 @@ const LessonScreen = screens.lazyScreen(() => import('../screens/student/learnin
 const ProfileScreen = screens.lazyScreen(() => import('../screens/student/profile/ProfileScreen'));
 const LearningPathsScreen = screens.lazyScreen(() => import('../screens/student/learning-paths/LearningPathsScreen'));
 const AICoachScreen = screens.lazyScreen(() => import('../screens/student/ai-coach/AICoachScreen'));
+const AITeacherScreen = screens.lazyScreen(() => import('../screens/student/ai-teacher/AITeacherScreen'));
 const ScheduleScreen = screens.lazyScreen(() => import('../screens/student/schedule/ScheduleScreen'));
 const TimetableScreen = screens.lazyScreen(() => import('../screens/shared/timetable/TimetableScreen'));
 const ResourcesScreen = screens.lazyScreen(() => import('../screens/shared/resources/ResourcesScreen'));
@@ -87,6 +88,7 @@ export default function AppNavigator() {
       <Drawer.Screen name="Profile" component={ProfileScreen} />
       <Drawer.Screen name="LearningPaths" component={LearningPathsScreen} />
       <Drawer.Screen name="AICoach" component={AICoachScreen} />
+      <Drawer.Screen name="AITeacher" component={AITeacherScreen} />
       <Drawer.Screen name="Schedule" component={ScheduleScreen} />
       <Drawer.Screen name="Timetable" component={TimetableScreen} />
       <Drawer.Screen name="Resources" component={ResourcesScreen} />
