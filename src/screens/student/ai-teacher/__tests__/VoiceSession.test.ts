@@ -5,7 +5,7 @@ import { VoiceSession, END_OF_TURN_MS, type VoiceDrivers, type Recognizer } from
 import type { TurnResponse } from '../services/aiTeacherApi';
 
 type FakeRec = Recognizer & { lang: string; start: jest.Mock; abort: jest.Mock };
-type Spoken = { text: string; lang: string; h: { onStart(): void; onBoundary(): void; onEnd(): void } };
+type Spoken = { text: string; lang: string; h: { onStart(): void; onBoundary(charIndex: number): void; onEnd(): void } };
 
 function setup(opts: { supported?: boolean; mic?: { granted: boolean; reason?: any } } = {}) {
   const recs: FakeRec[] = [];
@@ -135,7 +135,7 @@ test('the reply is spoken segment by segment, revealing the board as each starts
   expect(t.cb.onSegmentStart).not.toHaveBeenCalled(); // nothing revealed before the audio starts
   t.spoken[1].h.onStart();
   expect(t.cb.onSegmentStart).toHaveBeenCalledWith(expect.objectContaining({ id: 's1', reveal: ['b1'] }), expect.anything());
-  t.spoken[1].h.onBoundary();
+  t.spoken[1].h.onBoundary(0);
   expect(t.cb.onBoundary).toHaveBeenCalled();
   const recsBefore = t.recs.length;
   t.spoken[1].h.onEnd();
@@ -200,7 +200,7 @@ test('Stop while speaking: speech cancelled, the queued narration and late playb
   t.spoken[1].h.onStart();
   t.session.stop();
   expect(t.drivers.cancelSpeech).toHaveBeenCalled();
-  t.spoken[1].h.onBoundary();
+  t.spoken[1].h.onBoundary(0);
   t.spoken[1].h.onEnd(); // the engine's late end event
   await flush();
   expect(t.spoken).toHaveLength(2); // the second segment never starts

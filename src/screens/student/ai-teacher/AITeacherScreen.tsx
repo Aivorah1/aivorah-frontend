@@ -26,6 +26,7 @@ import { teacherAvatar } from './utils/buddyAvatar';
 import { greetingLine } from './utils/greeting';
 import { VoiceSession, type VoiceDrivers, type VoiceStatus } from './voice/VoiceSession';
 import { browserDrivers } from './voice/browserDrivers';
+import { LipSync } from './avatar/lipSync';
 
 const LISTEN_HINT = 'Say your answer when you’re ready.';
 
@@ -50,7 +51,8 @@ export default function AITeacherScreen({ navigation, drivers = browserDrivers }
   const languageRef = useRef<'en' | 'hi'>('en');
   const greetingRef = useRef(greeting);
   useEffect(() => { greetingRef.current = greeting; }, [greeting]);
-  const talkRef = useRef<(() => void) | null>(null);
+  // What the buddy is saying right now, for its lips (read by the avatar's animation loop).
+  const [lips] = useState(() => new LipSync());
   const started = useRef(false);
 
   // The student's first name (the account's own name, from the server).
@@ -73,7 +75,11 @@ export default function AITeacherScreen({ navigation, drivers = browserDrivers }
       },
       greeting: () => greetingRef.current,
       language: () => languageRef.current,
-      onStatus: (s) => { setStatus(s); setActive(s !== 'idle'); },
+      onStatus: (s) => {
+        if (s !== 'speaking') lips.end();
+        setStatus(s);
+        setActive(s !== 'idle');
+      },
       onCaption: (c) => setCaption(c),
       onResponse: (r: TurnResponse) => {
         if (r.state) turnState.current = r.state;
@@ -92,10 +98,12 @@ export default function AITeacherScreen({ navigation, drivers = browserDrivers }
         }
         return r.kind === 'practice' || (r.kind === 'unclear' && r.practice) ? LISTEN_HINT : '';
       },
-      onSegmentStart: (seg) => {
+      onSegmentStart: (seg, r) => {
+        lips.begin(seg.speech, r?.language || languageRef.current, performance.now());
         if (seg.reveal.length) setRevealed((prev) => new Set([...prev, ...seg.reveal]));
       },
-      onBoundary: () => talkRef.current?.(),
+      onBoundary: (charIndex) => lips.boundary(charIndex, performance.now()),
+      onSegmentEnd: () => lips.end(),
       onNarrationDone: (r) => {
         // The countdown starts once the question has been read out and the microphone is listening.
         if (r?.kind === 'practice' && r.practice?.durationSeconds) {
@@ -106,7 +114,7 @@ export default function AITeacherScreen({ navigation, drivers = browserDrivers }
       onError: (m) => setError(m),
     });
     return sessionRef.current;
-  }, [drivers]);
+  }, [drivers, lips]);
 
   const toggle = useCallback(() => {
     setError('');
@@ -145,7 +153,7 @@ export default function AITeacherScreen({ navigation, drivers = browserDrivers }
         {isMobile ? (
           // Narrow screens: the avatar and the voice button stay on screen; the board scrolls under them.
           <View style={styles.mobile}>
-            <AvatarPanel source={avatar.source} name={avatar.name} status={status} caption={caption} active={active} onToggle={toggle} colors={colors} compact talkRef={talkRef} />
+            <AvatarPanel source={avatar.source} name={avatar.name} status={status} caption={caption} active={active} onToggle={toggle} colors={colors} compact lips={lips} />
             <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 24 }} testID="ai-teacher-board-scroll">
               <TeachingBoard topic={topic} blocks={blocks} revealed={revealed} practice={practice} colors={colors} />
             </ScrollView>
@@ -154,7 +162,7 @@ export default function AITeacherScreen({ navigation, drivers = browserDrivers }
           <View style={styles.desktop}>
             {/* The avatar, caption and voice button stay put while the board scrolls. */}
             <View style={styles.left}>
-              <AvatarPanel source={avatar.source} name={avatar.name} status={status} caption={caption} active={active} onToggle={toggle} colors={colors} talkRef={talkRef} />
+              <AvatarPanel source={avatar.source} name={avatar.name} status={status} caption={caption} active={active} onToggle={toggle} colors={colors} lips={lips} />
             </View>
             <ScrollView style={styles.right} contentContainerStyle={{ paddingBottom: 24 }} testID="ai-teacher-board-scroll">
               <TeachingBoard topic={topic} blocks={blocks} revealed={revealed} practice={practice} colors={colors} />

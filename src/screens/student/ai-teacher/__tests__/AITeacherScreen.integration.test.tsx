@@ -40,7 +40,7 @@ jest.mock('@react-navigation/native', () => {
 
 type FakeRec = Recognizer & { start: jest.Mock; abort: jest.Mock };
 let recs: FakeRec[];
-let spoken: { text: string; h: { onStart(): void; onBoundary(): void; onEnd(): void } }[];
+let spoken: { text: string; h: { onStart(): void; onBoundary(charIndex: number): void; onEnd(): void } }[];
 let timers: Map<number, () => void>;
 let drivers: VoiceDrivers & { cancelSpeech: jest.Mock };
 

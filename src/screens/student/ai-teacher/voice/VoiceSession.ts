@@ -28,7 +28,8 @@ export interface VoiceDrivers {
   supported(): boolean;
   requestMic(): Promise<{ granted: boolean; reason?: 'denied' | 'no-microphone' | 'unsupported' }>;
   createRecognizer(lang: 'en' | 'hi'): Recognizer;
-  speak(text: string, lang: 'en' | 'hi', h: { onStart(): void; onBoundary(): void; onEnd(): void }): void;
+  /** onBoundary gets the position (character index) of the word the voice has reached. */
+  speak(text: string, lang: 'en' | 'hi', h: { onStart(): void; onBoundary(charIndex: number): void; onEnd(): void }): void;
   cancelSpeech(): void;
   setTimer(fn: () => void, ms: number): any;
   clearTimer(id: any): void;
@@ -44,7 +45,10 @@ export interface VoiceCallbacks {
   /** Returns the caption to show while waiting for the student after this reply (or nothing). */
   onResponse(r: TurnResponse): string | void;
   onSegmentStart(seg: Segment, r: TurnResponse | null): void;
-  onBoundary(): void;
+  /** The voice reached the word at charIndex of the segment being spoken. */
+  onBoundary(charIndex: number): void;
+  /** The segment finished playing. */
+  onSegmentEnd?(seg: Segment): void;
   onNarrationDone(r: TurnResponse | null): void;
   onError(message: string): void;
 }
@@ -195,8 +199,12 @@ export class VoiceSession {
       };
       this.d.speak(seg.speech, lang, {
         onStart: begin,
-        onBoundary: () => { if (this.alive(sid)) this.cb.onBoundary(); },
-        onEnd: () => { begin(); resolve(); },
+        onBoundary: (charIndex) => { if (this.alive(sid)) this.cb.onBoundary(charIndex); },
+        onEnd: () => {
+          begin();
+          if (this.alive(sid)) this.cb.onSegmentEnd?.(seg);
+          resolve();
+        },
       });
     })), Promise.resolve());
   }

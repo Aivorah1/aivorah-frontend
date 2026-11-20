@@ -47,7 +47,7 @@ export const browserDrivers: VoiceDrivers = {
     return wrapper;
   },
   speak(text, lang, h) {
-    speakWithBoundary(text, () => h.onBoundary(), () => h.onEnd(), 0.95, lang === 'hi' ? { lang: 'hi' } : undefined, () => h.onStart());
+    speakWithBoundary(text, (charIndex) => h.onBoundary(charIndex), () => h.onEnd(), 0.95, lang === 'hi' ? { lang: 'hi' } : undefined, () => h.onStart());
   },
   cancelSpeech() {
     // Also clears the shared helper's queued restart, so nothing speaks after Stop.
