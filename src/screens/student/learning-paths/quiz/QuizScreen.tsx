@@ -23,6 +23,10 @@ import QuizQuestionList from './components/QuizQuestionList';
 import { PracticeStart, PracticeHistoryList, formatTakenAt } from './components/PracticeHome';
 import { usePracticeHistory, useAttemptExplanations } from './hooks/usePracticeHistory';
 import type { PastAttempt } from './resultCache';
+import RecommendedPractice from '../practice-followup/components/RecommendedPractice';
+import PracticeDetailsModal from '../practice-followup/components/PracticeDetailsModal';
+import { useFollowupRecommendations } from '../practice-followup/hooks/useFollowupRecommendations';
+import type { Recommendation } from '../practice-followup/types';
 
 // The drawer keeps this screen mounted, so coming back would show the last test's
 // questions/results. Each new visit gets a fresh session (new questions).
@@ -85,6 +89,50 @@ function QuizSession({ navigation, route }: any) {
   const pastExplanationsRef = useRef<Record<number, string>>({});
   const [pastStartedAt, setPastStartedAt] = useState(0);
   const openHistory = () => { history.reload(); setView('history'); quiz.backToHub(); };
+
+  // ── Practise This Skill ─────────────────────────────────────────
+  // Recommendations belong to the exact original attempt: the one just
+  // finished (once saved) or the past one opened from History.
+  const reportAttemptId = quiz.phase === 'result' ? quiz.savedAttemptId : (view === 'report' ? pastAttempt?.id : null);
+  const followups = useFollowupRecommendations(reportAttemptId, topicId);
+  const [detailsFor, setDetailsFor] = useState<string | null>(null);
+  const practise = (item: Recommendation) => {
+    // Opens this topic's Ask Aivorah with the exact follow-up (skill + attempt).
+    const lessonParams = returnTo === 'LessonScreen' && returnParams
+      ? returnParams
+      : { subject, grade, curriculum, topicId, topicName: topic };
+    navigation.navigate('LessonScreen', {
+      ...lessonParams, mode: 'ask', followupId: item.followupId, followupNonce: Date.now(),
+      followupReturn: { params: { ...(route?.params || {}), openAttemptId: undefined, openNonce: undefined } },
+    });
+  };
+  const followupSlot = (quiz.phase === 'result' && quiz.attemptSaveFailed) ? null : (
+    <RecommendedPractice
+      items={followups.items}
+      loading={followups.loading || (quiz.phase === 'result' && !quiz.savedAttemptId)}
+      error={followups.error}
+      onRetry={followups.reload}
+      onPractise={practise}
+      onDetails={(item) => setDetailsFor(item.followupId)}
+      colors={colors}
+    />
+  );
+  const detailsModal = <PracticeDetailsModal followupId={detailsFor} onClose={() => setDetailsFor(null)} colors={colors} />;
+
+  // "Back to Test Report" from Ask Aivorah: open that exact past report.
+  const openAttemptId = route?.params?.openAttemptId as string | undefined;
+  const openNonce = route?.params?.openNonce;
+  const openedRef = useRef<unknown>(null);
+  useEffect(() => {
+    if (!openAttemptId || openedRef.current === openNonce || history.loading) return;
+    const a = history.attempts.find((x) => x.id === openAttemptId);
+    if (!a) return;
+    openedRef.current = openNonce;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- navigation param → open that report
+    setPastAttempt(a);
+    setPastStartedAt(Date.now() - (a.timeSpentSeconds || 0) * 1000);
+    setView('report');
+  }, [openAttemptId, openNonce, history.loading, history.attempts]);
   const takeTest = () => { setView('start'); quiz.startTest(history.nextAttemptNumber); };
 
   // ── Start page / History / past report ─────────────────────────
@@ -110,6 +158,7 @@ function QuizSession({ navigation, route }: any) {
           onHistory={() => setView('history')}
           takenAt={formatTakenAt(pastAttempt.createdAt)}
           review
+          followupSlot={<>{followupSlot}{detailsModal}</>}
         />
       );
     }
@@ -170,6 +219,7 @@ function QuizSession({ navigation, route }: any) {
         nextTopicLoading={nextTopic.loading}
         onNextTopic={(next) => navigation.navigate('LessonScreen', next.params)}
         onHistory={openHistory}
+        followupSlot={<>{followupSlot}{detailsModal}</>}
       />
     );
   }

@@ -2,13 +2,14 @@ import { formatStudyTime, formatRelativeTime, median, todayISO } from './dashboa
 import { ACTIVITY_ICON } from '../constants';
 import type { InsightTile, RecentActivityItem } from '../types';
 import { resolveStudentStatus } from '../../../../utils/studentStatus';
+import { buildNeedSupport, type TopicHelpByStudent } from './needSupport';
 
 // Pure computation of every derived stat/tile the Teacher Dashboard renders,
 // extracted verbatim from TeacherDashboardScreen so the screen only calls this
 // once per render instead of owning ~250 lines of inline derivation. `gold`
 // is the theme's accent color (all tile "colors" collapse to it — see the
 // original `T` palette object).
-export function buildDashboardStats(students: any[], insights: any, activityFeed: any[], gold: string) {
+export function buildDashboardStats(students: any[], insights: any, activityFeed: any[], gold: string, topicHelp: TopicHelpByStudent = {}) {
   const today = todayISO();
   const totalStudents = students.length;
   const allNeedsAttention = students.filter(s => resolveStudentStatus(s) === 'needs_attention');
@@ -71,14 +72,20 @@ export function buildDashboardStats(students: any[], insights: any, activityFeed
   const studentsCompletedChallenge = challStats.filter((s: any) => s.completed > 0).length;
   const topChallStudent = [...challStats].sort((a: any, b: any) => (b.avgScore || 0) - (a.avgScore || 0))[0];
 
+  // Need Support: inactive (existing rule) and/or needs topic help — each student once.
+  const needSupport = buildNeedSupport(students, allNeedsAttention, topicHelp);
+  const topicHelpCount = needSupport.filter(r => r.reasons.some(x => x.kind === 'topic_help')).length;
+
   // ── SECTION 1: Learning Path Insights ───────────────────
   const learningPathTiles: InsightTile[] = [
     {
       icon: 'book-open', color: gold,
-      stat: `${allNeedsAttention.length}`,
+      stat: `${needSupport.length}`,
       label: 'Needs Attention',
       title: 'Need Support',
-      body: `${allNeedsAttention.length} student${allNeedsAttention.length !== 1 ? 's' : ''} not active for 7+ days.`,
+      body: topicHelpCount > 0
+        ? `${allNeedsAttention.length} not active for 7+ days · ${topicHelpCount} need${topicHelpCount !== 1 ? '' : 's'} topic help.`
+        : `${allNeedsAttention.length} student${allNeedsAttention.length !== 1 ? 's' : ''} not active for 7+ days.`,
       screen: 'TeacherStudents', params: { initialTab: 'Needs Attention' },
     },
     {
@@ -218,7 +225,7 @@ export function buildDashboardStats(students: any[], insights: any, activityFeed
     : `Median study time is ${formatStudyTime(medianStudyMins)} per student. Assign a chapter task or quiz to keep them engaged.`;
 
   return {
-    totalStudents, allNeedsAttention, needsAttentionStudents, activeToday, avgProgress,
+    totalStudents, allNeedsAttention, needsAttentionStudents, needSupport, activeToday, avgProgress,
     medianCombinedMins, minCombinedMins, maxCombinedMins,
     totalAssignmentsAssigned, totalAssignmentsSubmitted, assignSubmitPct,
     totalChallengesAssigned, totalChallengesCompleted, challCompletePct, classProgressPct,

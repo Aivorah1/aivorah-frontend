@@ -5,15 +5,17 @@ import { formatStudyTime } from '../../utils/dashboardHelpers';
 import { initials, ModalRenderCtx } from './modalTypes';
 
 // Cases 0-3 of the old renderInsightModalContent switch — Learning Path
-// column's 4 tiles (Struggling / Top Performers / Inactive / Study Time).
+// column's 4 tiles (Need Support / Top Performers / Inactive / Study Time).
 // Extracted verbatim; only the dispatch mechanism changed.
 export function renderLearningPathModal(tileIndex: number, ctx: ModalRenderCtx) {
   const { tile, students, allNeedsAttention, totalStudyMins, styles, colors, onClose } = ctx;
 
   switch (tileIndex) {
-    case 0: { // Struggling — same population as the outer tile (needsAttention)
-      const stuck = [...allNeedsAttention]
-        .sort((a, b) => (a.progressPct || 0) - (b.progressPct || 0));
+    case 0: { // Need Support — Inactive and/or Needs topic help, one row per student
+      const rows = ctx.needSupport ?? [...allNeedsAttention]
+        .sort((a, b) => (a.progressPct || 0) - (b.progressPct || 0))
+        .map((s) => ({ student: s, reasons: [{ kind: 'inactive' as const, label: 'Inactive' as const, detail: 'No learning activity for 7+ days' }] }));
+      const firstHelp = rows.find((r) => r.reasons.some((x) => x.kind === 'topic_help'));
       return (
         <>
           <View style={styles.modalHeader}>
@@ -21,68 +23,58 @@ export function renderLearningPathModal(tileIndex: number, ctx: ModalRenderCtx) 
               <Feather name={tile.icon} size={16} color={tile.color} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={[styles.modalStat, { color: tile.color }]}>{stuck.length} Students</Text>
-              <Text style={styles.modalHeading}>Need Support</Text>
+              <Text style={[styles.modalStat, { color: tile.color }]}>{rows.length} Students</Text>
+              <Text style={styles.modalHeading}>Need Support ({rows.length})</Text>
             </View>
             <TouchableOpacity onPress={onClose} style={styles.modalClose} testID="modal-close-button">
               <Feather name="x" size={20} color={colors.textDim} />
             </TouchableOpacity>
           </View>
           <View style={styles.tableHeader}>
-            <Text style={[styles.tableCol, { flex: 2.4 }]}>Student</Text>
-            <Text style={[styles.tableCol, { flex: 1.3 }]}>Topics Done</Text>
-            <Text style={[styles.tableCol, { flex: 1, textAlign: 'center' }]}>Streak</Text>
-            <Text style={[styles.tableCol, { flex: 1, textAlign: 'right' }]}>Progress</Text>
+            <Text style={[styles.tableCol, { flex: 1.4 }]}>Student</Text>
+            <Text style={[styles.tableCol, { flex: 3 }]}>Reason</Text>
           </View>
           <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
-            {stuck.length === 0 ? (
+            {rows.length === 0 ? (
               <View style={styles.modalEmpty}>
                 <Feather name="check-circle" size={28} color="#5A8A70" />
                 <Text style={styles.modalEmptyText}>No students need support right now!</Text>
               </View>
-            ) : stuck.map((s, i) => {
-              // "Topics Done" must only count the teacher's own subjects (Mathematics,
-              // English) — other subjects (PE, Art, ...) are handled by other staff and
-              // shouldn't inflate this count. Falls back to the raw count only when this
-              // teacher has no subject scoping configured at all.
-              const scopedSubjectsForCount: string[] = s.scopedSubjects || [];
-              const doneCount = scopedSubjectsForCount.length > 0
-                ? (s.completedTopicsDetailed || []).filter((d: any) => scopedSubjectsForCount.includes(d.subject)).length
-                : (s.completedTopics || []).length;
-              const pct = s.progressPct || 0;
-              const pctColor = pct < 20 ? '#B8797E' : '#8A8358';
-              const streak = s.currentStreak || 0;
-              return (
-                <View key={s.id || String(i)} style={[styles.tableRow, i % 2 === 0 && styles.tableRowAlt]}>
-                  <View style={[styles.tableCell, { flex: 2.4, flexDirection: 'row', alignItems: 'center', gap: 8 }]}>
-                    <View style={[styles.modalAvatar, { backgroundColor: tile.color + '20', width: 30, height: 30, borderRadius: 15 }]}>
-                      <Text style={[styles.modalAvatarText, { color: tile.color, fontSize: 10 }]}>{initials(s.name || '?')}</Text>
-                    </View>
-                    <View>
-                      <Text style={styles.tableStudentName}>{(s.name || 'Unknown').split(' ')[0]}</Text>
-                      <Text style={styles.tableStudentGrade}>{s.grade || '—'}</Text>
-                    </View>
+            ) : rows.map(({ student: s, reasons }, i) => (
+              <View key={s.id || String(i)} style={[styles.tableRow, i % 2 === 0 && styles.tableRowAlt, { alignItems: 'flex-start' }]} testID="need-support-row">
+                <View style={[styles.tableCell, { flex: 1.4, flexDirection: 'row', alignItems: 'center', gap: 8 }]}>
+                  <View style={[styles.modalAvatar, { backgroundColor: tile.color + '20', width: 30, height: 30, borderRadius: 15 }]}>
+                    <Text style={[styles.modalAvatarText, { color: tile.color, fontSize: 10 }]}>{initials(s.name || '?')}</Text>
                   </View>
-                  <View style={[styles.tableCell, { flex: 1.3, alignItems: 'flex-start' }]}>
-                    <Text style={[styles.tableChip, doneCount === 0
-                      ? { color: '#B8797E', borderColor: '#B8797E40', backgroundColor: '#B8797E10' }
-                      : { color: '#5A8A70', borderColor: '#5A8A7040', backgroundColor: '#5A8A7010' }
-                    ]}>
-                      {doneCount === 0 ? 'None yet' : doneCount + ' topics done'}
-                    </Text>
-                  </View>
-                  <Text style={[styles.tableCell, { flex: 1, textAlign: 'center', color: streak === 0 ? '#B8797E' : colors.textDim, fontSize: 12, fontWeight: '700' }]}>
-                    {streak}d
-                  </Text>
-                  <View style={[styles.tableCell, { flex: 1, alignItems: 'flex-end' }]}>
-                    <View style={[styles.pctPill, { backgroundColor: pctColor + '18', borderColor: pctColor + '40' }]}>
-                      <Text style={[styles.pctPillText, { color: pctColor }]}>{pct}%</Text>
-                    </View>
+                  <View>
+                    <Text style={styles.tableStudentName}>{(s.name || 'Unknown').split(' ')[0]}</Text>
+                    <Text style={styles.tableStudentGrade}>{s.grade || '—'}</Text>
                   </View>
                 </View>
-              );
-            })}
+                <View style={[styles.tableCell, { flex: 3, gap: 8 }]}>
+                  {reasons.map((r, j) => (
+                    <TouchableOpacity key={j} disabled={!ctx.onViewProgress}
+                      onPress={() => ctx.onViewProgress?.(s.id, r.kind === 'topic_help' ? r.skillId : undefined)}
+                      accessibilityRole="button" accessibilityLabel={`${r.label}: ${r.detail}`} testID={`need-support-reason-${r.kind}`}>
+                      <Text style={[styles.tableChip, { alignSelf: 'flex-start' }, r.kind === 'topic_help'
+                        ? { color: '#8A6A1F', borderColor: '#C9A24E60', backgroundColor: '#C9A24E18' }
+                        : { color: '#8A8358', borderColor: '#8A835840', backgroundColor: '#8A835810' }]}>
+                        {r.label}
+                      </Text>
+                      <Text style={{ fontSize: 12, color: colors.textMuted, marginTop: 3 }}>{r.detail}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            ))}
           </ScrollView>
+          {!!ctx.onViewProgress && rows.length > 0 && (
+            <TouchableOpacity onPress={() => ctx.onViewProgress?.(firstHelp?.student.id, firstHelp?.reasons.find((x) => x.kind === 'topic_help')?.skillId as string | undefined)}
+              accessibilityRole="link" testID="view-student-progress" style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingTop: 12 }}>
+              <Text style={{ color: tile.color, fontWeight: '700', textDecorationLine: 'underline' }}>View Student Progress</Text>
+              <Feather name="chevron-right" size={16} color={tile.color} />
+            </TouchableOpacity>
+          )}
         </>
       );
     }

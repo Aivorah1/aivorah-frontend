@@ -12,7 +12,8 @@ declare const __DEV__: boolean;
 
 const LIVE_LEARNING_PATHS_BACKEND = 'https://aivorah-learning-paths-service-ob0u.onrender.com';
 
+// EXPO_PUBLIC_LEARNING_PATHS_URL points only this service elsewhere (e.g. a local copy).
 const LEARNING_PATHS_SERVER_URL =
-  USE_LOCAL_SERVICES ? 'http://localhost:3015' : LIVE_LEARNING_PATHS_BACKEND;
+  process.env.EXPO_PUBLIC_LEARNING_PATHS_URL || (USE_LOCAL_SERVICES ? 'http://localhost:3015' : LIVE_LEARNING_PATHS_BACKEND);
 
 export default LEARNING_PATHS_SERVER_URL;

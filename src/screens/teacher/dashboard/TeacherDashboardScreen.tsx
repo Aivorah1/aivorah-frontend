@@ -9,6 +9,7 @@ import { useTheme } from '../../../context/ThemeContext';
 
 import { useTeacherDashboardData } from './hooks/useTeacherDashboardData';
 import { buildDashboardStats } from './utils/buildDashboardStats';
+import { useTeacherTopicHelp } from './hooks/useTeacherTopicHelp';
 import { getGreeting } from './utils/dashboardHelpers';
 import AISuggestedActionCard from './components/AISuggestedActionCard';
 import StudentOverviewCard from './components/StudentOverviewCard';
@@ -33,13 +34,14 @@ export default function TeacherDashboardScreen({ navigation }: any) {
   const firstName = user?.name?.split(' ')[0] || 'Teacher';
   const ringTrack = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)';
 
+  const topicHelp = useTeacherTopicHelp();
   const stats = useMemo(
-    () => buildDashboardStats(students, insights, activityFeed, gold),
-    [students, insights, activityFeed, gold]
+    () => buildDashboardStats(students, insights, activityFeed, gold, topicHelp),
+    [students, insights, activityFeed, gold, topicHelp]
   );
 
   const {
-    totalStudents, allNeedsAttention, activeToday, avgProgress,
+    totalStudents, allNeedsAttention, needSupport, activeToday, avgProgress,
     medianCombinedMins, minCombinedMins, maxCombinedMins,
     totalAssignmentsAssigned, totalAssignmentsSubmitted, assignSubmitPct,
     totalChallengesAssigned, totalChallengesCompleted, challCompletePct, classProgressPct,
@@ -59,6 +61,11 @@ export default function TeacherDashboardScreen({ navigation }: any) {
       tile, students, allNeedsAttention, assignStats, challStats,
       classAvgScore, studentsWithSubmissions, studentsWithChallenges, studentsCompletedChallenge,
       totalStudyMins, styles, colors, onClose: () => setInsightModal(null),
+      needSupport,
+      onViewProgress: (studentId?: string, skillId?: string) => {
+        setInsightModal(null);
+        navigation.navigate('TeacherProgress', studentId ? { studentId, skillId, skillNonce: Date.now() } : undefined);
+      },
     };
     if (tileIndex <= 3) return renderLearningPathModal(tileIndex, ctx);
     if (tileIndex <= 6) return renderAssignmentModal(tileIndex, ctx);

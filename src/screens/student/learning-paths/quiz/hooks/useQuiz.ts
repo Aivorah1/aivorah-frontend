@@ -61,6 +61,11 @@ export function useQuiz(params: {
   // times add up to the time spent on the test.
   const lastAnswerAtRef = useRef(initialStartTime);
 
+  // The saved topic_attempts row for the finished test (from track-attempt),
+  // so the results screen can load Practise This Skill recommendations.
+  const [savedAttemptId, setSavedAttemptId] = useState<string | null>(null);
+  const [attemptSaveFailed, setAttemptSaveFailed] = useState(false);
+
   // Issue #106 — auto-loaded explanations in result screen
   const [resultExplanations, setResultExplanations] = useState<Record<number, string>>({});
 
@@ -185,6 +190,7 @@ export function useQuiz(params: {
     quizStartTimeRef.current = Date.now();
     lastAnswerAtRef.current = Date.now();
     if (isRetake) setAttemptNumber(n => n + 1);
+    setSavedAttemptId(null); setAttemptSaveFailed(false);
     setSpokenText(''); setSpokenStatus('idle'); setSpokenError('');
     if (practiceQuiz?.length) {
       setQuestions(withSpokenQuestion(normalizeQuizQuestions(practiceQuiz), topic));
@@ -254,10 +260,15 @@ export function useQuiz(params: {
           correctAnswers: finalScore,
           score: pct,
           timeSpentSeconds: totalTimeSeconds,
-          perQuestionResults: perQuestionResultsRef.current,
+          // With the optional reasoning and each question's first answer,
+          // tries and hint shown (Practise This Skill evidence).
+          perQuestionResults: perQuestionResultsWithReasoning,
           attemptNumber,
         }),
-      }).catch(() => {});
+      })
+        .then((r: any) => (r?.ok ? r.json() : Promise.reject(new Error('track-attempt failed'))))
+        .then((d: any) => { if (d?.attempt?.id) setSavedAttemptId(String(d.attempt.id)); else setAttemptSaveFailed(true); })
+        .catch(() => setAttemptSaveFailed(true));
     } else if (__DEV__) {
       // B004: this should be unreachable once logged in (studentId resolves
       // before a quiz is reachable) — if it fires, tracking was silently
@@ -400,9 +411,14 @@ export function useQuiz(params: {
     const attempts = a.mcqAttempts + 1;
     patchAnswer(i, { mcqSelected: optIdx, mcqAttempts: attempts });
 
+    // Evidence kept apart from the score: the first response, how many tries
+    // it took, and whether the hint was shown (it shows after a wrong try).
+    const evidence = { attempts, firstAnswer: a.firstAnswer ?? q.options[optIdx], hintShown: a.showMcqHint };
+    if (attempts === 1) patchAnswer(i, { firstAnswer: q.options[optIdx] });
+
     if (isCorrect) {
       patchAnswer(i, { mcqDone: true });
-      recordResult(i, true, q.options[optIdx]);
+      recordResult(i, true, q.options[optIdx], evidence);
       // fetch explanation for correct answer too
       fetchExplanation(i, q, q.options[optIdx], q.options[q.correct as number], true);
     } else if (attempts < 2) {
@@ -413,7 +429,7 @@ export function useQuiz(params: {
     } else {
       // 2nd wrong — lock and show explanation
       patchAnswer(i, { mcqDone: true });
-      recordResult(i, false, q.options[optIdx]);
+      recordResult(i, false, q.options[optIdx], evidence);
       fetchExplanation(i, q, q.options[optIdx], q.options[q.correct as number], false);
     }
   }
@@ -435,10 +451,15 @@ export function useQuiz(params: {
         body: JSON.stringify({ studentAnswer: input, correctAnswer: q.correct, question: q.question }),
       });
       const { correct } = await resp.json();
+      const tries = a.fillAttempts + 1;
+      // Evidence kept apart from the score: first response, tries, and whether
+      // the hint was shown (it shows after the second wrong try).
+      const evidence = { attempts: tries, firstAnswer: a.firstAnswer ?? input, hintShown: a.fillAttempts >= 2 };
+      if (tries === 1) patchAnswer(i, { firstAnswer: input });
       if (correct) {
         patchAnswer(i, { fillFeedback: 'correct' });
         setExplanationFor(i, q.explanation || 'Excellent! That\'s correct!');
-        recordResult(i, true, input);
+        recordResult(i, true, input, evidence);
       } else {
         const attempts = answerAt(i).fillAttempts + 1;
         if (attempts === 1) patchAnswer(i, { fillAttempts: attempts, fillFeedback: 'wrong1' });
@@ -446,7 +467,7 @@ export function useQuiz(params: {
         else {
           patchAnswer(i, { fillAttempts: attempts, fillFeedback: 'revealed' });
           setExplanationFor(i, q.explanation || '');
-          recordResult(i, false, input);
+          recordResult(i, false, input, evidence);
         }
       }
     } catch {
@@ -466,5 +487,6 @@ export function useQuiz(params: {
     fetchQuiz, startTest, backToHub, finish, handleMcqAnswer, setFillInput, handleFillSubmit,
     spokenText, setSpokenText, spokenStatus, spokenError, submitSpoken,
     reasoningByIndex, setReasoning: patchReasoning, toggleReasoningVoice, listeningIndex,
+    savedAttemptId, attemptSaveFailed,
   };
 }

@@ -15,6 +15,7 @@ import StudentSearchBar from './components/StudentSearchBar';
 import SummaryCards from './components/SummaryCards';
 import ActivityTable from './components/ActivityTable';
 import AttemptDrawer from './components/AttemptDrawer';
+import SkillSupportPanel from './components/SkillSupportPanel';
 import { filterByClass } from './utils/rosterFilters';
 import { searchByName } from './utils/searchStudents';
 import { profileSubjectsFor, profileCurricula, profileGradesFor, mergeGrades } from './utils/profileSubjects';
@@ -23,7 +24,12 @@ import { exportStudentProgressPdf } from './utils/exportPdf';
 import { updatedAgoLabel } from './utils/formatters';
 import type { HeatmapStudent } from './types';
 
-export default function TeacherStudentProgressScreen({ navigation }: any) {
+export default function TeacherStudentProgressScreen({ navigation, route }: any) {
+  // Opened from Need Support → "Needs topic help": focus on that student's skill.
+  const focusStudentId = route?.params?.studentId as string | undefined;
+  const focusSkillId = route?.params?.skillId as string | undefined;
+  const [hiddenFocus, setHiddenFocus] = useState<unknown>(null);
+  const showFocus = !!focusStudentId && !!focusSkillId && hiddenFocus !== route?.params?.skillNonce;
   const { colors } = useTheme();
   const gold = colors.accentYellow;
   const { user } = useAuth();
@@ -147,6 +153,15 @@ export default function TeacherStudentProgressScreen({ navigation }: any) {
           {/* Section 4 — Subject Progress, derived from the SAME filtered
               data as Topic Exploration below (see utils/subjectSummary.ts),
               so it can never disagree with what the teacher filtered to. */}
+          {showFocus && (
+            <SkillSupportPanel
+              studentId={focusStudentId!}
+              skillId={focusSkillId!}
+              studentName={(roster as any[])?.find?.((r: any) => r.id === focusStudentId)?.name}
+              colors={colors}
+              onClose={() => setHiddenFocus(route?.params?.skillNonce)}
+            />
+          )}
           <SummaryCards colors={colors} gold={gold} subjects={subjectCards} loading={loading} />
 
           {/* Student search — narrows Topic Exploration + Activity &

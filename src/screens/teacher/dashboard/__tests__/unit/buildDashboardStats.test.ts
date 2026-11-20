@@ -206,3 +206,19 @@ describe('buildDashboardStats — AI suggested action', () => {
     expect(stats.aiActionTitle).toBe('Set up your first assignment to get started');
   });
 });
+
+describe('buildDashboardStats — Need Support with topic help', () => {
+  test('counts each student once across Inactive and Needs topic help; inactivity rule unchanged', () => {
+    const students = [
+      student({ id: 'a', name: 'Kiran', status: 'on_track' }),
+      student({ id: 'b', name: 'Dev', status: 'needs_attention' }),
+      student({ id: 'c', name: 'Asha', status: 'needs_attention' }),
+    ];
+    const help = { a: [{ skillId: 'x', shortName: 'Puns and alliteration' } as any], c: [{ skillId: 'y', shortName: 'Equivalent fractions' } as any] };
+    const stats = buildDashboardStats(students, null, [], GOLD, help);
+    expect(stats.allNeedsAttention.map((s: any) => s.id)).toEqual(['b', 'c']);
+    expect(stats.needSupport.map((r: any) => r.student.id).sort()).toEqual(['a', 'b', 'c']);
+    expect(stats.learningPathTiles[0].stat).toBe('3');
+    expect(stats.needSupport.find((r: any) => r.student.id === 'c').reasons.map((r: any) => r.label)).toEqual(['Inactive', 'Needs topic help']);
+  });
+});

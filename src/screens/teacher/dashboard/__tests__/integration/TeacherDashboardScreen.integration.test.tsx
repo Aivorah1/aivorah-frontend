@@ -37,6 +37,12 @@ jest.mock('../../../../../context/ThemeContext', () => ({
   }),
 }));
 
+// "Needs topic help" flags (learning-paths-service /practice-followup/teacher/support).
+const mockTeacherSupport = jest.fn(async () => ({ students: [] as any[] }));
+jest.mock('../../../../student/learning-paths/practice-followup/services/practiceFollowupApi', () => ({
+  followupApi: { teacherSupport: () => mockTeacherSupport() },
+}));
+
 const navigation = { openDrawer: jest.fn(), navigate: jest.fn() };
 
 function jsonRes(url: string) {
@@ -114,15 +120,34 @@ describe('TeacherDashboardScreen', () => {
     // opens the real LearningPathModals "Struggling" detail table.
     await user.press(screen.getByText('Need Support'));
 
-    // "Topics Done" is a table header unique to the opened modal (not the tile).
-    await waitFor(() => expect(screen.getByText('Topics Done')).toBeTruthy());
+    // "Reason" is a table header unique to the opened modal (not the tile).
+    await waitFor(() => expect(screen.getByText('Reason')).toBeTruthy());
     // Bela Rao (needsAttention: true, progressPct: 10) shows up in the struggling table.
     expect(screen.getAllByText('Bela').length).toBeGreaterThan(0);
 
     // Pressing the real close button (ctx.onClose -> setInsightModal(null)) dismisses it.
     await user.press(screen.getByTestId('modal-close-button'));
 
-    await waitFor(() => expect(screen.queryByText('Topics Done')).toBeNull());
+    await waitFor(() => expect(screen.queryByText('Reason')).toBeNull());
+  });
+
+  test('Need Support lists Inactive and Needs topic help reasons, each student once', async () => {
+    mockTeacherSupport.mockResolvedValueOnce({ students: [
+      { studentId: 's1', topicHelp: [{ skillId: 'en.figurative.pun-vs-alliteration', shortName: 'Puns and alliteration', label: 'Telling puns and alliteration apart' }] },
+      { studentId: 's2', topicHelp: [{ skillId: 'math.fractions.equivalent', shortName: 'Equivalent fractions', label: 'Finding equivalent fractions' }] },
+    ] });
+    const user = userEvent.setup();
+    await render(<TeacherDashboardScreen navigation={navigation} />);
+    await waitFor(() => expect(screen.getByText('AI Teaching Insights')).toBeTruthy());
+    await user.press(screen.getByText('Need Support'));
+    await waitFor(() => expect(screen.getByText('Need Support (2)')).toBeTruthy());
+    expect(screen.getAllByTestId('need-support-row')).toHaveLength(2);
+    expect(screen.getByText('Puns and alliteration · repeated difficulty')).toBeTruthy();
+    // Bela is both inactive and needs topic help — one row, both reasons.
+    expect(screen.getAllByText('Inactive').length).toBe(1);
+    expect(screen.getAllByText('Needs topic help').length).toBe(2);
+    await user.press(screen.getByTestId('view-student-progress'));
+    expect(navigation.navigate).toHaveBeenCalledWith('TeacherProgress', expect.objectContaining({ studentId: 's1', skillId: 'en.figurative.pun-vs-alliteration' }));
   });
 
   test('the Android hardware back button (Modal onRequestClose) also dismisses the insight modal', async () => {
@@ -131,12 +156,12 @@ describe('TeacherDashboardScreen', () => {
     await waitFor(() => expect(screen.getByText('AI Teaching Insights')).toBeTruthy());
 
     await user.press(screen.getByText('Need Support'));
-    await waitFor(() => expect(screen.getByText('Topics Done')).toBeTruthy());
+    await waitFor(() => expect(screen.getByText('Reason')).toBeTruthy());
 
     const modal = screen.getByTestId('insight-modal');
     await act(async () => { modal.props.onRequestClose(); });
 
-    await waitFor(() => expect(screen.queryByText('Topics Done')).toBeNull());
+    await waitFor(() => expect(screen.queryByText('Reason')).toBeNull());
   });
 
   test('tapping an Assignments-column tile opens the correct offset-indexed modal (not a Learning Path one)', async () => {

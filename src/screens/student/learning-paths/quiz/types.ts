@@ -44,6 +44,7 @@ export type QuestionAnswer = {
   recorded: boolean;     // its result is saved: it counts as answered
   reasoning: string;     // student's reasoning ("why did you choose this?")
   reasoningListening: boolean; // voice input active state
+  firstAnswer?: string;  // the first response, kept as separate evidence
 };
 
 export const emptyAnswer = (): QuestionAnswer => ({
