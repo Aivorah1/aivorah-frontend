@@ -17,13 +17,15 @@ const RESULT_TONE: Record<ResultView['code'], 'good' | 'info' | 'warn'> = {
   independent: 'good', assisted: 'good', clarify: 'info', solution: 'info', incorrect: 'warn', misconception: 'warn', unclear: 'warn',
 };
 
-export default function SkillPracticePanel({ followupId, colors, onBackToReport, onGoToLearn }: {
+export default function SkillPracticePanel({ followupId, colors, onBackToReport, onGoToLearn, lessonText }: {
   followupId: string;
+  // The lesson the student is looking at: grounds a topic skill's questions.
+  lessonText?: string;
   colors: AppColors;
   onBackToReport: (attemptId: string) => void;
   onGoToLearn?: () => void;
 }) {
-  const p = useSkillPractice(followupId);
+  const p = useSkillPractice(followupId, lessonText);
   const [choice, setChoice] = useState<number | null>(null);
   const [typed, setTyped] = useState('');
   const [reasoning, setReasoning] = useState('');
@@ -43,7 +45,7 @@ export default function SkillPracticePanel({ followupId, colors, onBackToReport,
   if (shownClarQid !== clarQid) { setShownClarQid(clarQid); setClarification(''); }
 
   if (p.loading && !s) {
-    return <View style={styles.center}><ActivityIndicator color={gold} /><Text style={[styles.muted, { color: colors.textMuted }]}>Loading your practice…</Text></View>;
+    return <View style={styles.center}><ActivityIndicator color={gold} /><Text style={[styles.muted, { color: colors.textMuted }]}>Aivorah is preparing your practice…</Text></View>;
   }
   if (!s) {
     return (
