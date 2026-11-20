@@ -36,6 +36,7 @@ const STUDENT_NAV_ITEMS = [
   { label: 'Profile', icon: 'user', screen: 'Profile', group: 'MENU' },
   { label: 'My Learning Paths', icon: 'book-open', screen: 'LearningPaths', group: 'MENU' },
   { label: 'AI Coach', icon: 'message-circle', screen: 'AICoach', group: 'MENU' },
+  { label: 'AI Teacher', icon: 'user-check', screen: 'AITeacher', group: 'MENU' },
   { label: 'Schedule', icon: 'calendar', screen: 'Schedule', group: 'MENU' },
   { label: 'Attendance', icon: 'clipboard', screen: 'StudentAttendance', group: 'MENU' },
   { label: 'Timetable', icon: 'columns', screen: 'Timetable', group: 'MENU' },

@@ -43,6 +43,7 @@ const STUDENT_NAV_ITEMS = [
       'WordWizard', 'DrawingBuddy', 'AIStoryteller', 'NCERTChapters',
     ] },
   { label: 'AI Coach',         icon: 'message-circle',screen: 'AICoach',           group: 'MENU',    premium: false },
+  { label: 'AI Teacher',       icon: 'user-check',   screen: 'AITeacher',          group: 'MENU',    premium: false },
   { label: 'Schedule',         icon: 'calendar',     screen: 'Schedule',           group: 'MENU',    premium: false },
   { label: 'Attendance',       icon: 'clipboard',    screen: 'StudentAttendance',  group: 'MENU',    premium: false },
   { label: 'Timetable', icon: 'columns', screen: 'Timetable', group: 'MENU', premium: false },
