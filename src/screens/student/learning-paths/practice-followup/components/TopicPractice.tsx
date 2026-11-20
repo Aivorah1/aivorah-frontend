@@ -1,15 +1,17 @@
 /**
- * Ask Aivorah → the topic's follow-up practice. Opened from a Test Report's
- * Practise This Skill button (followupId given), or found automatically for
- * this topic from the student's newest test on it. Shows a short note when
- * there is nothing to practise yet.
+ * Ask Aivorah → the coach for one wrong question of one test.
+ * Opened from a Test Report's "Explain This Question" / "Practise This Skill"
+ * (attemptId + questionIndex + mode given), or found automatically for this
+ * topic from the student's newest test on it (practice first). Shows a short
+ * note when there is nothing to practise yet.
  */
 import React, { useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator, TouchableOpacity, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../../theme';
 import { followupApi } from '../services/practiceFollowupApi';
-import SkillPracticePanel from './SkillPracticePanel';
+import QuestionCoach from './QuestionCoach';
+import type { CoachMode } from '../hooks/useQuestionCoach';
 
 // The lesson text the student sees in Learn (curated strings or teacher blocks).
 export function lessonTextOf(topic: any): string {
@@ -20,34 +22,45 @@ export function lessonTextOf(topic: any): string {
     .filter(Boolean).join('\n').slice(0, 6000);
 }
 
-export default function TopicPractice({ followupId, topicName, subject, topicId, lessonText, colors, onBackToReport, onGoToLearn, onGoToPractice }: {
-  followupId?: string;
+export interface CoachRequest { attemptId: string; questionIndex: number; mode: CoachMode; nonce?: unknown }
+
+export default function TopicPractice({ request, topicName, subject, topicId, lessonText, colors, onBackToReport, onGoToPractice }: {
+  request?: CoachRequest | null;
   topicName: string;
   subject?: string;
   topicId?: string;
   lessonText?: string;
   colors: AppColors;
   onBackToReport: (attemptId: string) => void;
-  onGoToLearn?: () => void;
   onGoToPractice?: () => void;
 }) {
-  const [found, setFound] = useState<{ id: string | null; hasTest: boolean; loading: boolean; error: string }>({ id: null, hasTest: false, loading: !followupId, error: '' });
+  const [found, setFound] = useState<{ req: CoachRequest | null; hasTest: boolean; loading: boolean; error: string }>({ req: null, hasTest: false, loading: !request, error: '' });
   const [retry, setRetry] = useState(0);
 
   useEffect(() => {
-    if (followupId || !topicName) return;
+    if (request || !topicName) return;
     let alive = true;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- look up this topic's practice
     setFound((f) => ({ ...f, loading: true, error: '' }));
     followupApi.forTopic(topicName, subject, topicId)
-      .then((d) => { if (alive) setFound({ id: d.followupId, hasTest: !!d.hasTest || !!d.attemptId, loading: false, error: '' }); })
-      .catch((e) => { if (alive) setFound({ id: null, hasTest: false, loading: false, error: e?.message || 'Could not load your practice.' }); });
+      .then((d: any) => {
+        if (!alive) return;
+        const req = d.attemptId && d.questionIndex != null ? { attemptId: d.attemptId, questionIndex: d.questionIndex, mode: 'practice' as const } : null;
+        setFound({ req, hasTest: !!d.hasTest || !!d.attemptId, loading: false, error: '' });
+      })
+      .catch((e) => { if (alive) setFound({ req: null, hasTest: false, loading: false, error: e?.message || 'Could not load your practice.' }); });
     return () => { alive = false; };
-  }, [followupId, topicName, subject, topicId, retry]);
+  }, [request, topicName, subject, topicId, retry]);
 
-  const id = followupId || found.id;
-  if (id) {
-    return <SkillPracticePanel followupId={id} lessonText={lessonText} colors={colors} onBackToReport={onBackToReport} onGoToLearn={onGoToLearn} />;
+  const req = request || found.req;
+  if (req) {
+    return (
+      <QuestionCoach
+        key={`${req.attemptId}:${req.questionIndex}:${req.mode}:${String(req.nonce ?? '')}`}
+        attemptId={req.attemptId} questionIndex={req.questionIndex} mode={req.mode}
+        lessonText={lessonText} colors={colors} onBackToReport={onBackToReport}
+      />
+    );
   }
   if (found.loading) {
     return <View style={styles.row} testID="topic-practice-loading"><ActivityIndicator size="small" color={colors.accentYellow} /><Text style={[styles.muted, { color: colors.textMuted }]}>Checking your practice…</Text></View>;
@@ -63,7 +76,7 @@ export default function TopicPractice({ followupId, topicName, subject, topicId,
           ? found.error
           : found.hasTest
             ? 'You got everything right in your last test on this topic — nothing to practise right now.'
-            : 'Take the Practice test first. Aivorah will then teach anything you missed and check it with two new questions.'}
+            : 'Take the Practice test first. Aivorah will then explain anything you missed and give you fresh questions on it.'}
       </Text>
       {!!found.error && (
         <TouchableOpacity onPress={() => setRetry((n) => n + 1)} accessibilityRole="button"><Text style={[styles.link, { color: colors.accentYellow }]}>Try again</Text></TouchableOpacity>

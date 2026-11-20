@@ -219,6 +219,6 @@ describe('buildDashboardStats — Need Support with topic help', () => {
     expect(stats.allNeedsAttention.map((s: any) => s.id)).toEqual(['b', 'c']);
     expect(stats.needSupport.map((r: any) => r.student.id).sort()).toEqual(['a', 'b', 'c']);
     expect(stats.learningPathTiles[0].stat).toBe('3');
-    expect(stats.needSupport.find((r: any) => r.student.id === 'c').reasons.map((r: any) => r.label)).toEqual(['Inactive', 'Needs topic help']);
+    expect(stats.needSupport.find((r: any) => r.student.id === 'c')!.reasons.map((r: any) => r.label)).toEqual(['Inactive', 'Needs topic help']);
   });
 });

@@ -23,10 +23,8 @@ import QuizQuestionList from './components/QuizQuestionList';
 import { PracticeStart, PracticeHistoryList, formatTakenAt } from './components/PracticeHome';
 import { usePracticeHistory, useAttemptExplanations } from './hooks/usePracticeHistory';
 import type { PastAttempt } from './resultCache';
-import RecommendedPractice from '../practice-followup/components/RecommendedPractice';
-import PracticeDetailsModal from '../practice-followup/components/PracticeDetailsModal';
-import { useFollowupRecommendations } from '../practice-followup/hooks/useFollowupRecommendations';
-import type { Recommendation } from '../practice-followup/types';
+import WrongQuestionActions from '../practice-followup/components/WrongQuestionActions';
+import { useWorkedOn } from '../practice-followup/hooks/useWorkedOn';
 
 // The drawer keeps this screen mounted, so coming back would show the last test's
 // questions/results. Each new visit gets a fresh session (new questions).
@@ -90,34 +88,38 @@ function QuizSession({ navigation, route }: any) {
   const [pastStartedAt, setPastStartedAt] = useState(0);
   const openHistory = () => { history.reload(); setView('history'); quiz.backToHub(); };
 
-  // ── Practise This Skill ─────────────────────────────────────────
-  // Recommendations belong to the exact original attempt: the one just
+  // ── Explain This Question / Practise This Skill ─────────────────
+  // Under each wrong question, for the exact original attempt: the test just
   // finished (once saved) or the past one opened from History.
   const reportAttemptId = quiz.phase === 'result' ? quiz.savedAttemptId : (view === 'report' ? pastAttempt?.id : null);
-  const followups = useFollowupRecommendations(reportAttemptId, topicId);
-  const [detailsFor, setDetailsFor] = useState<string | null>(null);
-  const practise = (item: Recommendation) => {
-    // Opens this topic's Ask Aivorah with the exact follow-up (skill + attempt).
+  const workedOn = useWorkedOn(reportAttemptId);
+  useEffect(() => {
+    // Back from Ask Aivorah: show the latest "What you worked on".
+    const off = navigation.addListener?.('focus', () => workedOn.reload());
+    return () => off?.();
+  }, [navigation, workedOn.reload]);
+  const openCoach = (questionIndex: number, coachMode: 'explain' | 'practice') => {
+    if (!reportAttemptId) return;
     const lessonParams = returnTo === 'LessonScreen' && returnParams
       ? returnParams
       : { subject, grade, curriculum, topicId, topicName: topic };
     navigation.navigate('LessonScreen', {
-      ...lessonParams, mode: 'ask', followupId: item.followupId, followupNonce: Date.now(),
+      ...lessonParams, mode: 'ask', attemptId: reportAttemptId, questionIndex, coachMode, followupNonce: Date.now(),
       followupReturn: { params: { ...(route?.params || {}), openAttemptId: undefined, openNonce: undefined } },
     });
   };
-  const followupSlot = (quiz.phase === 'result' && quiz.attemptSaveFailed) ? null : (
-    <RecommendedPractice
-      items={followups.items}
-      loading={followups.loading || (quiz.phase === 'result' && !quiz.savedAttemptId)}
-      error={followups.error}
-      onRetry={followups.reload}
-      onPractise={practise}
-      onDetails={(item) => setDetailsFor(item.followupId)}
+  const wrongActions = (quiz.phase === 'result' && quiz.attemptSaveFailed) ? undefined : (idx: number) => (
+    <WrongQuestionActions
+      index={idx}
+      ready={!!reportAttemptId}
+      saving={quiz.phase === 'result' && !quiz.savedAttemptId}
+      workedOn={workedOn.byIndex[idx]}
+      onExplain={(i) => openCoach(i, 'explain')}
+      onPractise={(i) => openCoach(i, 'practice')}
       colors={colors}
     />
   );
-  const detailsModal = <PracticeDetailsModal followupId={detailsFor} onClose={() => setDetailsFor(null)} colors={colors} />;
+  const wrongLabel = (idx: number) => workedOn.byIndex[idx]?.skillLabel || null;
 
   // "Back to Test Report" from Ask Aivorah: open that exact past report.
   const openAttemptId = route?.params?.openAttemptId as string | undefined;
@@ -158,7 +160,8 @@ function QuizSession({ navigation, route }: any) {
           onHistory={() => setView('history')}
           takenAt={formatTakenAt(pastAttempt.createdAt)}
           review
-          followupSlot={<>{followupSlot}{detailsModal}</>}
+          wrongActions={wrongActions}
+          wrongLabel={wrongLabel}
         />
       );
     }
@@ -219,7 +222,8 @@ function QuizSession({ navigation, route }: any) {
         nextTopicLoading={nextTopic.loading}
         onNextTopic={(next) => navigation.navigate('LessonScreen', next.params)}
         onHistory={openHistory}
-        followupSlot={<>{followupSlot}{detailsModal}</>}
+        wrongActions={wrongActions}
+        wrongLabel={wrongLabel}
       />
     );
   }

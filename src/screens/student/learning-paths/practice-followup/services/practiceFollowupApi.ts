@@ -54,6 +54,15 @@ export const followupApi = {
   clarify: (id: string, questionId: string, reasoning: string) =>
     call<{ result: ResultView; session: SessionView; duplicate?: boolean }>(`/${encodeURIComponent(id)}/clarify`, { method: 'POST', body: { questionId, reasoning } }),
   details: (id: string) => call<PracticeDetails>(`/${encodeURIComponent(id)}/details`),
+  // ── Explain This Question / Practise This Skill (one wrong question of one test) ──
+  explainQuestion: (attemptId: string, index: number, action: 'first' | 'again' | 'another_way', lessonText?: string) =>
+    call<ExplainView>(`/attempts/${encodeURIComponent(attemptId)}/questions/${index}/explain`, { method: 'POST', body: { action, lessonText: lessonText || '' } }),
+  practiseQuestion: (attemptId: string, index: number, action: 'start' | 'next', lessonText?: string) =>
+    call<PracticeView>(`/attempts/${encodeURIComponent(attemptId)}/questions/${index}/practice`, { method: 'POST', body: { action, lessonText: lessonText || '' } }),
+  workedOn: (attemptId: string) => call<{ attemptId: string; questions: WorkedOn[] }>(`/attempts/${encodeURIComponent(attemptId)}/worked-on`),
+  working: (id: string, questionId: string, working: string) =>
+    call<{ identified: boolean; step?: string; feedback: string }>(`/${encodeURIComponent(id)}/working`, { method: 'POST', body: { questionId, working } }),
+  learningReport: (studentId: string) => call<LearningReport>(`/report/students/${encodeURIComponent(studentId)}`),
   parentChild: (childId: string) =>
     call<{ childId: string; hasAssessments: boolean; followups: ParentFollowup[] }>(`/parent/children/${encodeURIComponent(childId)}`),
   teacherSupport: () => call<{ students: { studentId: string; topicHelp: TopicHelp[] }[] }>('/teacher/support'),
@@ -61,6 +70,68 @@ export const followupApi = {
 };
 
 export type { Teaching };
+
+export interface WrongQuestionRef { index: number; question: string }
+
+export interface ExplainView {
+  mode: 'explain';
+  attemptId: string;
+  questionIndex: number;
+  followupId: string;
+  question: { index: number; text: string; yourAnswer: string; correctAnswer: string };
+  explanation: { title: string; body: string; example?: string | null; steps?: string[] | null; table?: string[][] | null; methodName?: string; method: string; variant: string; at: string };
+  skillLabel: string | null;
+  methodsUsed: string[];
+  repeated: boolean;
+  wrongQuestions: WrongQuestionRef[];
+}
+
+export interface PracticeView {
+  mode: 'practice';
+  attemptId: string;
+  questionIndex: number;
+  followupId: string;
+  skillLabel: string | null;
+  question: (PublicQuestionLite & { level: number; levelName: string; isMemoryCheck: boolean; helpShown: 'none' | 'hint' | 'solution'; hint: string | null }) | null;
+  clarification: { questionId: string; question: PublicQuestionLite; yourAnswer: string; prompt: string } | null;
+  memoryCheck: { daysSince: number | null } | null;
+  wrongQuestions: WrongQuestionRef[];
+}
+
+export interface PublicQuestionLite { id: string; type: 'mcq' | 'fill_blank'; question: string; options?: string[]; reasoningPrompt: string }
+
+export interface WorkedOn {
+  index: number;
+  question: string;
+  skillLabel: string | null;
+  lines: string[];
+  hasActivity: boolean;
+  practice: { total: number; independent: number; assisted: number; incorrect: number; skipped: number; awaiting_verification: number; solution_shown: number };
+  recurringMistakes: { step: string; questions: number }[];
+  memoryChecks: { at: string; level: number | null; outcome: string; helpUsed: string }[];
+}
+
+export interface LearningReportTest {
+  attemptId: string;
+  subject: string;
+  topic: string;
+  takenAt: string;
+  score: number | null;
+  correct: number | null;
+  total: number | null;
+  skillsReviewed: string[];
+  explanationsShown: number;
+  practice: { total: number; independent: number; assisted: number; incorrect: number; skipped: number; awaiting_verification: number; solution_shown: number };
+  recurringMistakes: { step: string; questions: number }[];
+  memoryChecks: { at: string; level: number | null; outcome: string; helpUsed: string }[];
+  hasFollowUp: boolean;
+}
+
+export interface LearningReport {
+  student: { id: string; name?: string; grade?: string; curriculum?: string };
+  generatedAt: string;
+  tests: LearningReportTest[];
+}
 
 export interface ParentFollowup {
   followupId: string;

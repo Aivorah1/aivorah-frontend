@@ -21,8 +21,11 @@ import ClassSelector from './components/ClassSelector';
 import UploadMarksModal from './components/UploadMarksModal';
 import ViewReportModal from './components/ViewReportModal';
 import { downloadReport, shareReport } from './utils/reportActions';
+import { downloadLearningReport } from '../../shared/learning-report/learningReport';
 
-export default function StudentReportScreen({ navigation }: any) {
+export default function StudentReportScreen({ navigation, route }: any) {
+  // Opened from My Classes → a class: start on that class.
+  const wanted = route?.params?.grade && route?.params?.section ? { grade: String(route.params.grade), section: String(route.params.section) } : null;
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { showToast, ToastComponent } = useToast();
@@ -45,7 +48,14 @@ export default function StudentReportScreen({ navigation }: any) {
       .then((c) => {
         if (!alive) return;
         setClasses(c);
-        if (c.homeClasses[0]) {
+        const homeMatch = wanted && c.homeClasses.find((h) => h.grade === wanted.grade && h.section === wanted.section);
+        const taughtMatch = wanted && c.grades.find((g) => g.grade === wanted.grade && g.sections.some((s) => s.section === wanted.section));
+        if (homeMatch) {
+          setSelected({ grade: homeMatch.grade, section: homeMatch.section });
+        } else if (taughtMatch) {
+          setGrade(taughtMatch.grade);
+          setSelected({ grade: wanted!.grade, section: wanted!.section });
+        } else if (c.homeClasses[0]) {
           setSelected({ grade: c.homeClasses[0].grade, section: c.homeClasses[0].section });
         } else if (c.grades[0]) {
           setGrade(c.grades[0].grade);
@@ -55,7 +65,8 @@ export default function StudentReportScreen({ navigation }: any) {
       })
       .catch((e) => alive && setClassesError(e?.message || 'Could not load your classes'));
     return () => { alive = false; };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- re-run only when another class is requested
+  }, [wanted?.grade, wanted?.section]);
 
   const selectedKey = selected ? `${selected.grade}|${selected.section}` : '';
   useEffect(() => {
@@ -83,6 +94,19 @@ export default function StudentReportScreen({ navigation }: any) {
     [info, search],
   );
   const classRef = useMemo(() => (info ? { grade: info.grade, section: info.section } : null), [info]);
+
+  // Practice tests + follow-up practice (any teacher linked to the student; the server checks).
+  const onLearningReport = useCallback(async (s: ReportStudent) => {
+    setBusy(true);
+    try {
+      const name = await downloadLearningReport(s.id);
+      showToast({ title: 'Learning report downloaded', subtitle: name, type: 'success' });
+    } catch (e: any) {
+      showToast({ title: 'Could not download', subtitle: /authoris/i.test(e?.message || '') ? 'You can download learning reports only for students linked to you.' : e?.message, type: 'error' });
+    } finally {
+      setBusy(false);
+    }
+  }, [showToast]);
 
   const onDownload = useCallback(async (s: ReportStudent) => {
     setBusy(true);
@@ -218,6 +242,10 @@ export default function StudentReportScreen({ navigation }: any) {
                               <Text style={styles.actionBtnText}>Download</Text>
                             </TouchableOpacity>
                           )}
+                          <TouchableOpacity testID={`learning-${s.id}`} style={styles.actionBtn} onPress={() => onLearningReport(s)} disabled={busy} accessibilityRole="button">
+                            <Feather name="trending-up" size={13} color={colors.textMain} />
+                            <Text style={styles.actionBtnText}>Learning Report</Text>
+                          </TouchableOpacity>
                           {info.canShare && (
                             <TouchableOpacity testID={`share-${s.id}`} style={[styles.actionBtn, styles.actionBtnPrimary]} onPress={() => setShareFor(s)} disabled={busy} accessibilityRole="button">
                               <Feather name="send" size={13} color="#241f16" />

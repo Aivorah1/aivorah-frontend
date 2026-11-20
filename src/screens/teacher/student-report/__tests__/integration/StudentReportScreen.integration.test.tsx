@@ -32,6 +32,9 @@ jest.mock('../../utils/reportActions', () => ({
   shareReport: jest.fn(async () => ({ ok: true, sentTo: [{ email: 'k1@s.org', name: 'Asha', role: 'student' }, { email: 'mum@x.org', name: 'Mum', role: 'parent' }] })),
 }));
 
+const mockLearningReport = jest.fn(async (_id: string) => 'Aivorah_Learning_Report_Asha_2026-11-20.pdf');
+jest.mock('../../../../shared/learning-report/learningReport', () => ({ downloadLearningReport: (id: string) => mockLearningReport(id) }));
+
 type Handler = (url: string, init?: any) => { ok?: boolean; status?: number; body: any };
 function mockApi(handler: Handler) {
   global.fetch = jest.fn((url: string, init?: any) => {
@@ -125,6 +128,22 @@ describe('homeroom teacher (T1)', () => {
     await user.press(await screen.findByTestId('download-k1'));
     expect(downloadReport).toHaveBeenCalledWith('k1');
     expect(await screen.findByTestId('toast')).toHaveTextContent(/Report downloaded/);
+  });
+
+  test('Learning Report downloads that student’s practice and follow-up report', async () => {
+    const user = userEvent.setup();
+    await render(<StudentReportScreen navigation={{}} />);
+    await user.press(await screen.findByTestId('learning-k2'));
+    expect(mockLearningReport).toHaveBeenCalledWith('k2');
+    expect(await screen.findByTestId('toast')).toHaveTextContent(/Learning report downloaded/);
+  });
+
+  test('Learning Report refused by the server shows a clear message', async () => {
+    mockLearningReport.mockRejectedValueOnce(new Error('Not authorised.'));
+    const user = userEvent.setup();
+    await render(<StudentReportScreen navigation={{}} />);
+    await user.press(await screen.findByTestId('learning-k1'));
+    expect(await screen.findByTestId('toast')).toHaveTextContent(/only for students linked to you/);
   });
 
   test('Share asks first, then sends to the student and linked parents', async () => {
