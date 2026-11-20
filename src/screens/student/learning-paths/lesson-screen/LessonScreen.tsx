@@ -116,6 +116,19 @@ export default function LessonScreen({ navigation, route, embedded = false, prac
     return 'read';
   })();
   const [mode, setMode] = useState<Mode>(initialMode);
+  // Practise This Skill (from a Test Report) opens Ask Aivorah on this topic
+  // with the exact follow-up. The drawer keeps this screen mounted, so a new
+  // request (new nonce) switches to the Ask tab even if it is already open.
+  const followupId = route?.params?.followupId as string | undefined;
+  const followupNonce = route?.params?.followupNonce;
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- navigation param → tab
+    if (followupId) setMode('ask');
+  }, [followupId, followupNonce]);
+  const backToReport = (attemptId: string) => {
+    const back = route?.params?.followupReturn;
+    navigation.navigate('Quiz', { ...(back?.params || {}), openAttemptId: attemptId, openNonce: Date.now() });
+  };
   const [fullBookView, setFullBookView] = useState(false);
   const [fontLarge, setFontLarge] = useState(false);
   const [pauseAnswer, setPauseAnswer] = useState<number | null>(null);
@@ -321,6 +334,9 @@ export default function LessonScreen({ navigation, route, embedded = false, prac
 
             {mode === 'ask' && (
               <AskTab
+                followupId={followupId}
+                onBackToReport={backToReport}
+                onGoToLearn={() => setMode('read')}
                 topic={topic}
                 chapter={chapter}
                 grade={grade}
@@ -379,6 +395,7 @@ export default function LessonScreen({ navigation, route, embedded = false, prac
                     navigation={navigation}
                     locked={practiceLocked}
                     onGoTo={setMode}
+                    lessonParams={route?.params}
                   />
                 )}
               </ScrollView>

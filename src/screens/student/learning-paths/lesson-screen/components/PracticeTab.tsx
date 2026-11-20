@@ -17,6 +17,7 @@ export default function PracticeTab({
   navigation,
   locked = false,
   onGoTo,
+  lessonParams,
 }: {
   topic: any;
   grade: string;
@@ -30,7 +31,11 @@ export default function PracticeTab({
   navigation: any;
   locked?: boolean;
   onGoTo?: (mode: 'read' | 'listen') => void;
+  // This lesson's own route params, so the quiz (and Practise This Skill)
+  // can bring the student back to this exact topic.
+  lessonParams?: Record<string, any>;
 }) {
+  const { mode: _mode, followupId: _f, followupNonce: _n, followupReturn: _r, ...ownParams } = lessonParams || {};
   if (locked) {
     return (
       <View style={[styles.card, { borderColor: colors.borderColor, backgroundColor: colors.cardDark }]}>
@@ -83,7 +88,7 @@ export default function PracticeTab({
           // So the quiz's back button returns here instead of the old
           // SubjectTopics list — it only knew that one hardcoded target before.
           returnTo: 'LessonScreen',
-          returnParams: { subject, curriculum, grade, chapterIndex, topicIndex },
+          returnParams: { ...ownParams, topicId, subject, curriculum, grade, chapterIndex, topicIndex },
         })}
         activeOpacity={0.85}
       >

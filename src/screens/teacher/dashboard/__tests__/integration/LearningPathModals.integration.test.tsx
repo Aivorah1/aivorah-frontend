@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react-native';
+import { render, screen, fireEvent } from '@testing-library/react-native';
 import { renderLearningPathModal } from '../../components/modals/LearningPathModals';
 
 const TILE = { icon: 'book-open', color: '#FFD700', stat: '1', label: 'Struggling', title: 'Need Support', body: 'x' };
@@ -21,19 +21,27 @@ describe('renderLearningPathModal — case 0 (Struggling)', () => {
     expect(screen.getByText('No students need support right now!')).toBeTruthy();
   });
 
-  test('sorts struggling students by progress ascending and scopes topic count to the teacher\'s subjects', async () => {
-    const students = [
-      { id: 's1', name: 'Bela Rao', progressPct: 15, scopedSubjects: ['Mathematics'], completedTopicsDetailed: [{ topic: 'Fractions', subject: 'Mathematics' }, { topic: 'Art 1', subject: 'Art' }] },
-      { id: 's2', name: 'Aarav Sharma', progressPct: 5, scopedSubjects: [], completedTopics: ['X', 'Y'] },
-    ];
+  test('without topic-help data, lists inactive students with the Inactive reason', async () => {
+    const students = [{ id: 's1', name: 'Bela Rao', progressPct: 15 }, { id: 's2', name: 'Aarav Sharma', progressPct: 5 }];
     await render(<>{renderLearningPathModal(0, baseCtx({ allNeedsAttention: students }))}</>);
-
-    // Aarav (5%) listed before Bela (15%) - ascending by progress.
     expect(screen.getByText('2 Students')).toBeTruthy();
-    // Bela: only the Mathematics topic is counted (Art excluded by subject scoping) -> 1.
-    // Aarav has no scoping, so his raw completedTopics length (2) is used instead.
-    expect(screen.getByText('1 topics done')).toBeTruthy();
-    expect(screen.getByText('2 topics done')).toBeTruthy();
+    expect(screen.getAllByText('Inactive')).toHaveLength(2);
+  });
+
+  test('shows Student / Reason rows, both reasons for one student, and opens the progress view for the skill', async () => {
+    const onViewProgress = jest.fn();
+    const needSupport = [
+      { student: { id: 'k', name: 'Kiran Rao', grade: 'Grade 8' }, reasons: [{ kind: 'topic_help', label: 'Needs topic help', detail: 'Puns and alliteration · repeated difficulty', skillId: 'en.figurative.pun-vs-alliteration' }] },
+      { student: { id: 'd', name: 'Dev Shah', grade: 'Grade 8' }, reasons: [{ kind: 'inactive', label: 'Inactive', detail: 'No learning activity for 8 days' }] },
+    ];
+    await render(<>{renderLearningPathModal(0, baseCtx({ needSupport, onViewProgress }))}</>);
+    expect(screen.getByText('Need Support (2)')).toBeTruthy();
+    expect(screen.getByText('Student')).toBeTruthy();
+    expect(screen.getByText('Reason')).toBeTruthy();
+    expect(screen.getByText('Kiran')).toBeTruthy();
+    expect(screen.getByText('No learning activity for 8 days')).toBeTruthy();
+    fireEvent.press(screen.getByTestId('view-student-progress'));
+    expect(onViewProgress).toHaveBeenCalledWith('k', 'en.figurative.pun-vs-alliteration');
   });
 });
 

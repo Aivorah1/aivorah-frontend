@@ -16,6 +16,7 @@ import ScreenLayout from '../../../components/common/ScreenLayout';
 import { useTheme } from '../../../context/ThemeContext';
 import { useParentAIProgressReport } from './hooks/useParentAIProgressReport';
 import ReportSection from './components/ReportSection';
+import LearningFollowUpCard from './components/LearningFollowUpCard';
 import { pdfSafeDeep } from './utils/pdfSafeText';
 import { enableUnicodeText } from './utils/pdfUnicodeText';
 import { textAfterFirstLine } from './utils/pdfLines';
@@ -529,6 +530,9 @@ export default function ParentAIProgressReportScreen({ navigation, route }: any)
                   </TouchableOpacity>
                 )}
               </View>
+
+              {/* Practise This Skill outcomes for the selected child (saved results only) */}
+              <LearningFollowUpCard childId={selectedChild?.id} childName={selectedChild?.name} colors={colors} />
 
               {/* Initial prompt — shown before any report is generated */}
               {!loadingReport && !reportData && !error && (

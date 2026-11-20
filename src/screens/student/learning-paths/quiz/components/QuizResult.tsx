@@ -32,6 +32,7 @@ export default function QuizResult({
   onHistory,
   takenAt,
   review = false,
+  followupSlot,
 }: {
   topic: string;
   score: number;
@@ -55,6 +56,8 @@ export default function QuizResult({
   // A past test opened from History: when it was taken; no celebration, no next-topic.
   takenAt?: string;
   review?: boolean;
+  // Practise This Skill recommendations, shown right under the score.
+  followupSlot?: React.ReactNode;
 }) {
   const accent = colors.accentYellow;
   const gold = colors.accentYellow;
@@ -108,6 +111,7 @@ export default function QuizResult({
           <Text style={[styles.resultScore, { color: scoreColor, marginTop: 12 }]}>{pct}%</Text>
           <Text style={[styles.resultLabel, { color: colors.textMain }]}>{score} / {questions.length} correct</Text>
           <Text style={[styles.resultMessage, { color: colors.textMuted }]}>{message}</Text>
+          {followupSlot}
 
           {/* badges */}
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12, justifyContent: 'center' }}>

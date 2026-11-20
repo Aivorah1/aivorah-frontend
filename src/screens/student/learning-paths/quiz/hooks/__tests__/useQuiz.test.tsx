@@ -101,6 +101,7 @@ function Harness({ studentId, practiceQuiz, keyPoints, autoStart = true }: { stu
       <Text testID="spokenStatus">{h.spokenStatus}</Text>
       <Text testID="spokenError">{h.spokenError}</Text>
       <Text testID="results">{JSON.stringify(h.perQuestionResultsRef.current)}</Text>
+      <Text testID="savedAttemptId">{String(h.savedAttemptId)}</Text>
       <TouchableOpacity testID="setSpoken" onPress={() => h.setSpokenText(SPOKEN)}><Text>x</Text></TouchableOpacity>
       <TouchableOpacity testID="setSpokenShort" onPress={() => h.setSpokenText('um ok')}><Text>x</Text></TouchableOpacity>
       <TouchableOpacity testID="submitSpoken" onPress={() => h.submitSpoken()}><Text>x</Text></TouchableOpacity>
@@ -503,5 +504,31 @@ describe('useQuiz — the spoken last question', () => {
     await waitFor(() => expect(text('answered')).toBe(1));
     await user.press(screen.getByTestId('submitSpoken'));
     expect(fetchCalls('/ibpyp/evaluate-explanation')).toHaveLength(1);
+  });
+});
+
+describe('Practise This Skill evidence', () => {
+  test('each answer keeps its first response, tries and hint shown apart from the score; the saved attempt id comes back', async () => {
+    const user = userEvent.setup();
+    mockFetchRoutes();
+    const base = global.fetch as jest.Mock;
+    global.fetch = jest.fn((url: string, opts?: any) => (String(url).includes('/student/track-attempt')
+      ? jsonRes({ ok: true, attempt: { id: 'attempt-42' } })
+      : base(url, opts))) as any;
+    await render(<Harness studentId="stu-1" />);
+    await waitFor(() => expect(text('phase')).toBe('quiz'));
+    await user.press(screen.getByTestId('q0-opt0')); // wrong first (A)
+    await waitFor(() => expect(text('showMcqHint')).toBe('true'), { timeout: 3000 });
+    await user.press(screen.getByTestId('q0-opt1')); // right on the second try, after the hint
+    await user.press(screen.getByTestId('q1-opt0')); // right first time
+    await answerSpoken(user);
+    await pressSeeResults(user);
+    expect(text('score')).toBe(3); // the score itself is unchanged by the evidence
+    const body = JSON.parse(fetchCalls('/student/track-attempt')[0][1].body);
+    expect(body.perQuestionResults[0]).toMatchObject({ isCorrect: true, attempts: 2, firstAnswer: 'A', hintShown: true });
+    expect(body.perQuestionResults[1]).toMatchObject({ isCorrect: true, attempts: 1, firstAnswer: 'A', hintShown: false });
+    expect(body.perQuestionResults[2]).not.toHaveProperty('attempts'); // voice question stays separate
+    expect(body.perQuestionResults[0]).toHaveProperty('reasoning');
+    await waitFor(() => expect(text('savedAttemptId')).toBe('attempt-42'));
   });
 });

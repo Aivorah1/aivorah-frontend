@@ -6,8 +6,12 @@ import { spacing } from '../../../../../theme';
 import TopicAICoach from '../../../../../components/common/TopicAICoach';
 import { makeStyles } from '../styles';
 import BookPane from './BookPane';
+import SkillPracticePanel from '../../practice-followup/components/SkillPracticePanel';
 
 export default function AskTab({
+  followupId,
+  onBackToReport,
+  onGoToLearn,
   topic,
   chapter,
   grade,
@@ -18,6 +22,10 @@ export default function AskTab({
   styles,
   onReadFullBook,
 }: {
+  // Practise This Skill: the follow-up to teach and check here.
+  followupId?: string;
+  onBackToReport?: (attemptId: string) => void;
+  onGoToLearn?: () => void;
   topic: any;
   chapter: any;
   grade: string;
@@ -38,6 +46,11 @@ export default function AskTab({
             Context loaded: {grade} · {subject} · Unit {chapterIndex + 1} · {topic.name}
           </Text>
         </View>
+        {!!followupId && (
+          <View style={{ marginBottom: 16 }}>
+            <SkillPracticePanel followupId={followupId} colors={colors} onBackToReport={(id) => onBackToReport?.(id)} onGoToLearn={onGoToLearn} />
+          </View>
+        )}
         <TopicAICoach
           topic={topic.name}
           subject={subject}
