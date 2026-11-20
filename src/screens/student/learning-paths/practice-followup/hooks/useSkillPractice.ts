@@ -6,7 +6,7 @@ import type { ResultView, SessionView } from '../types';
 // source of truth: every action returns the saved session, and on any failure
 // (timeout, failed save, invalid AI output) the last saved state is reloaded
 // and a retry message shown — a result is only shown after it was saved.
-export function useSkillPractice(followupId: string | null | undefined) {
+export function useSkillPractice(followupId: string | null | undefined, lessonText?: string) {
   const [session, setSession] = useState<SessionView | null>(null);
   const [loading, setLoading] = useState(!!followupId);
   const [loadError, setLoadError] = useState('');
@@ -22,7 +22,7 @@ export function useSkillPractice(followupId: string | null | undefined) {
     if (!followupId) return;
     setLoading(true); setLoadError('');
     try {
-      const s = await followupApi.session(followupId);
+      const s = await followupApi.open(followupId, lessonText);
       setSession(s);
       setHint(s.question?.hint ?? null);
     } catch (e: any) {
@@ -30,6 +30,8 @@ export function useSkillPractice(followupId: string | null | undefined) {
     } finally {
       setLoading(false);
     }
+    // lessonText only grounds the first build; changing it must not reload.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [followupId]);
 
   // eslint-disable-next-line react-hooks/set-state-in-effect -- load the saved session when it changes

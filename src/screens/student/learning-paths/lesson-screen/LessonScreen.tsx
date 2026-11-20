@@ -337,6 +337,8 @@ export default function LessonScreen({ navigation, route, embedded = false, prac
                 followupId={followupId}
                 onBackToReport={backToReport}
                 onGoToLearn={() => setMode('read')}
+                onGoToPractice={() => setMode('practice')}
+                topicId={topicId}
                 topic={topic}
                 chapter={chapter}
                 grade={grade}

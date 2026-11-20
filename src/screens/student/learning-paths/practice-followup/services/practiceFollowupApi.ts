@@ -38,6 +38,12 @@ export const followupApi = {
     call<{ attemptId: string; originalScore: number; recommendations: Recommendation[]; unmappedQuestions: number }>(
       `/attempts/${encodeURIComponent(attemptId)}${topicId ? `?topicId=${encodeURIComponent(topicId)}` : ''}`),
   session: (id: string) => call<SessionView>(`/${encodeURIComponent(id)}`),
+  // Opens (and, for a topic skill, builds once from this lesson text) the session.
+  open: (id: string, lessonText?: string) => call<SessionView>(`/${encodeURIComponent(id)}/open`, { method: 'POST', body: { lessonText: lessonText || '' } }),
+  // The follow-up Ask Aivorah should show for a topic (from the newest test on it).
+  forTopic: (topic: string, subject?: string, topicId?: string) =>
+    call<{ followupId: string | null; attemptId: string | null; completed?: boolean; hasTest?: boolean }>(
+      `/for-topic?${new URLSearchParams({ topic, ...(subject ? { subject } : {}), ...(topicId ? { topicId } : {}) }).toString()}`),
   explainAnotherWay: (id: string, message?: string) =>
     call<{ understood: boolean; reply?: string; repeated?: boolean; session?: SessionView }>(`/${encodeURIComponent(id)}/explain-another-way`, { method: 'POST', body: { message } }),
   hint: (id: string, questionId: string) => call<{ questionId: string; hint: string }>(`/${encodeURIComponent(id)}/hint`, { method: 'POST', body: { questionId } }),

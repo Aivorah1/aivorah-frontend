@@ -10,7 +10,7 @@ jest.mock('../../../../../context/ThemeContext', () => ({
 }));
 
 const mockApi = {
-  session: jest.fn(), answer: jest.fn(), clarify: jest.fn(), hint: jest.fn(), solution: jest.fn(), explainAnotherWay: jest.fn(),
+  session: jest.fn(), open: jest.fn(), answer: jest.fn(), clarify: jest.fn(), hint: jest.fn(), solution: jest.fn(), explainAnotherWay: jest.fn(),
 };
 jest.mock('../services/practiceFollowupApi', () => {
   class FollowupApiError extends Error { status: number; code?: string; constructor(m: string, s: number, c?: string) { super(m); this.status = s; this.code = c; } }
@@ -35,7 +35,11 @@ const session = (over: Partial<SessionView> = {}): SessionView => ({
   outcome: { code: 'in_progress', label: 'In progress', text: '', parentText: '', confirmed: 0 }, answeredCount: 0, ...over,
 });
 
-beforeEach(() => { Object.values(mockApi).forEach((f) => f.mockReset()); });
+beforeEach(() => {
+  Object.values(mockApi).forEach((f) => f.mockReset());
+  // Opening uses POST /open (with the lesson text); reloads use GET.
+  mockApi.open.mockImplementation((...a: any[]) => mockApi.session(...a));
+});
 
 async function open(over: Partial<SessionView> = {}) {
   mockApi.session.mockResolvedValue(session(over));

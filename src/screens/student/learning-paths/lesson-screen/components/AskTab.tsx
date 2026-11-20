@@ -6,12 +6,14 @@ import { spacing } from '../../../../../theme';
 import TopicAICoach from '../../../../../components/common/TopicAICoach';
 import { makeStyles } from '../styles';
 import BookPane from './BookPane';
-import SkillPracticePanel from '../../practice-followup/components/SkillPracticePanel';
+import TopicPractice, { lessonTextOf } from '../../practice-followup/components/TopicPractice';
 
 export default function AskTab({
   followupId,
   onBackToReport,
   onGoToLearn,
+  onGoToPractice,
+  topicId,
   topic,
   chapter,
   grade,
@@ -26,6 +28,8 @@ export default function AskTab({
   followupId?: string;
   onBackToReport?: (attemptId: string) => void;
   onGoToLearn?: () => void;
+  onGoToPractice?: () => void;
+  topicId?: string;
   topic: any;
   chapter: any;
   grade: string;
@@ -46,11 +50,20 @@ export default function AskTab({
             Context loaded: {grade} · {subject} · Unit {chapterIndex + 1} · {topic.name}
           </Text>
         </View>
-        {!!followupId && (
-          <View style={{ marginBottom: 16 }}>
-            <SkillPracticePanel followupId={followupId} colors={colors} onBackToReport={(id) => onBackToReport?.(id)} onGoToLearn={onGoToLearn} />
-          </View>
-        )}
+        {/* Practise This Skill: the follow-up from the Test Report, or this topic's open one */}
+        <View style={{ marginBottom: 16 }}>
+          <TopicPractice
+            followupId={followupId}
+            topicName={topic.name}
+            subject={subject}
+            topicId={topicId}
+            lessonText={lessonTextOf(topic)}
+            colors={colors}
+            onBackToReport={(id) => onBackToReport?.(id)}
+            onGoToLearn={onGoToLearn}
+            onGoToPractice={onGoToPractice}
+          />
+        </View>
         <TopicAICoach
           topic={topic.name}
           subject={subject}
