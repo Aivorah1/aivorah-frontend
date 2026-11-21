@@ -3,22 +3,21 @@
  * status (Listening / Thinking / Speaking), the caption of what is being said,
  * and the ONE voice button (Start / Stop).
  *
- * Motion: a gentle idle "breathing" loop while listening or idle, a small
- * bounce on every spoken word (driven by the speech engine's word events, so
- * it follows the audio actually playing), and a slight tilt while thinking.
- * The Learning Buddy pictures are single flat images: there is no separate
- * mouth or eye artwork to animate, so lip-sync and blinking are approximated
- * by moving the whole picture.
+ * Motion: the buddy talks (lips and jaw move with the speech, eyes blink;
+ * see avatar/TalkingFace.tsx), breathes gently, and tilts a little while
+ * thinking.
  */
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Animated, Easing, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../theme';
 import type { VoiceStatus } from '../voice/VoiceSession';
+import TalkingFace from '../avatar/TalkingFace';
+import type { LipSync } from '../avatar/lipSync';
 
 const STATUS_LABEL: Record<VoiceStatus, string> = { idle: '', listening: 'Listening…', thinking: 'Thinking…', speaking: 'Speaking…' };
 
-export default function AvatarPanel({ source, name, status, caption, active, onToggle, colors, compact = false, talkRef }: {
+export default function AvatarPanel({ source, name, status, caption, active, onToggle, colors, compact = false, lips }: {
   source: any;
   name: string;
   status: VoiceStatus;
@@ -27,10 +26,9 @@ export default function AvatarPanel({ source, name, status, caption, active, onT
   onToggle: () => void;
   colors: AppColors;
   compact?: boolean;
-  talkRef?: React.MutableRefObject<(() => void) | null>;
+  lips: LipSync;
 }) {
   const [breathe] = useState(() => new Animated.Value(0));
-  const [talk] = useState(() => new Animated.Value(0));
   const [tilt] = useState(() => new Animated.Value(0));
   const [bars] = useState(() => new Animated.Value(0));
 
@@ -56,22 +54,7 @@ export default function AvatarPanel({ source, name, status, caption, active, onT
     return () => loop.stop();
   }, [status, tilt, bars]);
 
-  // One small "talk" bounce per spoken word.
-  useEffect(() => {
-    if (!talkRef) return;
-    talkRef.current = () => {
-      talk.stopAnimation();
-      talk.setValue(1);
-      Animated.timing(talk, { toValue: 0, duration: 180, easing: Easing.out(Easing.quad), useNativeDriver: true }).start();
-    };
-    return () => { talkRef.current = null; };
-  }, [talk, talkRef]);
-
-  const scale = Animated.add(
-    breathe.interpolate({ inputRange: [0, 1], outputRange: [1, 1.012] }),
-    talk.interpolate({ inputRange: [0, 1], outputRange: [0, 0.018] }),
-  );
-  const translateY = talk.interpolate({ inputRange: [0, 1], outputRange: [0, -3] });
+  const scale = breathe.interpolate({ inputRange: [0, 1], outputRange: [1, 1.012] });
   const rotate = tilt.interpolate({ inputRange: [0, 1], outputRange: ['-1.5deg', '1.5deg'] });
   const mint = '#D9F0E4';
 
@@ -87,13 +70,9 @@ export default function AvatarPanel({ source, name, status, caption, active, onT
             ))}
           </View>
         )}
-        <Animated.Image
-          source={source}
-          accessibilityLabel={`${name}, your AI Teacher`}
-          resizeMode="contain"
-          style={[styles.avatar, { transform: [{ translateY }, { scale }, { rotate }] }]}
-          testID="ai-teacher-buddy"
-        />
+        <Animated.View style={[styles.avatar, { transform: [{ scale }, { rotate }] }]}>
+          <TalkingFace source={source} name={name} lips={lips} />
+        </Animated.View>
         {!!caption && (
           <View style={styles.caption} testID="ai-teacher-caption" accessibilityLiveRegion="polite">
             <Text style={styles.captionText}>{caption}</Text>
