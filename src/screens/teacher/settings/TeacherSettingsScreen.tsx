@@ -1,8 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import {
-  View, Text, ScrollView, StyleSheet, TouchableOpacity,
-  TextInput, Modal, ActivityIndicator, Platform, Image,
-} from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput, Modal, Platform, Image } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { spacing, radius } from '../../../theme';
@@ -543,7 +541,7 @@ export default function TeacherSettingsScreen({ navigation }: any) {
                 onPress={confirmDeleteAccount}
                 disabled={deleteLoading}
               >
-                {deleteLoading ? <ActivityIndicator color="white" size="small" /> : <Text style={styles.modalSaveText}>Delete</Text>}
+                {deleteLoading ? <ActivityIndicator color={colors.onPrimary} size="small" /> : <Text style={styles.modalSaveText}>Delete</Text>}
               </TouchableOpacity>
             </View>
           </View>
@@ -569,7 +567,7 @@ export default function TeacherSettingsScreen({ navigation }: any) {
                 activeOpacity={0.85}
                 style={{ backgroundColor: gold, borderRadius: radius.md, paddingHorizontal: 40, paddingVertical: 11, alignItems: 'center', justifyContent: 'center', minWidth: 120 }}
               >
-                <Text style={{ color: '#fff', fontSize: 14, fontWeight: '700' }}>OK</Text>
+                <Text style={{ color: colors.onPrimary, fontSize: 14, fontWeight: '700' }}>OK</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -589,7 +587,7 @@ function FieldRow({ label, sub, btnLabel, onPress, styles, badgeOnly, testID }: 
         <Text style={styles.fieldSub} numberOfLines={1} testID={testID ? `${testID}-value` : undefined}>{sub}</Text>
       </View>
       {badgeOnly ? (
-        <TouchableOpacity testID={testID} style={[styles.changeBtn, { borderColor: styles.comingSoonBadge?.borderColor || '#E5A93C40', backgroundColor: styles.comingSoonBadge?.backgroundColor || '#E5A93C18' }]} onPress={onPress} activeOpacity={0.7}>
+        <TouchableOpacity testID={testID} style={[styles.changeBtn, { borderColor: styles.comingSoonBadge?.borderColor || '#0E6E8640', backgroundColor: styles.comingSoonBadge?.backgroundColor || '#0E6E8618' }]} onPress={onPress} activeOpacity={0.7}>
           <Text style={styles.changeBtnText}>{btnLabel}</Text>
         </TouchableOpacity>
       ) : (
@@ -620,13 +618,14 @@ function AppModal({ visible, title, onClose, children, styles, colors, testID }:
 }
 
 function ModalButtons({ onCancel, onSave, loading, saveLabel = 'Save Changes', cancelLabel = 'Cancel', styles, saveTestID }: { onCancel: () => void; onSave: () => void; loading: boolean; saveLabel?: string; cancelLabel?: string; styles: any; saveTestID?: string }) {
+  const { colors } = useTheme();
   return (
     <View style={styles.modalBtns}>
       <TouchableOpacity style={styles.modalCancelBtn} onPress={onCancel}>
         <Text style={styles.modalCancelText}>{cancelLabel}</Text>
       </TouchableOpacity>
       <TouchableOpacity testID={saveTestID} style={styles.modalSaveBtn} onPress={onSave} disabled={loading}>
-        {loading ? <ActivityIndicator color="white" size="small" /> : <Text style={styles.modalSaveText}>{saveLabel}</Text>}
+        {loading ? <ActivityIndicator color={colors.onPrimary} size="small" /> : <Text style={styles.modalSaveText}>{saveLabel}</Text>}
       </TouchableOpacity>
     </View>
   );
@@ -713,5 +712,5 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
   modalCancelBtn: { flex: 1, height: 46, borderRadius: radius.md, borderWidth: 1, borderColor: c.borderColor, alignItems: 'center', justifyContent: 'center' },
   modalCancelText: { fontSize: 14, fontWeight: '600', color: c.textMuted },
   modalSaveBtn: { flex: 1, height: 46, borderRadius: radius.md, backgroundColor: c.accentYellow, alignItems: 'center', justifyContent: 'center' },
-  modalSaveText: { fontSize: 14, fontWeight: '700', color: 'white' },
+  modalSaveText: { fontSize: 14, fontWeight: '700', color: c.onPrimary },
 });

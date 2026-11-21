@@ -13,7 +13,8 @@
  * the chosen script. Everything already in the target script is left untouched.
  */
 import React, { useCallback, useRef, useState } from 'react';
-import { View, TextInput, Text, Pressable, StyleSheet, ActivityIndicator, type TextInputProps } from 'react-native';
+import { View, TextInput, Text, Pressable, StyleSheet, type TextInputProps } from 'react-native';
+import ActivityIndicator from './AivorahLoader';
 import ASSIGNMENTS_SERVER_URL from '../../config/assignmentsServerUrl';
 
 // Human language name (as stored on assignments) → Google Input Tools code.

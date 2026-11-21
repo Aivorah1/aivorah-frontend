@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import ActivityIndicator from '../../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../../theme';
 import { isRealStudentEmail } from '../../utils/studentDisplay';
@@ -117,7 +118,7 @@ export default function CreateStudentTab({
         </TouchableOpacity>
         <TouchableOpacity testID="teacher-students-create-submit-button" style={styles.modalSaveBtn} onPress={onSubmit} disabled={creating}>
           {creating
-            ? <ActivityIndicator color="white" size="small" />
+            ? <ActivityIndicator color={colors.onPrimary} size="small" />
             : <Text style={styles.modalSaveText}>{invite ? 'Create & Send Invite' : 'Create Account'}</Text>}
         </TouchableOpacity>
       </View>

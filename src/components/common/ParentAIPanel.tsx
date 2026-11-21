@@ -6,10 +6,8 @@
  * Uses selected child's real data as context. Warm, jargon-free tone.
  */
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import {
-  View, Text, TextInput, TouchableOpacity, ScrollView,
-  Animated, ActivityIndicator, Platform, Image,
-} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Animated, Platform, Image } from 'react-native';
+import ActivityIndicator from './AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';

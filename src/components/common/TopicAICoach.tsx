@@ -4,11 +4,8 @@
  * Scopes the AI to the current topic — e.g., "Fractions" only answers about Fractions.
  */
 import React, { useState, useRef, useEffect } from 'react';
-import {
-  View, Text, TextInput, TouchableOpacity, ScrollView,
-  StyleSheet, Animated, ActivityIndicator, Keyboard,
-  Platform, KeyboardAvoidingView, Image,
-} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Animated, Keyboard, Platform, KeyboardAvoidingView, Image } from 'react-native';
+import ActivityIndicator from './AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';

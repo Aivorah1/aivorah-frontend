@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import Header from '../../../components/common/Header';
 import ScreenLayout from '../../../components/common/ScreenLayout';
@@ -57,6 +58,7 @@ export default function TeacherSubjectEditorScreen({ route, navigation }: any) {
         : s?.status === 'draft' ? `Draft saved ${when(s.updatedAt)} · only you can see it`
           : 'Standard path · make any change to start your version';
   const canPublish = draft.dirty || s?.status === 'draft' || !!s?.hasUnpublishedChanges;
+  const liveClean = s?.status === 'published' && !s.hasUnpublishedChanges && !draft.dirty;
 
   const outline = (
     <SubjectOutline
@@ -89,14 +91,19 @@ export default function TeacherSubjectEditorScreen({ route, navigation }: any) {
   return (
     <ScreenLayout>
       <Header title={subject} subtitle={`${curriculum} · ${grade} · your class version`} showBack onMenuPress={() => navigation?.openDrawer?.()} />
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.borderColor, flexWrap: 'wrap' }}>
-        <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: s?.status === 'published' && !s.hasUnpublishedChanges && !draft.dirty ? colors.accentGreen : colors.accentYellow }} />
-        <Text testID="edits-status" style={{ flex: 1, fontSize: 13, color: colors.textMuted }}>{statusText}</Text>
-        {!!draft.error && <Text style={{ fontSize: 12.5, color: '#C0392B' }}>{draft.error}</Text>}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.borderColor, backgroundColor: colors.cardDark, flexWrap: 'wrap' }}>
+        {/* Status pill: icon + text + colour (mint = live, lilac = saved draft / pending, peach = unsaved). */}
+        <View style={{ flexShrink: 1, flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 36, paddingHorizontal: 12, borderRadius: 999, backgroundColor: liveClean ? colors.tintMint : draft.dirty ? colors.tintPeach : colors.tintLilac }}>
+          <Feather name={draft.saving ? 'loader' : liveClean ? 'check-circle' : draft.dirty ? 'edit-3' : 'check'} size={15} color={liveClean ? colors.accentGreen : draft.dirty ? colors.accentOrange : colors.primary} />
+          <Text testID="edits-status" style={{ flexShrink: 1, fontSize: 14, fontWeight: '600', color: colors.textMain }}>{statusText}</Text>
+        </View>
+        <View style={{ flex: 1 }} />
+        {!!draft.error && <Text style={{ fontSize: 14, color: colors.accentRed }}>{draft.error}</Text>}
         <TouchableOpacity testID="publish-subject" disabled={!canPublish || publishing} onPress={publish}
-          style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 16, paddingVertical: 9, borderRadius: 10, backgroundColor: colors.primary, opacity: canPublish ? 1 : 0.45 }}>
-          <Feather name="send" size={14} color="#fff" />
-          <Text style={{ color: '#fff', fontWeight: '800', fontSize: 13.5 }}>{publishing ? 'Publishing…' : s?.status === 'published' ? 'Publish updates' : 'Publish to students'}</Text>
+          accessibilityRole="button" accessibilityState={{ disabled: !canPublish || publishing }}
+          style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 44, paddingHorizontal: 18, borderRadius: 12, borderWidth: 1, borderColor: canPublish ? colors.primary : colors.borderColor, backgroundColor: canPublish ? colors.primary : colors.cardHover }}>
+          <Feather name="upload-cloud" size={16} color={canPublish ? colors.onPrimary : colors.textMuted} />
+          <Text style={{ color: canPublish ? colors.onPrimary : colors.textMuted, fontWeight: '700', fontSize: 15 }}>{publishing ? 'Publishing…' : s?.status === 'published' ? 'Publish updates' : 'Publish to students'}</Text>
         </TouchableOpacity>
       </View>
 
@@ -116,7 +123,7 @@ export default function TeacherSubjectEditorScreen({ route, navigation }: any) {
         </ScrollView>
       ) : (
         <View style={{ flex: 1, flexDirection: 'row' }}>
-          <ScrollView style={{ width: 360, maxWidth: 360, borderRightWidth: 1, borderRightColor: colors.borderColor }} contentContainerStyle={{ padding: 14 }}>
+          <ScrollView style={{ width: 360, maxWidth: 360, borderRightWidth: 1, borderRightColor: colors.borderColor, backgroundColor: colors.cardDark }} contentContainerStyle={{ padding: 14 }}>
             {outline}
           </ScrollView>
           <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20, maxWidth: 980, width: '100%', alignSelf: 'center' }}>

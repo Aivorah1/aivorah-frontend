@@ -14,7 +14,7 @@ export const DURATION_MINS: Record<string, number> = {
 
 export const ASSIGNMENT_TAGS = [
   { key: 'Live Class / Lesson', color: '#7FC29B' },
-  { key: 'Study Session',       color: '#C9A24E' },
+  { key: 'Study Session',       color: '#0E6E86' },
   { key: 'Learning experience', color: '#7FC29B' },
   { key: 'Quick task',          color: '#7FB2D6' },
   { key: 'Worksheet / Assignment', color: '#E3B24C' },

@@ -18,7 +18,7 @@ export function makeStyles(colors: AppColors) {
       },
       actionBtnPrimary: { backgroundColor: colors.accentYellow, borderColor: colors.accentYellow },
       actionBtnText: { fontFamily: fonts.serif, fontSize: 12, fontWeight: '600', color: colors.textMain },
-      actionBtnTextPrimary: { color: '#241f16' },
+      actionBtnTextPrimary: { color: '#1C2B37' },
       modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', alignItems: 'center', justifyContent: 'center', padding: spacing.lg },
       modalCard: {
         width: '100%', maxWidth: 720, maxHeight: '92%', backgroundColor: colors.cardDark, borderRadius: radius.md,
@@ -52,7 +52,7 @@ export function makeStyles(colors: AppColors) {
       tr: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: colors.borderColor },
       trHead: { backgroundColor: colors.accentYellow },
       trTotal: { backgroundColor: `${colors.accentYellow}18`, borderBottomWidth: 0 },
-      th: { fontFamily: fonts.serif, fontSize: 12.5, fontWeight: '700', color: '#241f16', paddingVertical: 8, paddingHorizontal: 8 },
+      th: { fontFamily: fonts.serif, fontSize: 12.5, fontWeight: '700', color: '#1C2B37', paddingVertical: 8, paddingHorizontal: 8 },
       td: { fontFamily: fonts.serif, fontSize: 13, color: colors.textMain, paddingVertical: 8, paddingHorizontal: 8 },
       tdBold: { fontWeight: '700' },
       cSno: { width: 52, textAlign: 'center' },

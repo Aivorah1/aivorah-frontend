@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../theme';
 import type { ChildData } from '../types';
@@ -22,10 +23,18 @@ export default function ChildrenSection({
         {childrenLoading ? (
           <ActivityIndicator color={colors.accentYellow} style={{ marginTop: 40, marginLeft: 8 }} />
         ) : childrenList.length === 0 ? (
-          <TouchableOpacity style={s.addChildBtn} onPress={onAddChild} activeOpacity={0.7}>
-            <Feather name="plus" size={20} color={colors.textDim} />
-            <Text style={s.addChildText}>Add Child</Text>
-          </TouchableOpacity>
+          <View testID="parent-no-children" style={{ minWidth: 260, maxWidth: 420, alignItems: 'center', gap: 8, paddingVertical: 20, paddingHorizontal: 16 }}>
+            <Feather name="book-open" size={34} color={colors.primary} />
+            <Text style={{ fontSize: 18, fontWeight: '700', color: colors.textHeading, textAlign: 'center' }}>No children linked yet</Text>
+            <Text style={{ fontSize: 14, lineHeight: 21, color: colors.textMuted, textAlign: 'center' }}>
+              Add a child to track learning, tasks, attendance and progress.
+            </Text>
+            <TouchableOpacity onPress={onAddChild} activeOpacity={0.8} accessibilityRole="button"
+              style={{ marginTop: 6, minHeight: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingHorizontal: 20, borderRadius: 12, backgroundColor: colors.primary }}>
+              <Feather name="plus" size={18} color={colors.onPrimary} />
+              <Text style={{ fontSize: 16, fontWeight: '700', color: colors.onPrimary }}>Add Child</Text>
+            </TouchableOpacity>
+          </View>
         ) : (
           <>
             {childrenList.map(ch => (

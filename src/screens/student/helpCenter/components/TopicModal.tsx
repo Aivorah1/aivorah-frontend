@@ -91,5 +91,5 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
   modalCancelBtn: { flex: 1, height: 46, borderRadius: radius.md, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
   modalCancelText: { fontSize: 14, fontWeight: '600' },
   modalSaveBtn: { flex: 1, height: 46, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center' },
-  modalSaveText: { fontSize: 14, fontWeight: '700', color: 'white' },
+  modalSaveText: { fontSize: 14, fontWeight: '700', color: c.onPrimary },
 });

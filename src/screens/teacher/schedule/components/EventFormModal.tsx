@@ -121,7 +121,7 @@ export default function EventFormModal(props: Props) {
                 backgroundColor: isAllDay ? gold : 'transparent',
                 alignItems: 'center', justifyContent: 'center'
               }}>
-                {isAllDay && <Feather name="check" size={13} color="white" />}
+                {isAllDay && <Feather name="check" size={13} color={colors.onPrimary} />}
               </View>
               <Text style={{ fontSize: 13, fontWeight: '700', color: colors.textMain }}>
                 All-day event (Holiday / Vacation / Assembly / Timeline)

@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity, TextInput, Platform } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput, Platform } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import Header from '../../../components/common/Header';
 import ScreenLayout from '../../../components/common/ScreenLayout';
@@ -34,7 +35,7 @@ export default function SchoolAdminAddTeacherScreen({ navigation }: any) {
           {result ? (
             <>
               <View style={styles.summaryCard}>
-                <View style={styles.summaryIcon}><Feather name="check" size={20} color="#0B0B0B" /></View>
+                <View style={styles.summaryIcon}><Feather name="check" size={20} color={colors.onPrimary} /></View>
                 <Text style={styles.summaryTitle}>Teacher added</Text>
                 <Text style={styles.warnText}>Save these now — the password won&apos;t be shown again.</Text>
               </View>
@@ -97,7 +98,7 @@ export default function SchoolAdminAddTeacherScreen({ navigation }: any) {
               <View style={styles.footerRow}>
                 <TouchableOpacity style={styles.secondaryBtn} onPress={goToTeachers} disabled={submitting} accessibilityRole="button"><Text style={styles.secondaryBtnText}>Cancel</Text></TouchableOpacity>
                 <TouchableOpacity style={[styles.primaryBtn, (!canSubmit || submitting) && styles.primaryBtnDisabled]} onPress={submit} disabled={!canSubmit || submitting} accessibilityRole="button">
-                  {submitting ? <ActivityIndicator color="#0B0B0B" size="small" /> : <Text style={styles.primaryBtnText}>Create Teacher</Text>}
+                  {submitting ? <ActivityIndicator color={colors.onPrimary} size="small" /> : <Text style={styles.primaryBtnText}>Create Teacher</Text>}
                 </TouchableOpacity>
               </View>
             </>
@@ -114,26 +115,26 @@ function makeStyles(colors: AppColors) {
     content: { padding: spacing.xl, paddingBottom: 60, width: '100%', maxWidth: 720, alignSelf: 'center' },
     card: { backgroundColor: colors.cardDark, borderWidth: 1, borderColor: colors.borderColor, borderRadius: radius.md, padding: spacing.lg, marginBottom: spacing.lg },
     cardTitle: { fontFamily: fonts.serif, fontSize: 15, fontWeight: '700', color: colors.textHeading, marginBottom: 4 },
-    cardHint: { fontFamily: fonts.serif, fontSize: 11.5, color: colors.textDim, marginBottom: 12, lineHeight: 16 },
+    cardHint: { fontFamily: fonts.serif, fontSize: 14, color: colors.textDim, marginBottom: 12, lineHeight: 16 },
     formRow: { flexDirection: 'row', gap: 14 },
-    formLabel: { fontFamily: fonts.serif, fontSize: 11.5, fontWeight: '600', color: colors.textMuted, marginBottom: 6, marginTop: 10 },
-    textInput: { fontFamily: fonts.serif, fontSize: 13, color: colors.textMain, borderWidth: 1, borderColor: colors.borderColor, borderRadius: radius.sm, paddingHorizontal: 12, paddingVertical: 10, backgroundColor: colors.bgDark },
-    hint: { fontFamily: fonts.serif, fontSize: 11, color: colors.textDim, marginTop: 10, lineHeight: 16 },
+    formLabel: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '600', color: colors.textMuted, marginBottom: 6, marginTop: 10 },
+    textInput: { fontFamily: fonts.serif, fontSize: 14, color: colors.textMain, borderWidth: 1, borderColor: colors.borderColor, borderRadius: radius.sm, paddingHorizontal: 12, paddingVertical: 10, backgroundColor: colors.bgDark },
+    hint: { fontFamily: fonts.serif, fontSize: 14, color: colors.textDim, marginTop: 10, lineHeight: 16 },
     footerRow: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10, marginTop: spacing.md },
-    primaryBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, backgroundColor: colors.accentYellow, borderRadius: radius.sm, paddingHorizontal: 18, height: 42 },
-    primaryBtnDisabled: { opacity: 0.45 },
-    primaryBtnText: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '700', color: '#0B0B0B' },
-    secondaryBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: colors.cardDark, borderWidth: 1, borderColor: colors.borderColor, borderRadius: radius.sm, paddingHorizontal: 16, height: 42 },
-    secondaryBtnText: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '700', color: colors.textHeading },
+    primaryBtn: { minHeight: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, backgroundColor: colors.accentYellow, borderRadius: radius.sm, paddingHorizontal: 18, height: 42 },
+    primaryBtnDisabled: { minHeight: 44, justifyContent: 'center', opacity: 0.45 },
+    primaryBtnText: { minHeight: 44, justifyContent: 'center', fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.onPrimary },
+    secondaryBtn: { minHeight: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: colors.cardDark, borderWidth: 1, borderColor: colors.borderColor, borderRadius: radius.sm, paddingHorizontal: 16, height: 42 },
+    secondaryBtnText: { minHeight: 44, justifyContent: 'center', fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.textHeading },
     emptyBox: { alignItems: 'center', paddingTop: 12, paddingBottom: 12, gap: 10, paddingHorizontal: 24, marginBottom: spacing.md },
-    emptyText: { fontFamily: fonts.serif, fontSize: 13, color: colors.textMuted, textAlign: 'center', lineHeight: 19 },
+    emptyText: { fontFamily: fonts.serif, fontSize: 14, color: colors.textMuted, textAlign: 'center', lineHeight: 19 },
     summaryCard: { backgroundColor: colors.cardDark, borderWidth: 1, borderColor: colors.borderColor, borderRadius: radius.md, padding: spacing.lg, marginBottom: spacing.lg, alignItems: 'center' },
     summaryIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.accentGreen, alignItems: 'center', justifyContent: 'center', marginBottom: 10 },
     summaryTitle: { fontFamily: fonts.serif, fontSize: 17, fontWeight: '700', color: colors.textHeading, marginBottom: 6 },
-    warnText: { fontFamily: fonts.serif, fontSize: 12, color: colors.accentYellow, textAlign: 'center' },
+    warnText: { fontFamily: fonts.serif, fontSize: 14, color: colors.accentYellow, textAlign: 'center' },
     credRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 7, borderBottomWidth: 1, borderBottomColor: colors.borderColor },
-    credLabel: { fontFamily: fonts.serif, fontSize: 12, color: colors.textDim },
-    credValue: { fontFamily: fonts.serif, fontSize: 12, fontWeight: '700', color: colors.textHeading, flexShrink: 1, textAlign: 'right' },
-    credValueMono: { fontFamily: Platform.select({ web: 'monospace', default: fonts.serif }), fontSize: 12, fontWeight: '700', color: colors.textHeading },
+    credLabel: { fontFamily: fonts.serif, fontSize: 14, color: colors.textDim },
+    credValue: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.textHeading, flexShrink: 1, textAlign: 'right' },
+    credValueMono: { fontFamily: Platform.select({ web: 'monospace', default: fonts.serif }), fontSize: 14, fontWeight: '700', color: colors.textHeading },
   });
 }

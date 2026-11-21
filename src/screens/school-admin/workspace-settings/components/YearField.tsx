@@ -61,7 +61,7 @@ function makeStyles(colors: AppColors) {
       borderWidth: 1, borderColor: colors.borderColor, backgroundColor: colors.bgDark,
       borderRadius: radius.sm, paddingHorizontal: 12, height: 42,
     },
-    fieldBoxText: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '600', color: colors.textHeading, flexShrink: 1 },
+    fieldBoxText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '600', color: colors.textHeading, flexShrink: 1 },
     ddBackdropNative: { position: 'absolute', top: -1000, left: -1000, right: -1000, bottom: -1000, zIndex: 19 },
     ddMenu: {
       position: 'absolute', top: 46, left: 0, right: 0, backgroundColor: colors.cardDark,
@@ -69,7 +69,7 @@ function makeStyles(colors: AppColors) {
       zIndex: 21, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 8,
     },
     ddItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12, paddingVertical: 9 },
-    ddItemText: { fontFamily: fonts.serif, fontSize: 12.5, color: colors.textMuted },
+    ddItemText: { fontFamily: fonts.serif, fontSize: 14, color: colors.textMuted },
     ddItemTextActive: { color: colors.textHeading, fontWeight: '700' },
   });
 }

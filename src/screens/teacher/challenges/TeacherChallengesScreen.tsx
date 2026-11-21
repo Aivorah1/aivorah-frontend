@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { spacing } from '../../../theme';
 import { useTheme } from '../../../context/ThemeContext';
@@ -20,7 +21,7 @@ import {
   localDateKey, topPerformersTitle, xpStatLabel,
 } from './utils/leaderboardPeriod';
 
-const GOLD = '#D9A93E';
+const GOLD = '#0E6E86';
 
 export default function TeacherChallengesScreen({ navigation }: any) {
   const { colors, isDark } = useTheme();

@@ -1,18 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useScheduleScroll } from '../../hooks/useScheduleScroll';
 import { useFocusEffect } from '@react-navigation/native';
-import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  Modal,
-  TextInput,
-  ActivityIndicator,
-  Platform,
-  useWindowDimensions,
-} from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Modal, TextInput, Platform, useWindowDimensions } from 'react-native';
+import ActivityIndicator from '../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { spacing, radius, fonts } from '../../theme';
 import type { AppColors } from '../../theme';

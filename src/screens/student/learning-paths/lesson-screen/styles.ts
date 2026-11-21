@@ -106,7 +106,7 @@ export const makeStyles = (c: AppColors) => StyleSheet.create({
 
   card: { borderWidth: 1, borderRadius: radius.lg, padding: 20, gap: 12 },
   introText: { fontFamily: fonts.serif, fontSize: 16, fontWeight: '700', lineHeight: 23 },
-  bodyText: { fontSize: 14, lineHeight: 22 },
+  bodyText: { fontSize: 17, lineHeight: 30, fontFamily: fonts.reading, maxWidth: 760 },
   poemLine: { fontFamily: fonts.serif, fontSize: 17, lineHeight: 30 },
   illusRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 12 },
   illusSlot: {

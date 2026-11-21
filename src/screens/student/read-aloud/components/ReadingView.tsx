@@ -54,7 +54,7 @@ export default function ReadingView(p: Props) {
             const isCurrent = status === 'current';
             const color = status === 'correct' || status === 'misread' || status === 'skipped' ? STATUS_COLORS[status] : isCurrent ? colors.textMain : colors.textMain + 'CC';
             const bg = isCurrent ? colors.accentYellow + '18'
-              : status === 'correct' ? '#9FB2A410' : status === 'misread' ? '#C98A8A14' : status === 'skipped' ? '#C5BD9614' : 'transparent';
+              : status === 'correct' ? '#9FB2A410' : status === 'misread' ? '#C98A8A14' : status === 'skipped' ? '#24877B14' : 'transparent';
             return (
               <View key={`${w}-${i}`} style={s.liveWordSlot} onLayout={(e) => { wordYRef.current[i] = e.nativeEvent.layout.y; }}>
                 {isCurrent ? <View style={[s.liveCaret, { backgroundColor: colors.accentYellow }]} /> : null}
@@ -113,8 +113,8 @@ export default function ReadingView(p: Props) {
             activeOpacity={0.7}
             accessibilityRole="button"
           >
-            <Feather name="check" size={18} color="#fff" />
-            <Text style={[s.recordingBtnText, { color: '#fff', fontWeight: '800' }]}>Done</Text>
+            <Feather name="check" size={18} color={colors.onPrimary} />
+            <Text style={[s.recordingBtnText, { color: colors.onPrimary, fontWeight: '800' }]}>Done</Text>
           </TouchableOpacity>
         </View>
       </View>

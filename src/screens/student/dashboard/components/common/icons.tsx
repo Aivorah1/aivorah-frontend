@@ -60,7 +60,7 @@ export function PerformanceBarChart({ topics, color, isDark }: { topics: { label
 export function FlameIcon({ size = 16 }: { size?: number }) {
   return (
     <Svg width={size} height={size * 1.25} viewBox="0 0 20 25">
-      <Path d="M10 0C8 3.5 5 7.5 5 12.5C5 17 7.2 20 10 20C12.8 20 15 17 15 12.5C15 7.5 12 3.5 10 0Z" fill="#BAA467" />
+      <Path d="M10 0C8 3.5 5 7.5 5 12.5C5 17 7.2 20 10 20C12.8 20 15 17 15 12.5C15 7.5 12 3.5 10 0Z" fill="#24877B" />
       <Path d="M10 6.5C9 9 7.5 11 7.5 13.5C7.5 15.5 8.5 17 10 17C11.5 17 12.5 15.5 12.5 13.5C12.5 11 11 9 10 6.5Z" fill="#D4BE7E" />
     </Svg>
   );

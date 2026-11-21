@@ -8,7 +8,8 @@
  * timetable of the class a school admin assigned them as class teacher).
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView, Platform, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, RefreshControl } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import Header from '../../../components/common/Header';
@@ -230,6 +231,17 @@ export default function TimetableScreen({ navigation, route }: any) {
               <Feather name="home" size={26} color={colors.textDim} />
               <Text style={styles.centerTitle}>No homeroom class yet</Text>
               <Text style={styles.centerText}>Your school admin assigns your homeroom class in Classes, using Assign Class Teacher.</Text>
+            </View>
+          ) : !selected && user?.role === 'parent' ? (
+            <View style={styles.centerBox} testID="timetable-parent-no-child">
+              <Feather name="book-open" size={30} color={colors.primary} />
+              <Text style={styles.centerTitle}>No child linked yet</Text>
+              <Text style={styles.centerText}>Add a child to view their timetable.</Text>
+              <TouchableOpacity onPress={() => navigation?.navigate?.('ParentMyKids')} accessibilityRole="button"
+                style={{ marginTop: 8, minHeight: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingHorizontal: 20, borderRadius: 12, backgroundColor: colors.primary }}>
+                <Feather name="plus" size={18} color={colors.onPrimary} />
+                <Text style={{ fontSize: 16, fontWeight: '700', color: colors.onPrimary }}>Add Child</Text>
+              </TouchableOpacity>
             </View>
           ) : !selected ? (
             <View style={styles.centerBox}><Feather name="calendar" size={26} color={colors.textDim} /><Text style={styles.centerText}>No class to show a timetable for.</Text></View>

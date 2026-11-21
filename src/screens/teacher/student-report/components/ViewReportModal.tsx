@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, View, Text, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
+import { Modal, View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { fetchStudentReport } from '../services/studentReportApi';
 import type { ReportStudent, StudentReport } from '../services/studentReportApi';
@@ -72,7 +73,7 @@ function ReportBody({ student, onClose, onDownload, onShare, busy, styles, color
           )}
           {report.canShare && (
             <TouchableOpacity testID="report-modal-share" style={[styles.actionBtn, styles.actionBtnPrimary]} onPress={() => onShare(student)} disabled={busy} accessibilityRole="button">
-              <Feather name="send" size={14} color="#241f16" />
+              <Feather name="send" size={14} color="#1C2B37" />
               <Text style={[styles.actionBtnText, styles.actionBtnTextPrimary]}>Share</Text>
             </TouchableOpacity>
           )}

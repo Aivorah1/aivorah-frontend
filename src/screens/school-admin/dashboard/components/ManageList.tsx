@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
   mainCol: { flex: 1, minWidth: 0 },
   sectionLabel: {
     fontFamily: fonts.serif,
-    fontSize: 10.5,
+    fontSize: 14,
     fontWeight: '700',
     letterSpacing: 0.6,
     marginBottom: 8, // spacing.sm
@@ -91,6 +91,6 @@ const rowStyles = StyleSheet.create({
     flexShrink: 0,
   },
   title: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700' },
-  caption: { fontFamily: fonts.serif, fontSize: 12, marginTop: 2 },
-  meta: { fontFamily: fonts.serif, fontSize: 12, fontWeight: '600', flexShrink: 0 },
+  caption: { fontFamily: fonts.serif, fontSize: 14, marginTop: 2 },
+  meta: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '600', flexShrink: 0 },
 });

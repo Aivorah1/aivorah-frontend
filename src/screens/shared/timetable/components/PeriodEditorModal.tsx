@@ -6,7 +6,8 @@
  * code still exists.
  */
 import React, { useMemo, useState, useEffect } from 'react';
-import { View, Text, Modal, TouchableOpacity, StyleSheet, TextInput, ScrollView, ActivityIndicator, Switch } from 'react-native';
+import { View, Text, Modal, TouchableOpacity, StyleSheet, TextInput, ScrollView, Switch } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../../../context/ThemeContext';
 import { radius, fonts } from '../../../../theme';

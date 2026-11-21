@@ -133,7 +133,8 @@ const LINKING_SCREENS = {
   ParentAnnouncements: 'parent/announcements',
 };
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { StyleSheet, View, ActivityIndicator, Platform, Text, TextInput, TouchableOpacity, Modal } from 'react-native';
+import { StyleSheet, View, Platform, Text, TextInput, TouchableOpacity, Modal } from 'react-native';
+import ActivityIndicator from './src/components/common/AivorahLoader';
 import { useFonts } from 'expo-font';
 import { Feather } from '@expo/vector-icons';
 import { applyActionCode, onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
@@ -211,6 +212,7 @@ import AdminNavigator from './src/navigation/AdminNavigator';
 import AdminLoginScreen from './src/screens/aivorah-admin/login/AdminLoginScreen';
 import { isAdminEmail } from './src/constants/adminEmails';
 import LandingScreen from './src/screens/auth/LandingScreen';
+import { isAuthPagePath } from './src/screens/auth/authRoutes';
 import VerifyEmailScreen from './src/screens/auth/VerifyEmailScreen';
 import ResetPasswordScreen from './src/screens/auth/ResetPasswordScreen';
 import OnboardingScreen from './src/screens/onboarding/OnboardingScreen';
@@ -826,6 +828,14 @@ function RootNavigator() {
   // it never fights real in-app navigation afterward (e.g. user taps
   // Dashboard on purpose later — must not get yanked back to the old URL).
   const hasRestoredFromUrlRef = useRef(false);
+  // Just signed in / up from a signed-out page (/signin, /signup …): that URL
+  // means nothing inside the app, so start from "/". Runs on every sign-in (not
+  // once per page load) and before the URL restore below reads the path.
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof window === 'undefined') return;
+    if (loading || !isAuthenticated) return;
+    if (isAuthPagePath(window.location.pathname)) window.history.replaceState(null, '', '/');
+  }, [loading, isAuthenticated]);
   useEffect(() => {
     if (hasRestoredFromUrlRef.current) return;
     if (Platform.OS !== 'web' || typeof window === 'undefined') return;
@@ -918,7 +928,8 @@ function RootNavigator() {
   if (!isAuthenticated) {
     console.log('[Auth] Not authenticated, showing LandingScreen');
     // Reset URL to root so browser doesn't show /leaderboard, /dashboard etc.
-    if (Platform.OS === 'web' && typeof window !== 'undefined' && window.location.pathname !== '/') {
+    // The signed-out pages (/signin, /signup, /forgot-password, /book-demo) keep their URL.
+    if (Platform.OS === 'web' && typeof window !== 'undefined' && window.location.pathname !== '/' && !isAuthPagePath(window.location.pathname)) {
       window.history.replaceState(null, '', '/');
     }
     return <LandingScreen />;

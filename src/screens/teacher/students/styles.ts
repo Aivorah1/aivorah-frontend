@@ -120,7 +120,7 @@ export const makeStyles = (c: AppColors) => StyleSheet.create({
     paddingHorizontal: spacing.xl, paddingVertical: 12,
     borderRadius: radius.md, backgroundColor: c.accentYellow,
   },
-  emptyAddBtnText: { fontSize: 14, fontWeight: '700', color: '#fff' },
+  emptyAddBtnText: { fontSize: 14, fontWeight: '700', color: c.onPrimary },
 
   // Modal
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.65)', alignItems: 'center', justifyContent: 'center', padding: spacing.xl },
@@ -151,5 +151,5 @@ export const makeStyles = (c: AppColors) => StyleSheet.create({
   modalCancelBtn: { flex: 1, height: 46, borderRadius: radius.md, borderWidth: 1, borderColor: c.borderColor, alignItems: 'center', justifyContent: 'center' },
   modalCancelText: { fontSize: 14, fontWeight: '600', color: c.textMuted },
   modalSaveBtn: { flex: 1, height: 46, borderRadius: radius.md, backgroundColor: c.accentYellow, alignItems: 'center', justifyContent: 'center' },
-  modalSaveText: { fontSize: 14, fontWeight: '700', color: 'white' },
+  modalSaveText: { fontSize: 14, fontWeight: '700', color: c.onPrimary },
 });

@@ -74,19 +74,19 @@ export default function ParentDetailModal({ parent, onClose }: Props) {
 function makeStyles(colors: AppColors) {
   return StyleSheet.create({
     avatar: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: `${colors.accentRed}22` },
-    avatarText: { fontFamily: fonts.serif, fontSize: 10, fontWeight: '700', color: colors.accentRed },
+    avatarText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.accentRed },
     statusPill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, borderWidth: 1, alignSelf: 'flex-start' },
-    statusPillText: { fontFamily: fonts.serif, fontSize: 10.5, fontWeight: '700' },
-    tdSub: { fontFamily: fonts.serif, fontSize: 11.5, color: colors.textDim, marginTop: 1 },
+    statusPillText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700' },
+    tdSub: { fontFamily: fonts.serif, fontSize: 14, color: colors.textDim, marginTop: 1 },
     modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', alignItems: 'center', justifyContent: 'center', padding: 20 },
     modalBox: { width: '100%', maxWidth: 420, backgroundColor: colors.cardDark, borderRadius: radius.md, borderWidth: 1, borderColor: colors.borderColor, padding: 20 },
     modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
     modalTitle: { fontFamily: fonts.serif, fontSize: 16, fontWeight: '700', color: colors.textHeading },
     modalRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 6 },
-    modalLabel: { fontFamily: fonts.serif, fontSize: 11.5, color: colors.textDim },
-    modalValue: { fontFamily: fonts.serif, fontSize: 13, color: colors.textMuted },
+    modalLabel: { fontFamily: fonts.serif, fontSize: 14, color: colors.textDim },
+    modalValue: { fontFamily: fonts.serif, fontSize: 14, color: colors.textMuted },
     linkedStudentRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 4 },
-    modalCloseBtn: { marginTop: 18, alignSelf: 'center', borderRadius: 20, paddingVertical: 9, paddingHorizontal: 22, backgroundColor: colors.accentYellow },
-    modalCloseBtnText: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '700', color: '#0B0B0B' },
+    modalCloseBtn: { minHeight: 44, justifyContent: 'center', marginTop: 18, alignSelf: 'center', borderRadius: 20, paddingVertical: 9, paddingHorizontal: 22, backgroundColor: colors.accentYellow },
+    modalCloseBtnText: { minHeight: 44, justifyContent: 'center', fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.onPrimary },
   });
 }

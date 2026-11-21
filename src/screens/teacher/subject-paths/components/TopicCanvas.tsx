@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../theme';
 import LessonScreen from '../../../student/learning-paths/lesson-screen/LessonScreen';
@@ -18,7 +19,7 @@ function lessonFrom(payload: any): LessonEdit {
 
 function PracticeList({ lesson, colors }: { lesson: LessonEdit; colors: AppColors }) {
   const quiz = lesson.practiceQuiz || [];
-  if (!quiz.length) return <Text style={{ fontSize: 13, color: colors.textMuted }}>No practice questions yet — students get questions made from the lesson.</Text>;
+  if (!quiz.length) return <Text style={{ fontSize: 14, lineHeight: 21, color: colors.textMuted }}>No practice questions yet — students get questions made from the lesson.</Text>;
   return (
     <View style={{ gap: 10 }}>
       {quiz.map((q, i) => (
@@ -64,24 +65,25 @@ export default function TopicCanvas({
     <View style={{ gap: 14 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
         <View style={{ flex: 1, minWidth: 200 }}>
-          <Text style={{ fontSize: 11, fontWeight: '700', color: colors.textMuted }}>{chapterTitle}</Text>
-          <Text style={{ fontSize: 19, fontWeight: '800', color: colors.textMain }}>{topic.name}</Text>
-          <Text style={{ fontSize: 12, color: edited || topic.added ? colors.primary : colors.textMuted, marginTop: 2 }}>
+          <Text style={{ fontSize: 14, fontWeight: '600', color: colors.textMuted }}>{chapterTitle}</Text>
+          <Text style={{ fontSize: 22, lineHeight: 30, fontWeight: '700', color: colors.textHeading }}>{topic.name}</Text>
+          <Text style={{ fontSize: 14, lineHeight: 21, color: edited || topic.added ? colors.primary : colors.textMuted, marginTop: 2 }}>
             {topic.added ? 'Your own topic' : edited ? 'Edited by you — students see your version' : 'Standard lesson — edit anything to make it yours'}
           </Text>
         </View>
         {edited && (
-          <TouchableOpacity testID="reset-lesson" onPress={onResetLesson} style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 7 }}>
-            <Feather name="rotate-ccw" size={13} color={colors.textMuted} />
-            <Text style={{ fontSize: 12.5, fontWeight: '700', color: colors.textMuted }}>Reset to original</Text>
+          <TouchableOpacity testID="reset-lesson" onPress={onResetLesson} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 44, paddingHorizontal: 14, borderRadius: 12, borderWidth: 1, borderColor: colors.borderColor, backgroundColor: colors.cardDark }}>
+            <Feather name="rotate-ccw" size={16} color={colors.textMain} />
+            <Text style={{ fontSize: 15, fontWeight: '700', color: colors.textMain }}>Reset to original</Text>
           </TouchableOpacity>
         )}
-        <View style={{ flexDirection: 'row', borderRadius: 10, borderWidth: 1, borderColor: colors.borderColor, overflow: 'hidden' }}>
+        <View style={{ flexDirection: 'row', gap: 6, padding: 4, borderRadius: 14, borderWidth: 1, borderColor: colors.borderColor, backgroundColor: colors.cardDark }}>
           {([['edit', 'Edit', 'edit-2'], ['view', 'Student view', 'eye']] as const).map(([key, label, icon]) => (
             <TouchableOpacity key={key} testID={`canvas-${key}`} onPress={() => setMode(key)}
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 8, backgroundColor: mode === key ? colors.primary : 'transparent' }}>
-              <Feather name={icon} size={13} color={mode === key ? '#fff' : colors.textMuted} />
-              <Text style={{ fontSize: 13, fontWeight: '700', color: mode === key ? '#fff' : colors.textMuted }}>{label}</Text>
+              accessibilityRole="button" accessibilityState={{ selected: mode === key }}
+              style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 40, paddingHorizontal: 14, borderRadius: 10, borderWidth: 1, borderColor: mode === key ? colors.primary : 'transparent', backgroundColor: mode === key ? colors.tintLilac : 'transparent' }}>
+              <Feather name={icon} size={16} color={mode === key ? colors.primary : colors.textMain} />
+              <Text style={{ fontSize: 15, fontWeight: '700', color: mode === key ? colors.textHeading : colors.textMain }}>{label}</Text>
             </TouchableOpacity>
           ))}
         </View>

@@ -94,7 +94,7 @@ function makeStyles(colors: AppColors) {
     },
     ddTriggerText: {
       fontFamily: fonts.serif,
-      fontSize: 12.5,
+      fontSize: 14,
       fontWeight: '600',
       color: colors.textHeading,
       flexShrink: 1,
@@ -154,7 +154,7 @@ function makeStyles(colors: AppColors) {
     },
     ddItemText: {
       fontFamily: fonts.serif,
-      fontSize: 12.5,
+      fontSize: 14,
       color: colors.textMuted,
     },
     ddItemTextActive: {

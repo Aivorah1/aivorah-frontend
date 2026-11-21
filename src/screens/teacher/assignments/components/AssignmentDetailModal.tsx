@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, Image, Modal, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, TextInput, Image, Modal, Platform } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import ReasoningBox, { ReasoningDisplay } from '../../../../components/common/ReasoningBox';
 import { Feather } from '@expo/vector-icons';
 import { spacing, radius } from '../../../../theme';
@@ -177,8 +178,8 @@ export function AssignmentDetailModal({
                       onPress={() => onPreviewHtml((a as any).interactiveQuizHtml)}
                       activeOpacity={0.85}
                     >
-                      <Feather name="play" size={12} color="#fff" style={{ marginLeft: 2 }} />
-                      <Text style={{ fontSize: 12, fontWeight: '700', color: '#fff' }}>Open Interactive Preview</Text>
+                      <Feather name="play" size={12} color={colors.onPrimary} style={{ marginLeft: 2 }} />
+                      <Text style={{ fontSize: 12, fontWeight: '700', color: colors.onPrimary }}>Open Interactive Preview</Text>
                     </TouchableOpacity>
                   </View>
                 ) : (a.documentUrls?.length ?? 0) > 0 ? (
@@ -225,7 +226,7 @@ export function AssignmentDetailModal({
                       onPress={() => { markComplete(a.id); onClose(); }}
                       activeOpacity={0.8}
                     >
-                      <Feather name="check" size={14} color="#fff" />
+                      <Feather name="check" size={14} color={colors.onPrimary} />
                       <Text style={styles.modalSaveBtnText}>Mark Complete</Text>
                     </TouchableOpacity>
                   )}
@@ -527,10 +528,10 @@ export function AssignmentDetailModal({
                                     activeOpacity={0.8}
                                   >
                                     {sendingFeedback ? (
-                                      <ActivityIndicator size="small" color="#fff" />
+                                      <ActivityIndicator size="small" color={colors.onPrimary} />
                                     ) : (
                                       <>
-                                        <Feather name="send" size={14} color="#fff" />
+                                        <Feather name="send" size={14} color={colors.onPrimary} />
                                         <Text style={styles.modalSaveBtnText}>{existingTeacherFb ? 'Save Changes' : 'Send Feedback'}</Text>
                                       </>
                                     )}
@@ -596,8 +597,8 @@ export function AssignmentDetailModal({
                         onPress={() => onPreviewHtml((a as any).interactiveQuizHtml)}
                         activeOpacity={0.85}
                       >
-                        <Feather name="eye" size={16} color="#fff" />
-                        <Text style={{ fontSize: 13, fontWeight: '700', color: '#fff' }}>View Full Interactive Quiz</Text>
+                        <Feather name="eye" size={16} color={colors.onPrimary} />
+                        <Text style={{ fontSize: 13, fontWeight: '700', color: colors.onPrimary }}>View Full Interactive Quiz</Text>
                       </TouchableOpacity>
                     )}
                   </View>

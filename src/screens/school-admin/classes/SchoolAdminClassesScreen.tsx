@@ -12,7 +12,8 @@
  *        body { teacherEmail: string | null } -> { ok }
  */
 import React, { useCallback, useMemo } from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import Header from '../../../components/common/Header';
@@ -94,10 +95,10 @@ function makeStyles(colors: AppColors) {
     screen: { flex: 1, backgroundColor: colors.bgDark },
     content: { padding: spacing.xl, paddingBottom: 60, width: '100%', maxWidth: 1100, alignSelf: 'center' },
     topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing.lg, gap: 12 },
-    countText: { fontFamily: fonts.serif, fontSize: 12.5, color: colors.textDim },
+    countText: { fontFamily: fonts.serif, fontSize: 14, color: colors.textDim },
     emptyBox: { alignItems: 'center', paddingTop: 56, gap: 12, paddingHorizontal: 24 },
-    emptyText: { fontFamily: fonts.serif, fontSize: 13, color: colors.textMuted, textAlign: 'center', lineHeight: 19, maxWidth: 380 },
-    retryBtn: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.borderColor },
-    retryText: { fontFamily: fonts.serif, fontSize: 12.5, fontWeight: '700', color: colors.accentYellow },
+    emptyText: { fontFamily: fonts.serif, fontSize: 14, color: colors.textMuted, textAlign: 'center', lineHeight: 19, maxWidth: 380 },
+    retryBtn: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 14, paddingVertical: 7, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.borderColor },
+    retryText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.accentYellow },
   });
 }

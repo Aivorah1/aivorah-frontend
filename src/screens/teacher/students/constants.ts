@@ -55,7 +55,7 @@ export const AVATAR_GRADIENTS: [string, string][] = [
   ['#5F8A86', '#7AADA8'],   // slate teal → mint
   ['#5A8A70', '#7AADA8'],   // forest green → mint
   ['#B8797E', '#C4836A'],   // rose → peach
-  ['#8A8358', '#C5BD96'],   // gold → khaki
+  ['#0E6E86', '#0E6E86'],   // gold → khaki
   ['#5F8A86', '#5A8A70'],   // teal → green
   ['#C4836A', '#B8797E'],   // peach → rose
 ];

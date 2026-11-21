@@ -169,7 +169,7 @@ export default function ParentDashboardScreen({ navigation, route }: any) {
               colors={colors}
               s={s}
             />
-            <AIWeeklyInsightCard
+            {!!child.id && <AIWeeklyInsightCard
               child={child}
               weeklyProgressPct={weeklyProgressPct}
               insightTopic={insightTopic}
@@ -184,7 +184,7 @@ export default function ParentDashboardScreen({ navigation, route }: any) {
               onViewReport={generateReport}
               colors={colors}
               s={s}
-            />
+            />}
           </View>
 
           {/* ── Row 2: Weekly Snapshot ── */}
@@ -334,7 +334,7 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
     borderRadius: 16, padding: 16, alignItems: 'center', justifyContent: 'center',
     gap: 8, minWidth: 80, borderStyle: 'dashed',
   },
-  addChildText: { fontSize: 11, color: c.textMuted },
+  addChildText: { fontSize: 14, fontWeight: '600', color: c.textMain },
 
   // AI Weekly Insight card
   insightCard: {

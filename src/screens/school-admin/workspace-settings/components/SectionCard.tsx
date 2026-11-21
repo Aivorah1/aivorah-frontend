@@ -43,7 +43,7 @@ function makeStyles(colors: AppColors) {
     sectionHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.md },
     sectionHeaderAction: { flexShrink: 0, marginBottom: spacing.md },
     sectionTitle: { fontFamily: fonts.serif, fontSize: 15, fontWeight: '700', color: colors.textHeading },
-    sectionSubtitle: { fontFamily: fonts.serif, fontSize: 12.5, color: colors.textMuted, marginTop: 3, marginBottom: spacing.md },
+    sectionSubtitle: { fontFamily: fonts.serif, fontSize: 14, color: colors.textMuted, marginTop: 3, marginBottom: spacing.md },
     sectionBody: {
       backgroundColor: colors.cardDark, borderWidth: 1, borderColor: colors.borderColor,
       borderRadius: radius.md, padding: spacing.lg, gap: spacing.md,
@@ -53,7 +53,7 @@ function makeStyles(colors: AppColors) {
       paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.borderColor,
     },
     rowLast: { borderBottomWidth: 0 },
-    rowLabel: { fontFamily: fonts.serif, fontSize: 13, color: colors.textMuted },
-    rowValue: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '600', color: colors.textHeading, maxWidth: '60%' },
+    rowLabel: { fontFamily: fonts.serif, fontSize: 14, color: colors.textMuted },
+    rowValue: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '600', color: colors.textHeading, maxWidth: '60%' },
   });
 }

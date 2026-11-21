@@ -53,8 +53,8 @@ export function WeeklyActivityCard({
       {/* Weekly totals */}
       <View style={styles.weekTotals}>
         {[
-          { label: 'Total Study', val: formatStudyTime(weeklyDays.reduce((s, d) => s + d.studyMinutes, 0)), color: '#BAA467' },
-          { label: 'XP Earned',   val: `+${weeklyDays.reduce((s, d) => s + d.xp, 0)}`,                      color: '#8A8358' },
+          { label: 'Total Study', val: formatStudyTime(weeklyDays.reduce((s, d) => s + d.studyMinutes, 0)), color: colors.primary },
+          { label: 'XP Earned',   val: `+${weeklyDays.reduce((s, d) => s + d.xp, 0)}`,                      color: colors.accentOrange },
           { label: 'Topics',       val: String(weeklyDays.reduce((s, d) => s + d.topicsCompleted, 0)),       color: colors.accentOrange },
         ].map(s => (
           <View key={s.label} style={styles.weekTotal}>

@@ -29,6 +29,17 @@ export const darkColors = {
   accentCyan: '#9FB2A4',    // sage
   accentOrange: '#C9A24E',  // deep gold
   accentPink: '#BAA467',    // gold
+
+  // Extra tokens (student redesign). Other roles keep their current look.
+  onPrimary: '#0B0B0B',
+  accent: '#BAA467',
+  surfaceSubtle: '#1C1C1C',
+  navActiveBg: 'rgba(186,164,103,0.094)',
+  navActiveText: '#BAA467',
+  tintLilac: '#1C1C1C',
+  tintMint: '#1C1C1C',
+  tintBlue: '#1C1C1C',
+  tintPeach: '#1C1C1C',
 };
 
 // Light mode: Aivorah brand on warm cream — same gold/sage accents, inverted bg/text.
@@ -59,6 +70,197 @@ export const lightColors = {
   accentCyan: '#5E7566',    // sage (readable on cream)
   accentOrange: '#B07A1E',  // amber-gold
   accentPink: '#BAA467',    // gold
+
+  onPrimary: '#FFFFFF',
+  accent: '#9A7B2E',
+  surfaceSubtle: '#EDE8E2',
+  navActiveBg: 'rgba(154,123,46,0.094)',
+  navActiveText: '#9A7B2E',
+  tintLilac: '#EDE8E2',
+  tintMint: '#EDE8E2',
+  tintBlue: '#EDE8E2',
+  tintPeach: '#EDE8E2',
+};
+
+// ── Shared redesign palette (Parent reference; also Student + Teacher) ──
+// Warm ivory / white cards in light, deep slate / storm slate in dark. Ocean
+// blue primary (pale cyan in dark); powder blue = info/selected, mint =
+// success, apricot = reminders, soft rose = errors. No gold, no violet.
+// Only the role navigators provide these (PortalThemeProvider).
+const sharedLight: typeof darkColors = {
+  bgDark: '#FAF8F3',
+  cardDark: '#FFFFFF',
+  cardHover: '#F1F6F8',
+  sidebarDark: '#FFFFFF',
+  borderColor: '#DCE5EA',
+  textMain: '#182B36',
+  textHeading: '#182B36',
+  textMuted: '#4A5E6A',
+  textDim: '#54687A',
+  primary: '#075D75',
+  primaryHover: '#064E63',
+  primaryGlow: 'rgba(7,93,117,0.10)',
+  accentBlue: '#1F6FA3',
+  accentPurple: '#075D75',
+  accentGreen: '#1E7F55',
+  accentYellow: '#075D75',
+  accentYellowGlow: 'rgba(7,93,117,0.10)',
+  accentRed: '#B4443C',
+  accentCyan: '#075D75',
+  accentOrange: '#A85520',
+  accentPink: '#B4443C',
+  onPrimary: '#FFFFFF',
+  accent: '#075D75',
+  surfaceSubtle: '#F6F8F9',
+  navActiveBg: '#DDEFF6',
+  navActiveText: '#0B4255',
+  tintLilac: '#E1F0F7',
+  tintMint: '#E0F4EA',
+  tintBlue: '#E1F0F7',
+  tintPeach: '#FCE9DA',
+};
+
+const sharedDark: typeof darkColors = {
+  bgDark: '#101B25',
+  cardDark: '#1C2B37',
+  cardHover: '#243746',
+  sidebarDark: '#14222E',
+  borderColor: '#2F4352',
+  textMain: '#F2F7FA',
+  textHeading: '#F2F7FA',
+  textMuted: '#B6C6D1',
+  textDim: '#A3B4C0',
+  primary: '#9ADBE9',
+  primaryHover: '#B3E6F0',
+  primaryGlow: 'rgba(154,219,233,0.14)',
+  accentBlue: '#A6D4F2',
+  accentPurple: '#9ADBE9',
+  accentGreen: '#93DDB5',
+  accentYellow: '#9ADBE9',
+  accentYellowGlow: 'rgba(154,219,233,0.14)',
+  accentRed: '#F4A9A3',
+  accentCyan: '#9ADBE9',
+  accentOrange: '#F6C29A',
+  accentPink: '#F4A9A3',
+  onPrimary: '#182B36',
+  accent: '#9ADBE9',
+  surfaceSubtle: '#14222E',
+  navActiveBg: '#2B4757',
+  navActiveText: '#F2F7FA',
+  tintLilac: '#20394A',
+  tintMint: '#1E3A33',
+  tintBlue: '#20394A',
+  tintPeach: '#3E3029',
+};
+
+// Parent: the reference palette, as is.
+export const parentLightColors: typeof darkColors = { ...sharedLight };
+export const parentDarkColors: typeof darkColors = { ...sharedDark };
+
+// Student: same palette, slightly stronger blue + mint accents.
+export const studentLightColors: typeof darkColors = {
+  ...sharedLight,
+  accentGreen: '#177A4F',
+  navActiveBg: '#D3EBF4',
+  tintBlue: '#D9EDF6',
+  tintMint: '#D8F1E4',
+};
+export const studentDarkColors: typeof darkColors = {
+  ...sharedDark,
+  accentGreen: '#9BE5BE',
+  navActiveBg: '#2E5263',
+};
+
+// Teacher: same palette, quieter borders for denser tables.
+export const teacherLightColors: typeof darkColors = {
+  ...sharedLight,
+  borderColor: '#E1E7EB',
+};
+export const teacherDarkColors: typeof darkColors = {
+  ...sharedDark,
+  borderColor: '#2A3D4B',
+};
+
+// ── School Admin palette (berry / fern / denim / clay / rose / eucalyptus) ──
+// Calm cream + white (light) and deep navy + blue-slate (dark) surfaces; the
+// multicolour accents go on buttons, links, tabs, icons and badges only.
+export const schoolAdminLightColors: typeof darkColors = {
+  bgDark: '#FAF6F0',
+  cardDark: '#FFFFFF',
+  cardHover: '#F7F2EE',
+  sidebarDark: '#FFFFFF',
+  borderColor: '#E6DFDA',
+  textMain: '#1F2A37',
+  textHeading: '#1F2A37',
+  textMuted: '#55606E',
+  textDim: '#5E6977',
+  primary: '#9B2550',          // berry: primary actions + selected nav
+  primaryHover: '#841F44',
+  primaryGlow: 'rgba(155,37,80,0.10)',
+  accentBlue: '#2F5E9E',       // denim: links + focus
+  accentPurple: '#9B2550',
+  accentGreen: '#2F7D4F',      // fern: secondary actions + positive
+  accentYellow: '#9B2550',
+  accentYellowGlow: 'rgba(155,37,80,0.10)',
+  accentRed: '#B03A3A',
+  accentCyan: '#2F5E9E',
+  accentOrange: '#B8613A',     // soft clay: attention + invitations
+  accentPink: '#B5536D',       // muted rose
+  onPrimary: '#FFFFFF',
+  accent: '#9B2550',
+  surfaceSubtle: '#FBF8F5',
+  navActiveBg: '#F6DDE6',
+  navActiveText: '#7E1D41',
+  tintLilac: '#F8E3EA',
+  tintMint: '#E2F1E6',
+  tintBlue: '#E3ECF7',
+  tintPeach: '#F8E6DA',
+};
+
+export const schoolAdminDarkColors: typeof darkColors = {
+  bgDark: '#101B25',
+  cardDark: '#1C2B37',
+  cardHover: '#243746',
+  sidebarDark: '#14222E',
+  borderColor: '#2F4352',
+  textMain: '#F2F7FA',
+  textHeading: '#F2F7FA',
+  textMuted: '#B6C6D1',
+  textDim: '#A3B4C0',
+  primary: '#C2416B',
+  primaryHover: '#D2557D',
+  primaryGlow: 'rgba(194,65,107,0.16)',
+  accentBlue: '#8FB6EA',
+  accentPurple: '#E58AA6',
+  accentGreen: '#7FCF9A',
+  accentYellow: '#C2416B',     // berry fill (white labels); links use denim
+  accentYellowGlow: 'rgba(194,65,107,0.16)',
+  accentRed: '#F2A0A0',
+  accentCyan: '#8FB6EA',
+  accentOrange: '#E9A47F',
+  accentPink: '#E79AB0',
+  onPrimary: '#FFFFFF',
+  accent: '#C2416B',
+  surfaceSubtle: '#14222E',
+  navActiveBg: '#5A2540',
+  navActiveText: '#FFE6EE',
+  tintLilac: '#3A2433',
+  tintMint: '#1E3A2C',
+  tintBlue: '#1F3150',
+  tintPeach: '#3E2D25',
+};
+
+// ── Company Admin palette: School Admin system with Company Admin surfaces ──
+export const companyAdminLightColors: typeof darkColors = {
+  ...schoolAdminLightColors,
+  bgDark: '#FAF8F4',
+  cardHover: '#F6F2EE',
+  borderColor: '#E3DCD6',
+  navActiveBg: '#F4D9E3',
+};
+export const companyAdminDarkColors: typeof darkColors = {
+  ...schoolAdminDarkColors,
+  borderColor: '#34495A',
 };
 
 // Default export keeps backward compat — ThemeContext overrides at runtime
@@ -83,11 +285,24 @@ export const radius = {
   xxl: 36,
   full: 9999,
 };
-const INTER = Platform.OS === 'web' ? 'Inter, system-ui, sans-serif' : 'system';
+// On web each family is a CSS variable that falls back to Inter. Only the
+// Student Portal defines the variables (StudentThemeProvider), so other roles
+// render exactly as before.
+const SYS = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+const webFont = (v: string) => (Platform.OS === 'web' ? `var(${v}, Inter), system-ui, sans-serif` : 'system');
 export const fonts = {
-  serif: INTER,
-  sans:  INTER,
-  brand: INTER,
+  serif: webFont('--av-heading'),   // headings: Baloo 2 (student)
+  sans:  webFont('--av-body'),      // UI / forms: Karla (student)
+  brand: webFont('--av-nav'),       // sidebar + brand: Sora (student)
+  card:  webFont('--av-card'),      // card titles / metrics: Quicksand (student)
+  // Same idea, but falling back to the system stack: for text that used no
+  // fontFamily before, so other roles keep their current rendering.
+  nav:   Platform.OS === 'web' ? `var(--av-nav, ${SYS})` : 'system',
+  title: Platform.OS === 'web' ? `var(--av-heading, ${SYS})` : 'system',
+  ui:    Platform.OS === 'web' ? `var(--av-card, ${SYS})` : 'system',
+  // Subheadings: the font preset's subheading face, else the portal's body font.
+  sub:   Platform.OS === 'web' ? `var(--av-sub, var(--av-body, ${SYS}))` : 'system',
+  reading: Platform.OS === 'web' ? 'var(--av-reading, Inter), Georgia, serif' : 'system', // passages: Lora
 };
 
 export const typography = {

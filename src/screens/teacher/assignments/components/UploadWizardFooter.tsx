@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../theme';
 import type { ScrollView } from 'react-native';
@@ -61,7 +62,7 @@ export function UploadWizardFooter({
           activeOpacity={0.85}
         >
           <Text style={styles.submitBtnText}>Next</Text>
-          <Feather name="arrow-right" size={16} color="#fff" />
+          <Feather name="arrow-right" size={16} color={colors.onPrimary} />
         </TouchableOpacity>
       ) : (
         <TouchableOpacity
@@ -76,9 +77,9 @@ export function UploadWizardFooter({
           disabled={creating}
         >
           {creating ? (
-            <ActivityIndicator size="small" color="#fff" />
+            <ActivityIndicator size="small" color={colors.onPrimary} />
           ) : (
-            <Feather name="send" size={15} color="#fff" />
+            <Feather name="send" size={15} color={colors.onPrimary} />
           )}
           <Text style={styles.submitBtnText}>
             {creating ? 'Publishing...' : 'Publish Assignment'}

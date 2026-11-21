@@ -12,10 +12,10 @@ describe('safeIcon', () => {
 
 describe('getPastelGradient', () => {
   test('a mapped cover color returns its real pastel gradient', () => {
-    expect(getPastelGradient('#7c3aed')).toEqual(['#C5BD96', '#9FB2A4']);
+    expect(getPastelGradient('#7c3aed')).toEqual(['#24877B', '#9FB2A4']);
   });
 
   test('an unmapped color falls back to the default gradient', () => {
-    expect(getPastelGradient('#000000')).toEqual(['#9FB2A4', '#C5BD96']);
+    expect(getPastelGradient('#000000')).toEqual(['#9FB2A4', '#24877B']);
   });
 });

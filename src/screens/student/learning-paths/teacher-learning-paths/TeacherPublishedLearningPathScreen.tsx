@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import Header from '../../../../components/common/Header';
 import ScreenLayout from '../../../../components/common/ScreenLayout';
@@ -70,5 +71,5 @@ const makeStyles = (colors: AppColors) => StyleSheet.create({
     marginTop: 8, paddingVertical: 7, paddingHorizontal: 12, borderRadius: 18,
     backgroundColor: colors.primary,
   },
-  openBtnText: { color: '#fff', fontSize: 12, fontWeight: '600' },
+  openBtnText: { color: colors.onPrimary, fontSize: 12, fontWeight: '600' },
 });

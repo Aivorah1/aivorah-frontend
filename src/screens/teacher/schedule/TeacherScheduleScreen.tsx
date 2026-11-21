@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../../context/ThemeContext';
 import { useAuth } from '../../../context/AuthContext';
@@ -81,7 +82,7 @@ export default function TeacherScheduleScreen({ navigation }: any) {
             <Header title="Class Schedule" subtitle="Create sessions and deadlines for students." />
           </View>
           <TouchableOpacity testID="teacher-schedule-add-event-button" style={styles.addEventBtnTop} onPress={() => form.openModal()} activeOpacity={0.8}>
-            <Feather name="plus" size={15} color="white" />
+            <Feather name="plus" size={15} color={colors.onPrimary} />
             <Text style={styles.addEventBtnTopText}>New Event</Text>
           </TouchableOpacity>
         </View>

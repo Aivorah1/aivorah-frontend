@@ -7,7 +7,7 @@
 import React from 'react';
 import { Platform, useWindowDimensions } from 'react-native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme, CompanyAdminThemeProvider } from '../context/ThemeContext';
 
 import DrawerContent from '../components/common/DrawerContent';
 import PlatformOverviewScreen from '../screens/aivorah-admin/overview/PlatformOverviewScreen';
@@ -49,6 +49,14 @@ export function adminRouteFromPath(path: string): keyof AdminDrawerParamList {
 }
 
 export default function AdminNavigator() {
+  return (
+    <CompanyAdminThemeProvider>
+      <CompanyAdminNavigator />
+    </CompanyAdminThemeProvider>
+  );
+}
+
+function CompanyAdminNavigator() {
   // Wake this role's services and, on a good connection, prefetch its screens.
   useRoleWarmup(screens, PLATFORM_ADMIN_SERVICES);
   const { width } = useWindowDimensions();

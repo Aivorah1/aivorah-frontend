@@ -14,9 +14,9 @@ interface Props {
 }
 
 function rankBadgeConfig(score: number) {
-  if (score >= 80)      return { label: 'Top 1%',  emoji: '🥇', bg: '#fbbf24', border: '#f59e0b', text: '#78350f' };
-  if (score >= 60)      return { label: 'Top 5%',  emoji: '🥈', bg: '#D8CFA8', border: '#BAA467', text: '#4A4228' };
-  if (score >= 40)      return { label: 'Top 10%', emoji: '🥉', bg: '#C5BD96', border: '#9A7B2E', text: '#3A3520' };
+  if (score >= 80)      return { label: 'Top 1%',  emoji: '🥇', bg: '#3FB8A8', border: '#3FB8A8', text: '#0F4C45' };
+  if (score >= 60)      return { label: 'Top 5%',  emoji: '🥈', bg: '#DCEFEB', border: '#24877B', text: '#0F4C45' };
+  if (score >= 40)      return { label: 'Top 10%', emoji: '🥉', bg: '#24877B', border: '#24877B', text: '#0F4C45' };
   if (score >= 20)      return { label: 'Top 25%', emoji: '⭐', bg: '#C8DCCC', border: '#9FB2A4', text: '#2A3530' };
   return null;
 }
@@ -27,6 +27,9 @@ export default function ChallengeCard({ ch, onStart, styles, colors }: Props) {
   const imgUrl = rawImg ? (rawImg.startsWith('http') ? rawImg : `${SERVER_URL}${rawImg}`) : null;
   const rankCfg = ch.status === 'completed' && ch.score != null ? rankBadgeConfig(ch.score) : null;
   const isGold = ch.score != null && ch.score >= 95;
+  // Without a cover image the card stays a neutral surface (no tinted block),
+  // so the overlay text switches from on-image white to theme text colours.
+  const noImg = !imgUrl;
 
   return (
     <View style={styles.challengeCard}>
@@ -35,37 +38,40 @@ export default function ChallengeCard({ ch, onStart, styles, colors }: Props) {
         {imgUrl ? (
           <Image source={{ uri: imgUrl }} style={styles.cardImage} resizeMode="cover" />
         ) : (
-          <View style={[styles.cardImage, { backgroundColor: diffColor + '33' }]} />
+          <View style={[styles.cardImage, { backgroundColor: colors.cardHover, alignItems: 'center', justifyContent: 'center' }]}>
+            <Feather name="target" size={28} color={colors.textMuted} style={{ marginBottom: 40 }} />
+          </View>
         )}
-        <View style={styles.cardScrim} />
+        {!noImg && <View style={styles.cardScrim} />}
         {/* Difficulty pill — top right */}
-        <View style={[styles.diffPill, { backgroundColor: diffColor }]}>
-          <Text style={styles.diffPillText}>{ch.difficulty}</Text>
+        <View style={[styles.diffPill, { backgroundColor: colors.cardDark, borderWidth: 1, borderColor: colors.borderColor, flexDirection: 'row', alignItems: 'center', gap: 6 }]}>
+          <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: diffColor }} />
+          <Text style={[styles.diffPillText, { color: colors.textHeading }]}>{ch.difficulty}</Text>
         </View>
         {/* Ranking band badge — top left, only for completed */}
         {rankCfg && (
           <View style={[styles.rankBadgeWrap, {
-            backgroundColor: isGold ? '#fbbf24' : rankCfg.bg,
+            backgroundColor: isGold ? '#3FB8A8' : rankCfg.bg,
             borderColor: rankCfg.border,
             shadowColor: rankCfg.border,
           }]}>
             {isGold && <View style={styles.rankBadgeShine} />}
             <Text style={styles.rankBadgeEmoji}>{rankCfg.emoji}</Text>
             <View>
-              <Text style={[styles.rankBadgeLabel, { color: isGold ? '#78350f' : '#fff' }]}>{rankCfg.label}</Text>
-              <Text style={[styles.rankBadgeSub, { color: isGold ? '#92400e' : 'rgba(255,255,255,0.8)' }]}>Performer</Text>
+              <Text style={[styles.rankBadgeLabel, { color: isGold ? '#0F4C45' : '#fff' }]}>{rankCfg.label}</Text>
+              <Text style={[styles.rankBadgeSub, { color: isGold ? '#0F4C45' : 'rgba(255,255,255,0.8)' }]}>Performer</Text>
             </View>
           </View>
         )}
         {/* Title + XP overlaid at bottom of image */}
         <View style={styles.cardOverlay}>
-          <Text style={styles.cardOverlayTitle} numberOfLines={1}>{ch.title}</Text>
+          <Text style={[styles.cardOverlayTitle, noImg && { color: colors.textHeading }]} numberOfLines={2}>{ch.title}</Text>
           <View style={styles.cardOverlayMeta}>
-            <Feather name="star" size={11} color={colors.accentYellow} />
-            <Text style={styles.cardOverlayXP}>{ch.xpReward} XP</Text>
-            <Text style={styles.cardOverlayDot}>·</Text>
-            <Feather name="clock" size={11} color="rgba(255,255,255,0.7)" />
-            <Text style={styles.cardOverlayTime}>{ch.timeLimitMinutes} min</Text>
+            <Feather name="award" size={14} color={noImg ? colors.accentOrange : '#3FB8A8'} />
+            <Text style={[styles.cardOverlayXP, noImg && { color: colors.textMain }]}>{ch.xpReward} XP</Text>
+            <Text style={[styles.cardOverlayDot, noImg && { color: colors.textMuted }]}>·</Text>
+            <Feather name="clock" size={14} color={noImg ? colors.textMuted : 'rgba(255,255,255,0.85)'} />
+            <Text style={[styles.cardOverlayTime, noImg && { color: colors.textMain }]}>{ch.timeLimitMinutes} min</Text>
           </View>
         </View>
       </View>
@@ -87,7 +93,7 @@ export default function ChallengeCard({ ch, onStart, styles, colors }: Props) {
           onPress={() => onStart(ch)}
           activeOpacity={0.85}
         >
-          <Feather name="play" size={13} color="white" />
+          <Feather name="play" size={14} color={colors.onPrimary} />
           <Text style={styles.startBtnText}>
             {ch.status === 'assigned' ? 'Start Now' : 'Start Challenge'}
           </Text>

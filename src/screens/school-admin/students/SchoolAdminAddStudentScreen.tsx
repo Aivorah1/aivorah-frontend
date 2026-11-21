@@ -20,7 +20,8 @@
  * options.
  */
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity, TextInput, Pressable, Platform, Share, Alert } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput, Pressable, Platform, Share, Alert } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import Header from '../../../components/common/Header';
@@ -322,7 +323,7 @@ export default function SchoolAdminAddStudentScreen({ navigation }: any) {
           {result ? (
             <>
               <View style={styles.summaryCard}>
-                <View style={styles.summaryIcon}><Feather name="check" size={20} color="#0B0B0B" /></View>
+                <View style={styles.summaryIcon}><Feather name="check" size={20} color={colors.onPrimary} /></View>
                 <Text style={styles.summaryTitle}>{result.transferred ? 'Student moved to your school' : 'Student added'}</Text>
                 {result.transferred ? (
                   <Text style={styles.warnText}>
@@ -516,7 +517,7 @@ export default function SchoolAdminAddStudentScreen({ navigation }: any) {
                   disabled={!canSubmit || submitting}
                   accessibilityRole="button"
                 >
-                  {submitting ? <ActivityIndicator color="#0B0B0B" size="small" /> : <Text style={styles.primaryBtnText}>Create Student</Text>}
+                  {submitting ? <ActivityIndicator color={colors.onPrimary} size="small" /> : <Text style={styles.primaryBtnText}>Create Student</Text>}
                 </TouchableOpacity>
               </View>
             </>
@@ -539,9 +540,9 @@ function makeStyles(colors: AppColors) {
     cardTitle: { fontFamily: fonts.serif, fontSize: 15, fontWeight: '700', color: colors.textHeading, marginBottom: 4 },
 
     formRow: { flexDirection: 'row', gap: 14 },
-    formLabel: { fontFamily: fonts.serif, fontSize: 11.5, fontWeight: '600', color: colors.textMuted, marginBottom: 6, marginTop: 10 },
+    formLabel: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '600', color: colors.textMuted, marginBottom: 6, marginTop: 10 },
     textInput: {
-      fontFamily: fonts.serif, fontSize: 13, color: colors.textMain,
+      fontFamily: fonts.serif, fontSize: 14, color: colors.textMain,
       borderWidth: 1, borderColor: colors.borderColor, borderRadius: radius.sm,
       paddingHorizontal: 12, paddingVertical: 10, backgroundColor: colors.bgDark,
     },
@@ -551,7 +552,7 @@ function makeStyles(colors: AppColors) {
       paddingHorizontal: 12, height: 40, backgroundColor: colors.bgDark, justifyContent: 'center',
     },
 
-    ddTriggerText: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '600', color: colors.textHeading, flexShrink: 1 },
+    ddTriggerText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '600', color: colors.textHeading, flexShrink: 1 },
     ddBackdropWeb: { position: 'fixed' as any, top: 0, left: 0, right: 0, bottom: 0, zIndex: 19 },
     ddBackdropNative: { position: 'absolute', top: -1000, left: -1000, right: -1000, bottom: -1000, zIndex: 19 },
     ddMenu: {
@@ -563,25 +564,25 @@ function makeStyles(colors: AppColors) {
     ddItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12, paddingVertical: 9 },
     ddItemHovered: { backgroundColor: colors.cardHover },
     ddItemActive: { backgroundColor: `${colors.accentYellow}14` },
-    ddItemText: { fontFamily: fonts.serif, fontSize: 12.5, color: colors.textMuted },
+    ddItemText: { fontFamily: fonts.serif, fontSize: 14, color: colors.textMuted },
     ddItemTextActive: { color: colors.textHeading, fontWeight: '700' },
 
     collapseHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
-    collapseToggle: { fontFamily: fonts.serif, fontSize: 12.5, fontWeight: '700', color: colors.accentYellow },
+    collapseToggle: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.accentYellow },
 
     footerRow: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10, marginTop: spacing.md },
-    primaryBtn: {
+    primaryBtn: { minHeight: 44,
       flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7,
       backgroundColor: colors.accentYellow, borderRadius: radius.sm, paddingHorizontal: 18, height: 42,
     },
-    primaryBtnDisabled: { opacity: 0.45 },
-    primaryBtnText: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '700', color: '#0B0B0B' },
-    secondaryBtn: {
+    primaryBtnDisabled: { minHeight: 44, justifyContent: 'center', opacity: 0.45 },
+    primaryBtnText: { minHeight: 44, justifyContent: 'center', fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.onPrimary },
+    secondaryBtn: { minHeight: 44,
       flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
       backgroundColor: colors.cardDark, borderWidth: 1, borderColor: colors.borderColor,
       borderRadius: radius.sm, paddingHorizontal: 16, height: 42,
     },
-    secondaryBtnText: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '700', color: colors.textHeading },
+    secondaryBtnText: { minHeight: 44, justifyContent: 'center', fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.textHeading },
 
 
     // ── Success state ────────────────────────────────────────────────────
@@ -591,19 +592,19 @@ function makeStyles(colors: AppColors) {
     },
     summaryIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.accentGreen, alignItems: 'center', justifyContent: 'center', marginBottom: 10 },
     summaryTitle: { fontFamily: fonts.serif, fontSize: 17, fontWeight: '700', color: colors.textHeading, marginBottom: 6 },
-    warnText: { fontFamily: fonts.serif, fontSize: 12, color: colors.accentYellow, textAlign: 'center' },
+    warnText: { fontFamily: fonts.serif, fontSize: 14, color: colors.accentYellow, textAlign: 'center' },
 
     credBlock: { marginTop: 6 },
-    credBlockLabel: { fontFamily: fonts.serif, fontSize: 10.5, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase', color: colors.textDim, marginBottom: 6 },
+    credBlockLabel: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase', color: colors.textDim, marginBottom: 6 },
     credRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: colors.borderColor },
-    credLabel: { fontFamily: fonts.serif, fontSize: 12, color: colors.textDim },
-    credValue: { fontFamily: fonts.serif, fontSize: 12, fontWeight: '700', color: colors.textHeading },
-    credValueMono: { fontFamily: Platform.select({ web: 'monospace', default: fonts.serif }), fontSize: 12, fontWeight: '700', color: colors.textHeading },
-    shareBtn: {
+    credLabel: { fontFamily: fonts.serif, fontSize: 14, color: colors.textDim },
+    credValue: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.textHeading },
+    credValueMono: { fontFamily: Platform.select({ web: 'monospace', default: fonts.serif }), fontSize: 14, fontWeight: '700', color: colors.textHeading },
+    shareBtn: { minHeight: 44,
       flexDirection: 'row', alignItems: 'center', justifyContent: 'center', alignSelf: 'center', gap: 6,
       backgroundColor: `${colors.accentYellow}18`, borderRadius: 20,
       paddingVertical: 8, paddingHorizontal: 16, marginTop: 14,
     },
-    shareBtnText: { fontFamily: fonts.serif, fontSize: 12, fontWeight: '700', color: colors.accentYellow },
+    shareBtnText: { minHeight: 44, justifyContent: 'center', fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.accentYellow },
   });
 }

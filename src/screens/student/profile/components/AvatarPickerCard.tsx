@@ -38,7 +38,7 @@ export function AvatarPickerCard({ styles, colors, isDark, avatars, selAvatar, p
                 <LinearGradient colors={av.gradient} style={styles.avCircle}>
                   <Feather name={av.icon as any} size={26} color="white" />
                 </LinearGradient>
-                {active && <View style={[styles.avCheck, { backgroundColor: colors.accentYellow }]}><Feather name="check" size={9} color="white" /></View>}
+                {active && <View style={[styles.avCheck, { backgroundColor: colors.accentYellow }]}><Feather name="check" size={9} color={colors.onPrimary} /></View>}
               </View>
               <Text style={[styles.avLabel, active && { color: colors.accentYellow, fontWeight: '700' }]}>{av.label}</Text>
             </TouchableOpacity>

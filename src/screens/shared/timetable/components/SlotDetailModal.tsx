@@ -5,9 +5,8 @@
  * Shared by TimetableScreen and ClassTimetableTab so behaviour is identical.
  */
 import React, { useMemo, useState, useEffect } from 'react';
-import {
-  View, Text, Modal, TouchableOpacity, StyleSheet, TextInput, ActivityIndicator, Platform, Linking, Alert,
-} from 'react-native';
+import { View, Text, Modal, TouchableOpacity, StyleSheet, TextInput, Platform, Linking, Alert } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../../../context/ThemeContext';
 import { spacing, radius, fonts } from '../../../../theme';

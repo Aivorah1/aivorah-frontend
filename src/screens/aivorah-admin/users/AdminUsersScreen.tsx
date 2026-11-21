@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import Header from '../../../components/common/Header';
 import ScreenLayout from '../../../components/common/ScreenLayout';
@@ -44,7 +45,7 @@ export default function AdminUsersScreen({ navigation }: any) {
   const u = useAdminUsers();
   const [panel, setPanel] = useState<SlideOverMode>(null);
 
-  const sage = colors.primary || colors.accentGreen;
+  const sage = colors.accentGreen; // positive / active state (fern)
   const avatarTones = [sage, colors.accentYellow, colors.accentRed];
   const allOn = u.users.length > 0 && u.users.every((x) => u.selected.has(x.id));
   const pageIndex = u.filters.page - 1;
@@ -149,13 +150,14 @@ export default function AdminUsersScreen({ navigation }: any) {
                         </TouchableOpacity>
                         <View style={[s.userCell, { flex: 2.6 }]}>
                           <View style={[s.avatar, { backgroundColor: tone + '2E' }]}><Text style={[s.avatarText, { color: tone }]}>{initials(x.name, x.email)}</Text></View>
-                          <View style={{ flexShrink: 1, minWidth: 0 }}>
-                            <Text style={s.name} numberOfLines={1}>{x.name || '—'}{x.isPlatformAdmin ? '  ·  Admin' : ''}</Text>
-                            <Text style={s.email} numberOfLines={1}>{x.email}</Text>
-                          </View>
+                          <TouchableOpacity testID={`users-view-${x.id}`} style={{ flexShrink: 1, minWidth: 0 }} onPress={() => setPanel({ type: 'view', user: x })}
+                            accessibilityRole="button" accessibilityLabel={`View details for ${x.name || x.email}`}>
+                            <Text style={[s.name, { color: colors.accentBlue }]} numberOfLines={1} {...({ title: x.name } as any)}>{x.name || '—'}{x.isPlatformAdmin ? '  ·  Admin' : ''}</Text>
+                            <Text style={s.email} numberOfLines={1} {...({ title: x.email } as any)}>{x.email}</Text>
+                          </TouchableOpacity>
                         </View>
                         <Text style={[s.td, { flex: 1 }]}>{roleLabel(String(x.role))}</Text>
-                        <Text style={[s.td, { flex: 1.4 }]} numberOfLines={1}>{x.school || 'Direct (B2C)'}</Text>
+                        <Text style={[s.td, { flex: 1.4 }]} numberOfLines={2} {...({ title: x.school || '' } as any)}>{x.school || 'Direct (B2C)'}</Text>
                         <Text style={[s.td, s.muted, { flex: 1.3 }]}>{blocked ? '—' : lastActiveLabel(x.last_active_at)}</Text>
                         <View style={{ flex: 1, alignItems: 'center' }}>
                           <Text style={[s.pill, { alignSelf: 'center' }, blocked

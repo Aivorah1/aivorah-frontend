@@ -1,5 +1,6 @@
 import React, { Suspense, useEffect } from 'react';
-import { ActivityIndicator, Platform, Text, TouchableOpacity, View } from 'react-native';
+import { Platform, Text, TouchableOpacity, View } from 'react-native';
+import ActivityIndicator from '../components/common/AivorahLoader';
 import { useTheme } from '../context/ThemeContext';
 import { getNetworkQuality, onNetworkQualityChange } from '../utils/networkQuality';
 import { keepServicesWarm } from '../utils/warmServices';
@@ -51,13 +52,13 @@ function withRetry(loader: Loader): Loader {
 }
 
 // Spinner color requested for the screen-loading state (Aivorah gold).
-const SPINNER_COLOR = '#B4A467';
+const SPINNER_COLOR = '#075D75'; // ocean blue (shared palette; reload button)
 
 function ScreenFallback() {
   const { colors } = useTheme();
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bgDark }}>
-      <ActivityIndicator testID="screen-loading" size="large" color={SPINNER_COLOR} />
+      <ActivityIndicator testID="screen-loading" size="large" />
     </View>
   );
 }
@@ -95,7 +96,7 @@ function ScreenCrashed({ onRetry }: { onRetry: () => void }) {
       <TouchableOpacity
         onPress={reload}
         accessibilityRole="button"
-        style={{ backgroundColor: SPINNER_COLOR, borderRadius: 10, paddingVertical: 10, paddingHorizontal: 20 }}
+        style={{ backgroundColor: SPINNER_COLOR, borderRadius: 12, minHeight: 44, justifyContent: 'center', paddingVertical: 10, paddingHorizontal: 20 }}
       >
         <Text style={{ color: '#fff', fontSize: 13, fontWeight: '700' }}>Reload</Text>
       </TouchableOpacity>

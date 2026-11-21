@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import ActivityIndicator from '../../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../../theme';
 import { normalizeCurriculum } from '../../../../../utils/curriculum';
@@ -126,8 +127,8 @@ export default function BulkImportTab({
               activeOpacity={0.8}
             >
               {bulkImporting
-                ? <><ActivityIndicator color="white" size="small" /><Text style={styles.modalSaveText}>Importing...</Text></>
-                : <><Feather name="upload" size={14} color="#fff" /><Text style={styles.modalSaveText}>Choose File</Text></>}
+                ? <><ActivityIndicator color={colors.onPrimary} size="small" /><Text style={styles.modalSaveText}>Importing...</Text></>
+                : <><Feather name="upload" size={14} color={colors.onPrimary} /><Text style={styles.modalSaveText}>Choose File</Text></>}
             </TouchableOpacity>
           </View>
         </>
@@ -171,7 +172,7 @@ export default function BulkImportTab({
                     backgroundColor: isChecked ? dotColor : 'transparent',
                     alignItems: 'center', justifyContent: 'center',
                   }}>
-                    {isChecked && <Feather name="check" size={12} color="#fff" />}
+                    {isChecked && <Feather name="check" size={12} color={colors.onPrimary} />}
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textMain }}>{r.name}</Text>
@@ -217,7 +218,7 @@ export default function BulkImportTab({
               disabled={bulkImporting || selectedRows.size === 0}
             >
               {bulkImporting
-                ? <><ActivityIndicator color="white" size="small" /><Text style={styles.modalSaveText}>Importing...</Text></>
+                ? <><ActivityIndicator color={colors.onPrimary} size="small" /><Text style={styles.modalSaveText}>Importing...</Text></>
                 : <Text style={styles.modalSaveText}>Import Selected ({selectedRows.size})</Text>}
             </TouchableOpacity>
           </View>

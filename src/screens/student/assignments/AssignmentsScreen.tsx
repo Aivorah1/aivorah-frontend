@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../../context/ThemeContext';
 import { useSlowLoadMessage } from '../../../hooks/useSlowLoadMessage';
@@ -111,8 +112,8 @@ export default function AssignmentsScreen({ navigation, route }: any) {
                 activeOpacity={0.8}
                 style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 20, paddingVertical: 10, borderRadius: 10, backgroundColor: colors.accentYellow }}
               >
-                <Feather name="refresh-cw" size={14} color="#fff" />
-                <Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>Try again</Text>
+                <Feather name="refresh-cw" size={14} color={colors.onPrimary} />
+                <Text style={{ color: colors.onPrimary, fontWeight: '700', fontSize: 13 }}>Try again</Text>
               </TouchableOpacity>
             </View>
           ) : filtered.length === 0 ? (

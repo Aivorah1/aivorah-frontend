@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, ActivityIndicator } from 'react-native';
+import { View, Text } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import QuestionEditor from './QuestionEditor';
 import { Button, LoadState, Segment } from './ui';
 import { getQuiz, listQuizWeeks, publishQuiz } from '../services/currentAffairsAdminService';

@@ -13,7 +13,8 @@
  * Name, Email, Role, Grade, Joined.
  */
 import React, { useState, useCallback, useMemo } from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity, RefreshControl, TextInput, Pressable, Platform } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, RefreshControl, TextInput, Pressable, Platform } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import Header from '../../../components/common/Header';
@@ -62,7 +63,8 @@ function formatJoined(iso: string): string {
 
 export default function SchoolAdminPeopleScreen({ navigation, route }: any) {
   const { colors } = useTheme();
-  const { isMobile } = useResponsive();
+  const { isMobile, width } = useResponsive();
+  const compactRows = isMobile || width < 1100;
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { user } = useAuth();
   const [people, setPeople] = useState<Person[]>([]);
@@ -204,7 +206,7 @@ export default function SchoolAdminPeopleScreen({ navigation, route }: any) {
                   : 'No one matches your search.'}
               </Text>
             </View>
-          ) : isMobile ? (
+          ) : compactRows ? (
             // Narrow screens: card list — a wide table would force horizontal scroll.
             rows.map((p) => {
               const tint = roleTint(colors, p.role);
@@ -294,16 +296,16 @@ function makeStyles(colors: AppColors) {
       backgroundColor: colors.cardDark, borderWidth: 1, borderColor: colors.borderColor,
       borderRadius: radius.sm, paddingHorizontal: 10, height: 36,
     },
-    searchInput: { flex: 1, fontFamily: fonts.serif, fontSize: 13, color: colors.textMain, height: '100%' },
+    searchInput: { flex: 1, fontFamily: fonts.serif, fontSize: 14, color: colors.textMain, height: '100%' },
     tabRow: { flexDirection: 'row', gap: 8, marginBottom: spacing.xl, flexWrap: 'wrap' },
     tab: {
       paddingHorizontal: 13, paddingVertical: 7, borderRadius: 999,
       borderWidth: 1, borderColor: colors.borderColor, backgroundColor: colors.cardDark,
     },
     tabActive: { borderColor: colors.accentYellow, backgroundColor: `${colors.accentYellow}1F` },
-    tabText: { fontFamily: fonts.serif, fontSize: 12.5, fontWeight: '600', color: colors.textMuted },
+    tabText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '600', color: colors.textMuted },
     tabTextActive: { color: colors.textHeading },
-    tabCount: { fontSize: 11, color: colors.textDim },
+    tabCount: { fontSize: 14, color: colors.textDim },
 
     // ── Table (desktop/tablet) ──────────────────────────────────────────
     table: {
@@ -317,7 +319,7 @@ function makeStyles(colors: AppColors) {
     },
     th: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 10, paddingHorizontal: 12, borderRadius: radius.sm },
     thHovered: { backgroundColor: colors.cardDark },
-    thText: { fontFamily: fonts.serif, fontSize: 10.5, fontWeight: '700', letterSpacing: 0.4, textTransform: 'uppercase', color: colors.textDim },
+    thText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', letterSpacing: 0.4, textTransform: 'uppercase', color: colors.textDim },
     thTextActive: { color: colors.textHeading },
     thStatic: { paddingVertical: 10, paddingHorizontal: 12 },
     // Name/Email flex to absorb extra width (long values benefit from room);
@@ -335,8 +337,8 @@ function makeStyles(colors: AppColors) {
     },
     trLast: { borderBottomWidth: 0 },
     nameCell: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 12 },
-    td: { fontFamily: fonts.serif, fontSize: 12.5, color: colors.textMuted, paddingHorizontal: 12 },
-    tdName: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '700', color: colors.textHeading, flexShrink: 1 },
+    td: { fontFamily: fonts.serif, fontSize: 14, color: colors.textMuted, paddingHorizontal: 12 },
+    tdName: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.textHeading, flexShrink: 1 },
 
     // ── Card list (mobile) ───────────────────────────────────────────────
     card: {
@@ -344,19 +346,19 @@ function makeStyles(colors: AppColors) {
       backgroundColor: colors.cardDark, borderWidth: 1, borderColor: colors.borderColor,
       borderRadius: radius.sm, paddingVertical: 9, paddingHorizontal: 12, marginBottom: 6,
     },
-    cardName: { fontFamily: fonts.serif, fontSize: 13.5, fontWeight: '700', color: colors.textHeading },
-    cardMeta: { fontFamily: fonts.serif, fontSize: 11.5, color: colors.textMuted, marginTop: 1 },
+    cardName: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.textHeading },
+    cardMeta: { fontFamily: fonts.serif, fontSize: 14, color: colors.textMuted, marginTop: 1 },
 
     avatar: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
-    avatarText: { fontFamily: fonts.serif, fontSize: 10, fontWeight: '700' },
+    avatarText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700' },
     rolePill: {
       paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999,
       backgroundColor: colors.cardHover, borderWidth: 1, flexShrink: 0,
     },
-    rolePillText: { fontFamily: fonts.serif, fontSize: 10.5, fontWeight: '700' },
+    rolePillText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700' },
     emptyBox: { alignItems: 'center', paddingTop: 56, gap: 10, paddingHorizontal: 24 },
-    emptyText: { fontFamily: fonts.serif, fontSize: 13, color: colors.textMuted, textAlign: 'center', lineHeight: 19 },
-    retryBtn: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.borderColor },
-    retryText: { fontFamily: fonts.serif, fontSize: 12.5, fontWeight: '700', color: colors.accentYellow },
+    emptyText: { fontFamily: fonts.serif, fontSize: 14, color: colors.textMuted, textAlign: 'center', lineHeight: 19 },
+    retryBtn: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 14, paddingVertical: 7, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.borderColor },
+    retryText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.accentYellow },
   });
 }

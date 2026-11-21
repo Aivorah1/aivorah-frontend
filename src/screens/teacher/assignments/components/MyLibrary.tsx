@@ -5,7 +5,8 @@
  * Remove takes it out of the library (the assignments already given stay).
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, Modal, ScrollView, TextInput, Platform, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, ScrollView, TextInput, Platform, Alert } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../theme';
 import DatePicker from '../../../../components/common/DatePicker';
@@ -121,7 +122,7 @@ export function MyLibrary({ active, teacherEmail, students, scope, subject, grad
                       activeOpacity={0.8}
                       accessibilityRole="button"
                     >
-                      <Text style={{ fontSize: 13, fontWeight: '700', color: '#fff' }}>Assign</Text>
+                      <Text style={{ fontSize: 13, fontWeight: '700', color: colors.onPrimary }}>Assign</Text>
                     </TouchableOpacity>
                     <TouchableOpacity testID="my-library-remove" onPress={() => confirmRemove(it)} accessibilityRole="button" accessibilityLabel={`Remove ${it.title} from your library`} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
                       <Feather name="trash-2" size={15} color={colors.textDim} />
@@ -247,7 +248,7 @@ function AssignFromLibraryModal({ item, students, scope, teacherEmail, colors, g
             style={{ backgroundColor: canAssign ? gold : gold + '55', borderRadius: 12, paddingVertical: 13, alignItems: 'center', marginTop: 4 }}
             accessibilityRole="button"
           >
-            {saving ? <ActivityIndicator color="#fff" /> : <Text style={{ color: '#fff', fontWeight: '800', fontSize: 14.5 }}>Assign</Text>}
+            {saving ? <ActivityIndicator color={colors.onPrimary} /> : <Text style={{ color: colors.onPrimary, fontWeight: '800', fontSize: 14.5 }}>Assign</Text>}
           </TouchableOpacity>
         </View>
       </View>

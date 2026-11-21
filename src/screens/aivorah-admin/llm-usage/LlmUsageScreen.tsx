@@ -1,5 +1,6 @@
 import React, { useMemo, useRef } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from '@react-navigation/native';
@@ -48,7 +49,7 @@ export default function LlmUsageScreen({ navigation }: any) {
   useFocusEffect(React.useCallback(() => { load(); }, [load]));
 
   const gold = colors.accentYellow;
-  const sage = colors.primary || colors.accentGreen;
+  const sage = colors.accentGreen; // positive / active state (fern)
   const rose = colors.accentRed;
   const modelColor = (i: number) => [gold, sage, rose][i] ?? colors.textDim;
   // "Up" is good for usage, bad for cost and latency.

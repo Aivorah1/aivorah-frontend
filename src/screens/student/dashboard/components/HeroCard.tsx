@@ -7,6 +7,7 @@ import { BRAND } from '../constants';
 import { getGreeting } from '../utils/dashboardHelpers';
 import { HeroDots, FlameIcon } from './common/icons';
 import type { makeStyles } from '../DashboardScreen';
+import { useTheme } from '../../../../context/ThemeContext';
 
 interface HeroCardProps {
   styles: ReturnType<typeof makeStyles>;
@@ -51,13 +52,14 @@ export function HeroCard({
   const isComplete = done >= total && total > 0;
   const isNew      = done === 0;
 
+  const { colors, isDark } = useTheme();
   return (
     <Animated.View style={[{
       opacity: heroAnim,
       transform: [{ translateY: heroAnim.interpolate({ inputRange: [0, 1], outputRange: [20, 0] }) }],
     }]}>
       <LinearGradient
-        colors={['#CDEBD7', '#DFF1E5', '#F6E6BE']}
+        colors={isDark ? ['#1C2B37', '#1C2B37'] : ['#FFFFFF', '#FFFFFF']}
         start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
         style={styles.heroCard}
       >
@@ -70,7 +72,7 @@ export function HeroCard({
         {/* Top badges */}
         <View style={styles.heroBadgeRow}>
           <View style={styles.levelBadge}>
-            <Feather name="shield" size={12} color="#BAA467" />
+            <Feather name="shield" size={12} color={colors.accent} />
             <Text style={styles.levelTxt}>{formatLevel(stats.level)}</Text>
           </View>
           <View style={styles.streakBadge}>

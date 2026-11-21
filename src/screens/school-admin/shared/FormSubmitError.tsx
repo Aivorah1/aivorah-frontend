@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { radius, fonts } from '../../../theme';
 import type { AppColors } from '../../../theme';
@@ -33,8 +34,8 @@ export default function FormSubmitError({ message, colors, action }: {
 function makeStyles(colors: AppColors) {
   return StyleSheet.create({
     box: { flexDirection: 'row', gap: 8, alignItems: 'flex-start', borderWidth: 1, borderColor: `${colors.accentRed}55`, backgroundColor: `${colors.accentRed}12`, borderRadius: radius.sm, paddingHorizontal: 12, paddingVertical: 10, marginTop: 4 },
-    text: { fontFamily: fonts.serif, fontSize: 12.5, color: colors.textMain, lineHeight: 18 },
-    actionBtn: { alignSelf: 'flex-start', marginTop: 8, borderRadius: 16, paddingVertical: 6, paddingHorizontal: 12, backgroundColor: `${colors.accentYellow}18` },
-    actionText: { fontFamily: fonts.serif, fontSize: 12, fontWeight: '700', color: colors.accentYellow },
+    text: { fontFamily: fonts.serif, fontSize: 14, color: colors.textMain, lineHeight: 18 },
+    actionBtn: { minHeight: 44, justifyContent: 'center', alignSelf: 'flex-start', marginTop: 8, borderRadius: 16, paddingVertical: 6, paddingHorizontal: 12, backgroundColor: `${colors.accentYellow}18` },
+    actionText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.accentYellow },
   });
 }

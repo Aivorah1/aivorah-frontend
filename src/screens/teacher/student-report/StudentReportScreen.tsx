@@ -8,7 +8,8 @@
  * /reports) enforces all of this; the buttons below just follow its answer.
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, TextInput, Modal } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Modal } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../../context/ThemeContext';
 import ScreenLayout from '../../../components/common/ScreenLayout';
@@ -248,7 +249,7 @@ export default function StudentReportScreen({ navigation, route }: any) {
                           </TouchableOpacity>
                           {info.canShare && (
                             <TouchableOpacity testID={`share-${s.id}`} style={[styles.actionBtn, styles.actionBtnPrimary]} onPress={() => setShareFor(s)} disabled={busy} accessibilityRole="button">
-                              <Feather name="send" size={13} color="#241f16" />
+                              <Feather name="send" size={13} color="#1C2B37" />
                               <Text style={[styles.actionBtnText, styles.actionBtnTextPrimary]}>Share</Text>
                             </TouchableOpacity>
                           )}
@@ -300,7 +301,7 @@ export default function StudentReportScreen({ navigation, route }: any) {
                 <Text style={styles.actionBtnText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity testID="share-send" style={[styles.actionBtn, styles.actionBtnPrimary]} onPress={confirmShare} disabled={busy} accessibilityRole="button">
-                {busy ? <ActivityIndicator size="small" color="#241f16" /> : <Text style={[styles.actionBtnText, styles.actionBtnTextPrimary]}>Send</Text>}
+                {busy ? <ActivityIndicator size="small" color="#1C2B37" /> : <Text style={[styles.actionBtnText, styles.actionBtnTextPrimary]}>Send</Text>}
               </TouchableOpacity>
             </View>
           </View>

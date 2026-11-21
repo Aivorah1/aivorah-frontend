@@ -6,7 +6,8 @@
  * note when there is nothing to practise yet.
  */
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import ActivityIndicator from '../../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../../theme';
 import { followupApi } from '../services/practiceFollowupApi';

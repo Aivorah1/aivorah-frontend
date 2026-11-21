@@ -5,6 +5,6 @@ import type { AppColors } from '../../../../../theme';
 export function boardColors(colors: AppColors) {
   const light = parseInt(colors.bgDark.slice(1, 3), 16) > 128;
   return light
-    ? { bg: '#F6E6BE', text: colors.textMain, label: colors.accentYellow, border: colors.accentYellow + '66', rule: colors.accentYellow + '55' }
+    ? { bg: '#DCEFEB', text: colors.textMain, label: colors.accentYellow, border: colors.accentYellow + '66', rule: colors.accentYellow + '55' }
     : { bg: colors.accentYellow, text: colors.bgDark, label: colors.bgDark, border: colors.accentYellow, rule: colors.bgDark + '44' };
 }

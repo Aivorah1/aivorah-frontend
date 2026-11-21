@@ -13,7 +13,7 @@ export function AchievementsGrid({ styles, colors, achievements }: {
     <>
       <View style={styles.cardHeader}>
         <Text style={styles.sectionTitle}>Achievements</Text>
-        <Text style={[styles.seeAll, { color: '#C9A24E' }]}>{unlockedCount}/{achievements.length} unlocked</Text>
+        <Text style={[styles.seeAll, { color: colors.accentOrange }]}>{unlockedCount}/{achievements.length} unlocked</Text>
       </View>
       <View style={styles.achieveGrid}>
         {achievements.map((a) => (
@@ -29,7 +29,7 @@ export function AchievementsGrid({ styles, colors, achievements }: {
           >
             <View style={[styles.achieveIcon, a.unlocked
               ? { backgroundColor: a.color, borderColor: a.color }
-              : { backgroundColor: 'rgba(255,255,255,0.03)', borderColor: colors.borderColor }]}>
+              : { backgroundColor: colors.cardHover, borderColor: colors.borderColor }]}>
               <Feather name={a.unlocked ? a.icon : 'lock'} size={22} color={a.unlocked ? '#FFFFFF' : colors.textDim} />
             </View>
             <Text style={[styles.achieveLabel, !a.unlocked && { color: colors.textDim }]}>{a.label}</Text>

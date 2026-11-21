@@ -2,7 +2,7 @@ import React from 'react';
 import { useWindowDimensions } from 'react-native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { ParentDrawerParamList } from './types';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme, ParentThemeProvider } from '../context/ThemeContext';
 
 import DrawerContent from '../components/common/DrawerContent';
 import ParentDashboardScreen from '../screens/parent/dashboard/ParentDashboardScreen';
@@ -39,6 +39,14 @@ const ParentHelpScreen = screens.lazyScreen(() => import('../screens/parent/help
 const Drawer = createDrawerNavigator<ParentDrawerParamList>();
 
 export default function ParentNavigator() {
+  return (
+    <ParentThemeProvider>
+      <ParentPortalNavigator />
+    </ParentThemeProvider>
+  );
+}
+
+function ParentPortalNavigator() {
   // Wake this role's services and, on a good connection, prefetch its screens.
   useRoleWarmup(screens, PARENT_SERVICES);
   const { width } = useWindowDimensions();

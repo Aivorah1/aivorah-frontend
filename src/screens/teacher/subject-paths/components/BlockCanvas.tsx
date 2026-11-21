@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../theme';
 import LearningBlocks from '../../../student/learning-paths/lesson-screen/components/LearningBlocks';
@@ -77,8 +78,8 @@ function BlockForm({ block, colors, onChange, onReplaceImage }: { block: Block; 
           {!!block.url && <Image source={{ uri: block.url }} style={{ width: '100%', height: 180, borderRadius: 8 }} resizeMode="contain" />}
           <TouchableOpacity testID="replace-image" onPress={onReplaceImage}
             style={{ alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, backgroundColor: colors.primary }}>
-            <Feather name="upload" size={14} color="#fff" />
-            <Text style={{ fontSize: 13, fontWeight: '700', color: '#fff' }}>{block.url ? 'Replace with another picture' : 'Choose a picture'}</Text>
+            <Feather name="upload" size={14} color={colors.onPrimary} />
+            <Text style={{ fontSize: 13, fontWeight: '700', color: colors.onPrimary }}>{block.url ? 'Replace with another picture' : 'Choose a picture'}</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -168,7 +169,7 @@ export default function BlockCanvas({ blocks, colors, onChange }: { blocks: Bloc
                     {tool('copy', () => { onChange([...blocks.slice(0, i + 1), JSON.parse(JSON.stringify(block)), ...blocks.slice(i + 1)]); }, `block-copy-${i}`)}
                     {tool('trash-2', () => { onChange(blocks.filter((_, k) => k !== i)); setSelected(null); }, `block-delete-${i}`)}
                     <TouchableOpacity testID={`block-done-${i}`} onPress={() => setSelected(null)} style={{ marginLeft: 6, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6, backgroundColor: colors.primary }}>
-                      <Text style={{ fontSize: 12, fontWeight: '700', color: '#fff' }}>Done</Text>
+                      <Text style={{ fontSize: 12, fontWeight: '700', color: colors.onPrimary }}>Done</Text>
                     </TouchableOpacity>
                   </View>
                   <BlockForm block={block} colors={colors} onChange={(b) => replace(i, b)} onReplaceImage={() => withPicture(i, (url) => replace(i, { ...block, url }))} />

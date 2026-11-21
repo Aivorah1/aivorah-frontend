@@ -1,8 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import {
-  View, Text, ScrollView, TouchableOpacity,
-  TextInput, ActivityIndicator, RefreshControl,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, RefreshControl } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { spacing } from '../../../theme';
 import { useTheme } from '../../../context/ThemeContext';
@@ -179,7 +177,7 @@ export default function TeacherStudentsScreen({ navigation, route }: any) {
               </Text>
               {students.length === 0 && (
                 <TouchableOpacity testID="teacher-students-empty-add-button" style={styles.emptyAddBtn} onPress={openAddModal} activeOpacity={0.8}>
-                  <Feather name="user-plus" size={14} color="#fff" />
+                  <Feather name="user-plus" size={14} color={colors.onPrimary} />
                   <Text style={styles.emptyAddBtnText}>Add your first student</Text>
                 </TouchableOpacity>
               )}

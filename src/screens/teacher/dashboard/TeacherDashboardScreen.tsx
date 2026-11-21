@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { View, StyleSheet, ActivityIndicator, RefreshControl, ScrollView, Modal } from 'react-native';
+import { View, StyleSheet, RefreshControl, ScrollView, Modal } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { spacing, radius } from '../../../theme';
 import type { AppColors } from '../../../theme';
 import Header from '../../../components/common/Header';

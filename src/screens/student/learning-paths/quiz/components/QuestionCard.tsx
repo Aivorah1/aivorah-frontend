@@ -7,7 +7,8 @@
  * voice-to-text support for students who prefer speaking over typing.
  */
 import React from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
+import ActivityIndicator from '../../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import TransliterationInput, { resolveTypingLang } from '../../../../../components/common/TransliterationInput';
 import type { AppColors } from '../../../../../theme';

@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  View, Text, ScrollView, TouchableOpacity,
-  StyleSheet, ActivityIndicator, TextInput, Platform,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, TextInput, Platform } from 'react-native';
+import ActivityIndicator from '../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import Header from '../../components/common/Header';
@@ -23,19 +21,19 @@ type Phase = 'attempt' | 'wrong' | 'correct';
 
 // Aivorah pastel accents per subject
 const SUBJECT_ACCENT: Record<string, string> = {
-  Mathematics: '#BAA467',
-  Science: '#BAA467',
-  English: '#BAA467',
-  'Social Studies': '#BAA467',
-  Arts: '#BAA467',
-  'Physical Education': '#BAA467',
-  ICT: '#BAA467',
+  Mathematics: '#24877B',
+  Science: '#24877B',
+  English: '#24877B',
+  'Social Studies': '#24877B',
+  Arts: '#24877B',
+  'Physical Education': '#24877B',
+  ICT: '#24877B',
 };
 
 export default function MathHelperScreen({ route, navigation }: any) {
   const { colors } = useTheme();
   const { topic, chapterId, unit, subject = 'Mathematics', grade = 'Grade 3', curriculum = 'IB PYP' } = route.params ?? {};
-  const accent = SUBJECT_ACCENT[subject] || '#BAA467';
+  const accent = SUBJECT_ACCENT[subject] || '#24877B';
 
   const [loading,       setLoading]       = useState(false);
   const [result,        setResult]        = useState<MathResult | null>(null);

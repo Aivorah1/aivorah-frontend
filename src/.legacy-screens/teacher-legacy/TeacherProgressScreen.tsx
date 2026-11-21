@@ -1,8 +1,6 @@
 import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
-import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  ActivityIndicator, RefreshControl, Platform,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Platform } from 'react-native';
+import ActivityIndicator from '../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import Svg, { Circle, G, Rect } from 'react-native-svg';
 import { spacing, radius } from '../../theme';

@@ -6,7 +6,7 @@ import type { AppColors } from '../../../../theme';
 import type { Challenge } from '../services/teacherChallengesService';
 import type { makeStyles } from '../styles';
 
-const GOLD = '#D9A93E';
+const GOLD = '#0E6E86';
 
 const DIFF_COLOR = (d: string, c: AppColors) =>
   d === 'Easy' ? c.accentGreen : d === 'Hard' ? c.accentRed : c.accentYellow;
@@ -18,8 +18,8 @@ const DIFF_COLOR = (d: string, c: AppColors) =>
 // so a stable fallback color works for any value, present or future.
 function categoryColor(category: string): string {
   const known: Record<string, string> = {
-    'Chapter Quiz':     '#BAA467',
-    'School Challenge': '#BAA467',
+    'Chapter Quiz':     '#0E6E86',
+    'School Challenge': '#0E6E86',
   };
   return known[category] ?? GOLD;
 }
@@ -40,7 +40,7 @@ export default function ChallengeCard({ ch, colors, isDark, styles, onAssign, as
   const titleColor = isDark ? colors.textMain  : '#16241B';
   const descColor  = isDark ? colors.textMuted : '#5C6F62';
   const dimColor   = isDark ? colors.textDim   : '#7C8A82';
-  const xpColor    = isDark ? colors.accentYellow : '#9A7B2E';
+  const xpColor    = isDark ? colors.accentYellow : '#0E6E86';
   const assignBg   = isDark ? 'transparent' : '#FFFFFF';
   const allAssigned = eligibleCount > 0 && assignedCount >= eligibleCount;
 

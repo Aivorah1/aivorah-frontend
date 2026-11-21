@@ -5,10 +5,8 @@
  * No student guardrails — professional educator context.
  */
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import {
-  View, Text, TextInput, TouchableOpacity, ScrollView,
-  Animated, ActivityIndicator, Platform, Image,
-} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Animated, Platform, Image } from 'react-native';
+import ActivityIndicator from './AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
@@ -18,12 +16,12 @@ import { resolveStudentStatus, STATUS_META } from '../../utils/studentStatus';
 import { normalizeCurriculum } from '../../utils/curriculum';
 
 const P = {
-  rose:  '#BAA467',
-  green: '#BAA467',
-  gold:  '#BAA467',
-  peach: '#BAA467',
-  teal:  '#BAA467',
-  slate: '#BAA467',
+  rose:  '#0E6E86',
+  green: '#0E6E86',
+  gold:  '#0E6E86',
+  peach: '#0E6E86',
+  teal:  '#0E6E86',
+  slate: '#0E6E86',
 };
 
 const PANEL_WIDTH = 340;

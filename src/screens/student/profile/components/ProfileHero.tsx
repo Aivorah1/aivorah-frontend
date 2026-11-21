@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import type { AppColors } from '../../../../theme';
@@ -101,14 +102,14 @@ export function ProfileHero({
         {/* Plan badge */}
         <TouchableOpacity
           style={[styles.tag, (user as any)?.isPro
-            ? { backgroundColor: isDark ? '#C5A56A22' : '#FFFFFFB0', borderColor: '#C5A56A80' }
+            ? { backgroundColor: isDark ? '#24877B22' : '#FFFFFFB0', borderColor: '#24877B80' }
             : { backgroundColor: isDark ? 'rgba(147,176,172,0.18)' : '#FFFFFFB0', borderColor: heroGreen + '80' }
           ]}
           onPress={onNavigateSubscription}
           activeOpacity={0.7}
         >
-          <Feather name={(user as any)?.isPro ? 'sun' : 'feather'} size={10} color={(user as any)?.isPro ? '#C5A56A' : heroGold} />
-          <Text style={[styles.tagText, { color: (user as any)?.isPro ? '#C5A56A' : heroGold }]}>
+          <Feather name={(user as any)?.isPro ? 'sun' : 'feather'} size={10} color={(user as any)?.isPro ? '#24877B' : heroGold} />
+          <Text style={[styles.tagText, { color: (user as any)?.isPro ? '#24877B' : heroGold }]}>
             {(user as any)?.isPro ? 'Pro Plan' : 'Free Plan'}
           </Text>
         </TouchableOpacity>

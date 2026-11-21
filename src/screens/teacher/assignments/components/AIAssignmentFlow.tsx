@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../theme';
 import type { StepType, TaskStep, StudentItem } from '../types';
@@ -97,13 +98,13 @@ export function AIAssignmentFlow(props: {
           <TouchableOpacity key={val}
             style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
               paddingVertical: 10, borderRadius: 10, borderWidth: 1.5,
-              borderColor: type === val ? '#BAA467' : colors.borderColor,
-              backgroundColor: type === val ? '#BAA46718' : 'transparent' }}
+              borderColor: type === val ? '#0E6E86' : colors.borderColor,
+              backgroundColor: type === val ? '#0E6E8618' : 'transparent' }}
             onPress={() => setType(val)}
             activeOpacity={0.75}
           >
-            <Feather name={icon as any} size={14} color={type === val ? '#BAA467' : colors.textMuted} />
-            <Text style={{ fontSize: 13, fontWeight: '700', color: type === val ? '#BAA467' : colors.textMuted }}>{label}</Text>
+            <Feather name={icon as any} size={14} color={type === val ? '#0E6E86' : colors.textMuted} />
+            <Text style={{ fontSize: 13, fontWeight: '700', color: type === val ? '#0E6E86' : colors.textMuted }}>{label}</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -123,10 +124,10 @@ export function AIAssignmentFlow(props: {
 
       {/* ── Quiz Generator (AI mode, type === quiz) ── */}
       {type === 'quiz' && (
-        <View style={{ padding: 14, borderRadius: 14, borderWidth: 1.5, borderColor: '#BAA46740', backgroundColor: '#BAA46708', gap: 12 }}>
+        <View style={{ padding: 14, borderRadius: 14, borderWidth: 1.5, borderColor: '#0E6E8640', backgroundColor: '#0E6E8608', gap: 12 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <Feather name="check-square" size={16} color="#BAA467" />
-            <Text style={{ fontSize: 14, fontWeight: '800', color: '#BAA467' }}>Quiz Generator</Text>
+            <Feather name="check-square" size={16} color="#0E6E86" />
+            <Text style={{ fontSize: 14, fontWeight: '800', color: '#0E6E86' }}>Quiz Generator</Text>
           </View>
 
           {/* Question Type */}
@@ -137,13 +138,13 @@ export function AIAssignmentFlow(props: {
                 <TouchableOpacity key={val}
                   style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5,
                     paddingVertical: 9, borderRadius: 10, borderWidth: 1.5,
-                    borderColor: quizType === val ? '#BAA467' : colors.borderColor,
-                    backgroundColor: quizType === val ? '#BAA46718' : 'transparent' }}
+                    borderColor: quizType === val ? '#0E6E86' : colors.borderColor,
+                    backgroundColor: quizType === val ? '#0E6E8618' : 'transparent' }}
                   onPress={() => setQuizType(val)}
                   activeOpacity={0.75}
                 >
-                  <Feather name={icon as any} size={12} color={quizType === val ? '#BAA467' : colors.textMuted} />
-                  <Text style={{ fontSize: 12, fontWeight: '700', color: quizType === val ? '#BAA467' : colors.textMuted }}>{label}</Text>
+                  <Feather name={icon as any} size={12} color={quizType === val ? '#0E6E86' : colors.textMuted} />
+                  <Text style={{ fontSize: 12, fontWeight: '700', color: quizType === val ? '#0E6E86' : colors.textMuted }}>{label}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -156,12 +157,12 @@ export function AIAssignmentFlow(props: {
               {(['easy','medium','hard'] as const).map(d => (
                 <TouchableOpacity key={d}
                   style={{ flex: 1, alignItems: 'center', paddingVertical: 8, borderRadius: 10, borderWidth: 1.5,
-                    borderColor: quizDifficulty === d ? '#BAA467' : colors.borderColor,
-                    backgroundColor: quizDifficulty === d ? '#BAA46718' : 'transparent' }}
+                    borderColor: quizDifficulty === d ? '#0E6E86' : colors.borderColor,
+                    backgroundColor: quizDifficulty === d ? '#0E6E8618' : 'transparent' }}
                   onPress={() => setQuizDifficulty(d)}
                   activeOpacity={0.75}
                 >
-                  <Text style={{ fontSize: 12, fontWeight: '700', color: quizDifficulty === d ? '#BAA467' : colors.textMuted, textTransform: 'capitalize' }}>{d}</Text>
+                  <Text style={{ fontSize: 12, fontWeight: '700', color: quizDifficulty === d ? '#0E6E86' : colors.textMuted, textTransform: 'capitalize' }}>{d}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -174,12 +175,12 @@ export function AIAssignmentFlow(props: {
               {[3, 5, 8, 10].map(n => (
                 <TouchableOpacity key={n}
                   style={{ flex: 1, alignItems: 'center', paddingVertical: 8, borderRadius: 10, borderWidth: 1.5,
-                    borderColor: quizCount === n ? '#BAA467' : colors.borderColor,
-                    backgroundColor: quizCount === n ? '#BAA46718' : 'transparent' }}
+                    borderColor: quizCount === n ? '#0E6E86' : colors.borderColor,
+                    backgroundColor: quizCount === n ? '#0E6E8618' : 'transparent' }}
                   onPress={() => setQuizCount(n)}
                   activeOpacity={0.75}
                 >
-                  <Text style={{ fontSize: 13, fontWeight: '800', color: quizCount === n ? '#BAA467' : colors.textMuted }}>{n}</Text>
+                  <Text style={{ fontSize: 13, fontWeight: '800', color: quizCount === n ? '#0E6E86' : colors.textMuted }}>{n}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -195,13 +196,13 @@ export function AIAssignmentFlow(props: {
               {([['off', 'Off', 'x'], ['optional', 'Optional', 'edit-3'], ['required', 'Compulsory', 'check-circle']] as const).map(([val, label, icon]) => (
                 <TouchableOpacity key={val} testID={`reasoning-setting-${val}`}
                   style={{ flex: 1, alignItems: 'center', paddingVertical: 8, borderRadius: 10, borderWidth: 1.5,
-                    borderColor: requireReasoning === val ? '#BAA467' : colors.borderColor,
-                    backgroundColor: requireReasoning === val ? '#BAA46718' : 'transparent' }}
+                    borderColor: requireReasoning === val ? '#0E6E86' : colors.borderColor,
+                    backgroundColor: requireReasoning === val ? '#0E6E8618' : 'transparent' }}
                   onPress={() => setRequireReasoning(val)}
                   activeOpacity={0.75}
                 >
-                  <Feather name={icon as any} size={12} color={requireReasoning === val ? '#BAA467' : colors.textMuted} />
-                  <Text style={{ fontSize: 12, fontWeight: '700', color: requireReasoning === val ? '#BAA467' : colors.textMuted, textTransform: 'capitalize' }}>{label}</Text>
+                  <Feather name={icon as any} size={12} color={requireReasoning === val ? '#0E6E86' : colors.textMuted} />
+                  <Text style={{ fontSize: 12, fontWeight: '700', color: requireReasoning === val ? '#0E6E86' : colors.textMuted, textTransform: 'capitalize' }}>{label}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -216,15 +217,15 @@ export function AIAssignmentFlow(props: {
           )}
           <TouchableOpacity
             style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
-              padding: 14, borderRadius: 12, backgroundColor: generatingQuiz ? colors.borderColor : '#BAA467' }}
+              padding: 14, borderRadius: 12, backgroundColor: generatingQuiz ? colors.borderColor : '#0E6E86' }}
             onPress={generateQuiz}
             activeOpacity={0.85}
             disabled={generatingQuiz}
           >
             {generatingQuiz
-              ? <ActivityIndicator size="small" color="#fff" />
-              : <Feather name="cpu" size={16} color="#fff" />}
-            <Text style={{ fontSize: 14, fontWeight: '800', color: '#fff' }}>
+              ? <ActivityIndicator size="small" color={colors.onPrimary} />
+              : <Feather name="cpu" size={16} color={colors.onPrimary} />}
+            <Text style={{ fontSize: 14, fontWeight: '800', color: colors.onPrimary }}>
               {generatingQuiz ? 'Generating Quiz...' : `Generate ${quizType === 'mcq' ? 'MCQ' : quizType === 'fill_blank' ? 'Fill-in-the-Blank' : 'Mixed'} Quiz`}
             </Text>
           </TouchableOpacity>
@@ -232,10 +233,10 @@ export function AIAssignmentFlow(props: {
       )}
 
       {/* ── AI Assignment Generator (only in AI mode, type === assignment) ── */}
-      {type === 'assignment' && <View style={{ padding: 14, borderRadius: 14, borderWidth: 1.5, borderColor: '#BAA46740', backgroundColor: '#BAA46708', gap: 10 }}>
+      {type === 'assignment' && <View style={{ padding: 14, borderRadius: 14, borderWidth: 1.5, borderColor: '#0E6E8640', backgroundColor: '#0E6E8608', gap: 10 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <Feather name="cpu" size={16} color="#BAA467" />
-          <Text style={{ fontSize: 14, fontWeight: '800', color: '#BAA467' }}>
+          <Feather name="cpu" size={16} color="#0E6E86" />
+          <Text style={{ fontSize: 14, fontWeight: '800', color: '#0E6E86' }}>
             {isIBPYP ? 'Generate IB PYP Assignment' : `Generate ${curriculum || 'AI'} Assignment`}
           </Text>
         </View>
@@ -268,7 +269,7 @@ export function AIAssignmentFlow(props: {
         )}
         <TouchableOpacity
           style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
-            padding: 14, borderRadius: 12, backgroundColor: (generatingIB || generatingSteps) ? colors.borderColor : '#BAA467' }}
+            padding: 14, borderRadius: 12, backgroundColor: (generatingIB || generatingSteps) ? colors.borderColor : '#0E6E86' }}
           // Bug fix: this button previously always called
           // generateIBAssignment() (→ /assignments/generate-ibpyp)
           // regardless of curriculum, even though its own label reads
@@ -282,9 +283,9 @@ export function AIAssignmentFlow(props: {
           disabled={generatingIB || generatingSteps}
         >
           {(generatingIB || generatingSteps)
-            ? <ActivityIndicator size="small" color="#fff" />
-            : <Feather name="cpu" size={16} color="#fff" />}
-          <Text style={{ fontSize: 14, fontWeight: '800', color: '#fff' }}>
+            ? <ActivityIndicator size="small" color={colors.onPrimary} />
+            : <Feather name="cpu" size={16} color={colors.onPrimary} />}
+          <Text style={{ fontSize: 14, fontWeight: '800', color: colors.onPrimary }}>
             {(generatingIB || generatingSteps)
               ? 'Generating Assignment...'
               : isIBPYP ? 'Generate Full IB PYP Assignment' : `Generate ${curriculum || 'AI'} Assignment`}
@@ -301,14 +302,14 @@ export function AIAssignmentFlow(props: {
         {!!ibPurpose && (
           <View style={{ gap: 8, marginTop: 4 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <Feather name="check-circle" size={14} color="#BAA467" />
-              <Text style={{ fontSize: 12, fontWeight: '700', color: '#BAA467' }}>
+              <Feather name="check-circle" size={14} color="#0E6E86" />
+              <Text style={{ fontSize: 12, fontWeight: '700', color: '#0E6E86' }}>
                 {isIBPYP ? 'IB PYP Assignment Generated' : `${curriculum || 'AI'} Assignment Generated`}
               </Text>
             </View>
 
-            <View style={{ backgroundColor: colors.bgDark, borderRadius: 10, padding: 10, borderWidth: 1, borderColor: '#BAA46730' }}>
-              <Text style={{ fontSize: 11, fontWeight: '700', color: '#BAA467', marginBottom: 4 }}>PURPOSE / CENTRAL IDEA</Text>
+            <View style={{ backgroundColor: colors.bgDark, borderRadius: 10, padding: 10, borderWidth: 1, borderColor: '#0E6E8630' }}>
+              <Text style={{ fontSize: 11, fontWeight: '700', color: '#0E6E86', marginBottom: 4 }}>PURPOSE / CENTRAL IDEA</Text>
               <TextInput
                 style={{ fontSize: 12, color: colors.textMain, lineHeight: 18 }}
                 value={ibCentralIdea || ibPurpose}
@@ -318,11 +319,11 @@ export function AIAssignmentFlow(props: {
             </View>
 
             {ibLinesOfInquiry.length > 0 && (
-              <View style={{ backgroundColor: colors.bgDark, borderRadius: 10, padding: 10, borderWidth: 1, borderColor: '#BAA46730' }}>
-                <Text style={{ fontSize: 11, fontWeight: '700', color: '#BAA467', marginBottom: 6 }}>LINES OF INQUIRY</Text>
+              <View style={{ backgroundColor: colors.bgDark, borderRadius: 10, padding: 10, borderWidth: 1, borderColor: '#0E6E8630' }}>
+                <Text style={{ fontSize: 11, fontWeight: '700', color: '#0E6E86', marginBottom: 6 }}>LINES OF INQUIRY</Text>
                 {ibLinesOfInquiry.map((loi, i) => (
                   <View key={i} style={{ flexDirection: 'row', gap: 6, marginBottom: 4 }}>
-                    <View style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: '#BAA467', marginTop: 7, flexShrink: 0 }} />
+                    <View style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: '#0E6E86', marginTop: 7, flexShrink: 0 }} />
                     <Text style={{ flex: 1, fontSize: 12, color: colors.textMain, lineHeight: 18 }}>{loi}</Text>
                   </View>
                 ))}
@@ -338,14 +339,14 @@ export function AIAssignmentFlow(props: {
                   </View>
                 ) : null}
                 {ibAtlSkill ? (
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20, backgroundColor: '#BAA46718', borderWidth: 1, borderColor: '#BAA46750' }}>
-                    <Text style={{ fontSize: 10, fontWeight: '800', color: '#8A7E4A' }}>ATL Skill</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20, backgroundColor: '#0E6E8618', borderWidth: 1, borderColor: '#0E6E8650' }}>
+                    <Text style={{ fontSize: 10, fontWeight: '800', color: '#0E6E86' }}>ATL Skill</Text>
                     <Text style={{ fontSize: 11, fontWeight: '600', color: colors.textMain }}>{ibAtlSkill}</Text>
                   </View>
                 ) : null}
                 {ibKeyConcept ? (
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20, backgroundColor: '#BAA46718', borderWidth: 1, borderColor: '#BAA46750' }}>
-                    <Text style={{ fontSize: 10, fontWeight: '800', color: '#BAA467' }}>Key Concept</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20, backgroundColor: '#0E6E8618', borderWidth: 1, borderColor: '#0E6E8650' }}>
+                    <Text style={{ fontSize: 10, fontWeight: '800', color: '#0E6E86' }}>Key Concept</Text>
                     <Text style={{ fontSize: 11, fontWeight: '600', color: colors.textMain }}>{ibKeyConcept}</Text>
                   </View>
                 ) : null}
@@ -353,11 +354,11 @@ export function AIAssignmentFlow(props: {
             )}
 
             {ibLearningOutcomes.filter(l => l.trim()).length > 0 && (
-              <View style={{ backgroundColor: colors.bgDark, borderRadius: 10, padding: 10, borderWidth: 1, borderColor: '#BAA46730' }}>
-                <Text style={{ fontSize: 11, fontWeight: '700', color: '#BAA467', marginBottom: 6 }}>LEARNING OUTCOMES</Text>
+              <View style={{ backgroundColor: colors.bgDark, borderRadius: 10, padding: 10, borderWidth: 1, borderColor: '#0E6E8630' }}>
+                <Text style={{ fontSize: 11, fontWeight: '700', color: '#0E6E86', marginBottom: 6 }}>LEARNING OUTCOMES</Text>
                 {ibLearningOutcomes.map((lo, i) => (
                   <View key={i} style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 6, marginBottom: 4 }}>
-                    <View style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: '#BAA467', marginTop: 7, flexShrink: 0 }} />
+                    <View style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: '#0E6E86', marginTop: 7, flexShrink: 0 }} />
                     <TextInput
                       style={{ flex: 1, fontSize: 12, color: colors.textMain, lineHeight: 18 }}
                       value={lo}
@@ -371,21 +372,21 @@ export function AIAssignmentFlow(props: {
                 ))}
                 <TouchableOpacity onPress={() => setIbLearningOutcomes(prev => [...prev, ''])} activeOpacity={0.75}
                   style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 }}>
-                  <Feather name="plus-circle" size={12} color="#BAA467" />
-                  <Text style={{ fontSize: 11, color: '#BAA467', fontWeight: '600' }}>Add outcome</Text>
+                  <Feather name="plus-circle" size={12} color="#0E6E86" />
+                  <Text style={{ fontSize: 11, color: '#0E6E86', fontWeight: '600' }}>Add outcome</Text>
                 </TouchableOpacity>
               </View>
             )}
 
             {ibWordBank.length > 0 && (
-              <View style={{ backgroundColor: colors.bgDark, borderRadius: 10, padding: 10, borderWidth: 1, borderColor: '#BAA46730' }}>
-                <Text style={{ fontSize: 11, fontWeight: '700', color: '#BAA467', marginBottom: 6 }}>WORD BANK</Text>
+              <View style={{ backgroundColor: colors.bgDark, borderRadius: 10, padding: 10, borderWidth: 1, borderColor: '#0E6E8630' }}>
+                <Text style={{ fontSize: 11, fontWeight: '700', color: '#0E6E86', marginBottom: 6 }}>WORD BANK</Text>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
                   {ibWordBank.map((w, i) => (
-                    <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 16, backgroundColor: '#BAA46718', borderWidth: 1, borderColor: '#BAA46740' }}>
-                      <Text style={{ fontSize: 12, color: '#BAA467', fontWeight: '600' }}>{w}</Text>
+                    <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 16, backgroundColor: '#0E6E8618', borderWidth: 1, borderColor: '#0E6E8640' }}>
+                      <Text style={{ fontSize: 12, color: '#0E6E86', fontWeight: '600' }}>{w}</Text>
                       <TouchableOpacity onPress={() => setIbWordBank(prev => prev.filter((_, j) => j !== i))} activeOpacity={0.7}>
-                        <Feather name="x" size={10} color="#BAA467" />
+                        <Feather name="x" size={10} color="#0E6E86" />
                       </TouchableOpacity>
                     </View>
                   ))}
@@ -404,15 +405,15 @@ export function AIAssignmentFlow(props: {
             )}
 
             {ibStamps.length > 0 && (
-              <View style={{ backgroundColor: colors.bgDark, borderRadius: 10, padding: 10, borderWidth: 1, borderColor: '#BAA46730' }}>
-                <Text style={{ fontSize: 11, fontWeight: '700', color: '#BAA467', marginBottom: 6 }}>STAMPS / BADGES</Text>
+              <View style={{ backgroundColor: colors.bgDark, borderRadius: 10, padding: 10, borderWidth: 1, borderColor: '#0E6E8630' }}>
+                <Text style={{ fontSize: 11, fontWeight: '700', color: '#0E6E86', marginBottom: 6 }}>STAMPS / BADGES</Text>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
                   {ibStamps.map((s, i) => (
-                    <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 16, backgroundColor: '#8A835818', borderWidth: 1, borderColor: '#8A835840' }}>
-                      <Feather name="award" size={11} color="#8A8358" />
-                      <Text style={{ fontSize: 12, color: '#8A8358', fontWeight: '600' }}>{s}</Text>
+                    <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 16, backgroundColor: '#0E6E8618', borderWidth: 1, borderColor: '#0E6E8640' }}>
+                      <Feather name="award" size={11} color="#0E6E86" />
+                      <Text style={{ fontSize: 12, color: '#0E6E86', fontWeight: '600' }}>{s}</Text>
                       <TouchableOpacity onPress={() => setIbStamps(prev => prev.filter((_, j) => j !== i))} activeOpacity={0.7}>
-                        <Feather name="x" size={10} color="#8A8358" />
+                        <Feather name="x" size={10} color="#0E6E86" />
                       </TouchableOpacity>
                     </View>
                   ))}
@@ -482,7 +483,7 @@ export function AIAssignmentFlow(props: {
         <View key={step.id} style={{ borderWidth: 1, borderColor: STEP_COLORS[step.type] + '40', borderRadius: 12, padding: 12, gap: 8, backgroundColor: STEP_COLORS[step.type] + '06' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: STEP_COLORS[step.type], alignItems: 'center', justifyContent: 'center' }}>
-              <Text style={{ fontSize: 11, fontWeight: '800', color: '#fff' }}>Q{idx + 1}</Text>
+              <Text style={{ fontSize: 11, fontWeight: '800', color: colors.onPrimary }}>Q{idx + 1}</Text>
             </View>
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
               <Feather name={STEP_ICONS[step.type] as any} size={13} color={STEP_COLORS[step.type]} />
@@ -634,8 +635,8 @@ export function AIAssignmentFlow(props: {
         <View key={q.id || i} style={{ padding: 12, borderRadius: 12, backgroundColor: colors.bgDark, borderWidth: 1, borderColor: colors.borderColor, gap: 8 }}>
           {/* Question text */}
           <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>
-            <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: '#BAA467', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
-              <Text style={{ fontSize: 11, fontWeight: '800', color: '#fff' }}>{i + 1}</Text>
+            <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: '#0E6E86', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
+              <Text style={{ fontSize: 11, fontWeight: '800', color: colors.onPrimary }}>{i + 1}</Text>
             </View>
             <TextInput
               style={[styles.input, { flex: 1, fontSize: 13, marginBottom: 0 }]}
@@ -772,7 +773,7 @@ export function AIAssignmentFlow(props: {
         }}
         activeOpacity={0.85}
       >
-        <Feather name="eye" size={15} color="#fff" />
+        <Feather name="eye" size={15} color={colors.onPrimary} />
         <Text style={styles.submitBtnText}>Preview Before Publishing</Text>
       </TouchableOpacity>
     </>

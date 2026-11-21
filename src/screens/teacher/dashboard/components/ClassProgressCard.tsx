@@ -84,14 +84,14 @@ export default function ClassProgressCard({
         {/* Assignments */}
         <View style={styles.progressItem}>
           <View style={styles.progressLabelRow}>
-            <Feather name="edit-3" size={11} color="#8A8358" />
+            <Feather name="edit-3" size={11} color="#0E6E86" />
             <Text style={styles.progressLabel}>Assignments</Text>
-            <Text style={[styles.progressPct, { color: '#8A8358' }]}>
+            <Text style={[styles.progressPct, { color: '#0E6E86' }]}>
               {totalAssignmentsSubmitted}/{totalAssignmentsAssigned} · {assignSubmitPct}%
             </Text>
           </View>
           <View style={[styles.progressTrack, { backgroundColor: colors.borderColor }]}>
-            <View style={[styles.progressFill, { width: `${assignSubmitPct}%` as any, backgroundColor: '#8A8358' }]} />
+            <View style={[styles.progressFill, { width: `${assignSubmitPct}%` as any, backgroundColor: '#0E6E86' }]} />
           </View>
         </View>
 

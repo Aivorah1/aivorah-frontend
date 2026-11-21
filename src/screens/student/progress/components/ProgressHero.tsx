@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { spacing } from '../../../../theme';
 import { RingProgress } from './RingProgress';
 import { formatStudyTime } from '../../../../context/StudentDataContext';
+import { useTheme } from '../../../../context/ThemeContext';
 
 export function ProgressHero({
   styles, overallPct, completedCount, masteredChapters, totalChapters, currentStreak, level, xpPoints,
@@ -21,11 +22,12 @@ export function ProgressHero({
   xpNeeded: number;
   xpProgress: number;
 }) {
+  const { colors } = useTheme();
   return (
     <View style={styles.heroBanner}>
       <View style={{ alignItems: 'center', marginBottom: spacing.lg }}>
         <View style={{ position: 'relative', alignItems: 'center', justifyContent: 'center' }}>
-          <RingProgress progress={overallPct / 100} color="#C9A24E" size={100} strokeWidth={9} />
+          <RingProgress progress={overallPct / 100} color="#24877B" size={100} strokeWidth={9} />
           <View style={StyleSheet.absoluteFill as any} pointerEvents="none">
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
               <Text style={styles.heroPct}>{overallPct}%</Text>
@@ -56,7 +58,7 @@ export function ProgressHero({
       <View style={{ marginBottom: spacing.lg }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
           <Text style={styles.xpLabel}>XP to Level {level + 1}</Text>
-          <Text style={[styles.xpLabel, { color: '#8A8358' }]}>{xpCurrent} / {xpNeeded}</Text>
+          <Text style={[styles.xpLabel, { color: colors.accentOrange }]}>{xpCurrent} / {xpNeeded}</Text>
         </View>
         <View style={styles.xpTrack}>
           <View style={[styles.xpFill, { width: `${xpProgress * 100}%` as any }]} />
@@ -64,11 +66,11 @@ export function ProgressHero({
       </View>
       <View style={styles.heroStats}>
         {[
-          { val: formatStudyTime(studyTimeMinutes), label: 'Study Time',   color: '#BAA467' },
-          { val: xpPoints.toLocaleString(),          label: 'XP Points',   color: '#8A8358' },
-          { val: String(currentStreak),              label: 'Day Streak',  color: '#7E9A86' },
-          { val: String(completedCount),             label: 'Topics Done', color: '#C9A24E' },
-          { val: String(Math.floor(xpPoints / 100)), label: 'Credits',     color: '#9FB2A4' },
+          { val: formatStudyTime(studyTimeMinutes), label: 'Study Time',   color: colors.primary },
+          { val: xpPoints.toLocaleString(),          label: 'XP Points',   color: colors.accentOrange },
+          { val: String(currentStreak),              label: 'Day Streak',  color: colors.accentOrange },
+          { val: String(completedCount),             label: 'Topics Done', color: colors.accentGreen },
+          { val: String(Math.floor(xpPoints / 100)), label: 'Credits',     color: colors.primary },
         ].map((s) => (
           <View key={s.label} style={styles.heroStat}>
             <Text style={[styles.heroStatVal, { color: s.color }]}>{s.val}</Text>

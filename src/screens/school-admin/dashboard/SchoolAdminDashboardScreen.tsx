@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity, RefreshControl } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, RefreshControl } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import Header from '../../../components/common/Header';
@@ -170,21 +171,21 @@ function makeStyles(colors: AppColors) {
       paddingHorizontal: spacing.xl, paddingVertical: spacing.md,
       borderBottomWidth: 1, borderBottomColor: colors.borderColor,
     },
-    crumb: { fontFamily: fonts.serif, fontSize: 12.5, color: colors.textDim },
-    crumbSep: { fontFamily: fonts.serif, fontSize: 12, color: colors.textDim },
-    crumbSchool: { fontFamily: fonts.serif, fontSize: 12.5, fontWeight: '700', color: colors.textHeading, flexShrink: 1 },
+    crumb: { fontFamily: fonts.serif, fontSize: 14, color: colors.textDim },
+    crumbSep: { fontFamily: fonts.serif, fontSize: 14, color: colors.textDim },
+    crumbSchool: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.textHeading, flexShrink: 1 },
 
     content: { padding: spacing.xl, paddingBottom: 60, maxWidth: 1080, width: '100%', alignSelf: 'center' },
 
     greeting: { fontFamily: fonts.serif, fontSize: 21, fontWeight: '700', color: colors.textHeading },
-    greetingSub: { fontFamily: fonts.serif, fontSize: 13, color: colors.textMuted, marginTop: 3 },
+    greetingSub: { fontFamily: fonts.serif, fontSize: 14, color: colors.textMuted, marginTop: 3 },
 
     bodyRow: { flexDirection: 'row', gap: 28 },
     bodyRowMobile: { flexDirection: 'column' },
 
     emptyBox: { alignItems: 'center', paddingTop: 56, gap: 10 },
-    emptyText: { fontFamily: fonts.serif, fontSize: 13, color: colors.textMuted, textAlign: 'center' },
-    retryBtn: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 6, borderWidth: 1, borderColor: colors.borderColor },
-    retryText: { fontFamily: fonts.serif, fontSize: 12.5, fontWeight: '700', color: colors.accentYellow },
+    emptyText: { fontFamily: fonts.serif, fontSize: 14, color: colors.textMuted, textAlign: 'center' },
+    retryBtn: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 14, paddingVertical: 7, borderRadius: 6, borderWidth: 1, borderColor: colors.borderColor },
+    retryText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.accentYellow },
   });
 }

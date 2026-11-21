@@ -103,7 +103,7 @@ export function subjectLabel(subject: string, curriculum?: string | null, grade?
 
 export const TYPES = ['assignment', 'quiz'];
 // Aivorah gold — matches the gold theme applied across teacher/parent/student screens
-export const AIVORAH_GOLD = '#BAA467';
+export const AIVORAH_GOLD = '#0E6E86';
 export const SUBJECT_COLORS: Record<string, string> = {
   Mathematics:    AIVORAH_GOLD,
   Science:        AIVORAH_GOLD,

@@ -6,6 +6,7 @@ import { formatStudyTime } from '../../../../context/StudentDataContext';
 import { RingChart } from './common/icons';
 import { SectionHeader } from './common/SectionHeader';
 import type { makeStyles } from '../DashboardScreen';
+import { useTheme } from '../../../../context/ThemeContext';
 
 interface GoalsCardProps {
   styles: ReturnType<typeof makeStyles>;
@@ -40,6 +41,7 @@ export function GoalsCard({
   goalRingTrack,
   navigation,
 }: GoalsCardProps) {
+  const surface = useTheme().colors.cardDark;
   return (
     <>
       <SectionHeader title="Today's Goals" sub="Daily missions • earn XP" onPress={() => navigation.navigate('Progress')} linkLabel="All progress" />
@@ -53,7 +55,7 @@ export function GoalsCard({
             return (
               <TouchableOpacity key={g.label} style={[styles.goalCardMobile, { borderColor: cardBorder }]} onPress={() => navigation.navigate(g.route ?? 'Progress')} activeOpacity={0.8}>
                 <LinearGradient
-                  colors={isDark ? [g.pastel, '#FFFFFF'] : [g.color + '24', g.pastel]}
+                  colors={[surface, surface]}
                   start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
                   style={styles.goalCardGradient}
                 >
@@ -100,7 +102,7 @@ export function GoalsCard({
             return (
               <TouchableOpacity key={g.label} style={[styles.goalCard, { borderColor: cardBorder }]} onPress={() => navigation.navigate(g.route ?? 'Progress')} activeOpacity={0.8}>
                 <LinearGradient
-                  colors={isDark ? [g.pastel, '#FFFFFF'] : [g.color + '24', g.pastel]}
+                  colors={[surface, surface]}
                   start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
                   style={styles.goalCardGradient}
                 >
@@ -141,8 +143,8 @@ export function GoalsCard({
                       {g.badges.map((b: any) => (
                         <View key={b.label} style={styles.goalBadgeMedalWrap}>
                           <View style={[styles.goalBadgeMedal, {
-                            backgroundColor: b.unlocked ? b.bg : '#f2f2f2',
-                            borderColor:     b.unlocked ? b.color : '#e0e0e0',
+                            backgroundColor: b.unlocked ? b.bg : goalRingTrack,
+                            borderColor:     b.unlocked ? b.color : cardBorder,
                             shadowColor:     b.unlocked ? b.color : 'transparent',
                             shadowOffset:    { width: 0, height: 3 },
                             shadowOpacity:   b.unlocked ? 0.45 : 0,
@@ -150,15 +152,15 @@ export function GoalsCard({
                             elevation:       b.unlocked ? 5 : 0,
                           }]}>
                             {b.unlocked && <View style={[styles.goalBadgeGlow, { backgroundColor: b.color + '18' }]} />}
-                            <Feather name={b.icon} size={15} color={b.unlocked ? b.color : '#cccccc'} />
+                            <Feather name={b.icon} size={15} color={b.unlocked ? b.color : goalMutedText} />
                             {b.unlocked && (
-                              <View style={[styles.goalBadgeCheckDot, { backgroundColor: b.color, borderColor: '#fff' }]}>
+                              <View style={[styles.goalBadgeCheckDot, { backgroundColor: b.color, borderColor: surface }]}>
                                 <Feather name="check" size={6} color="#fff" />
                               </View>
                             )}
                           </View>
                           <Text style={[styles.goalBadgeMedalLabel, {
-                            color: b.unlocked ? b.color : '#c0c0c0',
+                            color: b.unlocked ? b.color : goalMutedText,
                             fontWeight: b.unlocked ? '700' : '400',
                           }]} numberOfLines={1}>{b.label}</Text>
                         </View>

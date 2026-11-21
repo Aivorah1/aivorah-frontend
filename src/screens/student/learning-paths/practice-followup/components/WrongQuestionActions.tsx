@@ -27,7 +27,7 @@ export default function WrongQuestionActions({ index, ready, saving, workedOn, o
       <View style={styles.row}>
         <TouchableOpacity disabled={!ready} onPress={() => onExplain(index)} accessibilityRole="button" accessibilityLabel={`${EXPLAIN_THIS_QUESTION} ${index + 1}`}
           style={[styles.btn, { backgroundColor: gold }, !ready && styles.off]} testID={`explain-question-${index}`}>
-          <Text style={[styles.btnText, { color: '#FFFFFF' }]}>{EXPLAIN_THIS_QUESTION}</Text>
+          <Text style={[styles.btnText, { color: colors.onPrimary }]}>{EXPLAIN_THIS_QUESTION}</Text>
         </TouchableOpacity>
         <TouchableOpacity disabled={!ready} onPress={() => onPractise(index)} accessibilityRole="button" accessibilityLabel={`${PRACTISE_THIS_SKILL} ${index + 1}`}
           style={[styles.btn, { borderWidth: 1.5, borderColor: gold }, !ready && styles.off]} testID={`practise-skill-${index}`}>
@@ -48,10 +48,10 @@ export default function WrongQuestionActions({ index, ready, saving, workedOn, o
 const styles = StyleSheet.create({
   wrap: { gap: 10, marginTop: 12 },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  btn: { flexGrow: 1, flexBasis: 180, borderRadius: 10, paddingVertical: 12, alignItems: 'center' },
-  btnText: { fontSize: 15, fontWeight: '800' },
-  off: { opacity: 0.5 },
-  muted: { fontSize: 12.5 },
+  btn: { flexGrow: 1, flexBasis: 200, minHeight: 48, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center' },
+  btnText: { fontSize: 15, fontWeight: '800', textAlign: 'center' },
+  off: { opacity: 0.6 },
+  muted: { fontSize: 14 },
   box: { borderWidth: 1, borderRadius: 12, padding: 12, gap: 4 },
   boxTitle: { fontSize: 15, fontWeight: '800', marginBottom: 2 },
   line: { fontSize: 14, lineHeight: 20 },

@@ -2,7 +2,7 @@ import React from 'react';
 import { useWindowDimensions } from 'react-native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { TeacherDrawerParamList } from './types';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme, TeacherThemeProvider } from '../context/ThemeContext';
 
 import DrawerContent from '../components/common/DrawerContent';
 import TeacherDashboardScreen from '../screens/teacher/dashboard/TeacherDashboardScreen';
@@ -43,6 +43,14 @@ const HelpSupportScreen = screens.lazyScreen(() => import('../screens/shared/hel
 const Drawer = createDrawerNavigator<TeacherDrawerParamList>();
 
 export default function TeacherNavigator() {
+  return (
+    <TeacherThemeProvider>
+      <TeacherPortalNavigator />
+    </TeacherThemeProvider>
+  );
+}
+
+function TeacherPortalNavigator() {
   // Wake this role's services and, on a good connection, prefetch its screens.
   useRoleWarmup(screens, TEACHER_SERVICES);
   const { width } = useWindowDimensions();

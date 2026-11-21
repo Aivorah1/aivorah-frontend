@@ -5,7 +5,8 @@
  * that this parent is linked to the child.
  */
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { downloadLearningReport } from '../../../shared/learning-report/learningReport';
 import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../theme';

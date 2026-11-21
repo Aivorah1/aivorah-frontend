@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, TextInput, Modal, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, Modal, StyleSheet } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { radius, fonts } from '../../../../theme';
 import type { AppColors } from '../../../../theme';
@@ -50,7 +51,7 @@ export default function GradesSectionsPromptModal({ prompt, value, onChangeValue
           <View style={styles.promptFooter}>
             <TouchableOpacity style={styles.cancelBtn} onPress={onClose}><Text style={styles.cancelBtnText}>Cancel</Text></TouchableOpacity>
             <TouchableOpacity style={styles.saveBtn} onPress={onSubmit} disabled={busy}>
-              {busy ? <ActivityIndicator color="#0B0B0B" size="small" /> : <Text style={styles.saveBtnText}>{prompt?.kind === 'renameGrade' ? 'Rename' : 'Add'}</Text>}
+              {busy ? <ActivityIndicator color={colors.onPrimary} size="small" /> : <Text style={styles.saveBtnText}>{prompt?.kind === 'renameGrade' ? 'Rename' : 'Add'}</Text>}
             </TouchableOpacity>
           </View>
         </View>
@@ -70,12 +71,12 @@ function makeStyles(colors: AppColors) {
       borderWidth: 1, borderColor: colors.borderColor, borderRadius: radius.sm,
       paddingHorizontal: 12, paddingVertical: 11, backgroundColor: colors.bgDark,
     },
-    promptHint: { fontFamily: fonts.serif, fontSize: 11.5, color: colors.textDim, marginTop: 8, lineHeight: 16 },
-    promptErr: { fontFamily: fonts.serif, fontSize: 12, color: colors.accentRed, marginTop: 8 },
+    promptHint: { fontFamily: fonts.serif, fontSize: 14, color: colors.textDim, marginTop: 8, lineHeight: 16 },
+    promptErr: { fontFamily: fonts.serif, fontSize: 14, color: colors.accentRed, marginTop: 8 },
     promptFooter: { flexDirection: 'row', gap: 10, marginTop: 18 },
-    cancelBtn: { flex: 1, borderWidth: 1, borderColor: colors.borderColor, borderRadius: radius.sm, paddingVertical: 11, alignItems: 'center' },
-    cancelBtnText: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '600', color: colors.textMuted },
-    saveBtn: { flex: 1, backgroundColor: colors.accentYellow, borderRadius: radius.sm, paddingVertical: 11, alignItems: 'center' },
-    saveBtnText: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '700', color: '#0B0B0B' },
+    cancelBtn: { minHeight: 44, justifyContent: 'center', flex: 1, borderWidth: 1, borderColor: colors.borderColor, borderRadius: radius.sm, paddingVertical: 11, alignItems: 'center' },
+    cancelBtnText: { minHeight: 44, justifyContent: 'center', fontFamily: fonts.serif, fontSize: 14, fontWeight: '600', color: colors.textMuted },
+    saveBtn: { minHeight: 44, justifyContent: 'center', flex: 1, backgroundColor: colors.accentYellow, borderRadius: radius.sm, paddingVertical: 11, alignItems: 'center' },
+    saveBtnText: { minHeight: 44, justifyContent: 'center', fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.onPrimary },
   });
 }

@@ -9,7 +9,8 @@
  * too; saving it keeps the teacher's own copy, the sharer's copy never changes.
  */
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Platform } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../../../context/ThemeContext';
@@ -156,7 +157,7 @@ export default function PrepareWorksheetScreen({ navigation, route }: any) {
               {doc.sharedBy && <Text style={styles.topSub}>Shared by {doc.sharedBy}. Saving keeps your own copy.</Text>}
             </View>
             <TouchableOpacity testID="editor-save" style={styles.primaryBtn} onPress={() => { setSaveError(''); setAskName(true); }} accessibilityRole="button">
-              <Feather name="save" size={15} color="#fff" />
+              <Feather name="save" size={15} color={colors.onPrimary} />
               <Text style={styles.primaryBtnText}>Save</Text>
             </TouchableOpacity>
           </View>
@@ -205,7 +206,7 @@ export default function PrepareWorksheetScreen({ navigation, route }: any) {
               onPress={() => startEditing({ id: null, title: '', html: '', isOwner: true, sharedBy: null })}
               accessibilityRole="button"
             >
-              <Feather name="file-plus" size={15} color="#fff" />
+              <Feather name="file-plus" size={15} color={colors.onPrimary} />
               <Text style={styles.primaryBtnText}>New Document</Text>
             </TouchableOpacity>
           </View>

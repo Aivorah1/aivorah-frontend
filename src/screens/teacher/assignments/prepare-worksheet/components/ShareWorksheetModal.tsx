@@ -4,7 +4,8 @@
  * Mounted only while a document is being shared, so it always starts empty.
  */
 import React, { useEffect, useMemo, useState } from 'react';
-import { Modal, View, Text, TextInput, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
+import { Modal, View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import ActivityIndicator from '../../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../../theme';
 import type { WorksheetStyles } from '../styles';
@@ -114,7 +115,7 @@ export function ShareWorksheetModal({ doc, onClose, onShared, styles, colors }: 
           {selected && (
             <View style={styles.modalFooter}>
               <TouchableOpacity testID="share-confirm" style={styles.primaryBtn} onPress={share} disabled={sharing} accessibilityRole="button">
-                {sharing ? <ActivityIndicator size="small" color="#fff" /> : <Feather name="send" size={15} color="#fff" />}
+                {sharing ? <ActivityIndicator size="small" color={colors.onPrimary} /> : <Feather name="send" size={15} color={colors.onPrimary} />}
                 <Text style={styles.primaryBtnText}>Share</Text>
               </TouchableOpacity>
             </View>

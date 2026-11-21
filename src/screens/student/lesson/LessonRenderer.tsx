@@ -222,7 +222,7 @@ const makeStyles = (c: AppColors, scale: number) => StyleSheet.create({
   poemLine: { fontFamily: fonts.serif, fontSize: 16.5 * scale, lineHeight: 30 * scale, color: c.textMain },
 
   prose: { gap: 6 },
-  bodyText: { fontSize: 14 * scale, lineHeight: 22 * scale, color: c.textMuted },
+  bodyText: { fontSize: 17 * scale, lineHeight: 30 * scale, color: c.textMain, fontFamily: fonts.reading, maxWidth: 760 },
 
   takeCard: { backgroundColor: c.accentYellow + '10', borderColor: c.accentYellow + '44' },
   reflectCard: { backgroundColor: c.primary + '0a', borderColor: c.primary + '33' },

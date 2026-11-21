@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, Modal, ActivityIndicator } from 'react-native';
+import { View, Text, Modal } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import type { AppColors } from '../../../../theme';
 import type { Challenge, Question } from '../types';
 import QuizHeader from './QuizHeader';

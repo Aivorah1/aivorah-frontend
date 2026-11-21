@@ -67,12 +67,12 @@ function makeStyles(colors: AppColors) {
     gradeRowArchived: { opacity: 0.6 },
     gradeNameCol: { width: 130, flexShrink: 0 },
     gradeName: { fontFamily: fonts.serif, fontSize: 15, fontWeight: '700', color: colors.textHeading },
-    gradeTotal: { fontFamily: fonts.serif, fontSize: 11, color: colors.textDim, marginTop: 3 },
+    gradeTotal: { fontFamily: fonts.serif, fontSize: 14, color: colors.textDim, marginTop: 3 },
     archivedTag: { alignSelf: 'flex-start', backgroundColor: `${colors.textDim}22`, borderRadius: 6, paddingHorizontal: 6, paddingVertical: 1, marginTop: 4 },
-    archivedTagText: { fontFamily: fonts.serif, fontSize: 9.5, fontWeight: '700', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.4 },
+    archivedTagText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.4 },
 
     chipsCol: { flex: 1, flexDirection: 'row', flexWrap: 'wrap', gap: 8, minWidth: 0 },
-    noSections: { fontFamily: fonts.serif, fontSize: 12.5, color: colors.textDim, fontStyle: 'italic' },
+    noSections: { fontFamily: fonts.serif, fontSize: 14, color: colors.textDim, fontStyle: 'italic' },
     chip: {
       flexDirection: 'row', alignItems: 'center', gap: 4,
       borderWidth: 1, borderColor: colors.borderColor, backgroundColor: colors.bgDark,
@@ -80,11 +80,11 @@ function makeStyles(colors: AppColors) {
     },
     chipArchived: { opacity: 0.55, borderStyle: 'dashed' },
     chipMuted: { backgroundColor: 'transparent', borderStyle: 'dashed' },
-    chipText: { fontFamily: fonts.serif, fontSize: 12.5, fontWeight: '600', color: colors.textHeading },
-    chipCount: { fontFamily: fonts.serif, fontSize: 12, color: colors.textMuted },
+    chipText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '600', color: colors.textHeading },
+    chipCount: { fontFamily: fonts.serif, fontSize: 14, color: colors.textMuted },
 
     actionsCol: { flexDirection: 'row', alignItems: 'center', gap: 16, flexShrink: 0 },
-    actionLink: { fontFamily: fonts.serif, fontSize: 12.5, fontWeight: '700', color: colors.accentYellow },
-    actionLinkMuted: { fontFamily: fonts.serif, fontSize: 12.5, fontWeight: '600', color: colors.textMuted },
+    actionLink: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.accentYellow },
+    actionLinkMuted: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '600', color: colors.textMuted },
   });
 }

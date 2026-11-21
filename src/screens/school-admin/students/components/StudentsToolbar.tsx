@@ -37,7 +37,7 @@ export function StudentsToolbar({ query, onQueryChange, onImport, onAddStudent, 
         <Text style={styles.importBtnText}>Import Students</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.addBtn} onPress={onAddStudent} accessibilityRole="button">
-        <Feather name="user-plus" size={14} color="#0B0B0B" />
+        <Feather name="user-plus" size={14} color={colors.onPrimary} />
         <Text style={styles.addBtnText}>Add Student</Text>
       </TouchableOpacity>
     </View>
@@ -52,18 +52,18 @@ function makeStyles(colors: AppColors) {
       backgroundColor: colors.cardDark, borderWidth: 1, borderColor: colors.borderColor,
       borderRadius: radius.sm, paddingHorizontal: 10, height: 36,
     },
-    searchInput: { flex: 1, fontFamily: fonts.serif, fontSize: 13, color: colors.textMain, height: '100%' },
-    addBtn: {
+    searchInput: { flex: 1, fontFamily: fonts.serif, fontSize: 14, color: colors.textMain, height: '100%' },
+    addBtn: { minHeight: 44, justifyContent: 'center',
       flexDirection: 'row', alignItems: 'center', gap: 6,
       backgroundColor: colors.accentYellow, borderRadius: radius.sm,
       paddingHorizontal: 14, height: 36,
     },
-    addBtnText: { fontFamily: fonts.serif, fontSize: 12.5, fontWeight: '700', color: '#0B0B0B' },
-    importBtn: {
+    addBtnText: { minHeight: 44, justifyContent: 'center', fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.onPrimary },
+    importBtn: { minHeight: 44, justifyContent: 'center',
       flexDirection: 'row', alignItems: 'center', gap: 6,
       backgroundColor: colors.cardDark, borderWidth: 1, borderColor: colors.borderColor,
       borderRadius: radius.sm, paddingHorizontal: 14, height: 36,
     },
-    importBtnText: { fontFamily: fonts.serif, fontSize: 12.5, fontWeight: '700', color: colors.textHeading },
+    importBtnText: { minHeight: 44, justifyContent: 'center', fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.textHeading },
   });
 }

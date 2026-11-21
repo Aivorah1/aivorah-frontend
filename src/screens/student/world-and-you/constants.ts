@@ -1,5 +1,5 @@
-export const TEAL = '#BAA467';
-export const ROSE = '#BAA467';
+export const TEAL = '#24877B';
+export const ROSE = '#24877B';
 
 export const CATEGORY_ICONS: Record<string, string> = {
   'Geography':                'globe',

@@ -11,7 +11,7 @@ jest.mock('@react-navigation/drawer', () => ({
 }));
 jest.mock('../../components/common/DrawerContent', () => () => null);
 jest.mock('../../screens/student/dashboard/DashboardScreen', () => () => null);
-jest.mock('../../context/ThemeContext', () => ({ useTheme: () => ({ colors: {} }) }));
+jest.mock('../../context/ThemeContext', () => ({ useTheme: () => ({ colors: {} }), StudentThemeProvider: ({ children }: any) => children }));
 jest.mock('../lazyScreens', () => ({
   createLazyScreenGroup: () => ({
     lazyScreen: (loader: any) => Object.assign(() => null, { loader }),

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { spacing } from '../../../../theme';
+import { useTheme } from '../../../../context/ThemeContext';
 import AICardDecoration from './common/AICardDecoration';
 
 export default function AISuggestedActionCard({
@@ -15,12 +16,13 @@ export default function AISuggestedActionCard({
   styles: any;
   navigation: any;
 }) {
+  const { colors } = useTheme();
   return (
     <View style={[styles.aiCard, { marginBottom: spacing.xl }]}>
       <AICardDecoration />
       <View style={styles.aiTop}>
         <View style={styles.aiIconWrap}>
-          <Feather name="cpu" size={20} color="white" />
+          <Feather name="cpu" size={20} color={colors.onPrimary} />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.aiTag}>AI SUGGESTED ACTION</Text>
@@ -40,8 +42,8 @@ export default function AISuggestedActionCard({
               activeOpacity={0.85}
               onPress={() => navigation.navigate('TeacherAssignments' as any)}
             >
-              <Feather name="plus-circle" size={14} color="white" />
-              <Text style={[styles.aiBtnText, { color: 'white' }]}>Assign Practice Task</Text>
+              <Feather name="plus-circle" size={14} color={colors.onPrimary} />
+              <Text style={[styles.aiBtnText, { color: colors.onPrimary }]}>Assign Practice Task</Text>
             </TouchableOpacity>
           </>
         ) : (

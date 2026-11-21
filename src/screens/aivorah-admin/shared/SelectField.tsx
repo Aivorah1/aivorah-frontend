@@ -101,14 +101,14 @@ export function SelectField({ testID, label, allLabel, placeholder, value, optio
 
 function makeStyles(colors: AppColors) {
   return StyleSheet.create({
-    label: { fontSize: 11, fontWeight: '700', color: colors.textDim, letterSpacing: 0.4 },
+    label: { fontSize: 12, fontWeight: '700', color: colors.textDim, letterSpacing: 0.4 },
     trigger: {
       flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8,
       height: 36, paddingHorizontal: 12, borderRadius: radius.sm, marginTop: 6,
       borderWidth: 1, borderColor: colors.borderColor, backgroundColor: colors.cardDark,
     },
     triggerActive: { borderColor: colors.accentYellow, backgroundColor: colors.accentYellow + '0F' },
-    triggerText: { fontSize: 13, color: colors.textMain, flexShrink: 1 },
+    triggerText: { fontSize: 14, color: colors.textMain, flexShrink: 1 },
     placeholder: { color: colors.textDim },
     dropdown: {
       backgroundColor: colors.cardDark, borderRadius: radius.md,
@@ -119,7 +119,7 @@ function makeStyles(colors: AppColors) {
       flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8,
       paddingHorizontal: 14, paddingVertical: 11, borderBottomWidth: 1, borderBottomColor: colors.borderColor,
     },
-    optionText: { fontSize: 13, color: colors.textMain, flexShrink: 1 },
+    optionText: { fontSize: 14, color: colors.textMain, flexShrink: 1 },
     optionTextActive: { color: colors.accentYellow, fontWeight: '700' },
   });
 }

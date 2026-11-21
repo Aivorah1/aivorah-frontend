@@ -313,7 +313,7 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
   },
   dayHeaderCircleToday: { backgroundColor: c.accentYellow },
   dayHeaderDate:      { fontSize: 14, fontWeight: '700', color: c.textMuted },
-  dayHeaderDateToday: { color: 'white' },
+  dayHeaderDateToday: { color: c.onPrimary },
   dayDot: { width: 4, height: 4, borderRadius: 2, backgroundColor: c.textDim },
 
   // All-day row (deadline/challenge chips, above the hourly grid)
@@ -349,7 +349,7 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
     backgroundColor: c.accentYellow, paddingHorizontal: spacing.lg,
     paddingVertical: 9, borderRadius: radius.lg,
   },
-  addEventBtnTopText: { fontSize: 13, fontWeight: '700', color: 'white' },
+  addEventBtnTopText: { fontSize: 13, fontWeight: '700', color: c.onPrimary },
   emptyText:    { fontSize: 12, color: c.textMuted, marginTop: 8 },
 
   // Sidebar
@@ -363,7 +363,7 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
   calDateToday:          { backgroundColor: c.accentYellow },
   calDateWeekHighlight:  { backgroundColor: c.accentYellow + '15' },
   calDateText:           { fontSize: 12, color: c.textMuted, fontWeight: '500' },
-  calDateTextToday:      { color: 'white', fontWeight: '700' },
+  calDateTextToday:      { color: c.onPrimary, fontWeight: '700' },
   calDot:        { width: 4, height: 4, borderRadius: 2 },
   sideTitle:     { fontSize: 14, fontWeight: '700', color: c.textMain },
   deadlineItem:  { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginBottom: spacing.md },
@@ -389,5 +389,5 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
   modalCancel:      { flex: 1, paddingVertical: 12, borderRadius: radius.md, borderWidth: 1, borderColor: c.borderColor, alignItems: 'center' },
   modalCancelText:  { fontSize: 13, fontWeight: '600', color: c.textMuted },
   modalConfirm:     { flex: 1, paddingVertical: 12, borderRadius: radius.md, backgroundColor: c.accentYellow, alignItems: 'center' },
-  modalConfirmText: { fontSize: 13, fontWeight: '700', color: 'white' },
+  modalConfirmText: { fontSize: 13, fontWeight: '700', color: c.onPrimary },
 });

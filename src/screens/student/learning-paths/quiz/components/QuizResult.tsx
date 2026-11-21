@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Animated, Easing } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Animated, Easing } from 'react-native';
+import ActivityIndicator from '../../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import Header from '../../../../../components/common/Header';
 import ScreenLayout from '../../../../../components/common/ScreenLayout';
@@ -75,7 +76,7 @@ export default function QuizResult({
   const [resultShownAt] = React.useState(() => Date.now());
   const totalTime = Math.round((resultShownAt - quizStartTime) / 1000);
   const timeStr = totalTime >= 60 ? `${Math.floor(totalTime / 60)}m ${totalTime % 60}s` : `${totalTime}s`;
-  const scoreColor = pct >= 60 ? gold : '#C98A8A';
+  const scoreColor = pct >= 60 ? gold : colors.accentRed;
   const trophyTier: 'gold' | 'silver' | 'bronze' = pct >= 80 ? 'gold' : pct >= 60 ? 'silver' : 'bronze';
   const message = pct === 100 ? 'Perfect score! Outstanding work!'
     : pct >= 80 ? 'Excellent! You really understand this topic!'
@@ -144,11 +145,11 @@ export default function QuizResult({
           {/* action buttons */}
           <View style={styles.resultBtns}>
             <TouchableOpacity
-              style={[styles.retryBtn, { borderColor: !passed ? '#C98A8A' : accent, backgroundColor: !passed ? '#C98A8A14' : accent + '14' }]}
+              style={[styles.retryBtn, { borderColor: !passed ? colors.accentRed : accent, backgroundColor: !passed ? colors.accentRed + '14' : accent + '14' }]}
               onPress={onRetry} activeOpacity={0.8}
             >
-              <Feather name="refresh-cw" size={16} color={!passed ? '#C98A8A' : accent} />
-              <Text style={[styles.retryBtnText, { color: !passed ? '#C98A8A' : accent }]}>
+              <Feather name="refresh-cw" size={16} color={!passed ? colors.accentRed : accent} />
+              <Text style={[styles.retryBtnText, { color: !passed ? colors.accentRed : accent }]}>
                 {review ? 'Take a New Test' : !passed ? 'Retake (New Questions)' : 'Try Again'}
               </Text>
             </TouchableOpacity>
@@ -175,11 +176,11 @@ export default function QuizResult({
                 activeOpacity={0.85}
               >
                 <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 11, fontWeight: '800', color: '#0B0B0BAA', letterSpacing: 0.6 }}>NEXT TOPIC</Text>
-                  <Text style={{ fontSize: 15, fontWeight: '800', color: '#0B0B0B' }} numberOfLines={1}>{nextTopic.name}</Text>
-                  <Text style={{ fontSize: 11, fontWeight: '600', color: '#0B0B0BAA' }} numberOfLines={1}>{nextTopic.chapterTitle}</Text>
+                  <Text style={{ fontSize: 12, fontWeight: '800', color: colors.onPrimary, opacity: 0.85, letterSpacing: 0.6 }}>NEXT TOPIC</Text>
+                  <Text style={{ fontSize: 16, fontWeight: '800', color: colors.onPrimary }} numberOfLines={2}>{nextTopic.name}</Text>
+                  <Text style={{ fontSize: 14, fontWeight: '600', color: colors.onPrimary }} numberOfLines={2}>{nextTopic.chapterTitle}</Text>
                 </View>
-                <Feather name="arrow-right" size={20} color="#0B0B0B" />
+                <Feather name="arrow-right" size={20} color={colors.onPrimary} />
               </TouchableOpacity>
             </Animated.View>
           )}
@@ -231,7 +232,7 @@ export default function QuizResult({
                 <View key={i} testID="quiz-review-card" style={[styles.reviewCard, { width: cardWidth }, {
                   backgroundColor: colors.cardDark,
                   borderColor: '#9FB2A430',
-                  borderLeftColor: '#9FB2A4',
+                  borderLeftColor: colors.accentGreen,
                 }]}>
                   <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10 }}>
                     <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: '#9FB2A420', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
@@ -255,10 +256,10 @@ export default function QuizResult({
           {wrongQs.length > 0 && (
             <View style={styles.reviewSection}>
               <View style={styles.reviewSectionHeader}>
-                <View style={[styles.reviewSectionIcon, { backgroundColor: '#C5BD9620' }]}>
-                  <Feather name="x-circle" size={16} color="#C5BD96" />
+                <View style={[styles.reviewSectionIcon, { backgroundColor: '#24877B20' }]}>
+                  <Feather name="x-circle" size={16} color="#24877B" />
                 </View>
-                <Text style={[styles.reviewSectionTitle, { color: '#C5BD96' }]}>
+                <Text style={[styles.reviewSectionTitle, { color: colors.textHeading }]}>
                   Questions You Got Wrong ({wrongQs.length})
                 </Text>
               </View>
@@ -268,8 +269,8 @@ export default function QuizResult({
                 return (
                   <View key={r.idx} testID="quiz-review-card" style={[styles.reviewCard, { width: cardWidth }, {
                     backgroundColor: colors.cardDark,
-                    borderColor: '#C5BD9630',
-                    borderLeftColor: '#C5BD96',
+                    borderColor: '#24877B30',
+                    borderLeftColor: colors.accentRed,
                   }]}>
                     {!!wrongLabel?.(r.idx) && (
                       <View style={{ alignSelf: 'flex-start', backgroundColor: colors.bgDark, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4, marginBottom: 8 }} testID={`wrong-label-${r.idx}`}>
@@ -278,38 +279,38 @@ export default function QuizResult({
                     )}
                     {/* question */}
                     <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 12 }}>
-                      <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: '#C5BD9620', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
-                        <Feather name="x" size={13} color="#C5BD96" />
+                      <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: '#24877B20', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                        <Feather name="x" size={13} color="#24877B" />
                       </View>
                       <Text style={{ flex: 1, fontSize: 14, fontWeight: '600', color: colors.textMain, lineHeight: 22 }}>{r.question}</Text>
                     </View>
 
                     {/* your answer vs correct answer */}
                     <View style={{ gap: 7, marginBottom: 14, marginLeft: 36 }}>
-                      <View style={[styles.reviewAnswerRow, { backgroundColor: colors.bgDark, borderRadius: 8 }]}>
-                        <Text style={{ fontSize: 11, fontWeight: '800', color: '#C9A24E', width: 100, letterSpacing: 0.3 }}>Your answer</Text>
-                        <Text style={{ flex: 1, fontSize: 14, fontWeight: '600', color: '#C9A24E' }}>{r.studentAnswer || '—'}</Text>
+                      <View style={[styles.reviewAnswerRow, { backgroundColor: colors.accentRed + '14', borderWidth: 1, borderColor: colors.accentRed + '80', borderRadius: 10 }]}>
+                        <Text style={{ fontSize: 14, fontWeight: '800', color: colors.textHeading, width: 120 }}>Your answer</Text>
+                        <Text style={{ flex: 1, fontSize: 15, fontWeight: '600', color: colors.textMain }}>{r.studentAnswer || '—'}</Text>
                       </View>
-                      <View style={[styles.reviewAnswerRow, { backgroundColor: colors.bgDark, borderRadius: 8 }]}>
-                        <Text style={{ fontSize: 11, fontWeight: '800', color: '#C5BD96', width: 100, letterSpacing: 0.3 }}>Correct answer</Text>
-                        <Text style={{ flex: 1, fontSize: 14, fontWeight: '700', color: '#C5BD96' }}>{r.correctAnswer}</Text>
+                      <View style={[styles.reviewAnswerRow, { backgroundColor: colors.accentGreen + '14', borderWidth: 1, borderColor: colors.accentGreen + '80', borderRadius: 10 }]}>
+                        <Text style={{ fontSize: 14, fontWeight: '800', color: colors.textHeading, width: 120 }}>Correct answer</Text>
+                        <Text style={{ flex: 1, fontSize: 15, fontWeight: '700', color: colors.textMain }}>{r.correctAnswer}</Text>
                       </View>
                     </View>
 
                     {/* Aivorah explanation */}
-                    <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10, padding: 12, borderRadius: 10, backgroundColor: isDark ? '#171612' : '#F8F6ED', borderWidth: 1, borderColor: '#C5BD9625' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10, padding: 12, borderRadius: 10, backgroundColor: colors.cardHover, borderWidth: 1, borderColor: colors.borderColor }}>
                       {expl ? (
                         <>
-                          <View style={{ width: 26, height: 26, borderRadius: 8, backgroundColor: '#C5BD9620', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            <Feather name="book-open" size={12} color="#C5BD96" />
+                          <View style={{ width: 26, height: 26, borderRadius: 8, backgroundColor: colors.primaryGlow, alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <Feather name="book-open" size={14} color={colors.primary} />
                           </View>
-                          <Text style={{ flex: 1, fontSize: 13, color: colors.textMain, lineHeight: 21 }}>
-                            <Text style={{ fontWeight: '800', color: '#C5BD96' }}>Aivorah: </Text>{expl}
+                          <Text style={{ flex: 1, fontSize: 15, color: colors.textMain, lineHeight: 23 }}>
+                            <Text style={{ fontWeight: '800', color: colors.textHeading }}>Aivorah: </Text>{expl}
                           </Text>
                         </>
                       ) : (
                         <>
-                          <ActivityIndicator size="small" color="#C5BD96" />
+                          <ActivityIndicator size="small" color="#24877B" />
                           <Text style={{ fontSize: 12, color: colors.textMuted, fontStyle: 'italic' }}>Aivorah is preparing your explanation…</Text>
                         </>
                       )}

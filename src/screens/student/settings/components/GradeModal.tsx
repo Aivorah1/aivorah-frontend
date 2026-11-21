@@ -1,5 +1,6 @@
 import React from 'react';
-import { Text, View, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { Text, View, TouchableOpacity } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { AppModal } from './shared';
 
 interface GradeModalProps {

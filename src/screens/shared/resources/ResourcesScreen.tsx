@@ -4,10 +4,8 @@
  * are never routed here. Reuses the /messages/upload Cloudinary endpoint.
  */
 import React, { useCallback, useMemo } from 'react';
-import {
-  View, Text, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator,
-  TextInput, Modal, Platform,
-} from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput, Modal, Platform } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import Header from '../../../components/common/Header';

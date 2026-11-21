@@ -3,6 +3,7 @@ import { Animated, TouchableOpacity, View, Text } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import type { makeStyles } from '../DashboardScreen';
+import { useTheme } from '../../../../context/ThemeContext';
 
 interface AICoachBannerProps {
   styles: ReturnType<typeof makeStyles>;
@@ -13,11 +14,12 @@ interface AICoachBannerProps {
 // Pulsing banner that routes to AI Coach — pure presentation, animation
 // value (pulseAnim) is owned and looped by the parent screen.
 export function AICoachBanner({ styles, pulseAnim, navigation }: AICoachBannerProps) {
+  const { colors, isDark } = useTheme();
   return (
     <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
       <TouchableOpacity onPress={() => navigation.navigate('AICoach')} activeOpacity={0.88}>
         <LinearGradient
-          colors={['#CDEBD7', '#DFF1E5', '#F6E6BE']}
+          colors={isDark ? ['#1C2B37', '#1C2B37'] : ['#FFFFFF', '#FFFFFF']}
           start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
           style={styles.aiBanner}
         >
@@ -26,7 +28,7 @@ export function AICoachBanner({ styles, pulseAnim, navigation }: AICoachBannerPr
           <View style={styles.aiAvatarWrap}>
             <View style={styles.aiAvatarOuter}>
               <View style={styles.aiAvatarInner}>
-                <Feather name="cpu" size={22} color="#0B0B0B" />
+                <Feather name="cpu" size={22} color={colors.textHeading} />
               </View>
             </View>
             <View style={styles.aiOnline} />
@@ -37,7 +39,7 @@ export function AICoachBanner({ styles, pulseAnim, navigation }: AICoachBannerPr
             <Text style={styles.aiSub}>Maths, Science, any topic — patient & always here.</Text>
           </View>
           <View style={styles.aiBannerCta}>
-            <Feather name="message-circle" size={20} color="rgba(11,11,11,0.85)" />
+            <Feather name="message-circle" size={20} color={colors.accent} />
             <Text style={styles.aiBannerCtaTxt}>Chat now</Text>
           </View>
         </LinearGradient>

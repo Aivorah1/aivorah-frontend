@@ -6,10 +6,8 @@
  * grade" helper). B2B only. Separate from 1:1 direct messages.
  */
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import {
-  View, Text, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator,
-  TextInput, Modal, useWindowDimensions, Switch,
-} from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput, Modal, useWindowDimensions, Switch } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import Header from '../../../components/common/Header';

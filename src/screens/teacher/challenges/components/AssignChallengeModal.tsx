@@ -1,8 +1,6 @@
 import React from 'react';
-import {
-  View, Text, TouchableOpacity, TextInput, Modal, KeyboardAvoidingView,
-  Platform, ScrollView, ActivityIndicator,
-} from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, Modal, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { radius } from '../../../../theme';
 import type { AppColors } from '../../../../theme';
@@ -187,10 +185,10 @@ export default function AssignChallengeModal({
                 activeOpacity={0.85}
               >
                 {assigning ? (
-                  <ActivityIndicator size="small" color="#fff" />
+                  <ActivityIndicator size="small" color={colors.onPrimary} />
                 ) : (
                   <>
-                    <Feather name="send" size={15} color="#fff" />
+                    <Feather name="send" size={15} color={colors.onPrimary} />
                     <Text style={styles.assignBtnText}>Assign Challenge</Text>
                   </>
                 )}

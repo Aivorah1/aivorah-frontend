@@ -5,7 +5,8 @@
  * Renders nothing where the browser / device can't do face login.
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import ActivityIndicator from './AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import {
   faceLoginAvailable, addFaceLogin, listFaceLogins, removeFaceLogin, faceLoginErrorMessage, rememberFaceLoginOffer, FaceLogin,

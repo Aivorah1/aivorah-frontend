@@ -8,7 +8,8 @@
  * the question can always be answered.
  */
 import React, { useEffect } from 'react';
-import { View, Text, TouchableOpacity, TextInput, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, StyleSheet } from 'react-native';
+import ActivityIndicator from '../../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../../theme';
 import { useSpeechToText, speechErrorMessage } from '../../../../../hooks/useSpeechToText';
@@ -40,7 +41,9 @@ export default function SpokenQuestion({ hint, text, setText, status, error, onS
   const canSubmit = !speech.listening && !checking && words >= MIN_SPOKEN_WORDS;
   const micMessage = speechErrorMessage(speech.error);
   const startOver = () => { setText(''); speech.start(); };
-  const boxBg = isDark ? colors.bgDark : '#F8FAFA';
+  const boxBg = colors.surfaceSubtle;
+  // Disabled submit stays distinct but readable (no faded fill + white label).
+  const submitFg = canSubmit ? colors.onPrimary : colors.textMuted;
 
   return (
     <View style={s.wrap}>
@@ -49,8 +52,8 @@ export default function SpokenQuestion({ hint, text, setText, status, error, onS
           ? 'Press the mic and explain the topic in your own words. Your words will appear below as you speak.'
           : 'Voice input is not available in this browser, so type your explanation instead.'}
       </Text>
-      <View style={[s.hint, { backgroundColor: accent + '10', borderColor: accent + '40' }]}>
-        <Feather name="zap" size={12} color={accent} />
+      <View style={[s.hint, { backgroundColor: colors.cardHover, borderColor: colors.borderColor }]}>
+        <Feather name="info" size={18} color={colors.textMain} />
         <Text style={[s.hintText, { color: colors.textMain }]}>{hint}</Text>
       </View>
 
@@ -59,8 +62,8 @@ export default function SpokenQuestion({ hint, text, setText, status, error, onS
           <View style={s.controls}>
             {speech.listening ? (
               <TouchableOpacity testID="spoken-stop" style={[s.micBtn, { backgroundColor: red }]} onPress={speech.stop} activeOpacity={0.85} accessibilityRole="button" accessibilityLabel="Stop recording">
-                <Feather name="square" size={16} color="#fff" />
-                <Text style={s.micBtnText}>Stop</Text>
+                <Feather name="square" size={16} color={colors.onPrimary} />
+                <Text style={[s.micBtnText, { color: colors.onPrimary }]}>Stop</Text>
               </TouchableOpacity>
             ) : text ? (
               <TouchableOpacity testID="spoken-rerecord" style={[s.micBtn, { backgroundColor: 'transparent', borderWidth: 1.5, borderColor: accent }]} onPress={startOver} disabled={checking} activeOpacity={0.85} accessibilityRole="button" accessibilityLabel="Record again">
@@ -69,8 +72,8 @@ export default function SpokenQuestion({ hint, text, setText, status, error, onS
               </TouchableOpacity>
             ) : (
               <TouchableOpacity testID="spoken-start" style={[s.micBtn, { backgroundColor: accent }]} onPress={startOver} activeOpacity={0.85} accessibilityRole="button" accessibilityLabel="Start speaking">
-                <Feather name="mic" size={16} color="#fff" />
-                <Text style={s.micBtnText}>Start speaking</Text>
+                <Feather name="mic" size={18} color={colors.onPrimary} />
+                <Text style={[s.micBtnText, { color: colors.onPrimary }]}>Start speaking</Text>
               </TouchableOpacity>
             )}
             {speech.listening && (
@@ -95,7 +98,7 @@ export default function SpokenQuestion({ hint, text, setText, status, error, onS
       ) : (
         <TextInput
           testID="spoken-typed"
-          style={[s.transcript, s.typed, { borderColor: accent + '50', backgroundColor: boxBg, color: colors.textMain }]}
+          style={[s.transcript, s.typed, { borderColor: colors.borderColor, backgroundColor: boxBg, color: colors.textMain }]}
           multiline
           value={text}
           onChangeText={setText}
@@ -112,7 +115,7 @@ export default function SpokenQuestion({ hint, text, setText, status, error, onS
 
       <TouchableOpacity
         testID="spoken-submit"
-        style={[s.submit, { backgroundColor: canSubmit ? accent : accent + '45' }]}
+        style={[s.submit, canSubmit ? { backgroundColor: accent } : { backgroundColor: colors.cardHover, borderWidth: 1, borderColor: colors.borderColor }]}
         onPress={onSubmit}
         disabled={!canSubmit}
         activeOpacity={0.85}
@@ -120,13 +123,13 @@ export default function SpokenQuestion({ hint, text, setText, status, error, onS
       >
         {checking ? (
           <>
-            <ActivityIndicator size="small" color="#fff" />
-            <Text style={s.submitText}>Aivorah is checking your answer…</Text>
+            <ActivityIndicator size="small" color={submitFg} />
+            <Text style={[s.submitText, { color: submitFg }]}>Aivorah is checking your answer…</Text>
           </>
         ) : (
           <>
-            <Feather name="send" size={14} color="#fff" />
-            <Text style={s.submitText}>Submit & See Results</Text>
+            <Feather name="send" size={16} color={submitFg} />
+            <Text style={[s.submitText, { color: submitFg }]}>Submit & See Results</Text>
           </>
         )}
       </TouchableOpacity>
@@ -136,20 +139,20 @@ export default function SpokenQuestion({ hint, text, setText, status, error, onS
 
 const s = StyleSheet.create({
   wrap: { gap: 12, paddingTop: 4 },
-  lead: { fontSize: 14, lineHeight: 21 },
-  hint: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, borderWidth: 1, borderRadius: 10, padding: 10 },
-  hintText: { flex: 1, fontSize: 13, lineHeight: 19 },
+  lead: { fontSize: 16, lineHeight: 25 },
+  hint: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, borderWidth: 1, borderRadius: 12, padding: 14 },
+  hintText: { flex: 1, fontSize: 14, lineHeight: 21 },
   controls: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 14 },
-  micBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 11, paddingHorizontal: 18, borderRadius: 24 },
+  micBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 44, paddingVertical: 10, paddingHorizontal: 18, borderRadius: 24 },
   micBtnText: { color: '#fff', fontWeight: '800', fontSize: 14 },
   live: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   dot: { width: 10, height: 10, borderRadius: 5 },
-  liveText: { fontSize: 13, fontWeight: '700' },
-  transcript: { minHeight: 120, borderWidth: 1.5, borderRadius: 12, padding: 14 },
-  typed: { textAlignVertical: 'top', fontSize: 15, lineHeight: 23 },
-  transcriptText: { fontSize: 15, lineHeight: 23 },
-  note: { fontSize: 12.5 },
-  err: { fontSize: 12.5, lineHeight: 18 },
-  submit: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 13, borderRadius: 12, marginTop: 4 },
-  submitText: { color: '#fff', fontWeight: '800', fontSize: 14.5 },
+  liveText: { fontSize: 14, fontWeight: '700' },
+  transcript: { minHeight: 120, borderWidth: 1.5, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 14 },
+  typed: { textAlignVertical: 'top', fontSize: 16, lineHeight: 24 },
+  transcriptText: { fontSize: 16, lineHeight: 24 },
+  note: { fontSize: 14 },
+  err: { fontSize: 14, lineHeight: 20 },
+  submit: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 48, paddingVertical: 12, paddingHorizontal: 16, borderRadius: 12, marginTop: 4 },
+  submitText: { fontWeight: '800', fontSize: 15, textAlign: 'center' },
 });

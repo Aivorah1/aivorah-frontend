@@ -6,12 +6,11 @@
  * digest (aivorah-world-and-you-service, /current-affairs) below this card.
  */
 import React, { useEffect } from 'react';
-import {
-  View, Text, TouchableOpacity, StyleSheet, ActivityIndicator,
-} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../../../context/ThemeContext';
-import { spacing, radius } from '../../../../theme';
+import { spacing, radius, fonts } from '../../../../theme';
 import { useDailyTidbit } from '../hooks/useDailyTidbit';
 import { categoryIcon } from '../utils/quizHelpers';
 import type { GKFact } from '../types';
@@ -34,12 +33,13 @@ export default function DailyTidbitCard({ grade, onTabChange, onFact, tab: contr
   const setTab = (next: 'gk' | 'news') => (controlledTab === undefined ? setOwnTab(next) : onTabChange?.(next));
 
   // ── Theme tokens ─────────────────────────────────────────────────
-  const teal        = '#BAA467';
-  const rose        = '#BAA467';
-  const cardBg      = isDark ? colors.cardDark  : '#F0F7F6';
-  const borderCol   = isDark ? colors.borderColor : teal + '25';
+  // Selected tab = primary fill with onPrimary label (forest/white, ice/navy).
+  const teal        = colors.primary;
+  const rose        = colors.primary;
+  const cardBg      = colors.cardDark;
+  const borderCol   = colors.borderColor;
   const activeTab   = tab === 'gk' ? teal : rose;
-  const titleColor  = isDark ? colors.textMain : '#1C2A28';
+  const titleColor  = colors.textHeading;
   const mutedColor  = colors.textMuted;
 
   return (
@@ -67,22 +67,22 @@ export default function DailyTidbitCard({ grade, onTabChange, onFact, tab: contr
       </View>
 
       {/* Tab switcher */}
-      <View style={[s.tabs, { backgroundColor: isDark ? colors.bgDark : teal + '10', borderColor: borderCol }]}>
+      <View style={[s.tabs, { backgroundColor: colors.surfaceSubtle, borderColor: borderCol }]}>
         <TouchableOpacity
           style={[s.tab, tab === 'gk' && { backgroundColor: teal, borderRadius: radius.sm - 2 }]}
           onPress={() => setTab('gk')}
           activeOpacity={0.8}
         >
-          <Feather name="star" size={12} color={tab === 'gk' ? '#fff' : mutedColor} />
-          <Text style={[s.tabText, { color: tab === 'gk' ? '#fff' : mutedColor }]}>GK Fact</Text>
+          <Feather name="star" size={16} color={tab === 'gk' ? colors.onPrimary : colors.textMain} />
+          <Text style={[s.tabText, { color: tab === 'gk' ? colors.onPrimary : colors.textMain }]}>GK Fact</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[s.tab, tab === 'news' && { backgroundColor: rose, borderRadius: radius.sm - 2 }]}
           onPress={() => setTab('news')}
           activeOpacity={0.8}
         >
-          <Feather name="radio" size={12} color={tab === 'news' ? '#fff' : mutedColor} />
-          <Text style={[s.tabText, { color: tab === 'news' ? '#fff' : mutedColor }]}>Current Affairs</Text>
+          <Feather name="radio" size={16} color={tab === 'news' ? colors.onPrimary : colors.textMain} />
+          <Text style={[s.tabText, { color: tab === 'news' ? colors.onPrimary : colors.textMain }]}>Current Affairs</Text>
         </TouchableOpacity>
       </View>
 
@@ -142,8 +142,8 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cardTitle:  { fontSize: 14, fontWeight: '700' },
-  cardSub:    { fontSize: 11, marginTop: 1 },
+  cardTitle:  { fontSize: 18, lineHeight: 24, fontWeight: '700', fontFamily: fonts.title },
+  cardSub:    { fontSize: 14, lineHeight: 20, marginTop: 2 },
   refreshBtn: { padding: 6 },
 
   tabs: {
@@ -158,17 +158,18 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 5,
-    paddingVertical: 7,
+    gap: 8,
+    minHeight: 44,
+    paddingVertical: 8,
   },
-  tabText: { fontSize: 12, fontWeight: '600' },
+  tabText: { fontSize: 15, fontWeight: '700' },
 
   loadingBox: {
     alignItems: 'center',
     gap: spacing.sm,
     paddingVertical: spacing.lg,
   },
-  loadingText: { fontSize: 12, textAlign: 'center' },
+  loadingText: { fontSize: 14, textAlign: 'center' },
 
   content:      { gap: spacing.sm },
   categoryBadge: {
@@ -181,6 +182,6 @@ const s = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
   },
-  categoryText: { fontSize: 11, fontWeight: '700' },
-  factText:     { fontSize: 14, fontWeight: '500', lineHeight: 22 },
+  categoryText: { fontSize: 12, fontWeight: '700' },
+  factText:     { fontSize: 16, fontWeight: '500', lineHeight: 25 },
 });

@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Image, ActivityIndicator, Alert, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, Image, Alert, Platform } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import SERVER_URL from '../../../../config/serverUrl';
 import { pickAndUploadPicture } from '../utils/pictureUpload';
@@ -47,7 +48,7 @@ export function EditablePicture({ url, height, addLabel, moveTargets, onSet, onM
     return (
       <TouchableOpacity testID={testID ? `${testID}-add` : undefined} onPress={pick} disabled={busy} activeOpacity={0.75}
         style={{ alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 8, borderWidth: 1, borderStyle: 'dashed', borderColor: 'rgba(195,220,216,0.35)' }}>
-        {busy ? <ActivityIndicator size="small" color="#BAA467" /> : <Feather name="image" size={14} color="#A8B5B3" />}
+        {busy ? <ActivityIndicator size="small" color="#0E6E86" /> : <Feather name="image" size={14} color="#A8B5B3" />}
         <Text style={{ fontSize: 12, fontWeight: '600', color: '#A8B5B3' }}>{busy ? 'Uploading…' : addLabel}</Text>
       </TouchableOpacity>
     );
@@ -66,7 +67,7 @@ export function EditablePicture({ url, height, addLabel, moveTargets, onSet, onM
           </TouchableOpacity>
         )}
         <TouchableOpacity testID={testID ? `${testID}-replace` : undefined} style={chip} onPress={pick} disabled={busy} activeOpacity={0.75}>
-          {busy ? <ActivityIndicator size="small" color="#BAA467" /> : <Feather name="refresh-cw" size={13} color="#D8E8E6" />}
+          {busy ? <ActivityIndicator size="small" color="#0E6E86" /> : <Feather name="refresh-cw" size={13} color="#D8E8E6" />}
           <Text style={chipText}>{busy ? 'Uploading…' : 'Replace'}</Text>
         </TouchableOpacity>
         <TouchableOpacity testID={testID ? `${testID}-remove` : undefined} style={chip} onPress={() => onSet(null)} activeOpacity={0.75}>
@@ -80,7 +81,7 @@ export function EditablePicture({ url, height, addLabel, moveTargets, onSet, onM
           {moveTargets.map((t, i) => (
             <TouchableOpacity key={i} testID={testID ? `${testID}-move-${i}` : undefined} style={chip} activeOpacity={0.75}
               onPress={() => { setMoving(false); onMove(t.slot); }}>
-              <Feather name="corner-down-right" size={13} color="#BAA467" />
+              <Feather name="corner-down-right" size={13} color="#0E6E86" />
               <Text style={chipText}>{t.label}</Text>
             </TouchableOpacity>
           ))}

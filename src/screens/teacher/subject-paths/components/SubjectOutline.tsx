@@ -84,14 +84,14 @@ export default function SubjectOutline({
                   const sel = selectedKey === t.editKey;
                   const renameKey = `${ch.editKey}|${t.editKey}`;
                   return (
-                    <View key={t.editKey} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingLeft: 8, paddingRight: 2, paddingVertical: 6, borderRadius: 8, backgroundColor: sel ? colors.primary + '1F' : 'transparent', opacity: t.hidden ? 0.5 : 1 }}>
+                    <View key={t.editKey} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44, paddingLeft: 10, paddingRight: 2, paddingVertical: 6, borderRadius: 10, borderWidth: 1, borderColor: sel ? colors.primary + '66' : 'transparent', backgroundColor: sel ? colors.tintLilac : 'transparent', opacity: t.hidden ? 0.5 : 1 }}>
                       {renaming === renameKey ? (
                         <InlineName testID={`topic-name-input-${ci}-${ti}`} value={t.name} colors={colors} onDone={(v) => { if (v && v !== t.name) apply(renameTopic(ch.editKey, t.editKey, v)); setRenaming(null); }} />
                       ) : (
                         <TouchableOpacity testID={`topic-${ci}-${ti}`} style={{ flex: 1 }} onPress={() => onSelect(ch.editKey, t.editKey)}>
-                          <Text style={{ fontSize: 13, fontWeight: sel ? '700' : '500', color: sel ? colors.primary : colors.textMain, textDecorationLine: t.hidden ? 'line-through' : 'none' }} numberOfLines={2}>{t.name}</Text>
+                          <Text style={{ fontSize: 14, lineHeight: 20, fontWeight: sel ? '700' : '500', color: sel ? colors.textHeading : colors.textMain, textDecorationLine: t.hidden ? 'line-through' : 'none' }} numberOfLines={2}>{t.name}</Text>
                           {(t.lessonEdit || t.added || t.hidden) && (
-                            <Text style={{ fontSize: 10.5, fontWeight: '700', color: t.hidden ? colors.textMuted : colors.primary }}>
+                            <Text style={{ fontSize: 12, fontWeight: '700', color: t.hidden ? colors.textMuted : colors.primary }}>
                               {t.hidden ? 'Hidden' : t.added ? 'Your topic' : 'Edited'}
                             </Text>
                           )}
@@ -111,8 +111,8 @@ export default function SubjectOutline({
                     <InlineName testID={`topic-add-input-${ci}`} value="" colors={colors} onDone={(v) => { if (v) apply(addTopic(ch.editKey, v)); setAdding(null); }} />
                   </View>
                 ) : (
-                  <TouchableOpacity testID={`topic-add-${ci}`} onPress={() => setAdding(ch.editKey)} style={{ paddingLeft: 8, paddingVertical: 6 }}>
-                    <Text style={{ fontSize: 12.5, fontWeight: '700', color: colors.primary }}>+ Add topic</Text>
+                  <TouchableOpacity testID={`topic-add-${ci}`} onPress={() => setAdding(ch.editKey)} style={{ marginTop: 4, minHeight: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 12, borderWidth: 1, borderStyle: 'dashed', borderColor: colors.borderColor }}>
+                    <Text style={{ fontSize: 14, fontWeight: '700', color: colors.primary }}>+ Add topic</Text>
                   </TouchableOpacity>
                 )}
               </View>

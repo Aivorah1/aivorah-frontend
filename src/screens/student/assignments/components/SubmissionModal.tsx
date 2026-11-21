@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Modal, Alert, Image, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Modal, Alert, Image, Platform } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { fonts } from '../../../../theme';
 import type { AppColors } from '../../../../theme';
@@ -26,7 +27,7 @@ export function SubmissionModal({ assignment, colors, onClose, onSubmitted }: {
 }) {
   const styles = useMemo(() => makeModalStyles(colors), [colors]);
   const { studentId } = useStudentData();
-  const color = SUBJECT_COLOR[assignment.subject] ?? '#BAA467';
+  const color = SUBJECT_COLOR[assignment.subject] ?? '#24877B';
 
   // Pages = worksheet images uploaded by teacher
   const pages: string[] = (assignment.documentUrls?.length ?? 0) > 0

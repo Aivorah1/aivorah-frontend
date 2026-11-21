@@ -8,8 +8,8 @@ export function subjectMeta(subject: string): SubjectMeta {
   // different color than the rest of the grid.
   return SUBJECT_META[subject] ?? {
     icon: 'book',
-    accentDark: '#C9A24E', bgFromDark: '#E4D4A8', bgToDark: '#F0E2BC',
-    accentLight: '#C9A24E', bgFromLight: '#E4D4A8', bgToLight: '#F0E2BC',
+    accentDark: '#24877B', bgFromDark: '#DCEFEB', bgToDark: '#DCEFEB',
+    accentLight: '#24877B', bgFromLight: '#DCEFEB', bgToLight: '#DCEFEB',
   };
 }
 

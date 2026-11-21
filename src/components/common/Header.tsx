@@ -1,22 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Modal,
-  Image,
-  ActivityIndicator,
-  Alert,
-  Platform,
-} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Image, Alert, Platform } from 'react-native';
+import ActivityIndicator from './AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
 import { useResponsive } from '../../hooks/useResponsive';
-import { spacing, radius } from '../../theme';
+import { spacing, radius, fonts } from '../../theme';
 import type { AppColors } from '../../theme';
 import { useTheme } from '../../context/ThemeContext';
 import { useNotification } from '../../context/NotificationContext';
@@ -28,6 +18,7 @@ import PROFILE_SERVER_URL from '../../config/profileServerUrl';
 import { getAvatarGradient, getAvatarIcon } from '../../constants/avatarStyles';
 import { isAdminEmail } from '../../constants/adminEmails';
 import { roleLabel } from '../../constants/roleLabels';
+import FontPresetMenu from './FontPresetMenu';
 
 function formatNotifTime(iso: string): string {
   try {
@@ -69,10 +60,12 @@ export default function Header({
   notificationCount = 0,
 }: HeaderProps) {
   const { isMobile } = useResponsive();
-  const { colors } = useTheme();
+  const { colors, portal } = useTheme();
+  // Redesigned portals (student, teacher) share these nav/header styles.
+  const isStudentPortal = !!portal; // student, teacher or parent
   const { user, updateUser, logout } = useAuth();
   const navigation = useNavigation<any>();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const styles = useMemo(() => makeStyles(colors, isStudentPortal), [colors, isStudentPortal]);
 
   function handleBack() {
     if (onBack) {
@@ -283,6 +276,13 @@ const [editingName, setEditingName] = useState(false);
             />
           </View>
         )}
+
+        {/* Font style (Aa) — immediately left of the bell, same button shape */}
+        <FontPresetMenu
+          colors={colors}
+          account={(user as any)?.email || (user as any)?.id}
+          buttonStyle={[styles.iconBtn, { borderColor: colors.accentYellow + '50', backgroundColor: colors.accentYellow + '12' }]}
+        />
 
         {/* Bell */}
         <TouchableOpacity
@@ -698,9 +698,9 @@ const [editingName, setEditingName] = useState(false);
   );
 }
 
-const makeStyles = (c: AppColors) => StyleSheet.create({
+const makeStyles = (c: AppColors, s = false) => StyleSheet.create({
   container: {
-    height: 64,
+    ...(s ? { minHeight: 76, paddingVertical: 12 } : { height: 64 }),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -711,12 +711,16 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
   },
   left: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   menuBtn: {
-    width: 36, height: 36, borderRadius: radius.sm,
+    width: s ? 44 : 36, height: s ? 44 : 36, borderRadius: s ? 12 : radius.sm,
     backgroundColor: c.cardDark, alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: c.borderColor,
   },
-  title: { fontSize: 18, fontWeight: '700', color: c.textMain, letterSpacing: -0.3 },
-  subtitle: { fontSize: 12, color: c.textMuted, marginTop: 1 },
+  title: s
+    ? { fontSize: 28, lineHeight: 34, fontWeight: '700', color: c.textHeading, letterSpacing: -0.2, fontFamily: fonts.title }
+    : { fontSize: 18, fontWeight: '700', color: c.textMain, letterSpacing: -0.3 },
+  subtitle: s
+    ? { fontSize: 16, lineHeight: 24, color: c.textMuted, marginTop: 2, fontFamily: fonts.sub }
+    : { fontSize: 12, color: c.textMuted, marginTop: 1 },
   roleBadge: {
     paddingHorizontal: 8,
     paddingVertical: 2,
@@ -741,7 +745,7 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
     borderColor: c.accentYellow + '40',
   },
   roleBadgeText: {
-    fontSize: 9,
+    fontSize: s ? 11 : 9,
     fontWeight: '800',
     letterSpacing: 0.5,
     textTransform: 'uppercase',
@@ -791,7 +795,8 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
   },
   dropdown: {
     width: 290, backgroundColor: c.cardDark,
-    borderRadius: radius.md, borderWidth: 1, borderColor: c.accentYellow + '35',
+    borderRadius: radius.md, borderWidth: 1, borderColor: s ? c.borderColor : c.accentYellow + '35',
+    maxWidth: '92%' as any,
     shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3, shadowRadius: 8, elevation: 20, overflow: 'hidden',
   },

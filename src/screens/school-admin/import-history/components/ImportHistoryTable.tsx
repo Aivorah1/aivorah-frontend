@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { radius, fonts } from '../../../../theme';
 import type { AppColors } from '../../../../theme';
 import { formatWhen, statusTone } from '../utils/format';
@@ -16,7 +16,10 @@ export default function ImportHistoryTable({ colors, runs, userEmail, onSelect }
   const styles = makeStyles(colors);
   return (
     <View style={styles.table}>
-      <View style={styles.theadRow}>
+      {/* Narrow widths scroll inside the table instead of clipping columns. */}
+      <ScrollView horizontal showsHorizontalScrollIndicator contentContainerStyle={{ flexGrow: 1 }}>
+      <View style={{ flexGrow: 1, minWidth: 640 }} accessibilityRole={'table' as any}>
+      <View style={styles.theadRow} accessibilityRole={'row' as any}>
         <View style={styles.colFile}><Text style={styles.thText}>File</Text></View>
         <View style={styles.colCount}><Text style={styles.thText}>Imported</Text></View>
         <View style={styles.colCount}><Text style={styles.thText}>Skipped</Text></View>
@@ -28,7 +31,7 @@ export default function ImportHistoryTable({ colors, runs, userEmail, onSelect }
         return (
           <View key={r.id} style={[styles.tr, i === runs.length - 1 && styles.trLast]}>
             <View style={styles.colFile}>
-              <Text style={styles.tdStrong} numberOfLines={1}>{r.fileName}</Text>
+              <Text style={styles.tdStrong} numberOfLines={2} accessibilityLabel={r.fileName} {...({ title: r.fileName } as any)}>{r.fileName}</Text>
               <Text style={styles.tdSub} numberOfLines={1}>
                 Run by {r.runByEmail === userEmail ? 'you' : r.runByEmail} · {formatWhen(r.createdAt)} · {r.type === 'teachers' ? 'Teachers' : 'Students'}
               </Text>
@@ -49,6 +52,8 @@ export default function ImportHistoryTable({ colors, runs, userEmail, onSelect }
           </View>
         );
       })}
+      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -57,19 +62,19 @@ function makeStyles(colors: AppColors) {
   return StyleSheet.create({
     table: { backgroundColor: colors.cardDark, borderWidth: 1, borderColor: colors.borderColor, borderRadius: radius.md, overflow: 'hidden' },
     theadRow: { flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: colors.borderColor, backgroundColor: colors.cardHover, paddingVertical: 10 },
-    thText: { fontFamily: fonts.serif, fontSize: 10.5, fontWeight: '700', letterSpacing: 0.4, textTransform: 'uppercase', color: colors.textDim },
+    thText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', letterSpacing: 0.4, textTransform: 'uppercase', color: colors.textDim },
     tr: { flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: colors.borderColor, paddingVertical: 12 },
     trLast: { borderBottomWidth: 0 },
     colFile: { flex: 2.4, minWidth: 200, paddingHorizontal: 14 },
     colCount: { flex: 1, minWidth: 90, paddingHorizontal: 14 },
     colStatus: { flex: 1.5, minWidth: 150, paddingHorizontal: 14 },
-    colAction: { width: 110, paddingHorizontal: 14, alignItems: 'flex-end' },
-    td: { fontFamily: fonts.serif, fontSize: 12.5, color: colors.textMuted },
-    tdStrong: { fontFamily: fonts.serif, fontSize: 13.5, fontWeight: '700', color: colors.textHeading },
-    tdSub: { fontFamily: fonts.serif, fontSize: 11.5, color: colors.textDim, marginTop: 2 },
-    actionLink: { fontFamily: fonts.serif, fontSize: 12.5, fontWeight: '700', color: colors.accentYellow },
+    colAction: { width: 140, paddingHorizontal: 14, alignItems: 'flex-end' },
+    td: { fontFamily: fonts.serif, fontSize: 14, color: colors.textMuted },
+    tdStrong: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.textHeading },
+    tdSub: { fontFamily: fonts.serif, fontSize: 14, color: colors.textDim, marginTop: 2 },
+    actionLink: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.accentYellow },
     badge: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', paddingHorizontal: 11, paddingVertical: 5, borderRadius: 999 },
     badgeDot: { width: 6, height: 6, borderRadius: 3 },
-    badgeText: { fontFamily: fonts.serif, fontSize: 12, fontWeight: '700' },
+    badgeText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700' },
   });
 }

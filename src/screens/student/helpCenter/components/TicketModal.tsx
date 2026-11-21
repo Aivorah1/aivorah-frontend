@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Modal, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Modal } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { spacing, radius } from '../../../../theme';
 import type { AppColors } from '../../../../theme';
@@ -46,7 +47,7 @@ export default function TicketModal({
               <Text style={[styles.modalCancelText, { color: colors.textMuted }]}>Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.modalSaveBtn, { backgroundColor: colors.accentYellow }]} onPress={onSubmit} disabled={loading}>
-              {loading ? <ActivityIndicator color="white" size="small" /> : <Text style={styles.modalSaveText}>Submit Ticket</Text>}
+              {loading ? <ActivityIndicator color={colors.onPrimary} size="small" /> : <Text style={styles.modalSaveText}>Submit Ticket</Text>}
             </TouchableOpacity>
           </View>
         </View>
@@ -68,5 +69,5 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
   modalCancelBtn: { flex: 1, height: 46, borderRadius: radius.md, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
   modalCancelText: { fontSize: 14, fontWeight: '600' },
   modalSaveBtn: { flex: 1, height: 46, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center' },
-  modalSaveText: { fontSize: 14, fontWeight: '700', color: 'white' },
+  modalSaveText: { fontSize: 14, fontWeight: '700', color: c.onPrimary },
 });

@@ -2,7 +2,7 @@ import { StyleSheet } from 'react-native';
 import { spacing, radius, fonts } from '../../../theme';
 import type { AppColors } from '../../../theme';
 
-const GOLD = '#D9A93E'; // Aivorah brand gold for leaderboard accents
+const GOLD = '#0E6E86'; // Aivorah brand gold for leaderboard accents
 
 export const makeStyles = (c: AppColors) => StyleSheet.create({
   screen:   { flex: 1, backgroundColor: c.bgDark },
@@ -221,7 +221,7 @@ export const makeStyles = (c: AppColors) => StyleSheet.create({
     backgroundColor: c.accentYellow, borderRadius: radius.lg, paddingVertical: 14,
   },
   assignBtnDisabled: { opacity: 0.45 },
-  assignBtnText:     { fontSize: 15, fontWeight: '700', color: '#fff' },
+  assignBtnText:     { fontSize: 15, fontWeight: '700', color: c.onPrimary },
 
   successBox: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
@@ -240,5 +240,5 @@ export const makeStyles = (c: AppColors) => StyleSheet.create({
     backgroundColor: c.accentYellow, borderRadius: radius.lg,
     paddingVertical: 14, alignItems: 'center',
   },
-  doneBtnText:  { fontSize: 15, fontWeight: '700', color: '#fff' },
+  doneBtnText:  { fontSize: 15, fontWeight: '700', color: c.onPrimary },
 });

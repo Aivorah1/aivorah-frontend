@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, StyleSheet, Alert, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Platform } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../theme';
 import { useLearningPathDraft } from '../hooks/useLearningPathDraft';
@@ -91,8 +92,8 @@ export default function LearningPathWorkspace({
             <Text style={[styles.btnText, { color: colors.primary }]}>{draft.saving ? 'Saving…' : 'Save draft'}</Text>
           </TouchableOpacity>
           <TouchableOpacity testID="publish" disabled={!canPublish} onPress={handlePublish} activeOpacity={0.8} style={[styles.btn, { backgroundColor: colors.primary, borderColor: colors.primary, opacity: canPublish ? 1 : 0.45 }]}>
-            <Feather name="send" size={14} color="#fff" />
-            <Text style={[styles.btnText, { color: '#fff' }]}>{publishLabel}</Text>
+            <Feather name="send" size={14} color={colors.onPrimary} />
+            <Text style={[styles.btnText, { color: colors.onPrimary }]}>{publishLabel}</Text>
           </TouchableOpacity>
         </View>
       </View>

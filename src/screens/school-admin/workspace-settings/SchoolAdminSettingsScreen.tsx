@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator, Image, TextInput, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Image, TextInput, TouchableOpacity, Platform } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import Header from '../../../components/common/Header';
 import ScreenLayout from '../../../components/common/ScreenLayout';
@@ -174,7 +175,7 @@ export default function SchoolAdminSettingsScreen({ navigation }: any) {
                     disabled={saving}
                     accessibilityRole="button"
                   >
-                    {saving ? <ActivityIndicator color="#0B0B0B" size="small" /> : <Text style={styles.saveBtnText}>Save Changes</Text>}
+                    {saving ? <ActivityIndicator color={colors.onPrimary} size="small" /> : <Text style={styles.saveBtnText}>Save Changes</Text>}
                   </TouchableOpacity>
                 </View>
               )}
@@ -194,33 +195,33 @@ function makeStyles(colors: AppColors) {
     fieldGrid: { flexDirection: 'row', gap: spacing.md },
     fieldHalf: { flex: 1, gap: 6 },
     field: { gap: 6 },
-    fieldLabel: { fontFamily: fonts.serif, fontSize: 12, fontWeight: '600', color: colors.textMuted },
+    fieldLabel: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '600', color: colors.textMuted },
     fieldBox: {
       flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8,
       borderWidth: 1, borderColor: colors.borderColor, backgroundColor: colors.bgDark,
       borderRadius: radius.sm, paddingHorizontal: 12, height: 42,
     },
     fieldBoxReadonly: { opacity: 0.7 },
-    fieldBoxText: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '600', color: colors.textHeading, flexShrink: 1 },
-    textInput: { fontFamily: fonts.serif, fontSize: 13, color: colors.textHeading, ...(Platform.OS === 'web' ? { outlineStyle: 'none' as any } : {}) },
-    errorText: { fontFamily: fonts.serif, fontSize: 12, color: colors.accentRed, marginBottom: spacing.md },
+    fieldBoxText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '600', color: colors.textHeading, flexShrink: 1 },
+    textInput: { fontFamily: fonts.serif, fontSize: 14, color: colors.textHeading, ...(Platform.OS === 'web' ? { outlineStyle: 'none' as any } : {}) },
+    errorText: { fontFamily: fonts.serif, fontSize: 14, color: colors.accentRed, marginBottom: spacing.md },
     pageFooter: { flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', gap: spacing.md, marginTop: spacing.sm },
-    editBtn: {
+    editBtn: { minHeight: 44, justifyContent: 'center',
       flexDirection: 'row', alignItems: 'center', gap: 6,
       paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999,
       borderWidth: 1, borderColor: colors.borderColor, backgroundColor: colors.cardDark,
     },
-    editBtnText: { fontFamily: fonts.serif, fontSize: 12.5, fontWeight: '700', color: colors.accentYellow },
-    cancelBtn: {
+    editBtnText: { minHeight: 44, justifyContent: 'center', fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.accentYellow },
+    cancelBtn: { minHeight: 44,
       paddingHorizontal: 16, height: 40, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center',
       borderWidth: 1, borderColor: colors.borderColor, backgroundColor: colors.cardDark,
     },
-    cancelBtnText: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '700', color: colors.textHeading },
-    saveBtn: {
+    cancelBtnText: { minHeight: 44, justifyContent: 'center', fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.textHeading },
+    saveBtn: { minHeight: 44,
       paddingHorizontal: 20, height: 42, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center',
       backgroundColor: colors.accentYellow,
     },
-    saveBtnText: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '700', color: '#0B0B0B' },
+    saveBtnText: { minHeight: 44, justifyContent: 'center', fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.onPrimary },
     brandRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
     brandLogo: {
       width: 52, height: 52, borderRadius: radius.sm, backgroundColor: `${colors.accentYellow}22`,
@@ -229,13 +230,13 @@ function makeStyles(colors: AppColors) {
     brandLogoImg: { width: '100%', height: '100%' },
     brandMonogram: { fontFamily: fonts.serif, fontSize: 20, fontWeight: '700', color: colors.accentYellow },
     brandName: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.textHeading },
-    brandSub: { fontFamily: fonts.serif, fontSize: 11.5, color: colors.textMuted, marginTop: 3, lineHeight: 16 },
-    uploadBtn: {
+    brandSub: { fontFamily: fonts.serif, fontSize: 14, color: colors.textMuted, marginTop: 3, lineHeight: 16 },
+    uploadBtn: { minHeight: 44,
       paddingHorizontal: 16, height: 40, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center',
       borderWidth: 1, borderColor: colors.borderColor, backgroundColor: colors.bgDark, flexShrink: 0,
     },
-    uploadBtnText: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '700', color: colors.textHeading },
+    uploadBtnText: { minHeight: 44, justifyContent: 'center', fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.textHeading },
     hintWrap: { paddingHorizontal: 2, paddingTop: 4 },
-    hint: { fontFamily: fonts.serif, fontSize: 11.5, color: colors.textDim, lineHeight: 16 },
+    hint: { fontFamily: fonts.serif, fontSize: 14, color: colors.textDim, lineHeight: 16 },
   });
 }

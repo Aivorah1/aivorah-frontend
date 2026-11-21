@@ -1,9 +1,7 @@
 import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import Svg, { Circle } from 'react-native-svg';
-import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  Switch, ActivityIndicator, Animated, useWindowDimensions,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Animated, useWindowDimensions } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { fonts } from '../../../theme';

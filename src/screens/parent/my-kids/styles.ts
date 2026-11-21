@@ -58,9 +58,9 @@ export const makeStyles = (c: AppColors) => StyleSheet.create({
   activityRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   activityText: { fontSize: 12, color: c.textMuted, flex: 1 },
 
-  emptyState: { flex: 1, minWidth: 280, alignItems: 'center', paddingVertical: 48, gap: spacing.md },
-  emptyTitle: { fontSize: 16, fontWeight: '700', color: c.textMain },
-  emptySub: { fontSize: 13, color: c.textMuted, textAlign: 'center', maxWidth: 260 },
+  emptyState: { flex: 1, minWidth: 280, alignItems: 'center', paddingVertical: 40, paddingHorizontal: 20, gap: spacing.md, borderRadius: 16, borderWidth: 1, borderColor: c.borderColor, backgroundColor: c.cardDark },
+  emptyTitle: { fontSize: 20, fontWeight: '700', color: c.textHeading },
+  emptySub: { fontSize: 15, lineHeight: 23, color: c.textMuted, textAlign: 'center', maxWidth: 420 },
 
   addChildCard: {
     flex: 1, minWidth: 200,

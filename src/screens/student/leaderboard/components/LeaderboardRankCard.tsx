@@ -74,8 +74,8 @@ const makeStyles = (c: AppColors, gold: string) => StyleSheet.create({
   rankCardBox: { alignSelf: 'stretch', backgroundColor: c.bgDark, borderRadius: radius.lg, padding: spacing.md, gap: 8, marginTop: 8 },
   rankCardBoxLabel: { fontFamily: fonts.serif, fontSize: 12, color: c.textMuted, fontWeight: '600' },
   rankCardBoxRank: { fontFamily: fonts.serif, fontSize: 18, fontWeight: '900' },
-  rankCardProgressTxt: { fontFamily: fonts.serif, fontSize: 11, color: c.textDim },
+  rankCardProgressTxt: { fontFamily: fonts.serif, fontSize: 13, color: c.textDim },
   progressTrack: { height: 7, borderRadius: 4, backgroundColor: c.borderColor, overflow: 'hidden' },
   progressFill: { height: '100%', borderRadius: 4 },
-  rankCardFoot: { fontFamily: fonts.serif, fontSize: 11, color: c.textDim, marginTop: 4 },
+  rankCardFoot: { fontFamily: fonts.serif, fontSize: 13, color: c.textDim, marginTop: 4 },
 });

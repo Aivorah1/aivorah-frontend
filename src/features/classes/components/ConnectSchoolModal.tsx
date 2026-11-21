@@ -6,10 +6,8 @@
  * dropped into any screen without registering a navigator route.
  */
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  View, Text, Modal, TouchableOpacity, StyleSheet, ScrollView,
-  ActivityIndicator, Platform, TextInput,
-} from 'react-native';
+import { View, Text, Modal, TouchableOpacity, StyleSheet, ScrollView, Platform, TextInput } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../../context/ThemeContext';
 import { useAuth } from '../../../context/AuthContext';

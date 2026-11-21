@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, Image, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, TextInput, Image, Modal } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../theme';
 import type { StudentItem, TaskStep } from '../types';
@@ -94,7 +95,7 @@ export function PreviewModal({
                   <View key={q.id || i} style={{ padding: 12, borderRadius: 12, backgroundColor: colors.bgDark, borderWidth: 1, borderColor: colors.borderColor, gap: 8 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>
                       <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: gold, alignItems: 'center', justifyContent: 'center' }}>
-                        <Text style={{ fontSize: 11, fontWeight: '800', color: '#fff' }}>{i + 1}</Text>
+                        <Text style={{ fontSize: 11, fontWeight: '800', color: colors.onPrimary }}>{i + 1}</Text>
                       </View>
                       <TextInput
                         style={[styles.input, { flex: 1, fontSize: 13, marginBottom: 0 }]}
@@ -158,7 +159,7 @@ export function PreviewModal({
             {/* Task steps preview (AI assignment) */}
             {type === 'assignment' && taskSteps.length > 0 && (
               <View style={{ gap: 10 }}>
-                <Text style={{ fontSize: 14, fontWeight: '800', color: '#BAA467' }}>
+                <Text style={{ fontSize: 14, fontWeight: '800', color: '#0E6E86' }}>
                   Task Steps ({taskSteps.length})
                 </Text>
                 {taskSteps.map((step, idx) => (
@@ -273,10 +274,10 @@ export function PreviewModal({
               disabled={creating}
             >
               {creating ? (
-                <ActivityIndicator color="#fff" size="small" />
+                <ActivityIndicator color={colors.onPrimary} size="small" />
               ) : (
                 <>
-                  <Feather name="send" size={15} color="#fff" />
+                  <Feather name="send" size={15} color={colors.onPrimary} />
                   <Text style={styles.submitBtnText}>Publish Assignment</Text>
                 </>
               )}

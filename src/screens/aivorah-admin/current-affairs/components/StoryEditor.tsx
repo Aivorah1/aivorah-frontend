@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, Linking, ActivityIndicator } from 'react-native';
+import { View, Text, Linking, useWindowDimensions } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Button, Field, Segment } from './ui';
 import { createStory, getStory, getStoryHistory, regenerateStory, setStoryStatus, updateStory, updateStoryOptimistic } from '../services/currentAffairsAdminService';
 import { useLoad } from '../hooks/useLoad';
@@ -69,6 +70,11 @@ export default function StoryEditor({ id, styles, accent, onChanged, onClose }: 
   const { data: story, setData: setStory, loading, error } = useLoad<Story | null>(fetchStory, 'Could not load the story');
   const [form, setForm] = useState<Form | null>(null);
   const [busy, setBusy] = useState(false);
+  // Both age versions side by side when there is room; labelled tabs on narrow
+  // screens. Edits for both live in the same form, so switching tabs keeps them.
+  const { width: winWidth } = useWindowDimensions();
+  const narrowAges = winWidth < 900;
+  const [ageTab, setAgeTab] = useState<(typeof AGES)[number]['key']>('kid');
   const [message, setMessage] = useState('');
   const [problem, setProblem] = useState('');
   const [history, setHistory] = useState<{ available: boolean; entries: HistoryEntry[] } | null>(null);
@@ -163,8 +169,12 @@ export default function StoryEditor({ id, styles, accent, onChanged, onClose }: 
       <Segment styles={styles} testID="ca-story-category" value={current.category as CaCategory}
         options={CA_CATEGORIES.map((c) => ({ value: c, label: c[0].toUpperCase() + c.slice(1) }))} onChange={(v) => set('category', v)} />
 
+      {narrowAges && (
+        <Segment styles={styles} testID="ca-story-age-tabs" value={ageTab}
+          options={AGES.map((a) => ({ value: a.key, label: `Age ${a.label}` }))} onChange={setAgeTab} />
+      )}
       <View style={styles.ageGrid}>
-        {AGES.map((a) => (
+        {AGES.filter((a) => !narrowAges || a.key === ageTab).map((a) => (
           <View key={a.key} style={styles.ageCol}>
             <Text style={styles.ageHead}>{a.label}</Text>
             {PARTS.map((p) => (

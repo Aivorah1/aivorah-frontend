@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import StoryEditor from './StoryEditor';
 import { Button, LoadState, Segment } from './ui';
 import { bulkStoryStatus, listStories } from '../services/currentAffairsAdminService';

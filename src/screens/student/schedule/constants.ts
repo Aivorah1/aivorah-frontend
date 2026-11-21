@@ -8,7 +8,7 @@ export const DURATIONS = ['30 min', '45 min', '1 hr', '1.5 hrs', '2 hrs', '2.5 h
 // ── Canonical tag definitions (mirrors Toddle's tag sidebar) ──────────────
 export const ASSIGNMENT_TAGS = [
   { key: 'Live Class / Lesson', color: '#7FC29B' },
-  { key: 'Study Session',       color: '#C9A24E' },
+  { key: 'Study Session',       color: '#24877B' },
   { key: 'Learning experience', color: '#7FC29B' },
   { key: 'Quick task',          color: '#7FB2D6' },
   { key: 'Worksheet / Assignment', color: '#E3B24C' },

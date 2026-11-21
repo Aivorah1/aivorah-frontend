@@ -5,7 +5,8 @@
  * student's own teachers can load it.
  */
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../theme';
 import { followupApi, type TeacherSkillView } from '../../../student/learning-paths/practice-followup/services/practiceFollowupApi';
@@ -42,7 +43,7 @@ export default function SkillSupportPanel({ studentId, skillId, studentName, col
       {!!error && <Text style={[styles.body, { color: colors.textMuted }]}>{error}</Text>}
       {!!data && (
         <>
-          <Text style={[styles.status, { color: data.needsTopicHelp ? '#8A6A1F' : colors.accentGreen }]} testID="skill-support-status">
+          <Text style={[styles.status, { color: data.needsTopicHelp ? '#0E6E86' : colors.accentGreen }]} testID="skill-support-status">
             {data.needsTopicHelp ? `Needs topic help · difficulty on ${data.flag?.evidenceCount ?? 2} questions` : 'No open topic-help flag for this skill'}
           </Text>
           <Text style={[styles.section, { color: colors.textMain }]}>What to practise next</Text>

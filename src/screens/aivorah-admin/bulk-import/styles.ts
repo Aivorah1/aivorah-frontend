@@ -13,7 +13,7 @@ export function makeStyles(colors: AppColors) {
     },
     tab: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 8, borderRadius: radius.sm - 2 },
     tabActive: { backgroundColor: colors.accentYellow + '1A' },
-    tabText: { fontSize: 13, fontWeight: '600', color: colors.textDim },
+    tabText: { fontSize: 14, fontWeight: '600', color: colors.textDim },
     tabTextActive: { color: colors.accentYellow, fontWeight: '800' },
   });
 }

@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, TextInput } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../../context/ThemeContext';
 import ScreenLayout from '../../../components/common/ScreenLayout';
@@ -96,7 +97,7 @@ export default function TeacherAttendanceScreen({ navigation, route }: any) {
                     />
                   </View>
                   <TouchableOpacity style={styles.markAllBtn} onPress={markAllPresent} activeOpacity={0.8}>
-                    <Feather name="check-square" size={14} color="#241f16" style={{ marginRight: 4 }} />
+                    <Feather name="check-square" size={14} color="#1C2B37" style={{ marginRight: 4 }} />
                     <Text style={styles.markAllBtnText}>Mark All Present</Text>
                   </TouchableOpacity>
                 </View>
@@ -119,10 +120,10 @@ export default function TeacherAttendanceScreen({ navigation, route }: any) {
                 {!loading && students.length > 0 && (
                   <TouchableOpacity testID="attendance-save" style={styles.saveBtn} onPress={save} disabled={saving} activeOpacity={0.85}>
                     {saving ? (
-                      <ActivityIndicator size="small" color="#241f16" />
+                      <ActivityIndicator size="small" color="#1C2B37" />
                     ) : (
                       <>
-                        <Feather name="save" size={16} color="#241f16" style={{ marginRight: 6 }} />
+                        <Feather name="save" size={16} color="#1C2B37" style={{ marginRight: 6 }} />
                         <Text style={styles.saveBtnText}>Save Daily Attendance</Text>
                       </>
                     )}

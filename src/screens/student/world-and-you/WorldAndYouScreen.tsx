@@ -3,7 +3,8 @@
  * "The World & You" — GK facts, On This Day, Current Affairs
  */
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../../context/ThemeContext';
 import { useAuth } from '../../../context/AuthContext';
@@ -146,7 +147,7 @@ const makeStyles = (c: AppColors, isDark: boolean) => StyleSheet.create({
   card: {
     backgroundColor: c.cardDark,
     borderWidth: 1,
-    borderColor: isDark ? c.borderColor : '#d0e0de',
+    borderColor: c.borderColor,
     borderRadius: radius.xl,
     padding: spacing.xl,
     gap: spacing.md,

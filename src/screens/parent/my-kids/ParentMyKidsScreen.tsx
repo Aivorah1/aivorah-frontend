@@ -1,8 +1,6 @@
 import React, { useMemo } from 'react';
-import {
-  View, Text, ScrollView, TouchableOpacity,
-  ActivityIndicator, RefreshControl, Modal, TextInput,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, RefreshControl, Modal, TextInput } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import Header from '../../../components/common/Header';
 import ScreenLayout from '../../../components/common/ScreenLayout';
@@ -61,11 +59,16 @@ export default function ParentMyKidsScreen({ navigation }: any) {
               ))}
 
               {k.children.length === 0 && (
-                <TouchableOpacity style={styles.emptyState} activeOpacity={0.7} onPress={() => k.openModal('create')}>
-                  <Feather name="user-plus" size={40} color={colors.textDim} />
+                <View style={styles.emptyState}>
+                  <Feather name="book-open" size={40} color={colors.primary} />
                   <Text style={styles.emptyTitle}>No children linked yet</Text>
-                  <Text style={styles.emptySub}>Tap here, or use &quot;Add Child&quot; above, to create a new account or link an existing one.</Text>
-                </TouchableOpacity>
+                  <Text style={styles.emptySub}>Create a new child account, or link one that already exists, to track learning, tasks, attendance and progress.</Text>
+                  <TouchableOpacity testID="my-kids-empty-add" onPress={() => k.openModal('create')} activeOpacity={0.8} accessibilityRole="button"
+                    style={{ marginTop: 4, minHeight: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingHorizontal: 20, borderRadius: 12, backgroundColor: colors.primary }}>
+                    <Feather name="plus" size={18} color={colors.onPrimary} />
+                    <Text style={{ fontSize: 16, fontWeight: '700', color: colors.onPrimary }}>Add Child</Text>
+                  </TouchableOpacity>
+                </View>
               )}
             </View>
           )}

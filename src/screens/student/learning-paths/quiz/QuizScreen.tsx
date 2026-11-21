@@ -9,7 +9,8 @@
  * - Fill-blank: 3-attempt nudge logic (wrong1 → retry, wrong2 → hint, wrong3 → reveal)
  */
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, ActivityIndicator } from 'react-native';
+import { View, Text } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { useTheme } from '../../../../context/ThemeContext';
 import { useAuth } from '../../../../context/AuthContext';
 import { useStudentData } from '../../../../context/StudentDataContext';

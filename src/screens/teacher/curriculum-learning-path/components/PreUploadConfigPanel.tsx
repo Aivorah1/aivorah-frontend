@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../../../context/ThemeContext';
 import { spacing, radius } from '../../../../theme';
@@ -139,7 +140,7 @@ export default function PreUploadConfigPanel({
             </Text>
             {Platform.OS === 'web' && <Text style={{ color: colors.textMuted, fontSize: 11, marginVertical: 4 }}>or</Text>}
             <View style={[s.chooseBtn, { backgroundColor: colors.accentYellow }]}>
-              <Text style={{ color: '#fff', fontWeight: '700', fontSize: 12.5 }}>Choose File</Text>
+              <Text style={{ color: colors.onPrimary, fontWeight: '700', fontSize: 12.5 }}>Choose File</Text>
             </View>
           </TouchableOpacity>
           {!!fileName && (
@@ -168,7 +169,7 @@ export default function PreUploadConfigPanel({
               {!!statusError && <Text testID="panel-error" style={{ color: colors.accentRed, fontSize: 12, marginTop: 4, textAlign: 'center' }}>{statusError}</Text>}
               {!!onRetry && (
                 <TouchableOpacity testID="retry-button" onPress={onRetry} style={[s.chooseBtn, { backgroundColor: colors.accentYellow, marginTop: 10 }]}>
-                  <Text style={{ color: '#fff', fontWeight: '700', fontSize: 12.5 }}>Retry</Text>
+                  <Text style={{ color: colors.onPrimary, fontWeight: '700', fontSize: 12.5 }}>Retry</Text>
                 </TouchableOpacity>
               )}
             </View>

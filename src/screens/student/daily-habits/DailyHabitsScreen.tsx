@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
-import {
-  View, Text, ScrollView, ActivityIndicator, RefreshControl, StyleSheet,
-} from 'react-native';
+import { View, Text, ScrollView, RefreshControl, StyleSheet } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../../context/ThemeContext';
 import Header from '../../../components/common/Header';
@@ -81,7 +80,7 @@ export default function DailyHabitsScreen({ navigation }: any) {
                 styles={styles}
               />
 
-              <Text style={[styles.sectionTitle, { color: '#BAA467' }]}>TODAY&apos;S HABITS</Text>
+              <Text style={[styles.sectionTitle, { color: '#24877B' }]}>TODAY&apos;S HABITS</Text>
 
               <HabitGrid
                 tasks={parentTasks}

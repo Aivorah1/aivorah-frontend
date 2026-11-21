@@ -8,7 +8,8 @@
  * auto-add can never silently no-op on a typo or a blank field.
  */
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, Modal, TouchableOpacity, StyleSheet, TextInput, Switch, ActivityIndicator, ScrollView, Platform } from 'react-native';
+import { View, Text, Modal, TouchableOpacity, StyleSheet, TextInput, Switch, ScrollView, Platform } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../../context/ThemeContext';
 import { useAuth } from '../../../context/AuthContext';

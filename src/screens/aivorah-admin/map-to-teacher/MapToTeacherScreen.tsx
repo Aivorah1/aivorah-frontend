@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, ScrollView, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TextInput, TouchableOpacity } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import Header from '../../../components/common/Header';
@@ -538,9 +539,9 @@ export default function MapToTeacherScreen({ navigation }: any) {
                     disabled={assigning}
                     activeOpacity={0.85}
                   >
-                    {assigning ? <ActivityIndicator color="#0B0B0B" size="small" /> : (
+                    {assigning ? <ActivityIndicator color={colors.onPrimary} size="small" /> : (
                       <>
-                        <Feather name="user-check" size={15} color="#0B0B0B" />
+                        <Feather name="user-check" size={15} color={colors.onPrimary} />
                         <Text style={styles.submitBtnText}>
                           {selectedStudentIds.size ? `Assign to ${selectedStudentIds.size} student${selectedStudentIds.size !== 1 ? 's' : ''}` : 'Assign'}
                         </Text>

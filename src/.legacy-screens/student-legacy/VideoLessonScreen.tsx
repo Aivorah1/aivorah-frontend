@@ -35,11 +35,11 @@ const VIDEO_MAP: Record<string, string> = {
 const SUBJECT_ACCENT: Record<string, { color: string; icon: any }> = {
   'Mathematics':          { color: '#9FB2A4', icon: 'trending-up' },
   'Science':              { color: '#7E9A86', icon: 'zap'         },
-  'English':              { color: '#C9A24E', icon: 'book-open'   },
-  'Social Studies':       { color: '#8A8358', icon: 'globe'       },
-  'Arts':                 { color: '#C9A24E', icon: 'feather'     },
+  'English':              { color: '#24877B', icon: 'book-open'   },
+  'Social Studies':       { color: '#24877B', icon: 'globe'       },
+  'Arts':                 { color: '#24877B', icon: 'feather'     },
   'Physical Education':   { color: '#9FB2A4', icon: 'activity'    },
-  'ICT':                  { color: '#BAA467', icon: 'monitor'     },
+  'ICT':                  { color: '#24877B', icon: 'monitor'     },
 };
 
 function subjectAccent(subject: string) {

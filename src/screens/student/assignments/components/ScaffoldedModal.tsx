@@ -1,5 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Modal, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Modal, Alert } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { fonts } from '../../../../theme';
 import type { AppColors } from '../../../../theme';
@@ -26,7 +27,7 @@ export function ScaffoldedModal({ assignment, colors, onClose, onSubmitted }: {
   const { studentId } = useStudentData();
   const steps     = assignment.taskSteps || [];
   const criteria  = assignment.successCriteria || [];
-  const color     = SUBJECT_COLOR[assignment.subject] ?? '#BAA467';
+  const color     = SUBJECT_COLOR[assignment.subject] ?? '#24877B';
 
   const [stepAnswers, setStepAnswers] = useState<StepAnswer[]>(() =>
     steps.map(s => ({
@@ -290,7 +291,7 @@ export function ScaffoldedModal({ assignment, colors, onClose, onSubmitted }: {
               {assignment.learnerProfile ? (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5,
                   paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20,
-                  backgroundColor: '#BAA46712', borderWidth: 1, borderColor: '#BAA46750' }}>
+                  backgroundColor: '#24877B12', borderWidth: 1, borderColor: '#24877B50' }}>
                   <Feather name="user" size={11} color="#8A6030" />
                   <Text style={{ fontSize: 10, fontWeight: '800', color: '#8A6030' }}>Learner Profile </Text>
                   <Text style={{ fontSize: 11, fontWeight: '600', color: colors.textMain }}>{assignment.learnerProfile}</Text>
@@ -299,7 +300,7 @@ export function ScaffoldedModal({ assignment, colors, onClose, onSubmitted }: {
               {assignment.atlSkill ? (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5,
                   paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20,
-                  backgroundColor: '#BAA46712', borderWidth: 1, borderColor: '#BAA46750' }}>
+                  backgroundColor: '#24877B12', borderWidth: 1, borderColor: '#24877B50' }}>
                   <Feather name="activity" size={11} color="#8A7E4A" />
                   <Text style={{ fontSize: 10, fontWeight: '800', color: '#8A7E4A' }}>ATL </Text>
                   <Text style={{ fontSize: 11, fontWeight: '600', color: colors.textMain }}>{assignment.atlSkill}</Text>
@@ -308,7 +309,7 @@ export function ScaffoldedModal({ assignment, colors, onClose, onSubmitted }: {
               {assignment.keyConcept ? (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5,
                   paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20,
-                  backgroundColor: '#BAA46712', borderWidth: 1, borderColor: '#BAA46750' }}>
+                  backgroundColor: '#24877B12', borderWidth: 1, borderColor: '#24877B50' }}>
                   <Feather name="layers" size={11} color="#7A6420" />
                   <Text style={{ fontSize: 10, fontWeight: '800', color: '#7A6420' }}>Key Concept </Text>
                   <Text style={{ fontSize: 11, fontWeight: '600', color: colors.textMain }}>{assignment.keyConcept}</Text>
@@ -493,7 +494,7 @@ export function ScaffoldedModal({ assignment, colors, onClose, onSubmitted }: {
 
   // ── Step UI ──
   if (!step) return null;
-  const stepColor = STEP_COLORS[step.type as StepType] ?? '#BAA467';
+  const stepColor = STEP_COLORS[step.type as StepType] ?? '#24877B';
   // Native-script assignments (Telugu, Hindi…) get English→script typing
   const langCode = resolveTypingLang(assignment.subject, step.label, step.instructions, assignmentLanguageText(assignment));
   return (

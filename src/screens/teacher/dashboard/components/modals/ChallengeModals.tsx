@@ -153,7 +153,7 @@ export function renderChallengeModal(tileIndex: number, ctx: ModalRenderCtx) {
                 <Text style={styles.modalEmptyText}>No challenge scores yet</Text>
               </View>
             ) : ranked.map((s: any, i: number) => {
-              const medal = i === 0 ? '#C5BD96' : i === 1 ? '#7AADA8' : i === 2 ? '#C4836A' : colors.textDim;
+              const medal = i === 0 ? '#0E6E86' : i === 1 ? '#7AADA8' : i === 2 ? '#C4836A' : colors.textDim;
               return (
                 <View key={s.id || i} style={[styles.tableRow, i % 2 === 0 && styles.tableRowAlt]}>
                   <Text style={[styles.tableCell, { width: 32, fontWeight: '800', color: medal, fontSize: 14, textAlign: 'center' }]}>{i + 1}</Text>

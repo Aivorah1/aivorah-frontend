@@ -19,4 +19,4 @@ export function SchoolCurriculumPicker({ testID, schoolName, value, onChange, mi
   );
 }
 
-const styles = StyleSheet.create({ hint: { fontSize: 11.5, marginTop: 4, lineHeight: 16 } });
+const styles = StyleSheet.create({ hint: { fontSize: 14, marginTop: 4, lineHeight: 16 } });

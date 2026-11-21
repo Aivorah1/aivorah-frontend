@@ -244,11 +244,11 @@ export function Donut({ slices, size = 168, thickness = 22, ink, centerTitle, ce
 }
 
 const s = StyleSheet.create({
-  yLabel: { position: 'absolute', left: 0, width: PAD.left - 6, textAlign: 'right', fontSize: 10.5 },
-  xLabel: { position: 'absolute', bottom: 2, width: 48, textAlign: 'center', fontSize: 10.5 },
+  yLabel: { position: 'absolute', left: 0, width: PAD.left - 6, textAlign: 'right', fontSize: 12 },
+  xLabel: { position: 'absolute', bottom: 2, width: 48, textAlign: 'center', fontSize: 12 },
   tooltip: { position: 'absolute', top: 0, width: 120, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, borderWidth: 1 },
-  tipTitle: { fontSize: 10.5 },
-  tipValue: { fontSize: 13, fontWeight: '800', marginTop: 1 },
+  tipTitle: { fontSize: 12 },
+  tipValue: { fontSize: 14, fontWeight: '800', marginTop: 1 },
   donutValue: { fontSize: 18, fontWeight: '800' },
-  donutTitle: { fontSize: 11, marginTop: 2 },
+  donutTitle: { fontSize: 12, marginTop: 2 },
 });

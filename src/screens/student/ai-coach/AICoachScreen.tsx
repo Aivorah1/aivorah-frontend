@@ -386,7 +386,7 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
     width: '100%', paddingVertical: 12, borderRadius: 12,
     backgroundColor: c.accentRed, alignItems: 'center', marginBottom: 10,
   },
-  clearChatConfirmText: { fontSize: 14, fontWeight: '700', color: '#fff' },
+  clearChatConfirmText: { fontSize: 14, fontWeight: '700', color: c.onPrimary },
   clearChatCancelBtn: { width: '100%', paddingVertical: 10, alignItems: 'center' },
   clearChatCancelText: { fontSize: 14, fontWeight: '600', color: c.textMuted },
 });

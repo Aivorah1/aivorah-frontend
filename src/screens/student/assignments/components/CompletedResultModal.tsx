@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Modal, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Modal, Platform } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { WebView } from 'react-native-webview';
 import { useTheme } from '../../../../context/ThemeContext';
@@ -183,10 +184,10 @@ export function CompletedResultModal({
           {!a.interactiveQuizHtml && pq.filter((q: any) => !q.correct && q.answered).length > 0 && (
             <View style={{ gap: 8 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <View style={{ width: 28, height: 28, borderRadius: 9, backgroundColor: '#BAA46720', alignItems: 'center', justifyContent: 'center' }}>
-                  <Feather name="x-circle" size={15} color="#BAA467" />
+                <View style={{ width: 28, height: 28, borderRadius: 9, backgroundColor: '#24877B20', alignItems: 'center', justifyContent: 'center' }}>
+                  <Feather name="x-circle" size={15} color="#24877B" />
                 </View>
-                <Text style={{ fontSize: 14, fontWeight: '800', color: '#BAA467' }}>
+                <Text style={{ fontSize: 14, fontWeight: '800', color: '#24877B' }}>
                   Questions You Got Wrong ({pq.filter((q: any) => !q.correct && q.answered).length})
                 </Text>
               </View>
@@ -207,36 +208,36 @@ export function CompletedResultModal({
                   }
                 };
                 return (
-                  <View key={i} style={{ padding: 14, borderRadius: 12, borderWidth: 1, borderLeftWidth: 3, borderColor: '#BAA46730', borderLeftColor: '#BAA467', backgroundColor: colors.cardDark, gap: 8 }}>
+                  <View key={i} style={{ padding: 14, borderRadius: 12, borderWidth: 1, borderLeftWidth: 3, borderColor: '#24877B30', borderLeftColor: '#24877B', backgroundColor: colors.cardDark, gap: 8 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>
-                      <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: '#BAA46720', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
-                        <Feather name="x" size={12} color="#BAA467" />
+                      <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: '#24877B20', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                        <Feather name="x" size={12} color="#24877B" />
                       </View>
                       <Text style={{ flex: 1, fontSize: 13, fontWeight: '600', color: colors.textMain, lineHeight: 20 }}>{q.question}</Text>
                     </View>
                     <View style={{ gap: 6, marginLeft: 32 }}>
                       {q.studentAnswer ? (
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, padding: 8, borderRadius: 8, backgroundColor: colors.bgDark }}>
-                          <Text style={{ fontSize: 11, fontWeight: '800', color: '#C9A24E', width: 100 }}>Your answer</Text>
-                          <Text style={{ flex: 1, fontSize: 13, fontWeight: '600', color: '#C9A24E' }}>{q.studentAnswer}</Text>
+                          <Text style={{ fontSize: 11, fontWeight: '800', color: '#24877B', width: 100 }}>Your answer</Text>
+                          <Text style={{ flex: 1, fontSize: 13, fontWeight: '600', color: '#24877B' }}>{q.studentAnswer}</Text>
                         </View>
                       ) : null}
                       {(q.correctAnswer || (q.comment && q.comment.includes('correct answer'))) ? (
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, padding: 8, borderRadius: 8, backgroundColor: colors.bgDark }}>
-                          <Text style={{ fontSize: 11, fontWeight: '800', color: '#BAA467', width: 100 }}>Correct answer</Text>
-                          <Text style={{ flex: 1, fontSize: 13, fontWeight: '700', color: '#BAA467' }}>
+                          <Text style={{ fontSize: 11, fontWeight: '800', color: '#24877B', width: 100 }}>Correct answer</Text>
+                          <Text style={{ flex: 1, fontSize: 13, fontWeight: '700', color: '#24877B' }}>
                             {q.correctAnswer || q.comment?.replace(/.*correct answer[:\s]*/i, '').trim()}
                           </Text>
                         </View>
                       ) : null}
                       {/* Aivorah explanation */}
                       {exp?.steps && exp.steps.length > 0 ? (
-                        <View style={{ padding: 12, borderRadius: 10, backgroundColor: isDark ? '#171612' : '#F8F6ED', borderWidth: 1, borderColor: '#BAA46725', gap: 8 }}>
+                        <View style={{ padding: 12, borderRadius: 10, backgroundColor: isDark ? '#171612' : '#F8F6ED', borderWidth: 1, borderColor: '#24877B25', gap: 8 }}>
                           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                            <View style={{ width: 22, height: 22, borderRadius: 7, backgroundColor: '#BAA46720', alignItems: 'center', justifyContent: 'center' }}>
-                              <Feather name="book-open" size={11} color="#BAA467" />
+                            <View style={{ width: 22, height: 22, borderRadius: 7, backgroundColor: '#24877B20', alignItems: 'center', justifyContent: 'center' }}>
+                              <Feather name="book-open" size={11} color="#24877B" />
                             </View>
-                            <Text style={{ fontSize: 12, fontWeight: '800', color: '#BAA467' }}>Aivorah explains</Text>
+                            <Text style={{ fontSize: 12, fontWeight: '800', color: '#24877B' }}>Aivorah explains</Text>
                             <TouchableOpacity onPress={fetchExpl} style={{ marginLeft: 'auto' as any }}>
                               <Feather name="chevron-up" size={14} color={colors.textMuted} />
                             </TouchableOpacity>
@@ -255,10 +256,10 @@ export function CompletedResultModal({
                         </View>
                       ) : (
                         <TouchableOpacity onPress={fetchExpl} activeOpacity={0.75}
-                          style={{ flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', paddingVertical: 7, paddingHorizontal: 12, borderRadius: 9, backgroundColor: '#BAA46715', borderWidth: 1, borderColor: '#BAA46740' }}>
+                          style={{ flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', paddingVertical: 7, paddingHorizontal: 12, borderRadius: 9, backgroundColor: '#24877B15', borderWidth: 1, borderColor: '#24877B40' }}>
                           {exp?.loading
-                            ? <><ActivityIndicator size="small" color="#BAA467" /><Text style={{ fontSize: 12, color: '#BAA467', fontWeight: '700' }}>Aivorah is thinking…</Text></>
-                            : <><Feather name="help-circle" size={13} color="#BAA467" /><Text style={{ fontSize: 12, color: '#BAA467', fontWeight: '700' }}>Aivorah, explain this</Text></>
+                            ? <><ActivityIndicator size="small" color="#24877B" /><Text style={{ fontSize: 12, color: '#24877B', fontWeight: '700' }}>Aivorah is thinking…</Text></>
+                            : <><Feather name="help-circle" size={13} color="#24877B" /><Text style={{ fontSize: 12, color: '#24877B', fontWeight: '700' }}>Aivorah, explain this</Text></>
                           }
                         </TouchableOpacity>
                       )}

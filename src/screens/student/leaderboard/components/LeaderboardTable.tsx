@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { LeaderboardEntry } from '../types';
 import { MEDAL_COLORS } from '../constants';
@@ -41,7 +42,7 @@ export default function LeaderboardTable({ leaderboard, loading, studentId, wide
         const medalColor = MEDAL_COLORS[s.rank - 1];
         const isMe = s.id === studentId;
         return (
-          <View key={s.id} style={[styles.tr, i < leaderboard.length - 1 && styles.trBorder, isMe && { backgroundColor: gold + '0E' }]}>
+          <View key={s.id} style={[styles.tr, i < leaderboard.length - 1 && styles.trBorder, isMe && { backgroundColor: gold + '1A' }]}>
             <View style={styles.thRank}>
               <View style={[styles.rankBadge, { backgroundColor: medalColor ? medalColor + '26' : 'transparent' }]}>
                 {s.rank <= 3 ? <Feather name="award" size={13} color={medalColor} /> : <Text style={[styles.rankNum, { color: colors.textMuted }]}>{s.rank}</Text>}
@@ -60,7 +61,7 @@ export default function LeaderboardTable({ leaderboard, loading, studentId, wide
               </View>
             </View>
             {wide && <Text style={styles.thGrade}><Text style={styles.gradeCell}>{s.grade}</Text></Text>}
-            <View style={styles.thXp}><Text style={[styles.xpCell, { color: gold }]}>{s.score.toLocaleString()} <Text style={{ fontSize: 11, fontWeight: '600' }}>XP</Text></Text></View>
+            <View style={styles.thXp}><Text style={[styles.xpCell, { color: colors.textHeading }]}>{s.score.toLocaleString()} <Text style={{ fontSize: 11, fontWeight: '600' }}>XP</Text></Text></View>
             <View style={[styles.thStreak, { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 4 }]}>
               {/* Bug #23 ("symbol error"): this was Feather's "wind" icon —
                   wrong symbol for a streak. Every other streak display in
@@ -87,25 +88,25 @@ export default function LeaderboardTable({ leaderboard, loading, studentId, wide
 const makeStyles = (c: AppColors, gold: string) => StyleSheet.create({
   tableCard: { backgroundColor: c.cardDark, borderWidth: 1, borderColor: c.borderColor, borderRadius: radius.xl, overflow: 'hidden' },
   tableHead: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: spacing.lg, borderBottomWidth: 1, borderBottomColor: c.borderColor, backgroundColor: c.bgDark + '80' },
-  thRank: { width: 54, fontFamily: fonts.serif, fontSize: 11, fontWeight: '700', color: c.textDim, textTransform: 'uppercase', letterSpacing: 0.5 },
-  thStudent: { flex: 1, fontFamily: fonts.serif, fontSize: 11, fontWeight: '700', color: c.textDim, textTransform: 'uppercase', letterSpacing: 0.5 },
-  thGrade: { width: 90, fontFamily: fonts.serif, fontSize: 11, fontWeight: '700', color: c.textDim, textTransform: 'uppercase', letterSpacing: 0.5 },
-  thXp: { width: 96, fontFamily: fonts.serif, fontSize: 11, fontWeight: '700', color: c.textDim, textTransform: 'uppercase', letterSpacing: 0.5, textAlign: 'right' },
-  thStreak: { width: 72, fontFamily: fonts.serif, fontSize: 11, fontWeight: '700', color: c.textDim, textTransform: 'uppercase', letterSpacing: 0.5, textAlign: 'right' },
-  tr: { flexDirection: 'row', alignItems: 'center', paddingVertical: 11, paddingHorizontal: spacing.lg },
+  thRank: { width: 54, fontFamily: fonts.sans, fontSize: 13, fontWeight: '700', color: c.textDim, textTransform: 'uppercase', letterSpacing: 0.5 },
+  thStudent: { flex: 1, fontFamily: fonts.sans, fontSize: 13, fontWeight: '700', color: c.textDim, textTransform: 'uppercase', letterSpacing: 0.5 },
+  thGrade: { width: 90, fontFamily: fonts.sans, fontSize: 13, fontWeight: '700', color: c.textDim, textTransform: 'uppercase', letterSpacing: 0.5 },
+  thXp: { width: 96, fontFamily: fonts.sans, fontSize: 13, fontWeight: '700', color: c.textDim, textTransform: 'uppercase', letterSpacing: 0.5, textAlign: 'right' },
+  thStreak: { width: 72, fontFamily: fonts.sans, fontSize: 13, fontWeight: '700', color: c.textDim, textTransform: 'uppercase', letterSpacing: 0.5, textAlign: 'right' },
+  tr: { flexDirection: 'row', alignItems: 'center', minHeight: 56, paddingVertical: 10, paddingHorizontal: spacing.lg, gap: 4 },
   trBorder: { borderBottomWidth: 1, borderBottomColor: c.borderColor },
   rankBadge: { width: 30, height: 30, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
-  rankNum: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '700' },
+  rankNum: { fontFamily: fonts.sans, fontSize: 13, fontWeight: '700' },
   avatar: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { fontFamily: fonts.serif, fontSize: 12, fontWeight: '700' },
-  name: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '600', color: c.textMain, flexShrink: 1, textTransform: 'none' },
-  gradeSmall: { fontFamily: fonts.serif, fontSize: 11, color: c.textDim, marginTop: 1, textTransform: 'none' },
-  gradeCell: { fontFamily: fonts.serif, fontSize: 13, color: c.textMuted, fontWeight: '600', textTransform: 'none' },
-  xpCell: { fontFamily: fonts.serif, fontSize: 15, fontWeight: '800', letterSpacing: -0.3, textTransform: 'none' },
-  streakCell: { fontFamily: fonts.serif, fontSize: 13, color: c.textMuted, fontWeight: '700', textTransform: 'none' },
+  avatarText: { fontFamily: fonts.sans, fontSize: 12, fontWeight: '700' },
+  name: { fontFamily: fonts.sans, fontSize: 14, fontWeight: '600', color: c.textMain, flexShrink: 1, textTransform: 'none' },
+  gradeSmall: { fontFamily: fonts.sans, fontSize: 13, color: c.textDim, marginTop: 1, textTransform: 'none' },
+  gradeCell: { fontFamily: fonts.sans, fontSize: 13, color: c.textMuted, fontWeight: '600', textTransform: 'none' },
+  xpCell: { fontFamily: fonts.sans, fontSize: 15, fontWeight: '800', letterSpacing: -0.3, textTransform: 'none' },
+  streakCell: { fontFamily: fonts.sans, fontSize: 13, color: c.textMuted, fontWeight: '700', textTransform: 'none' },
   youBadge: { borderWidth: 1, borderRadius: 20, paddingHorizontal: 6, paddingVertical: 2 },
-  youText: { fontFamily: fonts.serif, fontSize: 9, fontWeight: '700', letterSpacing: 0.5 },
-  empty: { textAlign: 'center', color: c.textMuted, padding: spacing.xl, fontFamily: fonts.serif, fontSize: 13 },
+  youText: { fontFamily: fonts.sans, fontSize: 12, fontWeight: '700', letterSpacing: 0.5 },
+  empty: { textAlign: 'center', color: c.textMuted, padding: spacing.xl, fontFamily: fonts.sans, fontSize: 13 },
   viewAllBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 14, borderTopWidth: 1, borderTopColor: c.borderColor },
-  viewAllText: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '700' },
+  viewAllText: { fontFamily: fonts.sans, fontSize: 13, fontWeight: '700' },
 });

@@ -4,7 +4,8 @@
  * so it matches each persona's look.
  */
 import React from 'react';
-import { Modal, View, Text, TextInput, TouchableOpacity, ActivityIndicator, Pressable } from 'react-native';
+import { Modal, View, Text, TextInput, TouchableOpacity, Pressable } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../theme';
 import type { EmailChange } from '../hooks/useEmailChange';

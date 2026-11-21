@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  View, Text, ScrollView, TouchableOpacity, TextInput,
-  StyleSheet, ActivityIndicator, Platform,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, StyleSheet, Platform } from 'react-native';
+import ActivityIndicator from '../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import Header from '../../components/common/Header';
@@ -25,8 +23,8 @@ interface WordEntry {
 }
 interface WordResult { word: string; stars: number; correct: boolean; }
 
-const CARD_COLORS = ['#BAA467', '#9FB2A4', '#C9A24E', '#B2C2B7'];
-const STAR_COLOR  = '#C9A24E';
+const CARD_COLORS = ['#24877B', '#9FB2A4', '#24877B', '#B2C2B7'];
+const STAR_COLOR  = '#24877B';
 
 // ── Audio helpers ─────────────────────────────────────────────────────────────
 let _audio: any = null;
@@ -234,8 +232,8 @@ function WordChallenge({ word, meaning, challenge, accent, colors, onResult }: {
       {/* ── HINT phase — show hint, let student try again OR skip to explanation ── */}
       {phase === 'hint' && (
         <>
-          <View style={[wc.hintBox, { backgroundColor: '#f59e0b15', borderColor: '#f59e0b40' }]}>
-            <Feather name="help-circle" size={16} color="#f59e0b" />
+          <View style={[wc.hintBox, { backgroundColor: '#3FB8A815', borderColor: '#3FB8A840' }]}>
+            <Feather name="help-circle" size={16} color="#3FB8A8" />
             <Text style={[wc.hintText, { color: colors.textMain }]}>
               Hmm, not quite! Here is a hint: {hintText}
             </Text>
@@ -297,10 +295,10 @@ function WordChallenge({ word, meaning, challenge, accent, colors, onResult }: {
           </View>
 
           <View style={[wc.explainBox, {
-            backgroundColor: stars > 0 ? '#10b98112' : '#BAA46712',
-            borderColor:     stars > 0 ? '#10b98140' : '#BAA46740',
+            backgroundColor: stars > 0 ? '#10b98112' : '#24877B12',
+            borderColor:     stars > 0 ? '#10b98140' : '#24877B40',
           }]}>
-            <Feather name={stars > 0 ? 'award' : 'info'} size={16} color={stars > 0 ? '#10b981' : '#BAA467'} />
+            <Feather name={stars > 0 ? 'award' : 'info'} size={16} color={stars > 0 ? '#10b981' : '#24877B'} />
             <View style={{ flex: 1, gap: 6 }}>
               <Text style={[wc.explainText, { color: colors.textMain }]}>
                 {speaking ? 'Ms. Zara is explaining…' : aiExplain}
@@ -310,8 +308,8 @@ function WordChallenge({ word, meaning, challenge, accent, colors, onResult }: {
                   style={{ flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start' }}
                   onPress={async () => { setSpeaking(true); await speak(aiExplain); setSpeaking(false); }}
                 >
-                  <Feather name="volume-2" size={12} color={stars > 0 ? '#10b981' : '#BAA467'} />
-                  <Text style={{ color: stars > 0 ? '#10b981' : '#BAA467', fontSize: 11, fontWeight: '700' }}>Hear again</Text>
+                  <Feather name="volume-2" size={12} color={stars > 0 ? '#10b981' : '#24877B'} />
+                  <Text style={{ color: stars > 0 ? '#10b981' : '#24877B', fontSize: 11, fontWeight: '700' }}>Hear again</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -360,10 +358,10 @@ function WordChallenge({ word, meaning, challenge, accent, colors, onResult }: {
           ) : (
             <>
               <View style={[wc.explainBox, {
-                backgroundColor: sentResult.correct ? '#10b98112' : '#f59e0b12',
-                borderColor:     sentResult.correct ? '#10b98140' : '#f59e0b40',
+                backgroundColor: sentResult.correct ? '#10b98112' : '#3FB8A812',
+                borderColor:     sentResult.correct ? '#10b98140' : '#3FB8A840',
               }]}>
-                <Feather name={sentResult.correct ? 'check-circle' : 'alert-circle'} size={16} color={sentResult.correct ? '#10b981' : '#f59e0b'} />
+                <Feather name={sentResult.correct ? 'check-circle' : 'alert-circle'} size={16} color={sentResult.correct ? '#10b981' : '#3FB8A8'} />
                 <Text style={[wc.explainText, { color: colors.textMain }]}>{sentResult.feedback}</Text>
               </View>
               <TouchableOpacity style={[wc.nextBtn, { backgroundColor: '#10b981' }]} onPress={finish}>

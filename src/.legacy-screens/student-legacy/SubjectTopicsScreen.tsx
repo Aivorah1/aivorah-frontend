@@ -1,8 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import {
-  View, Text, ScrollView, TouchableOpacity, Image, TextInput,
-  StyleSheet, ActivityIndicator, useWindowDimensions,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image, TextInput, StyleSheet, useWindowDimensions } from 'react-native';
+import ActivityIndicator from '../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useStudentData } from '../../context/StudentDataContext';
@@ -27,16 +25,16 @@ interface TopicItem {
 // Per-card accent cycle — muted landing-palette colours (sage / purple / gold /
 // teal / amber / rose), so each numbered topic card reads distinctly but stays
 // on-brand instead of using neon hues.
-const TOPIC_COLORS = ['#9FB2A4', '#BAA467', '#7E9A86', '#9A7B2E', '#B2C2B7', '#C9A24E'];
+const TOPIC_COLORS = ['#9FB2A4', '#24877B', '#7E9A86', '#24877B', '#B2C2B7', '#24877B'];
 
 // ─── Subject visual config ────────────────────────────────────────────────────
 const SUBJECT_META: Record<string, { icon: any; color: string; bgFrom: string; bgTo: string }> = {
   'Mathematics':        { icon: 'trending-up', color: '#7E9A86', bgFrom: '#D6DFD4', bgTo: '#E4EAE0' },
   'Science':            { icon: 'zap',         color: '#7E9A86', bgFrom: '#D2DECF', bgTo: '#E2EAE0' },
-  'EVS':                { icon: 'sun',         color: '#9A7B2E', bgFrom: '#E6DFC2', bgTo: '#EFE9D2' },
-  'Social Studies':     { icon: 'globe',       color: '#9A7B2E', bgFrom: '#E6DEBE', bgTo: '#EFE9CE' },
-  'English':            { icon: 'book-open',   color: '#BAA467', bgFrom: '#E8E0CA', bgTo: '#F1ECDA' },
-  'Arts':               { icon: 'feather',     color: '#C9A24E', bgFrom: '#ECE1C6', bgTo: '#F4ECD6' },
+  'EVS':                { icon: 'sun',         color: '#24877B', bgFrom: '#E6DFC2', bgTo: '#EFE9D2' },
+  'Social Studies':     { icon: 'globe',       color: '#24877B', bgFrom: '#E6DEBE', bgTo: '#EFE9CE' },
+  'English':            { icon: 'book-open',   color: '#24877B', bgFrom: '#E8E0CA', bgTo: '#F1ECDA' },
+  'Arts':               { icon: 'feather',     color: '#24877B', bgFrom: '#ECE1C6', bgTo: '#DCEFEB' },
   'Physical Education': { icon: 'activity',    color: '#9FB2A4', bgFrom: '#D9E1D7', bgTo: '#E7ECE3' },
   'ICT':                { icon: 'monitor',     color: '#9FB2A4', bgFrom: '#D6DFD4', bgTo: '#E4EAE0' },
 };
@@ -48,46 +46,46 @@ function meta(subject: string) {
 const SUBJECT_MODULES: Record<string, Array<{ label: string; icon: any; color: string; route: string }>> = {
   'Mathematics': [
     { label: 'Start Learning', icon: 'play-circle', color: '#9FB2A4', route: 'Learn5E'      },
-    { label: 'Practice Test',  icon: 'check-square', color: '#BAA467', route: 'Quiz'  },
-    { label: 'Math Helper',    icon: 'hash',         color: '#BAA467', route: 'MathHelper'  },
+    { label: 'Practice Test',  icon: 'check-square', color: '#24877B', route: 'Quiz'  },
+    { label: 'Math Helper',    icon: 'hash',         color: '#24877B', route: 'MathHelper'  },
   ],
   'Science': [
     { label: 'Start Learning', icon: 'play-circle',  color: '#7E9A86', route: 'Learn5E'      },
-    { label: 'Practice Test',  icon: 'check-square', color: '#BAA467', route: 'Quiz'   },
-    { label: 'Drawing Buddy',  icon: 'edit-3',       color: '#C9A24E', route: 'DrawingBuddy' },
+    { label: 'Practice Test',  icon: 'check-square', color: '#24877B', route: 'Quiz'   },
+    { label: 'Drawing Buddy',  icon: 'edit-3',       color: '#24877B', route: 'DrawingBuddy' },
   ],
   'EVS': [
     { label: 'Start Learning', icon: 'play-circle',  color: '#9FB2A4', route: 'Learn5E'      },
-    { label: 'Practice Test',  icon: 'check-square', color: '#BAA467', route: 'Quiz'   },
+    { label: 'Practice Test',  icon: 'check-square', color: '#24877B', route: 'Quiz'   },
   ],
   'English': [
-    { label: 'Start Learning', icon: 'play-circle',  color: '#C9A24E', route: 'Learn5E'   },
-    { label: 'Practice Test',  icon: 'check-square', color: '#BAA467', route: 'Quiz' },
-    { label: 'Word Wizard',    icon: 'book',         color: '#8A8358', route: 'WordWizard' },
+    { label: 'Start Learning', icon: 'play-circle',  color: '#24877B', route: 'Learn5E'   },
+    { label: 'Practice Test',  icon: 'check-square', color: '#24877B', route: 'Quiz' },
+    { label: 'Word Wizard',    icon: 'book',         color: '#24877B', route: 'WordWizard' },
   ],
   'Social Studies': [
-    { label: 'Start Learning', icon: 'play-circle',  color: '#8A8358', route: 'Learn5E'   },
-    { label: 'Practice Test',  icon: 'check-square', color: '#BAA467', route: 'Quiz' },
-    { label: 'Word Wizard',    icon: 'book',         color: '#C9A24E', route: 'WordWizard' },
+    { label: 'Start Learning', icon: 'play-circle',  color: '#24877B', route: 'Learn5E'   },
+    { label: 'Practice Test',  icon: 'check-square', color: '#24877B', route: 'Quiz' },
+    { label: 'Word Wizard',    icon: 'book',         color: '#24877B', route: 'WordWizard' },
   ],
   'Arts': [
     { label: 'Start Learning', icon: 'play-circle',  color: '#9FB2A4', route: 'Learn5E'      },
-    { label: 'Practice Test',  icon: 'check-square', color: '#BAA467', route: 'Quiz'   },
-    { label: 'Drawing Buddy',  icon: 'edit-3',       color: '#C9A24E', route: 'DrawingBuddy' },
+    { label: 'Practice Test',  icon: 'check-square', color: '#24877B', route: 'Quiz'   },
+    { label: 'Drawing Buddy',  icon: 'edit-3',       color: '#24877B', route: 'DrawingBuddy' },
   ],
   'Physical Education': [
     { label: 'Start Learning', icon: 'play-circle',  color: '#9FB2A4', route: 'Learn5E'   },
-    { label: 'Practice Test',  icon: 'check-square', color: '#BAA467', route: 'Quiz' },
+    { label: 'Practice Test',  icon: 'check-square', color: '#24877B', route: 'Quiz' },
   ],
   'ICT': [
-    { label: 'Start Learning', icon: 'play-circle',  color: '#BAA467', route: 'Learn5E'   },
-    { label: 'Practice Test',  icon: 'check-square', color: '#BAA467', route: 'Quiz' },
+    { label: 'Start Learning', icon: 'play-circle',  color: '#24877B', route: 'Learn5E'   },
+    { label: 'Practice Test',  icon: 'check-square', color: '#24877B', route: 'Quiz' },
   ],
 };
 function subjectModules(subject: string) {
   return SUBJECT_MODULES[subject] ?? [
     { label: 'Start Learning', icon: 'play-circle',  color: '#9FB2A4', route: 'Learn5E'   },
-    { label: 'Practice Test',  icon: 'check-square', color: '#BAA467', route: 'Quiz' },
+    { label: 'Practice Test',  icon: 'check-square', color: '#24877B', route: 'Quiz' },
   ];
 }
 
@@ -528,7 +526,7 @@ export default function SubjectTopicsScreen({ navigation, route }: any) {
                 <Text style={[styles.progressPctText, { color: colors.textMain }]}>{pct}% Complete</Text>
                 <View style={[styles.progBarTrack, { backgroundColor: colors.borderColor }]}>
                   <LinearGradient
-                    colors={['#3FA06A', '#BAA467']}
+                    colors={['#3FA06A', '#24877B']}
                     start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
                     style={[styles.progBarFill, { width: `${pct}%` as any }]}
                   />

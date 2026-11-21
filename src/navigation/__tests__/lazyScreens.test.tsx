@@ -19,12 +19,13 @@ describe('lazyScreens', () => {
     expect(await screen.findByText('Hello Asha')).toBeTruthy();
   });
 
-  test('shows a centered #B4A467 spinner while the chunk loads', async () => {
+  test('shows the centered Aivorah loader while the chunk loads', async () => {
     const group = createLazyScreenGroup();
     const Pending = group.lazyScreen(() => new Promise(() => {}));
     await render(<Pending />);
     const spinner = screen.getByTestId('screen-loading');
-    expect(spinner.props.color).toBe('#B4A467');
+    expect(spinner.props.accessibilityRole).toBe('progressbar');
+    expect(spinner.props.accessibilityLabel).toBe('Loading');
   });
 
   test('a screen that crashes shows Reload for that screen instead of blanking the app', async () => {

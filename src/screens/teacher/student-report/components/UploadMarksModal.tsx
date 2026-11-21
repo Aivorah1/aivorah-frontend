@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, View, Text, TextInput, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
+import { Modal, View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { fetchSubjectMarks, saveSubjectMarks } from '../services/studentReportApi';
 import type { ReportClassRef, ReportStudent } from '../services/studentReportApi';
@@ -123,7 +124,7 @@ function MarksForm({ student, classRef, subjects, onClose, onSaved, styles, colo
           disabled={saving || loading}
           accessibilityRole="button"
         >
-          {saving ? <ActivityIndicator size="small" color="#241f16" /> : <Text style={[styles.actionBtnText, styles.actionBtnTextPrimary]}>Save Marks</Text>}
+          {saving ? <ActivityIndicator size="small" color="#1C2B37" /> : <Text style={[styles.actionBtnText, styles.actionBtnTextPrimary]}>Save Marks</Text>}
         </TouchableOpacity>
       </View>
     </View>

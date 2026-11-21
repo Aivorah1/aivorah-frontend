@@ -7,8 +7,8 @@ import type { AppColors } from '../../../../theme';
 import type { LeaderEntry } from '../services/teacherChallengesService';
 import type { makeStyles } from '../styles';
 
-const GOLD = '#D9A93E';
-const MEDAL_COLORS = ['#f59e0b', '#94a3b8', '#cd7c2c'];
+const GOLD = '#0E6E86';
+const MEDAL_COLORS = ['#9ADBE9', '#94a3b8', '#cd7c2c'];
 const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 export function initials(name: string) {

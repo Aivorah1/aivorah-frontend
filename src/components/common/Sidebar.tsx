@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { spacing, radius, typography } from '../../theme';
+import { spacing, radius, typography, fonts } from '../../theme';
 import type { AppColors } from '../../theme';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -259,11 +259,13 @@ export default function Sidebar({ currentScreen, onNavigate }: SidebarProps) {
   const homeItem = NAV_ITEMS[0];
   const goToDashboard = () => { if (homeItem) onNavigate(homeItem.screen, (homeItem as any).params); };
   const groups = isAdmin ? ['MENU'] : role === 'teacher' ? ['MENU', 'CLASS', 'RESOURCES', 'MANAGE', 'SYSTEM'] : role === 'super_admin' ? ['MENU', 'MANAGE', 'SYSTEM'] : role === 'school_admin' ? ['WORKSPACE', 'STUDENT MANAGEMENT', 'ACADEMIC STRUCTURE', 'PEOPLE', 'COMMUNICATION', 'ADMINISTRATION', 'SUPPORT'] : role === 'parent' ? ['MENU', 'CHILDREN', 'SYSTEM'] : ['MENU', 'FOCUS', 'SYSTEM'];
-  const { colors, themeMode, setThemeMode } = useTheme();
+  const { colors, themeMode, setThemeMode, portal } = useTheme();
+  // Redesigned portals (student, teacher) share these nav/header styles.
+  const isStudentPortal = !!portal; // student, teacher or parent
   const { unreadCount, unreadAssignments, unreadChallenges } = useNotification();
   const { bannerAnnouncements } = useAnnouncements();
   const unreadAnnouncements = bannerAnnouncements.length;
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const styles = useMemo(() => makeStyles(colors, isStudentPortal), [colors, isStudentPortal]);
   const MESSAGE_SCREENS      = ['TeacherMessages', 'ParentMessages', 'Messages'];
   const ASSIGNMENT_SCREENS   = ['Assignments', 'ParentAssignments'];
   const CHALLENGE_SCREENS    = ['Challenges', 'ParentChallenges'];
@@ -274,9 +276,13 @@ export default function Sidebar({ currentScreen, onNavigate }: SidebarProps) {
       {/* Logo */}
       <View style={[styles.logoRow, collapsed && styles.logoRowCollapsed]}>
         <TouchableOpacity style={[styles.logo, collapsed && { paddingLeft: 0 }]} activeOpacity={0.7} onPress={goToDashboard} accessibilityRole="button" accessibilityLabel="Go to your dashboard" testID="logo-home">
-          <View style={styles.logoMark}>
-            <Feather name="zap" size={18} color="white" />
-          </View>
+          {isStudentPortal ? (
+            <Feather name="book-open" size={24} color={colors.textHeading} />
+          ) : (
+            <View style={styles.logoMark}>
+              <Feather name="zap" size={18} color="white" />
+            </View>
+          )}
           {!collapsed && <Text style={styles.logoText}>Aivorah</Text>}
         </TouchableOpacity>
         {canCollapse && (
@@ -338,11 +344,11 @@ export default function Sidebar({ currentScreen, onNavigate }: SidebarProps) {
                     activeOpacity={0.7}
                     accessibilityLabel={collapsed ? item.label : undefined}
                   >
-                    {isActive && <View style={styles.activeBar} />}
+                    {isActive && !isStudentPortal && <View style={styles.activeBar} />}
                     <Feather
                       name={item.icon as any}
                       size={17}
-                      color={isActive ? colors.accentYellow : colors.textMuted}
+                      color={isActive ? (isStudentPortal ? colors.navActiveText : colors.accentYellow) : colors.textMuted}
                     />
                     {!collapsed && (
                       <Text style={[styles.navItemText, isActive && styles.navItemTextActive]}>
@@ -367,10 +373,10 @@ export default function Sidebar({ currentScreen, onNavigate }: SidebarProps) {
                     {(item as any).premium && (
                       <View style={styles.premiumIndicator}>
                         {!(user as any)?.isPro && (
-                          <Feather name="lock" size={9} color="#C5A56A" style={{ marginRight: 3 }} />
+                          <Feather name="lock" size={9} color={isStudentPortal ? colors.accentOrange : '#C5A56A'} style={{ marginRight: 3 }} />
                         )}
                         {(user as any)?.isPro && (
-                          <Feather name="star" size={9} color="#C5A56A" style={{ marginRight: 3 }} />
+                          <Feather name="star" size={9} color={isStudentPortal ? colors.accentOrange : '#C5A56A'} style={{ marginRight: 3 }} />
                         )}
                         <Text style={styles.premiumIndicatorText}>PRO</Text>
                       </View>
@@ -488,7 +494,7 @@ export default function Sidebar({ currentScreen, onNavigate }: SidebarProps) {
   );
 }
 
-const makeStyles = (c: AppColors) => StyleSheet.create({
+const makeStyles = (c: AppColors, s = false) => StyleSheet.create({
   container: {
     width: 260,
     backgroundColor: c.sidebarDark,
@@ -526,10 +532,11 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
     justifyContent: 'center',
   },
   logoText: {
-    fontSize: 18,
+    fontSize: s ? 20 : 18,
     fontWeight: '700',
-    color: c.textMain,
+    color: s ? c.textHeading : c.textMain,
     letterSpacing: -0.3,
+    ...(s ? { fontFamily: fonts.nav } : null),
   },
   schoolCard: {
     flexDirection: 'row',
@@ -571,6 +578,7 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
   navGroup: { marginBottom: 28 },
   navLabel: {
     ...typography.label,
+    ...(s ? { fontFamily: fonts.nav } : null),
     color: c.textDim,
     marginBottom: spacing.md,
     paddingLeft: spacing.md,
@@ -591,19 +599,19 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
     paddingHorizontal: 0,
     width: 44,
   },
-  navItemActive: { backgroundColor: c.accentYellow + '18' },
+  navItemActive: { backgroundColor: s ? c.navActiveBg : c.accentYellow + '18' },
   activeBar: {
     position: 'absolute',
     left: 0,
     top: 6,
     bottom: 6,
     width: 3,
-    backgroundColor: c.accentYellow,
+    backgroundColor: s ? c.accent : c.accentYellow,
     borderTopRightRadius: 4,
     borderBottomRightRadius: 4,
   },
-  navItemText: { fontSize: 14, fontWeight: '500', color: c.textMuted, flex: 1 },
-  navItemTextActive: { color: c.accentYellow },
+  navItemText: { fontSize: 14, fontWeight: '500', color: s ? c.textMain : c.textMuted, flex: 1, ...(s ? { fontFamily: fonts.nav } : null) },
+  navItemTextActive: { color: s ? c.navActiveText : c.accentYellow, ...(s ? { fontWeight: '700' as const } : null) },
   navBadge: {
     minWidth: 18, height: 18, borderRadius: 9,
     backgroundColor: c.accentRed,
@@ -613,22 +621,22 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
   navBadgeText: { fontSize: 10, fontWeight: '800', color: '#fff' },
   premiumBadge: {
     paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6,
-    backgroundColor: '#C5A56A22', borderWidth: 1, borderColor: '#C5A56A55',
+    backgroundColor: (s ? c.accentOrange : '#C5A56A') + '22', borderWidth: 1, borderColor: (s ? c.accentOrange : '#C5A56A') + '55',
   },
-  premiumBadgeText: { fontSize: 9, fontWeight: '800', color: '#C5A56A', letterSpacing: 0.4 },
+  premiumBadgeText: { fontSize: 9, fontWeight: '800', color: (s ? c.accentOrange : '#C5A56A'), letterSpacing: 0.4 },
   lockBadge: {
     width: 22, height: 22, borderRadius: 11,
-    backgroundColor: '#C5A56A15',
+    backgroundColor: (s ? c.accentOrange : '#C5A56A') + '15',
     alignItems: 'center', justifyContent: 'center',
   },
   premiumIndicator: {
     flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: 7, paddingVertical: 2, borderRadius: 8,
-    backgroundColor: '#C5A56A18', borderWidth: 1, borderColor: '#C5A56A40',
+    backgroundColor: (s ? c.accentOrange : '#C5A56A') + '18', borderWidth: 1, borderColor: (s ? c.accentOrange : '#C5A56A') + '40',
     marginLeft: 'auto',
   },
   premiumIndicatorText: {
-    fontSize: 8, fontWeight: '800', color: '#C5A56A',
+    fontSize: 8, fontWeight: '800', color: (s ? c.accentOrange : '#C5A56A'),
     letterSpacing: 0.6,
   },
   freeBadge: {
@@ -711,11 +719,11 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
     backgroundColor: c.accentYellow + '18', borderColor: c.accentYellow + '40',
   },
   planBadgePro: {
-    backgroundColor: '#C5A56A22', borderColor: '#C5A56A55',
+    backgroundColor: (s ? c.accentOrange : '#C5A56A') + '22', borderColor: (s ? c.accentOrange : '#C5A56A') + '55',
   },
   planBadgeText: { fontSize: 8, fontWeight: '800', letterSpacing: 0.5 },
   planBadgeTextFree: { color: c.accentYellow },
-  planBadgeTextPro: { color: '#C5A56A' },
+  planBadgeTextPro: { color: (s ? c.accentOrange : '#C5A56A') },
 
   // Home confirm modal
 });

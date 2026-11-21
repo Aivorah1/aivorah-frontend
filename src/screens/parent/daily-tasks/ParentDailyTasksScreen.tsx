@@ -1,8 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import {
-  View, Text, ScrollView, StyleSheet, TouchableOpacity,
-  ActivityIndicator, TextInput, RefreshControl,
-} from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput, RefreshControl } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { spacing, radius, fonts } from '../../../theme';
 import type { AppColors } from '../../../theme';

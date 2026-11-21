@@ -1,31 +1,37 @@
 /**
  * OnboardingStudentBoxes.tsx
  * Student onboarding — all sections shown as cards on a single page
- * (About You, Curriculum, School & Grade, Your Avatar, Learning Style).
+ * (About You, Curriculum, School, Your Grade, Your Avatar, Learning Style).
  * Everything is visible and editable at once; "Complete Setup" saves
  * the profile and finishes onboarding.
+ *
+ * Styled with the homepage light/dark tokens (../auth/authTheme); the sun/moon
+ * switch only swaps tokens, so nothing typed or selected is lost.
  */
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   View, Text, TouchableOpacity, TextInput, ScrollView,
-  StyleSheet, Platform, Modal,
+  StyleSheet, Platform, Modal, useWindowDimensions,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import Svg, { Circle } from 'react-native-svg';
 import { useAuth } from '../../context/AuthContext';
-import { useTheme } from '../../context/ThemeContext';
 import PROFILE_SERVER_URL from '../../config/profileServerUrl';
 import { AVATAR_STYLES } from '../../constants/avatarStyles';
 import {
-  DatePickerInput, CURRICULA, getGradesForCurriculum, GENDERS, LEARNING_STYLES, TEAL,
+  DatePickerInput, CURRICULA, getGradesForCurriculum, GENDERS, LEARNING_STYLES,
 } from './OnboardingScreen';
 import {
-  AutocompleteField, CardHeader, BBox, fetchCitySuggestions, fetchSchoolSuggestions, locateCity, locateFull,
+  AutocompleteField, CardHeader, BBox, fetchCitySuggestions, fetchSchoolSuggestions, locateFull,
   SelectField, COUNTRIES, INDIA_STATES, INDIA_CITIES,
 } from './OnboardingSharedFields';
 import { computeStudentCompletion } from './utils/studentCompletion';
 import { checkDobGradeConsistency } from './utils/dobGradeValidation';
 import { resolveOnboardingSaveResult } from './utils/resolveOnboardingSaveResult';
+import {
+  HomeThemeProvider, useHomeTheme, ThemeSwitch, SelectChip, HomeTokens, SERIF, SANS, PaperBackdrop, OpenBookArt, Decorative,
+} from '../auth/authTheme';
 
 const GRADE_GROUPS = [
   { label: 'Early Years', grades: ['Nursery', 'LKG', 'UKG'] },
@@ -33,6 +39,9 @@ const GRADE_GROUPS = [
   { label: 'Middle School', grades: ['Grade 6', 'Grade 7', 'Grade 8'] },
   { label: 'Senior School', grades: ['Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'] },
 ];
+const GROUP_ICONS: Record<string, string> = {
+  'Early Years': 'sun', Primary: 'book-open', 'Middle School': 'layers', 'Senior School': 'award',
+};
 
 function getAge(dobStr: string): number | null {
   const parts = dobStr.split('/');
@@ -47,10 +56,41 @@ function getAge(dobStr: string): number | null {
   return age;
 }
 
+type Layout = 'mobile' | 'tablet' | 'wide';
+
+function CompletionRing({ pct, t }: { pct: number; t: HomeTokens }) {
+  const r = 18, c = 2 * Math.PI * r;
+  return (
+    <View style={{ width: 46, height: 46, alignItems: 'center', justifyContent: 'center' }}>
+      <Svg width={46} height={46} viewBox="0 0 46 46" style={{ position: 'absolute' }}>
+        <Circle cx={23} cy={23} r={r} stroke={t.line} strokeWidth={4} fill="none" />
+        <Circle cx={23} cy={23} r={r} stroke={t.primary} strokeWidth={4} fill="none" strokeLinecap="round"
+          strokeDasharray={`${c}`} strokeDashoffset={c * (1 - Math.max(0, Math.min(100, pct)) / 100)} transform="rotate(-90 23 23)" />
+      </Svg>
+      <Text style={{ fontFamily: SANS, fontSize: 12, fontWeight: '700', color: t.heading }}>{pct}%</Text>
+    </View>
+  );
+}
+
 export default function OnboardingStudentBoxes() {
+  return (
+    <HomeThemeProvider>
+      <StudentOnboarding />
+    </HomeThemeProvider>
+  );
+}
+
+function StudentOnboarding() {
   const { user, updateUser, logout } = useAuth();
-  const { colors } = useTheme();
-  const styles = useStyles(colors);
+  const { t } = useHomeTheme();
+  const { width } = useWindowDimensions();
+  const layout: Layout = width >= 1024 ? 'wide' : width >= 640 ? 'tablet' : 'mobile';
+  // The shared onboarding fields read these app-theme keys; feed them the tokens.
+  const colors = useMemo(() => ({
+    bgDark: t.input, cardDark: t.card, borderColor: t.inputLine, textMain: t.text, textMuted: t.muted, textDim: t.placeholder,
+  }), [t]);
+  const styles = useMemo(() => makeStyles(t, layout), [t, layout]);
+  const mobileLayout = layout === 'mobile';
 
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -243,74 +283,82 @@ export default function OnboardingStudentBoxes() {
     }
   }
 
+
+  const brand = (
+    <View style={styles.brand} pointerEvents="none">
+      <Text style={styles.logoTxt}>Aivorah <Text style={{ color: t.accent }}>Æ</Text></Text>
+      <View style={styles.roleBadge}>
+        <Text style={styles.roleBadgeText}>Student</Text>
+      </View>
+    </View>
+  );
+
   return (
     <View style={styles.screen}>
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <PaperBackdrop />
+      {layout === 'wide' && (
+        <Decorative style={{ position: 'absolute', top: 6, left: 18, opacity: 0.95 }}><OpenBookArt width={130} /></Decorative>
+      )}
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
 
         {/* ── Header ── */}
         <View style={styles.topbar}>
-          <View style={styles.logoRow}>
-            <TouchableOpacity
-              onPress={() => setShowLeaveConfirm(true)}
-              style={styles.backBtn}
-              activeOpacity={0.7}
-              accessibilityLabel="Back to home page"
-            >
-              <Feather name="arrow-left" size={18} color={colors.textMuted} />
-              <Text style={styles.backTxt}>Back</Text>
-            </TouchableOpacity>
-            <View style={styles.logoMark}><Feather name="zap" size={14} color="#fff" /></View>
-            <Text style={styles.logoTxt}>Aivorah</Text>
-            <View style={[styles.roleBadge, styles.roleBadgeStudent]}>
-              <Text style={[styles.roleBadgeText, styles.roleBadgeTextStudent]}>Student</Text>
-            </View>
-          </View>
-          <View style={styles.completionRow}>
-            <Text style={styles.completionLbl}>Profile Completion</Text>
-            <View style={styles.completionRing}>
-              <Text style={styles.completionPct}>{completionPct}%</Text>
+          {layout !== 'mobile' && <View style={styles.brandCenter} pointerEvents="none">{brand}</View>}
+          <TouchableOpacity
+            onPress={() => setShowLeaveConfirm(true)}
+            style={styles.backBtn}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Back to home page"
+          >
+            <Feather name="arrow-left" size={18} color={t.heading} />
+            <Text style={styles.backTxt}>Back</Text>
+          </TouchableOpacity>
+          <View style={styles.topRight}>
+            <ThemeSwitch />
+            <View style={styles.completionRow} accessibilityLabel={`Profile Completion ${completionPct}%`}>
+              <CompletionRing pct={completionPct} t={t} />
+              <Text style={styles.completionLbl}>Profile{'\n'}Completion</Text>
             </View>
           </View>
         </View>
+        {layout === 'mobile' && <View style={{ alignItems: 'center', marginBottom: 12 }}>{brand}</View>}
 
         <View style={styles.greetWrap}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            <View style={{ backgroundColor: TEAL + '18', borderColor: TEAL + '40', borderWidth: 1, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 4 }}>
-              <Text style={{ color: TEAL, fontSize: 11, fontWeight: '800', letterSpacing: 1, textTransform: 'uppercase' }}>Student Onboarding</Text>
-            </View>
+          <View style={styles.eyebrowRow}>
+            <View style={styles.eyebrowLine} />
+            <Text style={styles.eyebrow}>Student Onboarding</Text>
+            <View style={styles.eyebrowLine} />
           </View>
-          <Text style={styles.greetMain}>Nice — let&apos;s personalise your learning experience</Text>
+          <Text style={styles.greetMain} accessibilityRole="header">Nice — let&apos;s personalise your learning experience</Text>
           <Text style={styles.greetSub}>Fill in each box to help us tailor stories, examples and explanations just for you.</Text>
         </View>
 
-        {/* ── Row 1: About You / Curriculum / School & Grade ── */}
-        <View style={[styles.rowWrap, { zIndex: 20 }]}>
+        {/* ── Row 1: About You / Curriculum / School ── */}
+        <View style={[styles.row, { zIndex: 20 }]}>
           {/* About You */}
-          <View style={[styles.card, styles.card3]}>
-            <CardHeader icon="user" title="About You" subtitle="Let's get to know you better." done={aboutYouDone} styles={styles} />
+          <View style={[styles.card, styles.col3]}>
+            <CardHeader icon="user" title="About You" subtitle="Let's get to know you better." done={aboutYouDone} styles={styles} accent={t.primary} onAccent={t.onPrimary} />
             <View style={styles.fieldGroup}>
               <Text style={styles.lbl}>Name</Text>
-              <TextInput style={styles.input} value={fullName} onChangeText={setFullName}
-                placeholder="Your name" placeholderTextColor={colors.textDim} autoCapitalize="words" />
+              <TextInput style={styles.input} value={fullName} onChangeText={setFullName} accessibilityLabel="Name"
+                placeholder="Your name" placeholderTextColor={t.placeholder} autoCapitalize="words" autoComplete="name" />
             </View>
             <View style={styles.fieldGroup}>
               <Text style={styles.lbl}>Gender</Text>
-              <View style={styles.chipRow}>
+              <View style={styles.chipRow} accessibilityRole="radiogroup">
                 {GENDERS.map(g => (
-                  <TouchableOpacity key={g} style={[styles.chip, gender === g && styles.chipActive]}
-                    onPress={() => setGender(g)} activeOpacity={0.8}>
-                    <Text style={[styles.chipTxt, gender === g && styles.chipTxtActive]}>{g}</Text>
-                  </TouchableOpacity>
+                  <SelectChip key={g} label={g} selected={gender === g} onPress={() => setGender(g)} />
                 ))}
               </View>
             </View>
             <View style={styles.fieldGroup}>
               <Text style={styles.lbl}>Date of Birth</Text>
               {Platform.OS === 'web' ? (
-                <DatePickerInput value={dob} onChange={setDob} colors={colors} />
+                <DatePickerInput value={dob} onChange={setDob} colors={colors} accent={t.primary} onAccent={t.onPrimary} />
               ) : (
-                <TextInput style={styles.input} value={dob} onChangeText={setDob}
-                  placeholder="DD/MM/YYYY" placeholderTextColor={colors.textDim} keyboardType="numeric" />
+                <TextInput style={styles.input} value={dob} onChangeText={setDob} accessibilityLabel="Date of Birth"
+                  placeholder="DD/MM/YYYY" placeholderTextColor={t.placeholder} keyboardType="numeric" />
               )}
               {underAge && (
                 <Text style={styles.warnTxt}>Students under 14 must have a parent or teacher create the account.</Text>
@@ -319,29 +367,33 @@ export default function OnboardingStudentBoxes() {
           </View>
 
           {/* Curriculum */}
-          <View style={[styles.card, styles.card3]}>
-            <CardHeader icon="book-open" title="Curriculum" subtitle="Which curriculum do you follow?" done={curriculumDone} styles={styles} />
-            <View style={styles.radioGrid}>
-              {CURRICULA.map(c => (
-                <TouchableOpacity key={c}
-                  style={[styles.radioTile, curriculum === c && styles.radioTileActive]}
-                  onPress={() => { setCurriculum(c); setGrade(''); }} activeOpacity={0.8}>
-                  <Text style={[styles.chipTxt, curriculum === c && styles.chipTxtActive]}>{c}</Text>
-                  <View style={[styles.radio, curriculum === c && { borderColor: TEAL }]}>
-                    {curriculum === c && <View style={styles.radioDot} />}
-                  </View>
-                </TouchableOpacity>
-              ))}
+          <View style={[styles.card, styles.col3]}>
+            <CardHeader icon="book-open" title="Curriculum" subtitle="Which curriculum do you follow?" done={curriculumDone} styles={styles} accent={t.primary} onAccent={t.onPrimary} />
+            <View style={styles.radioGrid} accessibilityRole="radiogroup">
+              {CURRICULA.map(c => {
+                const on = curriculum === c;
+                return (
+                  <TouchableOpacity key={c}
+                    style={[styles.radioTile, on && styles.radioTileActive]}
+                    onPress={() => { setCurriculum(c); setGrade(''); }} activeOpacity={0.8}
+                    accessibilityRole="radio" accessibilityState={{ checked: on, selected: on }}>
+                    <View style={[styles.radio, on && { borderColor: t.primary }]}>
+                      {on && <View style={styles.radioDot} />}
+                    </View>
+                    <Text style={[styles.tileTxt, on && styles.tileTxtActive]}>{c}</Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
             <View style={styles.infoBox}>
-              <Feather name="info" size={14} color={TEAL} />
+              <Feather name="info" size={14} color={t.muted} />
               <Text style={styles.infoTxt}>You can change this anytime in settings.</Text>
             </View>
           </View>
 
           {/* School */}
-          <View style={[styles.card, styles.card3, { zIndex: 10 }]}>
-            <CardHeader icon="award" title="School" subtitle="Tell us about your school." done={schoolGradeDone} styles={styles} />
+          <View style={[styles.card, styles.col3, { zIndex: 10 }]}>
+            <CardHeader icon="award" title="School" subtitle="Tell us about your school." done={schoolGradeDone} styles={styles} accent={t.primary} onAccent={t.onPrimary} />
             <View style={styles.fieldGroup}>
               <Text style={styles.lbl}>School Name</Text>
               <AutocompleteField
@@ -355,12 +407,11 @@ export default function OnboardingStudentBoxes() {
               />
             </View>
             {Platform.OS === 'web' && (
-              <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 2 }}>
-                <TouchableOpacity style={styles.locateBtn} onPress={() => locateFull(({ city: c, state: s, country: co }) => { if (co) setCountry(co); if (s) setStateProv(s); if (c) setCity(c); }, setLocating)} disabled={locating} activeOpacity={0.8}>
-                  <Feather name="crosshair" size={12} color={TEAL} />
-                  <Text style={styles.locateTxt}>{locating ? 'Locating...' : 'Use my location'}</Text>
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity style={styles.locateBtn} onPress={() => locateFull(({ city: c, state: s, country: co }) => { if (co) setCountry(co); if (s) setStateProv(s); if (c) setCity(c); }, setLocating)} disabled={locating} activeOpacity={0.8}
+                accessibilityRole="button" accessibilityState={{ busy: locating, disabled: locating }}>
+                <Feather name="crosshair" size={14} color={t.heading} />
+                <Text style={styles.locateTxt}>{locating ? 'Locating...' : 'Use my location'}</Text>
+              </TouchableOpacity>
             )}
             <View style={[styles.fieldRow, { zIndex: 10 }]}>
               <View style={[styles.fieldGroup, { flex: 1, zIndex: 20 }]}>
@@ -414,10 +465,10 @@ export default function OnboardingStudentBoxes() {
           </View>
         </View>
 
-        {/* ── Row 2: Your Grade ── */}
-        <View style={styles.rowWrap}>
-          <View style={[styles.card, styles.cardFull]}>
-            <CardHeader icon="layers" title="Your Grade" subtitle="Which grade are you in?" done={schoolGradeDone} styles={styles} />
+        {/* ── Row 2: Your Grade (full width) ── */}
+        <View style={styles.row}>
+          <View style={[styles.card, { flex: 1 }]}>
+            <CardHeader icon="layers" title="Your Grade" subtitle="Which grade are you in?" done={schoolGradeDone} styles={styles} accent={t.primary} onAccent={t.onPrimary} />
             <View style={styles.gradeGroupsWrap}>
               {GRADE_GROUPS.map(group => {
                 const available = group.grades.filter(g => getGradesForCurriculum(curriculum).includes(g));
@@ -425,15 +476,12 @@ export default function OnboardingStudentBoxes() {
                 return (
                   <View key={group.label} style={styles.gradeGroup}>
                     <View style={styles.gradeGroupHead}>
-                      <View style={styles.gradeGroupDot} />
+                      <Feather name={GROUP_ICONS[group.label] as any} size={15} color={t.primary} />
                       <Text style={styles.gradeGroupLbl}>{group.label}</Text>
                     </View>
-                    <View style={styles.chipRow}>
+                    <View style={styles.chipRow} accessibilityRole="radiogroup">
                       {available.map(g => (
-                        <TouchableOpacity key={g} style={[styles.chip, grade === g && styles.chipActive]}
-                          onPress={() => setGrade(g)} activeOpacity={0.8}>
-                          <Text style={[styles.chipTxt, grade === g && styles.chipTxtActive]}>{g}</Text>
-                        </TouchableOpacity>
+                        <SelectChip key={g} label={g} selected={grade === g} onPress={() => setGrade(g)} />
                       ))}
                     </View>
                   </View>
@@ -446,67 +494,81 @@ export default function OnboardingStudentBoxes() {
           </View>
         </View>
 
-        {/* ── Row 2: Your Avatar / Learning Style ── */}
-        <View style={styles.rowWrap}>
-          <View style={[styles.card, styles.card3Wide]}>
-            <CardHeader icon="smile" title="Your Avatar" subtitle="Choose an avatar that represents you." done={avatarDone} styles={styles} />
-            <View style={styles.avatarGrid}>
-              {AVATAR_STYLES.map(av => (
-                <TouchableOpacity key={av.id}
-                  style={[styles.avatarTile, avatarStyle === av.id && styles.avatarTileActive]}
-                  onPress={() => setAvatarStyle(av.id)} activeOpacity={0.8}>
-                  <LinearGradient colors={av.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.avatarCircle}>
-                    <Feather name={av.icon as any} size={20} color="#fff" />
-                  </LinearGradient>
-                  <Text style={[styles.avatarLbl, avatarStyle === av.id && { color: TEAL }]}>{av.label}</Text>
-                  {avatarStyle === av.id && (
-                    <View style={styles.tileCheck}><Feather name="check" size={10} color="#fff" /></View>
-                  )}
-                </TouchableOpacity>
-              ))}
+        {/* ── Row 3: Your Avatar (wider) / Learning Style ── */}
+        <View style={styles.row}>
+          <View style={[styles.card, styles.colAvatar]}>
+            <CardHeader icon="smile" title="Your Avatar" subtitle="Choose an avatar that represents you." done={avatarDone} styles={styles} accent={t.primary} onAccent={t.onPrimary} />
+            <View style={styles.avatarGrid} accessibilityRole="radiogroup">
+              {AVATAR_STYLES.map(av => {
+                const on = avatarStyle === av.id;
+                return (
+                  <TouchableOpacity key={av.id}
+                    style={[styles.avatarTile, on && styles.avatarTileActive]}
+                    onPress={() => setAvatarStyle(av.id)} activeOpacity={0.8}
+                    accessibilityRole="radio" accessibilityLabel={av.label} accessibilityState={{ checked: on, selected: on }}>
+                    <LinearGradient colors={av.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.avatarCircle}>
+                      <Feather name={av.icon as any} size={20} color="#fff" />
+                    </LinearGradient>
+                    <Text style={[styles.avatarLbl, on && { color: t.heading, fontWeight: '700' }]}>{av.label}</Text>
+                    {on && (
+                      <View style={styles.tileCheck}><Feather name="check" size={10} color={t.onPrimary} /></View>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           </View>
 
-          <View style={[styles.card, styles.card2]}>
-            <CardHeader icon="zap" title="Learning Style" subtitle="How do you learn best?" done={learningStyleDone} styles={styles} />
-            <View style={styles.lsGrid}>
-              {LEARNING_STYLES.map(ls => (
-                <TouchableOpacity key={ls.id}
-                  style={[styles.lsTile, learningStyle === ls.id && styles.lsTileActive]}
-                  onPress={() => setLearningStyle(ls.id)} activeOpacity={0.8}>
-                  <View style={styles.lsRow}>
-                    <Feather name={ls.icon as any} size={16} color={learningStyle === ls.id ? TEAL : colors.textMuted} />
-                    {learningStyle === ls.id && <Feather name="check-circle" size={14} color={TEAL} />}
-                  </View>
-                  <Text style={[styles.lsLabel, learningStyle === ls.id && { color: TEAL }]}>{ls.label}</Text>
-                  <Text style={styles.lsDesc}>{ls.desc}</Text>
-                </TouchableOpacity>
-              ))}
+          <View style={[styles.card, styles.colStyle]}>
+            <CardHeader icon="zap" title="Learning Style" subtitle="How do you learn best?" done={learningStyleDone} styles={styles} accent={t.primary} onAccent={t.onPrimary} />
+            <View style={styles.lsGrid} accessibilityRole="radiogroup">
+              {LEARNING_STYLES.map(ls => {
+                const on = learningStyle === ls.id;
+                return (
+                  <TouchableOpacity key={ls.id}
+                    style={[styles.lsTile, on && styles.lsTileActive]}
+                    onPress={() => setLearningStyle(ls.id)} activeOpacity={0.8}
+                    accessibilityRole="radio" accessibilityState={{ checked: on, selected: on }}>
+                    {on && <View style={styles.lsCheck}><Feather name="check" size={11} color={t.onPrimary} /></View>}
+                    <Feather name={ls.icon as any} size={24} color={on ? t.primary : t.heading} />
+                    <Text style={styles.lsLabel}>{ls.label}</Text>
+                    <Text style={styles.lsDesc}>{ls.desc}</Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           </View>
         </View>
 
-        {saveError ? <Text style={styles.errorTxt}>{saveError}</Text> : null}
+        {saveError ? (
+          <View style={styles.errorBox} accessibilityLiveRegion="polite">
+            <Feather name="alert-circle" size={16} color={t.danger} />
+            <Text style={styles.errorTxt}>{saveError}</Text>
+          </View>
+        ) : null}
 
         {/* ── Footer ── */}
         <View style={styles.footer}>
           <View style={styles.secureRow}>
-            <View style={styles.secureIcon}><Feather name="shield" size={14} color={TEAL} /></View>
+            <Feather name="lock" size={15} color={t.heading} />
             <Text style={styles.secureTxt}>Your data is secure and never shared.</Text>
           </View>
+          {!mobileLayout && <View style={styles.footerDivider} />}
           <View style={styles.footerBtns}>
             {!requiredDone && (
               <Text style={styles.requiredHint}>Complete About You, Curriculum and School & Grade to continue</Text>
             )}
             <TouchableOpacity
-              style={[styles.completeBtn, !requiredDone && { opacity: 0.4 }]}
+              style={[styles.completeBtn, (!requiredDone || saving) && { opacity: 0.5 }]}
               disabled={!requiredDone || saving}
-              onPress={handleFinish} activeOpacity={0.85}>
+              onPress={handleFinish} activeOpacity={0.85}
+              accessibilityRole="button" accessibilityState={{ disabled: !requiredDone || saving, busy: saving }}>
               <Text style={styles.completeTxt}>{saving ? 'Saving...' : 'Complete Setup'}</Text>
-              {!saving && <Feather name="arrow-right" size={16} color="#fff" />}
+              {!saving && <Feather name="arrow-right" size={16} color={t.onPrimary} />}
             </TouchableOpacity>
           </View>
         </View>
+        <Text style={styles.footBrand} aria-hidden>Aivorah <Text style={{ color: t.accent }}>Æ</Text></Text>
       </ScrollView>
 
       {/* ── Leave-to-home confirmation ── */}
@@ -514,7 +576,7 @@ export default function OnboardingStudentBoxes() {
         <View style={styles.confirmOverlay}>
           <View style={styles.confirmBox}>
             <View style={styles.confirmIcon}>
-              <Feather name="log-out" size={22} color={TEAL} />
+              <Feather name="log-out" size={22} color={t.primary} />
             </View>
             <Text style={styles.confirmTitle}>Return to the home page?</Text>
             <Text style={styles.confirmBody}>
@@ -541,7 +603,7 @@ export default function OnboardingStudentBoxes() {
               activeOpacity={0.7}
               disabled={saving}
               onPress={() => setShowLeaveConfirm(false)}
-              style={{ marginTop: 4 }}
+              style={{ marginTop: 4, padding: 8 }}
             >
               <Text style={[styles.confirmSecondaryTxt, { textDecorationLine: 'underline' }]}>Stay here</Text>
             </TouchableOpacity>
@@ -552,185 +614,165 @@ export default function OnboardingStudentBoxes() {
   );
 }
 
-function useStyles(colors: any) {
+function makeStyles(t: HomeTokens, layout: Layout) {
+  const wide = layout === 'wide';
+  const mobile = layout === 'mobile';
+  const gutter = mobile ? 16 : wide ? 32 : 24;
   return StyleSheet.create({
-    screen: { flex: 1, backgroundColor: colors.bgDark },
-    scrollContent: { paddingHorizontal: 24, paddingTop: 24, paddingBottom: 40, maxWidth: 1280, width: '100%', alignSelf: 'center' },
+    screen: { flex: 1, backgroundColor: t.paper },
+    scrollContent: { paddingHorizontal: gutter, paddingTop: 16, paddingBottom: 40, maxWidth: 1200 + gutter * 2, width: '100%', alignSelf: 'center' },
 
-    topbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 },
-    logoRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    topbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: mobile ? 12 : 20, minHeight: 56 },
+    brandCenter: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' },
+    brand: { alignItems: 'center', gap: 4 },
+    logoTxt: { fontFamily: SERIF, fontSize: 24, fontWeight: '600', color: t.heading, letterSpacing: -0.4 },
+    roleBadge: { paddingHorizontal: 10, paddingVertical: 2, borderRadius: 999, borderWidth: 1, borderColor: t.primary },
+    roleBadgeText: { fontFamily: SANS, fontSize: 10, fontWeight: '700', letterSpacing: 1.2, textTransform: 'uppercase', color: t.heading },
     backBtn: {
-      flexDirection: 'row', alignItems: 'center', gap: 4,
-      paddingVertical: 6, paddingHorizontal: 10, borderRadius: 8,
-      borderWidth: 1, borderColor: colors.borderColor, marginRight: 4,
+      flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44,
+      paddingHorizontal: 6, borderRadius: 999,
     },
-    backTxt: { fontSize: 13, fontWeight: '600', color: colors.textMuted },
-    confirmOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center', padding: 24 },
-    confirmBox: {
-      width: 360, maxWidth: '95%', borderRadius: 20, padding: 28, alignItems: 'center',
-      backgroundColor: colors.cardDark, borderWidth: 1, borderColor: colors.borderColor,
-    },
-    confirmIcon: {
-      width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center',
-      backgroundColor: TEAL + '22', marginBottom: 16,
-    },
-    confirmTitle: { fontSize: 19, fontWeight: '800', color: colors.textMain, marginBottom: 10, textAlign: 'center' },
-    confirmBody: { fontSize: 14, color: colors.textMuted, lineHeight: 21, textAlign: 'center', marginBottom: 24 },
-    confirmPrimary: { width: '100%', backgroundColor: TEAL, borderRadius: 12, paddingVertical: 14, alignItems: 'center', marginBottom: 10 },
-    confirmPrimaryTxt: { fontSize: 15, fontWeight: '700', color: '#fff' },
-    confirmSecondary: { width: '100%', paddingVertical: 12, alignItems: 'center', borderRadius: 12, borderWidth: 1, borderColor: colors.borderColor },
-    confirmSecondaryTxt: { fontSize: 14, fontWeight: '600', color: colors.textMuted },
-    logoMark: { width: 28, height: 28, borderRadius: 8, backgroundColor: TEAL, alignItems: 'center', justifyContent: 'center' },
-    logoTxt: { fontSize: 16, fontWeight: '800', color: colors.textMain },
-    roleBadge: {
-      paddingHorizontal: 8,
-      paddingVertical: 2.5,
-      borderRadius: 12,
-      borderWidth: 1,
-      alignSelf: 'center',
-      marginLeft: 4,
-    },
-    roleBadgeStudent: {
-      backgroundColor: TEAL + '18',
-      borderColor: TEAL + '40',
-    },
-    roleBadgeText: {
-      fontSize: 9,
-      fontWeight: '800',
-      letterSpacing: 0.5,
-      textTransform: 'uppercase',
-    },
-    roleBadgeTextStudent: {
-      color: TEAL,
-    },
-    completionRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-    completionLbl: { fontSize: 13, fontWeight: '600', color: colors.textMuted },
-    completionRing: {
-      width: 38, height: 38, borderRadius: 19, borderWidth: 2, borderColor: TEAL,
-      alignItems: 'center', justifyContent: 'center',
-    },
-    completionPct: { fontSize: 11, fontWeight: '800', color: TEAL },
+    backTxt: { fontFamily: SANS, fontSize: 14, fontWeight: '600', color: t.heading },
+    topRight: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+    completionRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    completionLbl: { fontFamily: SANS, fontSize: 12, lineHeight: 15, fontWeight: '600', color: t.muted, display: mobile ? 'none' : 'flex' },
 
-    greetWrap: { marginBottom: 24 },
-    greetMain: { fontSize: 24, fontWeight: '800', color: colors.textMain },
-    greetSub: { fontSize: 14, color: colors.textMuted, marginTop: 4 },
+    greetWrap: { alignItems: 'center', marginBottom: 24 },
+    eyebrowRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 10 },
+    eyebrowLine: { width: mobile ? 24 : 56, height: 1, backgroundColor: t.accent, opacity: 0.6 },
+    eyebrow: { fontFamily: SANS, fontSize: 12, fontWeight: '700', letterSpacing: 2.4, textTransform: 'uppercase', color: t.heading },
+    greetMain: { fontFamily: SERIF, fontSize: mobile ? 28 : wide ? 38 : 32, lineHeight: (mobile ? 28 : wide ? 38 : 32) * 1.15, fontWeight: '600', color: t.heading, textAlign: 'center', letterSpacing: -0.5 },
+    greetSub: { fontFamily: SANS, fontSize: 16, lineHeight: 23, color: t.muted, marginTop: 8, textAlign: 'center' },
 
-    rowWrap: { flexDirection: 'row', gap: 16, flexWrap: 'wrap', marginBottom: 16 },
+    row: { flexDirection: mobile ? 'column' : 'row', flexWrap: layout === 'tablet' ? 'wrap' : 'nowrap', gap: 16, marginBottom: 16, alignItems: 'stretch' },
     card: {
-      backgroundColor: colors.cardDark, borderWidth: 1, borderColor: colors.borderColor,
-      borderRadius: 16, padding: 20, gap: 16,
+      backgroundColor: t.card, borderWidth: 1, borderColor: t.line,
+      borderRadius: 18, padding: wide ? 22 : 18, gap: 16,
+      shadowColor: t.shadow, shadowOpacity: 1, shadowRadius: 18, shadowOffset: { width: 0, height: 8 }, elevation: 2,
     },
-    card3: { flexGrow: 1, flexBasis: 320, minWidth: 280 },
-    card3Wide: { flexGrow: 2, flexBasis: 460, minWidth: 320 },
-    card2: { flexGrow: 1.5, flexBasis: 360, minWidth: 300 },
-    cardFull: { flexGrow: 1, flexBasis: '100%', minWidth: 280 },
+    col3: wide ? { flex: 1, flexBasis: 0, minWidth: 0 } : mobile ? {} : { flexGrow: 1, flexBasis: '46%', minWidth: 280 },
+    colAvatar: wide ? { flex: 1.55, flexBasis: 0, minWidth: 0 } : mobile ? {} : { flexGrow: 1, flexBasis: '100%' },
+    colStyle: wide ? { flex: 1, flexBasis: 0, minWidth: 0 } : mobile ? {} : { flexGrow: 1, flexBasis: '100%' },
 
-    gradeGroupsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 14 },
+    gradeGroupsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
     gradeGroup: {
-      flexBasis: '23%', flexGrow: 1, minWidth: 220,
-      backgroundColor: colors.bgDark, borderWidth: 1, borderColor: colors.borderColor,
-      borderRadius: 12, padding: 12, gap: 10,
+      flexGrow: 1, flexBasis: wide ? '22%' : mobile ? '100%' : '46%', minWidth: mobile ? 0 : 220,
+      backgroundColor: t.input, borderWidth: 1, borderColor: t.line,
+      borderRadius: 14, padding: 14, gap: 12,
     },
     gradeGroupHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    gradeGroupDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: TEAL },
-    gradeGroupLbl: { flex: 1, fontSize: 12, fontWeight: '800', color: colors.textMain, textTransform: 'uppercase', letterSpacing: 0.5 },
+    gradeGroupLbl: { flex: 1, fontFamily: SANS, fontSize: 15, fontWeight: '700', color: t.heading },
 
+    // CardHeader (shared component) reads these
     cardHeaderRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
-    cardIcon: {
-      width: 38, height: 38, borderRadius: 10, backgroundColor: TEAL + '18',
-      alignItems: 'center', justifyContent: 'center',
-    },
-    cardTitle: { fontSize: 16, fontWeight: '800', color: colors.textMain },
-    cardSub: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
-    cardCheck: {
-      width: 18, height: 18, borderRadius: 9, backgroundColor: TEAL,
-      alignItems: 'center', justifyContent: 'center',
-    },
+    cardIcon: { width: 38, height: 38, borderRadius: 10, backgroundColor: t.primarySoft, alignItems: 'center', justifyContent: 'center' },
+    cardTitle: { fontFamily: SERIF, fontSize: 21, fontWeight: '600', color: t.heading, letterSpacing: -0.2 },
+    cardSub: { fontFamily: SANS, fontSize: 13.5, color: t.muted, marginTop: 2 },
+    cardCheck: { width: 20, height: 20, borderRadius: 10, backgroundColor: t.primary, alignItems: 'center', justifyContent: 'center' },
 
-    fieldGroup: { gap: 8 },
-    fieldRow: { flexDirection: 'row', gap: 12 },
-    lbl: { fontSize: 12, fontWeight: '700', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.5 },
+    fieldGroup: { gap: 7 },
+    fieldRow: { flexDirection: mobile ? 'column' : 'row', gap: mobile ? 16 : 12 },
+    lbl: { fontFamily: SANS, fontSize: 14, fontWeight: '600', color: t.heading },
     lblRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-    locateBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-    locateTxt: { fontSize: 11, fontWeight: '700', color: TEAL },
+    locateBtn: {
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 44, borderRadius: 12,
+      borderWidth: 1.5, borderColor: t.primary, backgroundColor: t.primarySoft,
+    },
+    locateTxt: { fontFamily: SANS, fontSize: 14, fontWeight: '600', color: t.heading },
+    // Shared SelectField / AutocompleteField read these
     input: {
-      height: 44, backgroundColor: colors.bgDark, borderWidth: 1, borderColor: colors.borderColor,
-      borderRadius: 10, paddingHorizontal: 14, fontSize: 14, color: colors.textMain,
+      minHeight: 48, backgroundColor: t.input, borderWidth: 1.5, borderColor: t.inputLine,
+      borderRadius: 12, paddingHorizontal: 14, fontFamily: SANS, fontSize: 16, color: t.text,
     },
-    hintTxt: { fontSize: 11, color: colors.textDim },
+    hintTxt: { fontFamily: SANS, fontSize: 12, color: t.muted },
     dropdown: {
-      marginTop: 6,
-      backgroundColor: colors.cardDark, borderWidth: 1, borderColor: colors.borderColor,
-      borderRadius: 10, overflow: 'hidden',
+      marginTop: 6, backgroundColor: t.card, borderWidth: 1, borderColor: t.line,
+      borderRadius: 12, overflow: 'hidden',
     },
-    dropdownItem: { paddingHorizontal: 14, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.borderColor },
-    dropdownTxt: { fontSize: 13, color: colors.textMain },
-    dropdownHint: { fontSize: 12, color: colors.textMuted, paddingHorizontal: 14, paddingVertical: 10 },
-    warnTxt: { color: '#ef4444', fontSize: 12, lineHeight: 17, marginTop: 4 },
+    dropdownItem: { paddingHorizontal: 14, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: t.line },
+    dropdownTxt: { fontFamily: SANS, fontSize: 15, color: t.text },
+    dropdownHint: { fontFamily: SANS, fontSize: 13, color: t.muted, paddingHorizontal: 14, paddingVertical: 10 },
+    warnTxt: { fontFamily: SANS, color: t.danger, fontSize: 13, lineHeight: 18, marginTop: 4 },
 
     chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-    chip: { paddingHorizontal: 14, paddingVertical: 9, borderRadius: 18, borderWidth: 1, borderColor: colors.borderColor, backgroundColor: colors.bgDark },
-    chipActive: { backgroundColor: TEAL + '20', borderColor: TEAL },
-    chipTxt: { fontSize: 13, fontWeight: '600', color: colors.textMuted },
-    chipTxtActive: { color: TEAL },
 
     radioGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
     radioTile: {
-      flexBasis: '47%', flexGrow: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-      paddingHorizontal: 14, paddingVertical: 12, borderRadius: 10,
-      borderWidth: 1, borderColor: colors.borderColor, backgroundColor: colors.bgDark,
+      flexBasis: '46%', flexGrow: 1, flexDirection: 'row', alignItems: 'center', gap: 10,
+      paddingHorizontal: 14, minHeight: 48, borderRadius: 12,
+      borderWidth: 1.5, borderColor: t.inputLine, backgroundColor: t.input,
     },
-    radioTileActive: { borderColor: TEAL, backgroundColor: TEAL + '10' },
-    radio: { width: 16, height: 16, borderRadius: 8, borderWidth: 2, borderColor: colors.borderColor, alignItems: 'center', justifyContent: 'center' },
-    radioDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: TEAL },
+    radioTileActive: { borderColor: t.primary, backgroundColor: t.primarySoft },
+    radio: { width: 18, height: 18, borderRadius: 9, borderWidth: 2, borderColor: t.muted, alignItems: 'center', justifyContent: 'center' },
+    radioDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: t.primary },
+    tileTxt: { fontFamily: SANS, fontSize: 15, fontWeight: '600', color: t.text },
+    tileTxtActive: { color: t.heading },
 
-    infoBox: {
-      flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12,
-      borderRadius: 10, backgroundColor: TEAL + '10', borderWidth: 1, borderColor: TEAL + '30',
-    },
-    infoTxt: { fontSize: 12, color: colors.textMuted },
+    infoBox: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 4 },
+    infoTxt: { fontFamily: SANS, fontSize: 13, fontStyle: 'italic', color: t.muted },
 
     avatarGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
     avatarTile: {
-      flexBasis: '21%', flexGrow: 1, minWidth: 76, alignItems: 'center', gap: 6, paddingVertical: 12, borderRadius: 12,
-      borderWidth: 1, borderColor: colors.borderColor, backgroundColor: colors.bgDark, position: 'relative',
+      flexBasis: mobile ? '46%' : '22%', flexGrow: 1, minWidth: mobile ? 0 : 84, alignItems: 'center', gap: 6, paddingVertical: 12,
+      borderRadius: 14, borderWidth: 1.5, borderColor: 'transparent', position: 'relative',
     },
-    avatarTileActive: { borderColor: TEAL, backgroundColor: TEAL + '10' },
-    avatarCircle: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
-    avatarLbl: { fontSize: 11, fontWeight: '600', color: colors.textMuted, textAlign: 'center' },
+    avatarTileActive: { borderColor: t.primary, backgroundColor: t.primarySoft },
+    avatarCircle: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
+    avatarLbl: { fontFamily: SANS, fontSize: 13, fontWeight: '600', color: t.muted, textAlign: 'center' },
     tileCheck: {
-      position: 'absolute', top: 6, right: 6, width: 16, height: 16, borderRadius: 8,
-      backgroundColor: TEAL, alignItems: 'center', justifyContent: 'center',
+      position: 'absolute', top: 6, right: 6, width: 18, height: 18, borderRadius: 9,
+      backgroundColor: t.primary, alignItems: 'center', justifyContent: 'center',
     },
 
-    lsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+    lsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
     lsTile: {
-      flexBasis: '47%', flexGrow: 1, padding: 14, borderRadius: 12,
-      borderWidth: 1, borderColor: colors.borderColor, backgroundColor: colors.bgDark, gap: 6,
+      flexBasis: '46%', flexGrow: 1, minHeight: 112, padding: 14, borderRadius: 14, alignItems: 'center', justifyContent: 'center',
+      borderWidth: 1.5, borderColor: t.inputLine, backgroundColor: t.input, gap: 6, position: 'relative',
     },
-    lsTileActive: { borderColor: TEAL, backgroundColor: TEAL + '10' },
-    lsRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-    lsLabel: { fontSize: 13, fontWeight: '700', color: colors.textMain },
-    lsDesc: { fontSize: 11, color: colors.textMuted, lineHeight: 15 },
+    lsTileActive: { borderColor: t.primary, backgroundColor: t.primarySoft },
+    lsCheck: {
+      position: 'absolute', top: 8, right: 8, width: 20, height: 20, borderRadius: 10,
+      backgroundColor: t.primary, alignItems: 'center', justifyContent: 'center',
+    },
+    lsLabel: { fontFamily: SANS, fontSize: 15, fontWeight: '700', color: t.heading, textAlign: 'center' },
+    lsDesc: { fontFamily: SANS, fontSize: 12, color: t.muted, lineHeight: 16, textAlign: 'center' },
 
-    errorTxt: { color: '#ef4444', fontSize: 13, textAlign: 'center', marginBottom: 12 },
+    errorBox: {
+      flexDirection: 'row', alignItems: 'flex-start', gap: 8, padding: 12, borderRadius: 12, marginBottom: 12,
+      backgroundColor: t.dangerSoft, borderWidth: 1, borderColor: t.danger,
+    },
+    errorTxt: { flex: 1, fontFamily: SANS, color: t.danger, fontSize: 14, lineHeight: 20 },
 
     footer: {
-      flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-      flexWrap: 'wrap', gap: 16, marginTop: 8,
+      flexDirection: mobile ? 'column' : 'row', alignItems: mobile ? 'stretch' : 'center', justifyContent: 'space-between',
+      gap: 14, marginTop: 4, paddingVertical: 14,
     },
+    footerDivider: { width: 1, alignSelf: 'stretch', backgroundColor: t.line },
+    footBrand: { fontFamily: SERIF, fontSize: 24, fontWeight: '500', color: t.heading, textAlign: 'center', marginTop: 18 },
     secureRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-    secureIcon: {
-      width: 28, height: 28, borderRadius: 8, backgroundColor: TEAL + '18',
-      alignItems: 'center', justifyContent: 'center',
-    },
-    secureTxt: { fontSize: 13, color: colors.textMuted },
-    footerBtns: { flexDirection: 'row', alignItems: 'center', gap: 16 },
-    requiredHint: { fontSize: 12, color: colors.textMuted, maxWidth: 220, textAlign: 'right' },
+    secureTxt: { fontFamily: SANS, fontSize: 14, color: t.muted },
+    footerBtns: { flexDirection: mobile ? 'column' : 'row', alignItems: mobile ? 'stretch' : 'center', gap: mobile ? 10 : 16 },
+    requiredHint: { fontFamily: SANS, fontSize: 13, color: t.muted, maxWidth: mobile ? undefined : 260, textAlign: mobile ? 'left' : 'right' },
     completeBtn: {
-      flexDirection: 'row', alignItems: 'center', gap: 8,
-      backgroundColor: TEAL, paddingHorizontal: 22, paddingVertical: 14, borderRadius: 12,
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 50,
+      backgroundColor: t.primary, paddingHorizontal: 24, borderRadius: 12,
     },
-    completeTxt: { fontSize: 14, fontWeight: '800', color: '#fff' },
+    completeTxt: { fontFamily: SANS, fontSize: 16, fontWeight: '700', color: t.onPrimary },
+
+    confirmOverlay: { flex: 1, backgroundColor: 'rgba(8,12,22,0.6)', justifyContent: 'center', alignItems: 'center', padding: 24 },
+    confirmBox: {
+      width: 380, maxWidth: '95%', borderRadius: 20, padding: 28, alignItems: 'center',
+      backgroundColor: t.card, borderWidth: 1, borderColor: t.line,
+    },
+    confirmIcon: {
+      width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center',
+      backgroundColor: t.primarySoft, marginBottom: 16,
+    },
+    confirmTitle: { fontFamily: SERIF, fontSize: 22, fontWeight: '600', color: t.heading, marginBottom: 10, textAlign: 'center' },
+    confirmBody: { fontFamily: SANS, fontSize: 14.5, color: t.muted, lineHeight: 21, textAlign: 'center', marginBottom: 22 },
+    confirmPrimary: { width: '100%', minHeight: 48, justifyContent: 'center', backgroundColor: t.primary, borderRadius: 12, alignItems: 'center', marginBottom: 10 },
+    confirmPrimaryTxt: { fontFamily: SANS, fontSize: 15, fontWeight: '700', color: t.onPrimary },
+    confirmSecondary: { width: '100%', minHeight: 48, justifyContent: 'center', alignItems: 'center', borderRadius: 12, borderWidth: 1.5, borderColor: t.inputLine },
+    confirmSecondaryTxt: { fontFamily: SANS, fontSize: 14, fontWeight: '600', color: t.heading },
   });
 }

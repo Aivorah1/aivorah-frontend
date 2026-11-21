@@ -8,7 +8,7 @@
 import React from 'react';
 import { useWindowDimensions } from 'react-native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme, SchoolAdminThemeProvider } from '../context/ThemeContext';
 
 import DrawerContent from '../components/common/DrawerContent';
 import SchoolAdminDashboardScreen from '../screens/school-admin/dashboard/SchoolAdminDashboardScreen';
@@ -73,6 +73,14 @@ export type SchoolAdminDrawerParamList = {
 const Drawer = createDrawerNavigator<SchoolAdminDrawerParamList>();
 
 export default function SchoolAdminNavigator() {
+  return (
+    <SchoolAdminThemeProvider>
+      <SchoolAdminPortalNavigator />
+    </SchoolAdminThemeProvider>
+  );
+}
+
+function SchoolAdminPortalNavigator() {
   // Wake this role's services and, on a good connection, prefetch its screens.
   useRoleWarmup(screens, SCHOOL_ADMIN_SERVICES);
   const { width } = useWindowDimensions();

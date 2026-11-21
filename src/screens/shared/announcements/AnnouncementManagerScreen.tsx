@@ -10,10 +10,8 @@
  * recipients will see.
  */
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import {
-  View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput,
-  ActivityIndicator, Modal, Platform, Alert,
-} from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput, Modal, Platform, Alert } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import Header from '../../../components/common/Header';

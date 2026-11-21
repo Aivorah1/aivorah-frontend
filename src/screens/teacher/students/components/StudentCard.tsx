@@ -1,5 +1,6 @@
 import React, { memo, useState } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import type { AppColors } from '../../../../theme';
@@ -103,7 +104,7 @@ export default function StudentCard({
       {/* Stats row */}
       <View style={styles.cardStats}>
         <View style={styles.cardStat}>
-          <Feather name="zap" size={12} color="#C5BD96" />
+          <Feather name="zap" size={12} color="#0E6E86" />
           <Text style={styles.cardStatVal}>{s.xpPoints} XP</Text>
         </View>
         <View style={styles.cardStat}>

@@ -178,7 +178,7 @@ export default function AccessRequestAuditModal({
               onPress={() => onActionRequest(selectedAuditRequest.id, 'approve')}
               accessibilityRole="button"
             >
-              <Feather name="check" size={15} color="#0B0B0B" />
+              <Feather name="check" size={15} color={colors.onPrimary} />
               <Text style={styles.auditApproveText}>Approve & Link Account</Text>
             </TouchableOpacity>
           </View>
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
   auditSection: { gap: 8 },
   auditSectionTitle: {
     fontFamily: fonts.serif,
-    fontSize: 11,
+    fontSize: 14,
     fontWeight: '800',
     textTransform: 'uppercase',
     letterSpacing: 0.6,
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   auditDataName: { fontFamily: fonts.serif, fontSize: 16, fontWeight: '800' },
-  auditDataEmail: { fontFamily: fonts.serif, fontSize: 13, marginBottom: 10 },
+  auditDataEmail: { fontFamily: fonts.serif, fontSize: 14, marginBottom: 10 },
   auditDataGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -243,8 +243,8 @@ const styles = StyleSheet.create({
     paddingTop: 12,
   },
   auditGridItem: { width: '46%', gap: 3 },
-  auditGridLabel: { fontFamily: fonts.serif, fontSize: 10, fontWeight: '700', letterSpacing: 0.5 },
-  auditGridVal: { fontFamily: fonts.serif, fontSize: 12.5, fontWeight: '700' },
+  auditGridLabel: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', letterSpacing: 0.5 },
+  auditGridVal: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700' },
   auditParentRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -255,9 +255,9 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   auditParentIcon: { width: 32, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
-  auditParentName: { fontFamily: fonts.serif, fontSize: 13.5, fontWeight: '700' },
-  auditParentEmail: { fontFamily: fonts.serif, fontSize: 12 },
-  auditParentStatus: { fontFamily: fonts.serif, fontSize: 11, marginTop: 4, fontWeight: '600' },
+  auditParentName: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700' },
+  auditParentEmail: { fontFamily: fonts.serif, fontSize: 14 },
+  auditParentStatus: { fontFamily: fonts.serif, fontSize: 14, marginTop: 4, fontWeight: '600' },
   auditNoParentBox: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -266,15 +266,15 @@ const styles = StyleSheet.create({
     padding: 14,
     borderWidth: 1,
   },
-  auditNoParentTitle: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '700', marginBottom: 4 },
-  auditNoParentDesc: { fontFamily: fonts.serif, fontSize: 12, lineHeight: 18 },
+  auditNoParentTitle: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', marginBottom: 4 },
+  auditNoParentDesc: { fontFamily: fonts.serif, fontSize: 14, lineHeight: 18 },
   auditFooterRow: {
     flexDirection: 'row',
     gap: 12,
     borderTopWidth: StyleSheet.hairlineWidth,
     paddingTop: 14,
   },
-  auditRejectBtn: {
+  auditRejectBtn: { minHeight: 44,
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
@@ -284,8 +284,8 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
     paddingVertical: 12,
   },
-  auditRejectText: { fontFamily: fonts.serif, fontSize: 13.5, fontWeight: '700' },
-  auditApproveBtn: {
+  auditRejectText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700' },
+  auditApproveBtn: { minHeight: 44,
     flex: 1.5,
     flexDirection: 'row',
     alignItems: 'center',
@@ -294,5 +294,5 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
     paddingVertical: 12,
   },
-  auditApproveText: { fontFamily: fonts.serif, fontSize: 13.5, fontWeight: '800', color: '#0B0B0B' },
+  auditApproveText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '800', color: '#FFFFFF' },
 });

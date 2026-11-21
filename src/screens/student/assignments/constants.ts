@@ -5,39 +5,39 @@ export const FILTERS = ['All', 'Pending', 'Completed', 'Quizzes'];
 // Every step uses Aivorah gold
 export const STEP_COLORS: Record<StepType, string> = {
   // Core
-  brainstorm:           '#BAA467',
-  drawing:              '#BAA467',
-  structured_writing:   '#BAA467',
-  problem_solving:      '#BAA467',
+  brainstorm:           '#24877B',
+  drawing:              '#24877B',
+  structured_writing:   '#24877B',
+  problem_solving:      '#24877B',
   // Maths
-  tuning_in:            '#BAA467',
-  math_reflection:      '#BAA467',
+  tuning_in:            '#24877B',
+  math_reflection:      '#24877B',
   // Science
-  prior_knowledge:      '#BAA467',
+  prior_knowledge:      '#24877B',
   // English
-  text_connection:      '#BAA467',
-  reading_comprehension:'#BAA467',
-  writing_reflection:   '#BAA467',
+  text_connection:      '#24877B',
+  reading_comprehension:'#24877B',
+  writing_reflection:   '#24877B',
   // Language Acquisition
-  language_culture:     '#BAA467',
-  language_practice:    '#BAA467',
-  communication:        '#BAA467',
+  language_culture:     '#24877B',
+  language_practice:    '#24877B',
+  communication:        '#24877B',
   // Social Studies
-  social_inquiry:       '#BAA467',
-  research_notes:       '#BAA467',
-  social_synthesis:     '#BAA467',
+  social_inquiry:       '#24877B',
+  research_notes:       '#24877B',
+  social_synthesis:     '#24877B',
   // Visual Arts
-  artistic_exploration: '#BAA467',
-  art_creation:         '#BAA467',
-  artistic_reflection:  '#BAA467',
+  artistic_exploration: '#24877B',
+  art_creation:         '#24877B',
+  artistic_reflection:  '#24877B',
   // ICT
-  digital_awareness:    '#BAA467',
-  tech_skill_practice:  '#BAA467',
-  digital_citizenship:  '#BAA467',
+  digital_awareness:    '#24877B',
+  tech_skill_practice:  '#24877B',
+  digital_citizenship:  '#24877B',
   // PE
-  movement_exploration: '#BAA467',
-  skill_practice:       '#BAA467',
-  physical_reflection:  '#BAA467',
+  movement_exploration: '#24877B',
+  skill_practice:       '#24877B',
+  physical_reflection:  '#24877B',
 };
 
 export const STEP_TEXT_COLORS: Record<StepType, string> = {
@@ -104,19 +104,19 @@ export const SUBJECT_ICON: Record<string, string> = {
 };
 
 export const SUBJECT_COLOR: Record<string, string> = {
-  Mathematics:           '#BAA467',
-  Science:               '#BAA467',
-  English:               '#BAA467',
-  'Social Studies':      '#BAA467',
-  'Language Acquisition':'#BAA467',
-  'Visual Arts':         '#BAA467',
-  ICT:                   '#BAA467',
-  'Physical Education':  '#BAA467',
+  Mathematics:           '#24877B',
+  Science:               '#24877B',
+  English:               '#24877B',
+  'Social Studies':      '#24877B',
+  'Language Acquisition':'#24877B',
+  'Visual Arts':         '#24877B',
+  ICT:                   '#24877B',
+  'Physical Education':  '#24877B',
 };
 
 // ── Stamp config ─────────────────────────────────────────────────────────────
 export const STAMPS = [
-  { id: 'amazing',    label: 'Amazing Storyteller', icon: 'star',         color: '#f59e0b', min: 80 },
+  { id: 'amazing',    label: 'Amazing Storyteller', icon: 'star',         color: '#3FB8A8', min: 80 },
   { id: 'hardworking',label: 'Hardworking Farmer',  icon: 'award',        color: '#10b981', min: 60 },
-  { id: 'keepgoing',  label: 'Keep Going!',          icon: 'trending-up',  color: '#BAA467', min: 0  },
+  { id: 'keepgoing',  label: 'Keep Going!',          icon: 'trending-up',  color: '#24877B', min: 0  },
 ];

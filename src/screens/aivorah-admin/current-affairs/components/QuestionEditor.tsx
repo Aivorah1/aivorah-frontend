@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Button, Field, Segment } from './ui';
 import { addQuestion, setQuestionStatus, updateQuestion } from '../services/currentAffairsAdminService';
 import { CA_CATEGORIES, type CaCategory, type QuizQuestion } from '../types';

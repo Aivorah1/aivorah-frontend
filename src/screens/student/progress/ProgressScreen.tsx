@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { spacing, radius, fonts } from '../../../theme';
 import type { AppColors } from '../../../theme';
@@ -79,11 +80,11 @@ export default function ProgressScreen({ navigation }: any) {
               activeOpacity={0.8}
               testID="stats-load-error-banner"
             >
-              <Feather name="wifi-off" size={16} color="#C9A24E" />
+              <Feather name="wifi-off" size={16} color="#24877B" />
               <Text style={styles.loadErrorText}>
                 Couldn&apos;t load your latest progress. Tap to retry.
               </Text>
-              <Feather name="refresh-cw" size={14} color="#C9A24E" />
+              <Feather name="refresh-cw" size={14} color="#24877B" />
             </TouchableOpacity>
           )}
 
@@ -131,15 +132,15 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    backgroundColor: 'rgba(201,162,78,0.12)',
+    backgroundColor: c.accentYellowGlow,
     borderWidth: 1,
-    borderColor: 'rgba(201,162,78,0.35)',
+    borderColor: c.borderColor,
     borderRadius: radius.md,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     marginBottom: spacing.lg,
   },
-  loadErrorText: { flex: 1, fontSize: 12, fontWeight: '600', color: '#C9A24E' },
+  loadErrorText: { flex: 1, fontSize: 12, fontWeight: '600', color: c.accentRed },
 
   heroBanner: {
     backgroundColor: c.cardDark,
@@ -150,17 +151,17 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
     marginBottom: spacing.xxl,
   },
   heroPct: { fontSize: 22, fontWeight: '800', color: c.textMain },
-  heroCircleLabel: { fontSize: 9, color: c.textMuted, fontWeight: '700', letterSpacing: 0.5 },
+  heroCircleLabel: { fontSize: 12, color: c.textMuted, fontWeight: '700', letterSpacing: 0.5 },
   heroText: { alignItems: 'center', marginBottom: spacing.lg },
   heroTitle: { fontSize: 17, fontWeight: '700', color: c.textMain, textAlign: 'center', marginBottom: 6, fontFamily: fonts.serif },
   heroSub: { fontSize: 12, color: c.textMuted, textAlign: 'center', lineHeight: 18 },
-  xpLabel: { fontSize: 11, color: c.textMuted, fontWeight: '600' },
-  xpTrack: { height: 6, backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 3, overflow: 'hidden' },
-  xpFill: { height: '100%', borderRadius: 3, backgroundColor: '#8A8358' },
+  xpLabel: { fontSize: 13, color: c.textMuted, fontWeight: '600' },
+  xpTrack: { height: 6, backgroundColor: c.cardHover, borderRadius: 3, overflow: 'hidden' },
+  xpFill: { height: '100%', borderRadius: 3, backgroundColor: c.primary },
   heroStats: { flexDirection: 'row', justifyContent: 'space-around' },
   heroStat: { alignItems: 'center', gap: 4 },
   heroStatVal: { fontSize: 20, fontWeight: '700', letterSpacing: -0.5 },
-  heroStatLabel: { fontSize: 10, color: c.textMuted },
+  heroStatLabel: { fontSize: 12, color: c.textMuted },
 
   glassCard: {
     backgroundColor: c.cardDark,
@@ -177,16 +178,16 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
 
   barChart: { flexDirection: 'row', height: 120, alignItems: 'flex-end', gap: 6, marginBottom: spacing.lg },
   barItem: { flex: 1, alignSelf: 'stretch', alignItems: 'center', gap: 2 },
-  barMinute: { fontSize: 9, color: c.textDim, fontWeight: '600', height: 14 },
+  barMinute: { fontSize: 12, color: c.textDim, fontWeight: '600', height: 14 },
   barWrapper: { flex: 1, width: '100%', justifyContent: 'flex-end' },
   bar: { width: '100%', borderRadius: 4, minHeight: 4 },
-  barActive: { shadowColor: '#C9A24E', shadowOffset: { width: 0, height: 0 }, shadowRadius: 8, shadowOpacity: 0.5 },
-  barLabel: { fontSize: 10, color: c.textMuted },
+  barActive: { shadowColor: c.primary, shadowOffset: { width: 0, height: 0 }, shadowRadius: 8, shadowOpacity: 0.5 },
+  barLabel: { fontSize: 12, color: c.textMuted },
 
   weekTotals: { flexDirection: 'row', justifyContent: 'space-around', borderTopWidth: 1, borderTopColor: c.borderColor, paddingTop: spacing.lg },
   weekTotal: { alignItems: 'center', gap: 2 },
   weekTotalVal: { fontSize: 16, fontWeight: '700' },
-  weekTotalLabel: { fontSize: 11, color: c.textMuted },
+  weekTotalLabel: { fontSize: 13, color: c.textMuted },
 
   sectionRow:   { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing.md },
   sectionTitle: { fontSize: 16, fontWeight: '700', color: c.textMain, marginBottom: spacing.lg },
@@ -209,22 +210,22 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
   subjectScore: { fontSize: 22, fontWeight: '800', letterSpacing: -0.5 },
   progressTrack: { height: 4, backgroundColor: c.borderColor, borderRadius: 2, overflow: 'hidden' },
   progressFill: { height: '100%', borderRadius: 2 },
-  subjectMeta: { fontSize: 11, color: c.textMuted },
+  subjectMeta: { fontSize: 13, color: c.textMuted },
 
   topicsList: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md, marginBottom: spacing.xxl },
   topicChip: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(201,162,78,0.10)',
+    backgroundColor: c.cardHover,
     borderWidth: 1,
-    borderColor: 'rgba(201,162,78,0.30)',
+    borderColor: c.borderColor,
     borderRadius: 20,
     paddingHorizontal: 12,
     paddingVertical: 6,
     maxWidth: 200,
   },
-  topicChipText: { fontSize: 12, fontWeight: '600', color: '#A8853A' },
+  topicChipText: { fontSize: 12, fontWeight: '600', color: c.textMain },
 
   achieveGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md, marginBottom: 20 },
   achieveCard: {
@@ -240,10 +241,10 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
   },
   achieveCardLocked: { opacity: 0.6 },
   unlockedBadge: { flexDirection: 'row', alignItems: 'center', gap: 3, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 },
-  unlockedBadgeText: { fontSize: 10, fontWeight: '700' },
+  unlockedBadgeText: { fontSize: 12, fontWeight: '700' },
   achieveIcon: { width: 52, height: 52, borderRadius: 26, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
   achieveLabel: { fontSize: 12, fontWeight: '600', color: c.textMain, textAlign: 'center' },
-  lockedText: { fontSize: 10, color: c.textDim, fontWeight: '600' },
+  lockedText: { fontSize: 12, color: c.textDim, fontWeight: '600' },
 
   // ── Rewards ─────────────────────────────────────────────────
   creditsCard: {
@@ -255,7 +256,7 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
   creditsCount:     { fontSize: 28, fontWeight: '800' },
   creditsLabel:     { fontSize: 12, fontWeight: '600', marginTop: 1 },
   xpConvertBadge:   { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20, borderWidth: 1 },
-  xpConvertText:    { fontSize: 11, fontWeight: '700' },
+  xpConvertText:    { fontSize: 13, fontWeight: '700' },
 
   taglineRow: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 8,
@@ -271,9 +272,9 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
   },
   merchIcon:        { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
   merchLabel:       { fontSize: 13, fontWeight: '700', textAlign: 'center' },
-  merchDesc:        { fontSize: 11, textAlign: 'center' },
+  merchDesc:        { fontSize: 13, textAlign: 'center' },
   merchCreditRow:   { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
-  merchCreditText:  { fontSize: 11, fontWeight: '700' },
+  merchCreditText:  { fontSize: 13, fontWeight: '700' },
   comingSoonBtn:    { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 5 },
-  comingSoonBtnText:{ fontSize: 11, fontWeight: '600' },
+  comingSoonBtnText:{ fontSize: 13, fontWeight: '600' },
 });

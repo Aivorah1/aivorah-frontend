@@ -1,18 +1,7 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  Modal,
-  FlatList,
-  ActivityIndicator,
-  Animated,
-  Easing,
-  Dimensions,
-} from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Modal, FlatList, Animated, Easing, Dimensions } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { spacing, radius, fonts } from '../../../theme';
@@ -37,7 +26,7 @@ import { isCbseCurriculum } from '../../../utils/curriculum';
 import { isPassingScore, isMasteryScore } from '../utils/masteryRules';
 import { useDashboardData } from './hooks/useDashboardData';
 import type { CurriculumTopic, CurriculumData } from './types';
-import { BRAND, PASTEL, SUBJECT_COLORS, SUBJECT_ICONS } from './constants';
+import { BRAND, PASTEL, SUBJECT_COLORS, SUBJECT_ICONS, applyStudentBrand } from './constants';
 import { getGreeting, normalizeSearchText } from './utils/dashboardHelpers';
 import { RingChart } from './components/common/icons';
 import { SectionHeader } from './components/common/SectionHeader';
@@ -61,6 +50,7 @@ export default function DashboardScreen({ navigation, route }: any) {
   useFocusEffect(useCallback(() => { refreshProfile(); }, []));
   const { stats: ctxStats, studentId, learningActivity: ctxActivity } = useStudentData();
   const { colors, isDark } = useTheme();
+  applyStudentBrand(isDark);
   const { unreadAssignments, unreadCount } = useNotification();
   const { isMobile, isTablet } = useResponsive();
   const styles = useMemo(() => makeStyles(colors, isMobile, isDark), [colors, isMobile, isDark]);
@@ -157,13 +147,13 @@ export default function DashboardScreen({ navigation, route }: any) {
   const cardBg     = colors.cardDark;
   const cardBorder  = colors.borderColor;
   const subtleBg   = colors.cardHover;
-  const ringTrack  = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(139,92,246,0.08)';
-  // "Today's Goals" cards always use a light pastel gradient (even in dark theme),
-  // so their text/track use fixed light-card values regardless of the app theme.
-  const goalText      = '#16241B';
-  const goalMutedText = '#5C6F62';
-  const goalDimText   = '#9FB0A4';
-  const goalRingTrack = 'rgba(0,0,0,0.07)';
+  const ringTrack  = colors.cardHover;
+  // "Today's Goals" cards sit on the theme's card surface, so their text and
+  // ring track follow the theme too.
+  const goalText      = colors.textHeading;
+  const goalMutedText = colors.textMuted;
+  const goalDimText   = colors.textMuted;
+  const goalRingTrack = colors.cardHover;
   const contentMax = isMobile ? undefined : isTablet ? 920 : 1080;
 
   // ── Derived ──────────────────────────────────────────────
@@ -585,39 +575,39 @@ export const makeStyles = (c: AppColors, isMobile: boolean, isDark: boolean) => 
   stateIconWrap: { width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center', backgroundColor: BRAND.indigo + '18' },
   stateTitle:    { fontSize: 18, fontWeight: '700', color: c.textMain, fontFamily: fonts.serif },
   stateSub:      { fontSize: 13, color: c.textMuted, textAlign: 'center', lineHeight: 20 },
-  retryBtn:      { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: BRAND.violet, paddingHorizontal: 22, paddingVertical: 12, borderRadius: 12, marginTop: 6 },
-  retryText:     { fontSize: 14, fontWeight: '700', color: '#fff' },
+  retryBtn:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', minHeight: 44, gap: 8, backgroundColor: c.accent, paddingHorizontal: 22, paddingVertical: 12, borderRadius: 12, marginTop: 6 },
+  retryText:     { fontSize: 14, fontWeight: '700', color: c.onPrimary },
 
   // ── Hero ──────────────────────────────────────────────
   heroCard: {
-    borderRadius: 22, padding: 20, paddingBottom: 18, overflow: 'hidden', position: 'relative', minHeight: 165,
-    borderWidth: 1, borderColor: 'rgba(245,243,238,0.16)',
-    shadowColor: '#000', shadowOpacity: 0.45, shadowRadius: 24, shadowOffset: { width: 0, height: 12 },
+    borderRadius: 16, padding: 20, paddingBottom: 18, overflow: 'hidden', position: 'relative', minHeight: 165,
+    borderWidth: 1, borderColor: c.borderColor,
+    shadowColor: '#000', shadowOpacity: isDark ? 0.3 : 0.06, shadowRadius: 18, shadowOffset: { width: 0, height: 6 },
   },
   heroGlowLeft:  { display: 'none' },
   heroGlowRight: { display: 'none' },
 
   heroBadgeRow: { flexDirection: 'row', gap: 8, marginBottom: 14, zIndex: 2 },
-  levelBadge:   { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: 'rgba(11,11,11,0.12)', borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4, borderWidth: 1, borderColor: 'rgba(11,11,11,0.18)' },
-  levelTxt:     { fontSize: 10, fontWeight: '800', color: '#0B0B0B', letterSpacing: 0.2 },
-  streakBadge:  { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: 'rgba(11,11,11,0.12)', borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4, borderWidth: 1, borderColor: 'rgba(11,11,11,0.18)' },
-  streakTxt:    { fontSize: 10, fontWeight: '700', color: '#0B0B0B' },
+  levelBadge:   { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: c.cardHover, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4, borderWidth: 1, borderColor: c.borderColor },
+  levelTxt:     { fontSize: 10, fontWeight: '800', color: c.textHeading, letterSpacing: 0.2 },
+  streakBadge:  { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: c.cardHover, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4, borderWidth: 1, borderColor: c.borderColor },
+  streakTxt:    { fontSize: 10, fontWeight: '700', color: c.textHeading },
 
-  heroGreeting: { fontSize: 12, fontWeight: '700', color: 'rgba(11,11,11,0.6)', zIndex: 1, textTransform: 'uppercase', letterSpacing: 0.5 },
-  heroName:     { fontFamily: fonts.serif, fontSize: isMobile ? 30 : 38, fontWeight: '500', color: '#0B0B0B', letterSpacing: -0.5, lineHeight: isMobile ? 34 : 44, marginBottom: 4, zIndex: 1 },
-  heroSub:      { fontSize: 12, color: 'rgba(11,11,11,0.78)', fontWeight: '500', lineHeight: 18, marginBottom: 14, zIndex: 1, maxWidth: '90%' },
+  heroGreeting: { fontSize: 12, fontWeight: '700', color: c.textMuted, zIndex: 1, textTransform: 'uppercase', letterSpacing: 0.5 },
+  heroName:     { fontFamily: fonts.serif, fontSize: isMobile ? 30 : 40, fontWeight: '700', color: c.textHeading, letterSpacing: -0.5, lineHeight: isMobile ? 34 : 44, marginBottom: 4, zIndex: 1 },
+  heroSub:      { fontSize: 14, color: c.textMain, fontWeight: '500', lineHeight: 21, marginBottom: 14, zIndex: 1, maxWidth: '90%' },
 
   xpBlock:    { zIndex: 1, marginBottom: 14 },
   xpLabelRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
-  xpLbl:      { fontSize: 10, fontWeight: '800', color: 'rgba(11,11,11,0.7)' },
-  xpNum:      { fontSize: 10, fontWeight: '800', color: 'rgba(11,11,11,0.7)' },
-  xpTrack:    { height: 8, backgroundColor: 'rgba(11,11,11,0.18)', borderRadius: 4, overflow: 'hidden' },
-  xpFill:     { height: '100%', backgroundColor: '#0B0B0B', borderRadius: 4 },
-  xpTotal:    { fontSize: 10, fontWeight: '700', color: 'rgba(11,11,11,0.62)', marginTop: 6 },
+  xpLbl:      { fontSize: 10, fontWeight: '800', color: c.textMuted },
+  xpNum:      { fontSize: 10, fontWeight: '800', color: c.textMuted },
+  xpTrack:    { height: 8, backgroundColor: c.cardHover, borderRadius: 4, overflow: 'hidden' },
+  xpFill:     { height: '100%', backgroundColor: c.primary, borderRadius: 4 },
+  xpTotal:    { fontSize: 10, fontWeight: '700', color: c.textMuted, marginTop: 6 },
 
-  heroCta:      { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#0B0B0B', borderRadius: 14, paddingVertical: 10, paddingHorizontal: 16, alignSelf: 'flex-start', zIndex: 1 },
+  heroCta:      { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: c.accent, borderRadius: 12, minHeight: 44, paddingVertical: 10, paddingHorizontal: 18, alignSelf: 'flex-start', zIndex: 1 },
   heroCtaPlay:  { width: 22, height: 22, borderRadius: 11, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },
-  heroCtaTxt:   { fontSize: 13, fontWeight: '800', color: '#fff', flex: 1 },
+  heroCtaTxt:   { fontSize: 13, fontWeight: '800', color: c.onPrimary, flex: 1 },
 
   heroChipOutside: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: 18, paddingVertical: 12, paddingHorizontal: 12, borderWidth: 1, shadowColor: '#000', shadowOpacity: isDark ? 0.2 : 0.04, shadowRadius: 8, shadowOffset: { width: 0, height: 3 } },
   heroChipDot: { width: 6, height: 6, borderRadius: 3 },
@@ -630,22 +620,22 @@ export const makeStyles = (c: AppColors, isMobile: boolean, isDark: boolean) => 
   goalsRowScroll: { flexDirection: 'row', gap: 10, paddingHorizontal: 2, paddingBottom: 4 },
   goalCard: {
     flex: 1,
-    borderRadius: 22, borderWidth: 1, overflow: 'hidden',
+    borderRadius: 16, borderWidth: 1, overflow: 'hidden',
     shadowColor: '#000', shadowOpacity: isDark ? 0.25 : 0.09, shadowRadius: 16, shadowOffset: { width: 0, height: 6 },
   },
   goalCardMobile: {
     width: Math.round(SCREEN_WIDTH * 0.72),
-    borderRadius: 22, borderWidth: 1, overflow: 'hidden',
+    borderRadius: 16, borderWidth: 1, overflow: 'hidden',
     shadowColor: '#000', shadowOpacity: isDark ? 0.25 : 0.09, shadowRadius: 16, shadowOffset: { width: 0, height: 6 },
   },
-  goalCardGradient: { paddingHorizontal: 12, paddingVertical: 10, gap: 6 },
+  goalCardGradient: { paddingHorizontal: 16, paddingVertical: 14, gap: 8 },
   goalTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   goalTitleWrap: { flexDirection: 'row', alignItems: 'center', gap: 9, flex: 1 },
   goalIconOrb: { width: 28, height: 28, borderRadius: 8, alignItems: 'center', justifyContent: 'center', borderWidth: 1 },
-  goalTitle: { fontSize: 13, fontWeight: '800', letterSpacing: -0.2 },
-  goalMeta: { fontSize: 9.5, marginTop: 1 },
+  goalTitle: { fontSize: 15, fontWeight: '700', letterSpacing: -0.1, fontFamily: fonts.ui },
+  goalMeta: { fontSize: 13, marginTop: 2 },
   goalStatusPill: { borderWidth: 1, borderRadius: 999, paddingHorizontal: 7, paddingVertical: 3 },
-  goalStatusTxt: { fontSize: 10, fontWeight: '800' },
+  goalStatusTxt: { fontSize: 12, fontWeight: '800' },
   goalMidRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   goalBadgesRight: { flexDirection: 'column', gap: 4, alignItems: 'center', justifyContent: 'space-evenly', alignSelf: 'stretch' },
   goalBadgeMedalWrap: { alignItems: 'center', gap: 2 },
@@ -662,14 +652,14 @@ export const makeStyles = (c: AppColors, isMobile: boolean, isDark: boolean) => 
     width: 12, height: 12, borderRadius: 6, borderWidth: 1.5,
     alignItems: 'center', justifyContent: 'center',
   },
-  goalBadgeMedalLabel: { fontSize: 7.5, textAlign: 'center', letterSpacing: 0.2 },
+  goalBadgeMedalLabel: { fontSize: 11, textAlign: 'center', letterSpacing: 0.2 },
   goalRingWrap:   { position: 'relative', alignItems: 'center', justifyContent: 'center' },
   goalRingCenter: { position: 'absolute', alignItems: 'center', justifyContent: 'center' },
   goalPct:        { fontSize: 15, fontWeight: '900', letterSpacing: -0.6 },
-  goalRingSub:    { fontSize: 8, fontWeight: '700', marginTop: -1, textTransform: 'uppercase', letterSpacing: 0.5 },
+  goalRingSub:    { fontSize: 11, fontWeight: '700', marginTop: -1, textTransform: 'uppercase', letterSpacing: 0.5 },
   goalValueWrap:  { flex: 1, gap: 2, justifyContent: 'center' },
-  goalVal:        { fontSize: 24, fontWeight: '900', letterSpacing: -1.1, lineHeight: 26 },
-  goalTarget:     { fontSize: 10 },
+  goalVal:        { fontSize: 26, fontWeight: '700', letterSpacing: -0.5, lineHeight: 32, fontFamily: fonts.ui, fontVariant: ['tabular-nums'] },
+  goalTarget:     { fontSize: 13, lineHeight: 18 },
   goalMiniMeta:   { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderRadius: 999, paddingHorizontal: 7, paddingVertical: 2, marginTop: 2 },
   goalMiniMetaTxt:{ fontSize: 10, fontWeight: '700' },
   goalBar:        { width: '100%', height: 6, borderRadius: 999, overflow: 'hidden' },
@@ -757,25 +747,25 @@ export const makeStyles = (c: AppColors, isMobile: boolean, isDark: boolean) => 
 
   clBottomRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   clHint:      { flex: 1, fontSize: 12, lineHeight: 17 },
-  clCtaBtn:    { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 9, borderRadius: 12 },
-  clCtaTxt:    { fontSize: 13, fontWeight: '800', color: '#fff' },
+  clCtaBtn:    { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', minHeight: 40, gap: 8, paddingHorizontal: 14, paddingVertical: 9, borderRadius: 12 },
+  clCtaTxt:    { fontSize: 13, fontWeight: '800', color: c.onPrimary },
 
   // ── AI banner ─────────────────────────────────────────
   aiBanner: {
-    flexDirection: 'row', alignItems: 'center', gap: 14, padding: 18, borderRadius: 22, overflow: 'hidden', position: 'relative',
-    shadowColor: '#BAA467', shadowOpacity: isDark ? 0.5 : 0.3, shadowRadius: 24, shadowOffset: { width: 0, height: 8 },
+    flexDirection: 'row', alignItems: 'center', gap: 14, padding: 18, borderRadius: 16, overflow: 'hidden', position: 'relative',
+    shadowColor: '#000', shadowOpacity: isDark ? 0.3 : 0.06, shadowRadius: 18, shadowOffset: { width: 0, height: 8 },
   },
-  aiGlow:       { position: 'absolute', right: -50, top: -50, width: 170, height: 170, borderRadius: 85, backgroundColor: 'rgba(11,11,11,0.04)' },
+  aiGlow:       { position: 'absolute', right: -50, top: -50, width: 170, height: 170, borderRadius: 85, backgroundColor: c.cardHover },
   aiAvatarWrap: { position: 'relative', flexShrink: 0 },
-  aiAvatarOuter:{ width: 54, height: 54, borderRadius: 27, backgroundColor: 'rgba(11,11,11,0.10)', alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: 'rgba(11,11,11,0.18)' },
-  aiAvatarInner:{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(11,11,11,0.08)', alignItems: 'center', justifyContent: 'center' },
+  aiAvatarOuter:{ width: 54, height: 54, borderRadius: 27, backgroundColor: c.cardHover, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: c.borderColor },
+  aiAvatarInner:{ width: 40, height: 40, borderRadius: 20, backgroundColor: c.cardHover, alignItems: 'center', justifyContent: 'center' },
   aiOnline:     { position: 'absolute', bottom: 2, right: 2, width: 12, height: 12, borderRadius: 6, backgroundColor: '#2E7D52', borderWidth: 2, borderColor: 'rgba(255,255,255,0.6)' },
   aiBannerBody: { flex: 1, gap: 2 },
-  aiTag:        { fontSize: 9, fontWeight: '800', color: 'rgba(11,11,11,0.55)', letterSpacing: 1 },
-  aiTitle:      { fontSize: 17, fontWeight: '900', color: '#0B0B0B', letterSpacing: -0.3, fontFamily: fonts.serif },
-  aiSub:        { fontSize: 12, color: 'rgba(11,11,11,0.72)', lineHeight: 17 },
+  aiTag:        { fontSize: 9, fontWeight: '800', color: c.textMuted, letterSpacing: 1 },
+  aiTitle:      { fontSize: 17, fontWeight: '900', color: c.textHeading, letterSpacing: -0.3, fontFamily: fonts.serif },
+  aiSub:        { fontSize: 12, color: c.textMuted, lineHeight: 17 },
   aiBannerCta:  { alignItems: 'center', gap: 4, flexShrink: 0 },
-  aiBannerCtaTxt:{ fontSize: 11, fontWeight: '800', color: 'rgba(11,11,11,0.85)' },
+  aiBannerCtaTxt:{ fontSize: 11, fontWeight: '800', color: c.textMuted },
 
   // ── Stats grid ────────────────────────────────────────
   statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },

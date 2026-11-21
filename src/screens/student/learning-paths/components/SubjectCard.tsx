@@ -23,11 +23,16 @@ export default function SubjectCard({
   /** Parent view: marks the subject whose details are open. */
   selected?: boolean;
 }) {
-  const { isDark } = useTheme();
+  const { isDark, portal, colors } = useTheme();
+  // Student Portal: neutral card surfaces in both themes (no gold/tinted blocks).
+  const neutral = portal === 'student';
   const meta = subjectMeta(data.subject);
   const done = data.topics.reduce((acc, topic) => acc + (completedSet.has(topic.topic) ? 1 : 0), 0);
   const pct = data.topicCount > 0 ? Math.round((done / data.topicCount) * 100) : 0;
-  const accent = isDark ? meta.accentDark : meta.accentLight;
+  const accent = neutral ? colors.primary : isDark ? meta.accentDark : meta.accentLight;
+  const ink = neutral ? colors.textHeading : '#1C2A28';
+  const sub = neutral ? colors.textMuted : '#3A5A56';
+  const chip = neutral ? colors.cardHover : '#ffffff50';
   // Founder feedback: a raw topic tally (e.g. "1906 topics") reads as overwhelming.
   // Show the curriculum's real chapter count (CBSE), else the unit count derived
   // from the topics (IB PYP). The server is the source of both.
@@ -42,28 +47,28 @@ export default function SubjectCard({
   return (
     <TouchableOpacity style={[cardStyles.touch, { width }]} activeOpacity={isBlocked ? 1 : 0.86} onPress={isBlocked ? undefined : onPress}>
       <LinearGradient
-        colors={[meta.bgFromDark, meta.bgToDark]}
+        colors={neutral ? [colors.cardDark, colors.cardDark] : [meta.bgFromDark, meta.bgToDark]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={[cardStyles.gradient, { borderColor: accent + '40' }, selected && { borderColor: accent, borderWidth: 2 }]}
+        style={[cardStyles.gradient, { borderColor: neutral ? colors.borderColor : accent + '40' }, selected && { borderColor: accent, borderWidth: 2 }]}
       >
         <View style={cardStyles.topRow}>
-          <View style={[cardStyles.iconWrap, { backgroundColor: '#ffffff50' }]}>
+          <View style={[cardStyles.iconWrap, { backgroundColor: chip }]}>
             <Feather name={meta.icon} size={18} color={accent} />
           </View>
-          <View style={[cardStyles.pctPill, { borderColor: accent + '88', backgroundColor: '#ffffff50' }]}>
+          <View style={[cardStyles.pctPill, { borderColor: accent + '88', backgroundColor: chip }]}>
             <Text style={[cardStyles.pctText, { color: accent }]}>{pct}%</Text>
           </View>
         </View>
-        <Text testID="subject-card-name" style={[cardStyles.subjectName, { color: '#1C2A28' }]} numberOfLines={2}>{data.subject}</Text>
+        <Text testID="subject-card-name" style={[cardStyles.subjectName, { color: ink }]} numberOfLines={3}>{data.subject}</Text>
         {!!data.books?.length && (
-          <Text testID="subject-card-book" style={[cardStyles.statMini, { color: '#3A5A56' }]} numberOfLines={1}>{data.books.join(' · ')}</Text>
+          <Text testID="subject-card-book" style={[cardStyles.statMini, { color: sub }]} numberOfLines={2}>{data.books.join(' · ')}</Text>
         )}
         <View style={cardStyles.statRow}>
-          <Text style={[cardStyles.statMini, { color: '#3A5A56' }]}>{countLabel}</Text>
-          <Text style={[cardStyles.statMini, { color: '#3A5A56' }]}>{done} completed</Text>
+          <Text style={[cardStyles.statMini, { color: sub }]}>{countLabel}</Text>
+          <Text style={[cardStyles.statMini, { color: sub }]}>{done} completed</Text>
         </View>
-        <View style={[cardStyles.track, { backgroundColor: accent + '40' }]}>
+        <View style={[cardStyles.track, { backgroundColor: neutral ? colors.cardHover : accent + '40' }]}>
           <View style={[cardStyles.fill, { width: `${pct}%`, backgroundColor: accent }]} />
         </View>
 

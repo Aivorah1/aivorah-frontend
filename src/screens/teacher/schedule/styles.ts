@@ -11,7 +11,7 @@ export const makeStyles = (c: AppColors) => StyleSheet.create({
     backgroundColor: c.accentYellow, paddingHorizontal: spacing.lg,
     paddingVertical: 9, borderRadius: radius.lg,
   },
-  addEventBtnTopText: { fontSize: 13, fontWeight: '700', color: 'white' },
+  addEventBtnTopText: { fontSize: 13, fontWeight: '700', color: c.onPrimary },
   scroll:   { flex: 1 },
   content:  { padding: spacing.xl, paddingBottom: 40 },
   infoBanner: {
@@ -107,7 +107,7 @@ export const makeStyles = (c: AppColors) => StyleSheet.create({
   modalCancel:      { flex: 1, paddingVertical: 12, borderRadius: radius.md, borderWidth: 1, borderColor: c.borderColor, alignItems: 'center' },
   modalCancelText:  { fontSize: 13, fontWeight: '600', color: c.textMuted },
   modalConfirm:     { flex: 1, paddingVertical: 12, borderRadius: radius.md, backgroundColor: c.accentYellow, alignItems: 'center' },
-  modalConfirmText: { fontSize: 13, fontWeight: '700', color: 'white' },
+  modalConfirmText: { fontSize: 13, fontWeight: '700', color: c.onPrimary },
   // Sidebar
   sideCard:      { backgroundColor: c.cardDark, borderWidth: 1, borderColor: c.borderColor, borderRadius: radius.lg, padding: spacing.lg },
   sideTitle:     { fontSize: 14, fontWeight: '700', color: c.textMain },

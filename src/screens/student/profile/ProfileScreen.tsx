@@ -286,5 +286,5 @@ export const makeStyles = (c: AppColors, isDark: boolean) => StyleSheet.create({
   cancelBtn: { flex: 1, height: 46, borderRadius: radius.md, borderWidth: 1, borderColor: c.borderColor, alignItems: 'center', justifyContent: 'center' },
   cancelText: { fontSize: 14, fontWeight: '600', color: c.textMuted },
   saveBtn: { flex: 1, height: 46, borderRadius: radius.md, backgroundColor: c.accentYellow, alignItems: 'center', justifyContent: 'center' },
-  saveText: { fontSize: 14, fontWeight: '700', color: 'white' },
+  saveText: { fontSize: 14, fontWeight: '700', color: c.onPrimary },
 });

@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity, RefreshControl } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, RefreshControl } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import Header from '../../../components/common/Header';
@@ -32,7 +33,7 @@ export default function SchoolAdminParentsScreen({ navigation }: any) {
           <View style={styles.toolbar}>
             <View style={{ flex: 1 }} />
             <TouchableOpacity style={styles.addBtn} onPress={() => navigation?.navigate?.('SchoolAdminAddParent')} accessibilityRole="button">
-              <Feather name="user-plus" size={14} color="#0B0B0B" />
+              <Feather name="user-plus" size={14} color={colors.onPrimary} />
               <Text style={styles.addBtnText}>Add Parent</Text>
             </TouchableOpacity>
           </View>
@@ -65,9 +66,9 @@ function makeStyles(colors: AppColors) {
     screen: { flex: 1, backgroundColor: colors.bgDark },
     content: { padding: spacing.xl, paddingBottom: 60, maxWidth: 1080, width: '100%', alignSelf: 'center' },
     toolbar: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.lg },
-    addBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.accentYellow, borderRadius: radius.sm, paddingHorizontal: 14, height: 36 },
-    addBtnText: { fontFamily: fonts.serif, fontSize: 12.5, fontWeight: '700', color: '#0B0B0B' },
+    addBtn: { minHeight: 44, justifyContent: 'center', flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.accentYellow, borderRadius: radius.sm, paddingHorizontal: 14, height: 36 },
+    addBtnText: { minHeight: 44, justifyContent: 'center', fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.onPrimary },
     emptyBox: { alignItems: 'center', paddingTop: 56, gap: 10, paddingHorizontal: 24 },
-    emptyText: { fontFamily: fonts.serif, fontSize: 13, color: colors.textMuted, textAlign: 'center', lineHeight: 19 },
+    emptyText: { fontFamily: fonts.serif, fontSize: 14, color: colors.textMuted, textAlign: 'center', lineHeight: 19 },
   });
 }

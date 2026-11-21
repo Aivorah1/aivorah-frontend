@@ -32,7 +32,7 @@ export function makeStyles(colors: AppColors) {
     },
     searchInput: { flex: 1, fontSize: 13, fontFamily: fonts.serif, color: colors.textMain, padding: 0 } as any,
     markAllBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.accentYellow, paddingHorizontal: 12, height: 38, borderRadius: radius.sm },
-    markAllBtnText: { fontSize: 11.5, fontFamily: fonts.serif, fontWeight: '700', color: '#241f16' },
+    markAllBtnText: { fontSize: 11.5, fontFamily: fonts.serif, fontWeight: '700', color: '#1C2B37' },
     emptyContainer: { alignItems: 'center', paddingVertical: 48 },
     emptyText: { fontFamily: fonts.serif, fontSize: 13, color: colors.textMuted },
     errorBox: {
@@ -58,7 +58,7 @@ export function makeStyles(colors: AppColors) {
       flexDirection: 'row', alignItems: 'center', justifyContent: 'center', alignSelf: 'center', backgroundColor: colors.accentYellow,
       height: 44, paddingVertical: 0, paddingHorizontal: 24, borderRadius: 12, marginTop: 8,
     },
-    saveBtnText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: '#241f16' },
+    saveBtnText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: '#1C2B37' },
     saveMessage: { fontFamily: fonts.serif, fontSize: 13, textAlign: 'center' },
   });
 }

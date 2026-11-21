@@ -1,5 +1,5 @@
 export const TEAL = '#9FB2A4';  // sage
-export const GOLD = '#BAA467';
+export const GOLD = '#24877B';
 export const SAGE = '#82A896';
 
 const ICON_MAP: Record<string, string> = {

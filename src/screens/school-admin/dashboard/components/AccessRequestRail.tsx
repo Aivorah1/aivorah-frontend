@@ -125,7 +125,7 @@ export default function AccessRequestRail({
                   }}
                   accessibilityRole="button"
                 >
-                  <Feather name="check" size={13} color="#0B0B0B" />
+                  <Feather name="check" size={13} color={colors.onPrimary} />
                   <Text style={styles.reqApproveText}>Approve</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
   railMobile: { width: '100%', marginTop: 24 /* spacing.xl */ },
   sectionLabel: {
     fontFamily: fonts.serif,
-    fontSize: 10.5,
+    fontSize: 14,
     fontWeight: '700',
     letterSpacing: 0.6,
     marginBottom: 8 /* spacing.sm */,
@@ -173,16 +173,16 @@ const styles = StyleSheet.create({
   requestTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   requestName: { flex: 1, fontFamily: fonts.serif, fontSize: 14.5, fontWeight: '800' },
   ageTag: { borderWidth: 1, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 2 },
-  ageTagText: { fontFamily: fonts.serif, fontSize: 10.5, fontWeight: '700' },
+  ageTagText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700' },
   rolePill: { borderRadius: 999, paddingHorizontal: 8, paddingVertical: 2 },
   rolePillText: {
     fontFamily: fonts.serif,
-    fontSize: 10,
+    fontSize: 14,
     fontWeight: '800',
     textTransform: 'uppercase',
     letterSpacing: 0.4,
   },
-  requestMeta: { fontFamily: fonts.serif, fontSize: 12 },
+  requestMeta: { fontFamily: fonts.serif, fontSize: 14 },
   parentPreviewBox: {
     borderRadius: 6 /* radius.sm */,
     paddingHorizontal: 10,
@@ -190,9 +190,9 @@ const styles = StyleSheet.create({
     marginTop: 4,
     borderWidth: 1,
   },
-  requestParentLinked: { fontFamily: fonts.serif, fontSize: 12, lineHeight: 17 },
-  requestParentDim: { fontFamily: fonts.serif, fontSize: 11.5, lineHeight: 16 },
-  requestBtns: { flexDirection: 'row', gap: 8, marginTop: 10 },
+  requestParentLinked: { fontFamily: fonts.serif, fontSize: 14, lineHeight: 17 },
+  requestParentDim: { fontFamily: fonts.serif, fontSize: 14, lineHeight: 16 },
+  requestBtns: { minHeight: 44, justifyContent: 'center', flexDirection: 'row', gap: 8, marginTop: 10 },
   reqApprove: {
     flex: 1,
     flexDirection: 'row',
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
     borderRadius: 6 /* radius.sm */,
     paddingVertical: 10,
   },
-  reqApproveText: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '800', color: '#0B0B0B' },
+  reqApproveText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '800', color: '#FFFFFF' },
   reqReject: {
     flex: 1,
     flexDirection: 'row',
@@ -213,5 +213,5 @@ const styles = StyleSheet.create({
     borderRadius: 6 /* radius.sm */,
     paddingVertical: 10,
   },
-  reqRejectText: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '700' },
+  reqRejectText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700' },
 });

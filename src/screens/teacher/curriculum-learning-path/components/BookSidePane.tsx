@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, TextInput } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import type { AppColors } from '../../../../theme';
 import { bookSrc } from '../../../student/learning-paths/lesson-screen/utils/book';
 import { LearningPathTopic, TeacherBookPage } from '../types';
@@ -218,7 +219,7 @@ function SectionPicker({ topic, pages, pathGrade, subject, colors, onCancel, onR
         </TouchableOpacity>
         <TouchableOpacity testID="picker-rebuild" disabled={busy} onPress={rebuild}
           style={{ backgroundColor: busy ? colors.borderColor : colors.primary, borderRadius: 8, paddingHorizontal: 14, paddingVertical: 7 }}>
-          <Text style={{ fontSize: 13, fontWeight: '700', color: '#fff' }}>Rebuild topic</Text>
+          <Text style={{ fontSize: 13, fontWeight: '700', color: colors.onPrimary }}>Rebuild topic</Text>
         </TouchableOpacity>
       </View>
     </View>

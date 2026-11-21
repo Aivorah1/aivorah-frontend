@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import {
-  View, Text, StyleSheet, TouchableOpacity,
-  ActivityIndicator, Platform, Linking,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, Linking } from 'react-native';
+import ActivityIndicator from '../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { spacing, radius } from '../../theme';
 import type { AppColors } from '../../theme';
@@ -86,10 +84,10 @@ export default function VideoPlayerScreen({ navigation, route }: any) {
   }, [topic, grade]);
 
   const sourceColor: Record<string, string> = {
-    vyond:   '#BAA467',
+    vyond:   '#24877B',
     youtube: '#ef4444',
     vimeo:   '#9FB2A4',
-    custom:  '#BAA467',
+    custom:  '#24877B',
   };
 
   return (

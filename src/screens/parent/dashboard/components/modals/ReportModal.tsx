@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, ScrollView, Modal, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, ScrollView, Modal, TouchableOpacity, Platform } from 'react-native';
+import ActivityIndicator from '../../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../../theme';
 

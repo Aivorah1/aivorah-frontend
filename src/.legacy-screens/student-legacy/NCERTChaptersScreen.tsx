@@ -1,12 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import ActivityIndicator from '../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useStudentData } from '../../context/StudentDataContext';
@@ -56,22 +50,22 @@ const UNIT_ICONS: Record<string, string> = {
 
 const UNIT_COLORS: Record<string, string> = {
   // Mathematics
-  Numbers: '#BAA467',
+  Numbers: '#24877B',
   'Addition & Subtraction': '#9FB2A4',
-  Measurement: '#C9A24E',
-  Geometry: '#BAA467',
+  Measurement: '#24877B',
+  Geometry: '#24877B',
   'Weight & Mass': '#9FB2A4',
-  Time: '#C9A24E',
-  'Multiplication & Division': '#BAA467',
+  Time: '#24877B',
+  'Multiplication & Division': '#24877B',
   Patterns: '#9FB2A4',
-  Capacity: '#C9A24E',
-  'Division & Fractions': '#BAA467',
+  Capacity: '#24877B',
+  'Division & Fractions': '#24877B',
   'Data Handling': '#9FB2A4',
-  Money: '#C9A24E',
+  Money: '#24877B',
   // Science (EVS)
-  'Unit 1 — Our Families and Communities': '#C9A24E',
+  'Unit 1 — Our Families and Communities': '#24877B',
   'Unit 2 — Living Together': '#9FB2A4',
-  'Unit 3 — Gifts of Nature': '#BAA467',
+  'Unit 3 — Gifts of Nature': '#24877B',
   'Unit 4 — Things Around Us': '#9FB2A4',
 };
 
@@ -95,10 +89,10 @@ const CHAPTER_MODULES: Record<number, { math: boolean; drawing: boolean; words: 
 };
 
 const MODULE_DEFS = {
-  learn: { label: 'Start Learning', icon: 'zap', color: '#BAA467', route: 'Learn5E' },
+  learn: { label: 'Start Learning', icon: 'zap', color: '#24877B', route: 'Learn5E' },
   math: { label: 'Math Helper', icon: 'hash', color: '#9FB2A4', route: 'MathHelper' },
-  words: { label: 'Word Wizard', icon: 'book', color: '#C9A24E', route: 'WordWizard' },
-  draw: { label: 'Drawing Buddy', icon: 'edit-3', color: '#BAA467', route: 'DrawingBuddy' },
+  words: { label: 'Word Wizard', icon: 'book', color: '#24877B', route: 'WordWizard' },
+  draw: { label: 'Drawing Buddy', icon: 'edit-3', color: '#24877B', route: 'DrawingBuddy' },
 };
 
 // CBSE follows the NCERT syllabus, so it's the single NCERT-syllabus option (#157).
@@ -109,16 +103,16 @@ const CURRICULUM_META: Record<
   CurriculumKey,
   { accent: string; icon: string; sub: string; status: string }
 > = {
-  NCERT: { accent: '#BAA467', icon: 'book-open', sub: 'National Curriculum', status: 'Active' },
+  NCERT: { accent: '#24877B', icon: 'book-open', sub: 'National Curriculum', status: 'Active' },
   IB: { accent: '#9FB2A4', icon: 'globe', sub: 'International Baccalaureate', status: 'Coming Soon' },
-  CBSE: { accent: '#BAA467', icon: 'book-open', sub: 'NCERT syllabus', status: 'Active' },
+  CBSE: { accent: '#24877B', icon: 'book-open', sub: 'NCERT syllabus', status: 'Active' },
   IGCSE: { accent: '#9FB2A4', icon: 'award', sub: 'Cambridge Track', status: 'Coming Soon' },
 };
 
 const GRADE_META: Record<GradeKey, { accent: string; icon: string }> = {
-  'Grade 3': { accent: '#BAA467', icon: 'book' },
+  'Grade 3': { accent: '#24877B', icon: 'book' },
   'Grade 4': { accent: '#9FB2A4', icon: 'compass' },
-  'Grade 5': { accent: '#C9A24E', icon: 'trending-up' },
+  'Grade 5': { accent: '#24877B', icon: 'trending-up' },
 };
 
 function ChapterCard({

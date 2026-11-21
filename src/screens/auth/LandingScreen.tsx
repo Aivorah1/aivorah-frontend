@@ -1,66 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Platform,
-  ActivityIndicator,
-  Alert,
-  Modal,
-  Dimensions,
-  useWindowDimensions,
-} from 'react-native';
-import { Feather } from '@expo/vector-icons';
-import Svg, { Path, Defs, LinearGradient as SvgGrad, Stop, Rect } from 'react-native-svg';
+import { View, Text, TouchableOpacity, Platform, Alert, Modal, BackHandler, Pressable } from 'react-native';
+import ActivityIndicator from '../../components/common/AivorahLoader';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import Svg, { Path } from 'react-native-svg';
 import { useAuth, UserRole } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { validateLoginForm, validateSignupForm } from './utils/validation';
-import SERVER_URL from '../../config/serverUrl';
 import PROFILE_SERVER_URL from '../../config/profileServerUrl';
 import AUTH_SERVER_URL from '../../config/authServerUrl';
 import { faceLoginAvailable, signInWithFace, faceLoginErrorMessage, rememberFaceLoginOffer } from '../../services/faceLogin';
-import { BLOCKED_ACCOUNT_MESSAGE } from '../../constants/supportContact';
+import { AUTH_PAGE_PATHS, AuthPage, authPageFromPath } from './authRoutes';
+import {
+  HomeThemeProvider, useHomeTheme, useAuthLayout, AuthShell, AuthCard, AuthHeading, AuthField, FieldLabel,
+  PasswordEye, PrimaryButton, OutlineButton, OrDivider, Notice, TextLink, SelectChip, RoleTile, Checkbox,
+  FramedPanel, SignInArt, CreateBookArt, Decorative, SANS, SERIF,
+} from './authTheme';
 
-// ─────────────────────────────────────────────────────────
-// Constants
-// ─────────────────────────────────────────────────────────
-// ── Enchanting Forest palette ─────────────────────────────
-const BG        = '#050705';
-const CARD      = '#101510';
-const SURFACE   = '#151D17';
-const BORDER    = 'rgba(197,255,218,0.18)';
-const MUTED     = '#B6C7B9';
-const DIM       = '#728173';
-const FORE      = '#F5F7F0';
-const CYAN      = '#B7F2C7';
-const BLUE      = '#6FAF91';
-const GREEN     = '#8FE6AE';
-const AMBER     = '#F4B84A';
-const RED       = '#E07F7F';
-const PURPLE    = '#E8C77A';
-
-// ── Lovable landing design palette (sage + gold on near-black) ────────────
-// Kept separate from the shared tokens above so the auth modals stay untouched.
-const LBG     = '#0B0B0B';
-const LSURF   = '#141414';
-const LSURF2  = '#101010';
-const LLINE   = 'rgba(245,243,238,0.08)';
-const LLINE2  = 'rgba(245,243,238,0.14)';
-const LTEXT   = '#F5F3EE';
-const LMUTED  = '#A9B0AC';
-const SAGE    = '#9FB2A4';
-const GOLD    = '#BAA467';
-const SERIF   = Platform.OS === 'web' ? '"Fraunces", Georgia, serif' : 'Georgia';
-
-const { width: WIN_W } = Dimensions.get('window');
 const IS_WEB = Platform.OS === 'web';
-const IS_LARGE = WIN_W >= 900;
 
 // ─────────────────────────────────────────────────────────
-// Google SVG Icon
+// Google SVG Icon (Google's own mark — keep its branding)
 // ─────────────────────────────────────────────────────────
 function GoogleIcon() {
   return (
@@ -73,138 +32,31 @@ function GoogleIcon() {
   );
 }
 
-// ─────────────────────────────────────────────────────────
-// Gradient button (SVG-backed gradient)
-// ─────────────────────────────────────────────────────────
-function GradientButton({ label, onPress, style, textStyle, icon, loading }: {
-  label: string; onPress: () => void; style?: any; textStyle?: any;
-  icon?: string; loading?: boolean;
-}) {
-  const [h, setH] = useState(52);
-  const [w, setW] = useState(200);
+function GoogleButton({ label, loading, onPress }: { label: string; loading: boolean; onPress: () => void }) {
+  const { t } = useHomeTheme();
   return (
-    <TouchableOpacity
+    <OutlineButton
+      label={label}
       onPress={onPress}
-      activeOpacity={0.85}
-      disabled={loading}
-      onLayout={e => { setH(e.nativeEvent.layout.height); setW(e.nativeEvent.layout.width); }}
-      style={[{ overflow: 'hidden', borderRadius: 8 }, style]}
-    >
-      <Svg style={StyleSheet.absoluteFill as any} width={w} height={h} pointerEvents="none">
-        <Defs>
-          <SvgGrad id="grad" x1="0" y1="0" x2="1" y2="0">
-            <Stop offset="0" stopColor="#8FE6AE" stopOpacity="1" />
-            <Stop offset="0.58" stopColor="#B7F2C7" stopOpacity="1" />
-            <Stop offset="1" stopColor="#F4B84A" stopOpacity="1" />
-          </SvgGrad>
-        </Defs>
-        <Rect x="0" y="0" width={w} height={h} fill="url(#grad)" />
-      </Svg>
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingHorizontal: 24, paddingVertical: 14 }}>
-        {loading ? (
-          <ActivityIndicator color="#061008" size="small" />
-        ) : (
-          <>
-            {icon && <Feather name={icon as any} size={15} color="#061008" />}
-            <Text style={[{ fontSize: 15, fontWeight: '700', color: '#061008' }, textStyle]}>{label}</Text>
-          </>
-        )}
-      </View>
-    </TouchableOpacity>
+      leading={loading ? <ActivityIndicator size="small" color={t.heading} /> : <GoogleIcon />}
+    />
   );
 }
 
-// ─────────────────────────────────────────────────────────
-// Ghost / outline button
-// ─────────────────────────────────────────────────────────
-function GhostButton({ label, onPress, style }: { label: string; onPress: () => void; style?: any }) {
+function FooterLine({ text, link, onPress, tone = 'accent' }: { text: string; link: string; onPress: () => void; tone?: 'accent' | 'primary' }) {
+  const { t } = useHomeTheme();
   return (
-    <TouchableOpacity
-      onPress={onPress}
-      activeOpacity={0.8}
-      style={[s.ghostBtn, style]}
-    >
-      <Text style={s.ghostBtnText}>{label}</Text>
-    </TouchableOpacity>
-  );
-}
-
-// ─────────────────────────────────────────────────────────
-// Firebase error helper
-// ─────────────────────────────────────────────────────────
-function getFbError(code: string): string {
-  switch (code) {
-    case 'auth/user-not-found':        return 'No account found with this email.';
-    case 'auth/wrong-password':        return 'Incorrect password.';
-    case 'auth/invalid-credential':    return 'Invalid email or password.';
-    case 'auth/email-already-in-use':  return 'An account with this email already exists.';
-    case 'auth/weak-password':         return 'Password must be at least 6 characters.';
-    case 'auth/invalid-email':         return 'Please enter a valid email address.';
-    case 'auth/user-disabled':         return BLOCKED_ACCOUNT_MESSAGE;
-    case 'auth/too-many-requests':     return 'Too many attempts. Please try again later.';
-    case 'auth/network-request-failed': return 'Network error. Check your connection.';
-    case 'auth/popup-closed-by-user':  return 'Google sign-in was cancelled.';
-    default:                           return 'Something went wrong. Please try again.';
-  }
-}
-
-// ─────────────────────────────────────────────────────────
-// Role chip rows
-// Login: all three roles | Signup: only teacher + parent
-// (Students are created by parent or teacher)
-// ─────────────────────────────────────────────────────────
-const ROLE_LABELS: UserRole[]        = ['student', 'teacher', 'parent'];
-const SIGNUP_ROLE_LABELS: UserRole[] = ['teacher', 'parent'];
-function RoleChips({ selected, onSelect }: { selected: UserRole; onSelect: (r: UserRole) => void }) {
-  return (
-    <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap', marginBottom: 18 }}>
-      {ROLE_LABELS.map(r => (
-        <TouchableOpacity
-          key={r}
-          onPress={() => onSelect(r)}
-          activeOpacity={0.75}
-          style={[s.roleChip, selected === r && s.roleChipActive]}
-        >
-          <Text style={[s.roleChipText, selected === r && s.roleChipTextActive]}>
-            {r.charAt(0).toUpperCase() + r.slice(1)}
-          </Text>
-        </TouchableOpacity>
-      ))}
+    <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap', gap: 5, marginTop: 18 }}>
+      <Text style={{ fontFamily: SANS, fontSize: 15, color: t.text }}>{text}</Text>
+      <TextLink label={link} onPress={onPress} tone={tone} />
     </View>
   );
 }
 
 // ─────────────────────────────────────────────────────────
-// Auth Modal shell
+// Roles: sign-up offers all three (students 14+ may self-register)
 // ─────────────────────────────────────────────────────────
-function AuthModal({ visible, onClose, children }: { visible: boolean; onClose: () => void; children: React.ReactNode }) {
-  // Live viewport height — cap the modal body so it never spills past the screen
-  // (e.g. short Mac windows). The body scrolls within this cap; the close button
-  // stays pinned outside the scroll area so it's always reachable.
-  const { height: winH } = useWindowDimensions();
-  // Subtract overlay + modal chrome (~padding) so the whole card fits on screen,
-  // with a sensible floor for very short windows.
-  const bodyMaxHeight = Math.max(320, winH - 112);
-  if (!visible) return null;
-  return (
-    <View style={s.overlay}>
-      <TouchableOpacity activeOpacity={1} style={s.overlayBg} onPress={onClose} />
-      <View style={[s.modal, { maxHeight: winH - 40 }]}>
-        <TouchableOpacity style={s.modalClose} onPress={onClose}>
-          <Feather name="x" size={18} color={MUTED} />
-        </TouchableOpacity>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          style={{ maxHeight: bodyMaxHeight }}
-          contentContainerStyle={{ paddingBottom: 4 }}
-        >
-          {children}
-        </ScrollView>
-      </View>
-    </View>
-  );
-}
+const ROLE_LABELS: UserRole[] = ['student', 'teacher', 'parent'];
 
 // ─────────────────────────────────────────────────────────
 // Date of birth picker (themed calendar; outputs DD/MM/YYYY)
@@ -213,6 +65,7 @@ const MONTH_NAMES = ['January','February','March','April','May','June','July','A
 const WEEKDAYS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
 
 function DobPicker({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  const { t } = useHomeTheme();
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<'days' | 'years'>('days');
   const today = new Date();
@@ -252,60 +105,67 @@ function DobPicker({ label, value, onChange }: { label: string; value: string; o
   for (let y = today.getFullYear(); y >= 1950; y--) years.push(y);
 
   const displayText = parsed ? `${pad(parsed.d)} ${MONTH_NAMES[parsed.m].slice(0,3)} ${parsed.y}` : 'Select your date of birth';
+  const navBtn = { width: 36, height: 36, borderRadius: 10, alignItems: 'center' as const, justifyContent: 'center' as const, borderWidth: 1, borderColor: t.line };
 
   return (
-    <View style={{ marginBottom: 18, zIndex: open ? 50 : 1 }}>
-      <Text style={s.formLabel}>{label}</Text>
-      <TouchableOpacity
-        activeOpacity={0.8}
-        style={[s.inputWrap, open && { borderColor: CYAN }]}
+    <View style={{ marginBottom: 18 }}>
+      <FieldLabel>{label}</FieldLabel>
+      <Pressable
         onPress={() => { setOpen(o => !o); setMode('days'); }}
+        accessibilityRole="button"
+        accessibilityLabel={`${label}: ${displayText}`}
+        accessibilityState={{ expanded: open }}
+        style={{
+          flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 48, borderRadius: 12,
+          borderWidth: 1.5, borderColor: open ? t.focus : t.inputLine, backgroundColor: t.input, paddingHorizontal: 14,
+        }}
       >
-        <Text style={[s.input, { color: parsed ? FORE : DIM }]}>{displayText}</Text>
-        <Feather name="calendar" size={15} color={DIM} />
-      </TouchableOpacity>
+        <Text style={{ fontFamily: SANS, fontSize: 16, color: parsed ? t.text : t.placeholder }}>{displayText}</Text>
+        <Feather name="calendar" size={17} color={t.muted} />
+      </Pressable>
 
       {open && (
-        <View style={s.dobCal}>
-          {/* Header */}
-          <View style={s.dobHead}>
-            <View style={s.dobNavGroup}>
-              <TouchableOpacity onPress={() => shiftYear(-1)} style={s.dobNav}><Feather name="chevrons-left" size={16} color={FORE} /></TouchableOpacity>
-              <TouchableOpacity onPress={() => shiftMonth(-1)} style={s.dobNav}><Feather name="chevron-left" size={16} color={FORE} /></TouchableOpacity>
+        <View style={{ marginTop: 8, padding: 12, borderRadius: 14, borderWidth: 1, borderColor: t.line, backgroundColor: t.card }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <View style={{ flexDirection: 'row', gap: 6 }}>
+              <TouchableOpacity accessibilityLabel="Previous year" onPress={() => shiftYear(-1)} style={navBtn}><Feather name="chevrons-left" size={16} color={t.heading} /></TouchableOpacity>
+              <TouchableOpacity accessibilityLabel="Previous month" onPress={() => shiftMonth(-1)} style={navBtn}><Feather name="chevron-left" size={16} color={t.heading} /></TouchableOpacity>
             </View>
             <TouchableOpacity onPress={() => setMode(mode === 'years' ? 'days' : 'years')} style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-              <Text style={s.dobHeadLabel}>{MONTH_NAMES[view.m]} {view.y}</Text>
-              <Feather name="chevron-down" size={14} color={MUTED} />
+              <Text style={{ fontFamily: SANS, fontSize: 15, fontWeight: '600', color: t.heading }}>{MONTH_NAMES[view.m]} {view.y}</Text>
+              <Feather name="chevron-down" size={14} color={t.muted} />
             </TouchableOpacity>
-            <View style={s.dobNavGroup}>
-              <TouchableOpacity onPress={() => shiftMonth(1)} style={s.dobNav}><Feather name="chevron-right" size={16} color={FORE} /></TouchableOpacity>
-              <TouchableOpacity onPress={() => shiftYear(1)} style={s.dobNav}><Feather name="chevrons-right" size={16} color={FORE} /></TouchableOpacity>
+            <View style={{ flexDirection: 'row', gap: 6 }}>
+              <TouchableOpacity accessibilityLabel="Next month" onPress={() => shiftMonth(1)} style={navBtn}><Feather name="chevron-right" size={16} color={t.heading} /></TouchableOpacity>
+              <TouchableOpacity accessibilityLabel="Next year" onPress={() => shiftYear(1)} style={navBtn}><Feather name="chevrons-right" size={16} color={t.heading} /></TouchableOpacity>
             </View>
           </View>
 
           {mode === 'years' ? (
-            <ScrollView style={{ maxHeight: 200 }}>
-              <View style={s.dobYearGrid}>
+            <View style={{ maxHeight: 220, overflow: 'scroll' as any }}>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
                 {years.map(y => (
-                  <TouchableOpacity key={y} style={[s.dobYear, y === view.y && s.dobSel]} onPress={() => { setView(v => ({ ...v, y })); setMode('days'); }}>
-                    <Text style={[s.dobYearTxt, y === view.y && { color: '#0b0b0b', fontWeight: '700' }]}>{y}</Text>
+                  <TouchableOpacity key={y} onPress={() => { setView(v => ({ ...v, y })); setMode('days'); }}
+                    style={{ width: '23%', paddingVertical: 9, borderRadius: 10, alignItems: 'center', backgroundColor: y === view.y ? t.primary : 'transparent' }}>
+                    <Text style={{ fontFamily: SANS, fontSize: 14, color: y === view.y ? t.onPrimary : t.text, fontWeight: y === view.y ? '700' : '400' }}>{y}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
-            </ScrollView>
+            </View>
           ) : (
             <>
-              <View style={s.dobDow}>
-                {WEEKDAYS.map(w => <Text key={w} style={s.dobDowTxt}>{w}</Text>)}
+              <View style={{ flexDirection: 'row' }}>
+                {WEEKDAYS.map(w => <Text key={w} style={{ flex: 1, textAlign: 'center', fontFamily: SANS, fontSize: 12, color: t.muted, paddingVertical: 4 }}>{w}</Text>)}
               </View>
-              <View style={s.dobGrid}>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                 {cells.map((d, i) => {
-                  if (d === null) return <View key={`e${i}`} style={s.dobCell} />;
+                  if (d === null) return <View key={`e${i}`} style={{ width: `${100 / 7}%`, height: 40 }} />;
                   const isFuture = new Date(view.y, view.m, d) > today;
                   const isSel = d === selDay && view.m === selMonth && view.y === selYear;
                   return (
-                    <TouchableOpacity key={d} disabled={isFuture} style={[s.dobCell, isSel && s.dobSel]} onPress={() => pick(d)}>
-                      <Text style={[s.dobCellTxt, isFuture && { color: DIM, opacity: 0.4 }, isSel && { color: '#0b0b0b', fontWeight: '700' }]}>{d}</Text>
+                    <TouchableOpacity key={d} disabled={isFuture} onPress={() => pick(d)}
+                      style={{ width: `${100 / 7}%`, height: 40, alignItems: 'center', justifyContent: 'center', borderRadius: 10, backgroundColor: isSel ? t.primary : 'transparent' }}>
+                      <Text style={{ fontFamily: SANS, fontSize: 14, color: isSel ? t.onPrimary : t.text, opacity: isFuture ? 0.35 : 1, fontWeight: isSel ? '700' : '400' }}>{d}</Text>
                     </TouchableOpacity>
                   );
                 })}
@@ -319,46 +179,16 @@ function DobPicker({ label, value, onChange }: { label: string; value: string; o
 }
 
 // ─────────────────────────────────────────────────────────
-// Form input
+// SIGN IN form
 // ─────────────────────────────────────────────────────────
-function FormInput({ label, value, onChange, placeholder, secureTextEntry, keyboardType, autoCapitalize, rightEl }: {
-  label: string; value: string; onChange: (v: string) => void; placeholder: string;
-  secureTextEntry?: boolean; keyboardType?: any; autoCapitalize?: any; rightEl?: React.ReactNode;
-}) {
-  const [focused, setFocused] = useState(false);
-  return (
-    <View style={{ marginBottom: 18 }}>
-      <Text style={s.formLabel}>{label}</Text>
-      <View style={[s.inputWrap, focused && { borderColor: CYAN }]}>
-        <TextInput
-          style={s.input}
-          value={value}
-          onChangeText={onChange}
-          placeholder={placeholder}
-          placeholderTextColor={DIM}
-          secureTextEntry={secureTextEntry}
-          keyboardType={keyboardType}
-          autoCapitalize={autoCapitalize || 'none'}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-        />
-        {rightEl}
-      </View>
-    </View>
-  );
-}
-
-// ─────────────────────────────────────────────────────────
-// LOGIN MODAL
-// ─────────────────────────────────────────────────────────
-function LoginModal({ visible, onClose, onSwitchSignup, onSwitchForgot, signInEmail, signInGoogle, addParentRoleSSO, externalError, onClearExternalError }: {
-  visible: boolean; onClose: () => void; onSwitchSignup: () => void; onSwitchForgot: () => void;
+function LoginForm({ onDone, onSwitchSignup, onSwitchForgot, signInEmail, signInGoogle, addParentRoleSSO, externalError }: {
+  onDone: () => void; onSwitchSignup: () => void; onSwitchForgot: () => void;
   signInEmail: (email: string, pass: string) => Promise<void>;
   signInGoogle: (role?: UserRole) => Promise<void>;
   addParentRoleSSO: (email: string) => Promise<void>;
   externalError?: string | null;
-  onClearExternalError?: () => void;
 }) {
+  const { t } = useHomeTheme();
   // Sign-in needs NO role — returning users' role comes from their account.
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
@@ -369,15 +199,15 @@ function LoginModal({ visible, onClose, onSwitchSignup, onSwitchForgot, signInEm
   // Face login (passkeys): only offered where this device can do it.
   const [faceAvailable, setFaceAvailable] = useState(false);
   const [faceLoading, setFaceLoading] = useState(false);
-  useEffect(() => { if (visible) faceLoginAvailable().then(setFaceAvailable); }, [visible]);
+  useEffect(() => { faceLoginAvailable().then(setFaceAvailable); }, []);
   async function faceSignIn() {
     setError(''); setFaceLoading(true);
-    try { await signInWithFace(); onClose(); }
+    try { await signInWithFace(); onDone(); }
     catch (e: any) { setError(faceLoginErrorMessage(e)); }
     finally { setFaceLoading(false); }
   }
 
-  // Show external error (e.g. role mismatch from Google SSO) and re-open modal
+  // Show external error (e.g. role mismatch from Google SSO)
   useEffect(() => {
     // Don't show internal signals as error text — LandingScreen handles these via Alert
     // eslint-disable-next-line react-hooks/set-state-in-effect -- syncs an externally-owned error signal, external sync
@@ -391,9 +221,9 @@ function LoginModal({ visible, onClose, onSwitchSignup, onSwitchForgot, signInEm
     const validation = validateLoginForm({ email: emailTrim, pass: passTrim });
     if (!validation.valid) { setError(validation.error!); return; }
     setLoading(true);
-    try { await signInEmail(emailTrim, passTrim); onClose(); }
-    catch (e: any) { 
-      setError(e.message || 'Something went wrong. Please try again.'); 
+    try { await signInEmail(emailTrim, passTrim); onDone(); }
+    catch (e: any) {
+      setError(e.message || 'Something went wrong. Please try again.');
     }
     finally { setLoading(false); }
   }
@@ -401,9 +231,9 @@ function LoginModal({ visible, onClose, onSwitchSignup, onSwitchForgot, signInEm
   async function googleSignIn() {
     setError('');
     setGoogleLoading(true);
-    try { await signInGoogle(); onClose(); }   // no role — returning user uses their stored role
+    try { await signInGoogle(); onDone(); }   // no role — returning user uses their stored role
     catch (e: any) {
-      // Brand-new Google user used the "Welcome back" modal → send them to Sign-Up
+      // Brand-new Google user used "Welcome back" → send them to Sign-Up
       // to pick a role. Returning users never hit this (they have a stored role).
       if (e.message?.startsWith('NEW_GOOGLE_USER:')) {
         setGoogleLoading(false);
@@ -422,7 +252,7 @@ function LoginModal({ visible, onClose, onSwitchSignup, onSwitchForgot, signInEm
               text: 'Yes, Add Parent Profile',
               onPress: async () => {
                 setGoogleLoading(true);
-                try { await addParentRoleSSO(teacherEmail); onClose(); }
+                try { await addParentRoleSSO(teacherEmail); onDone(); }
                 catch { setError('Could not add Parent profile. Please try again.'); }
                 finally { setGoogleLoading(false); }
               },
@@ -437,68 +267,63 @@ function LoginModal({ visible, onClose, onSwitchSignup, onSwitchForgot, signInEm
   }
 
   return (
-    <AuthModal visible={visible} onClose={onClose}>
-      <Text style={s.modalTitle}>Welcome back</Text>
-      <Text style={s.modalSubtitle}>Sign in to your Aivorah account</Text>
+    <>
+      <AuthHeading title="Welcome back" subtitle="Sign in to your Aivorah account" />
 
-      <TouchableOpacity style={s.googleBtn} onPress={googleSignIn} activeOpacity={0.85}>
-        {googleLoading ? <ActivityIndicator size="small" color="#3c4043" /> : <GoogleIcon />}
-        <Text style={s.googleBtnText}>Sign in with Google</Text>
-      </TouchableOpacity>
+      <GoogleButton label="Sign in with Google" loading={googleLoading} onPress={googleSignIn} />
 
-      <View style={s.divider}><View style={s.divLine} /><Text style={s.divText}>or continue with email</Text><View style={s.divLine} /></View>
+      <OrDivider />
 
-      <FormInput label="Email address" value={email} onChange={setEmail} placeholder="you@example.com" keyboardType="email-address" />
-      <View style={{ marginBottom: 6 }}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
-          <Text style={s.formLabel}>Password</Text>
-          <TouchableOpacity onPress={onSwitchForgot}><Text style={s.linkText}>Forgot password?</Text></TouchableOpacity>
-        </View>
-        <View style={s.inputWrap}>
-          <TextInput style={[s.input, { flex: 1 }]} value={pass} onChangeText={setPass} placeholder="••••••••" placeholderTextColor={DIM} secureTextEntry={!showPass} />
-          <TouchableOpacity onPress={() => setShowPass(!showPass)} style={{ padding: 4 }}>
-            <Feather name={showPass ? 'eye-off' : 'eye'} size={14} color={DIM} />
-          </TouchableOpacity>
-        </View>
+      <AuthField
+        label="Email address" value={email} onChangeText={setEmail} placeholder="you@example.com"
+        keyboardType="email-address" autoCapitalize="none" autoComplete="email" textContentType="emailAddress"
+        invalid={!!error && !email.trim()}
+      />
+      <AuthField
+        label="Password" value={pass} onChangeText={setPass} placeholder="••••••••"
+        secureTextEntry={!showPass} autoCapitalize="none" autoComplete="current-password" textContentType="password"
+        onSubmitEditing={submit} returnKeyType="go" style={{ marginBottom: 8 }}
+        invalid={!!error && !pass.trim()}
+        rightEl={<PasswordEye shown={showPass} onToggle={() => setShowPass(!showPass)} />}
+      />
+      <View style={{ alignItems: 'flex-end', marginBottom: 18 }}>
+        <TextLink label="Forgot password?" onPress={onSwitchForgot} />
       </View>
 
-      {!!error && <View style={s.errorBox}><Feather name="alert-circle" size={13} color={RED} /><Text style={s.errorText}>{error}</Text></View>}
+      {!!error && <Notice kind="error">{error}</Notice>}
 
-      <GradientButton label="Sign In" onPress={submit} loading={loading} style={{ marginTop: 8 }} />
+      <PrimaryButton label="Sign In" onPress={submit} loading={loading} />
       {faceAvailable && (
-        <TouchableOpacity
+        <OutlineButton
           testID="login-face"
-          style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 10, paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: BORDER }}
+          label="Use face authentication"
+          leading={<MaterialCommunityIcons name="face-recognition" size={20} color={t.heading} />}
           onPress={faceSignIn}
-          disabled={faceLoading}
-          activeOpacity={0.85}
-          accessibilityRole="button"
-        >
-          {faceLoading ? <ActivityIndicator size="small" color={CYAN} /> : <Feather name="smile" size={16} color={CYAN} />}
-          <Text style={{ color: FORE, fontWeight: '700', fontSize: 14 }}>Use face authentication</Text>
-        </TouchableOpacity>
+          loading={faceLoading}
+          style={{ marginTop: 12 }}
+        />
       )}
-      <View style={s.formFooter}>
-        <Text style={s.footerText}>Don&apos;t have an account? </Text>
-        <TouchableOpacity onPress={onSwitchSignup}><Text style={s.linkText}>Sign up free</Text></TouchableOpacity>
-      </View>
-    </AuthModal>
+      <FooterLine text="Don't have an account?" link="Sign up free" onPress={onSwitchSignup} />
+    </>
   );
 }
 
 // ─────────────────────────────────────────────────────────
-// SIGN UP MODAL
+// CREATE ACCOUNT form
 // ─────────────────────────────────────────────────────────
 // CBSE follows the NCERT syllabus, so NCERT is not a separate board option (#157).
 const CURRICULA = ['IB PYP', 'IB MYP', 'IB DP', 'CBSE', 'ICSE', 'Cambridge'];
 
-function SignupModal({ visible, onClose, onSwitchLogin, signUpEmail, signInGoogle, addParentRole, addParentRoleSSO }: {
-  visible: boolean; onClose: () => void; onSwitchLogin: () => void;
+function SignupForm({ onDone, onSwitchLogin, signUpEmail, signInGoogle, addParentRole, addParentRoleSSO }: {
+  onDone: () => void; onSwitchLogin: () => void;
   signUpEmail: (name: string, email: string, pass: string, role: UserRole, curriculum?: string) => Promise<void>;
   signInGoogle: (role: UserRole) => Promise<void>;
   addParentRole: (email: string, password: string) => Promise<void>;
   addParentRoleSSO: (email: string) => Promise<void>;
 }) {
+  const { t } = useHomeTheme();
+  const { width } = useAuthLayout();
+  const twoCol = width >= 760;
   const [role, setRole]             = useState<UserRole>('student');
   const [curriculum, setCurriculum] = useState('CBSE');
   const [name, setName]             = useState('');
@@ -509,14 +334,13 @@ function SignupModal({ visible, onClose, onSwitchLogin, signUpEmail, signInGoogl
   const [error, setError]           = useState('');
   const [loading, setLoading]       = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [emailSent, setEmailSent]   = useState(false); // post-signup verification screen
 
   const showCurriculum = role === 'student' || role === 'teacher';
   // Optional: set up face login right after the account is created
   // (on the Verify Email screen, where the user is signed in).
   const [faceAvailable, setFaceAvailable] = useState(false);
   const [addFace, setAddFace] = useState(false);
-  useEffect(() => { if (visible) faceLoginAvailable().then(setFaceAvailable); }, [visible]);
+  useEffect(() => { faceLoginAvailable().then(setFaceAvailable); }, []);
 
   async function submit() {
     setError('');
@@ -538,7 +362,7 @@ function SignupModal({ visible, onClose, onSwitchLogin, signUpEmail, signInGoogl
           body: JSON.stringify({ email: emailTrim.toLowerCase(), role: 'student', dob: dob.trim() }),
         }).catch(() => {});
       }
-      onClose();
+      onDone();
     } catch (e: any) {
       // Teacher trying to sign up as Parent → offer to add Parent profile
       if (e.message?.startsWith('TEACHER_ADD_PARENT:')) {
@@ -554,7 +378,7 @@ function SignupModal({ visible, onClose, onSwitchLogin, signUpEmail, signInGoogl
                 setLoading(true);
                 try {
                   await addParentRole(emailTrim, pass);
-                  onClose();
+                  onDone();
                 } catch {
                   setError('Could not add Parent profile. Please check your password and try again.');
                 } finally {
@@ -575,7 +399,7 @@ function SignupModal({ visible, onClose, onSwitchLogin, signUpEmail, signInGoogl
   async function googleSignIn() {
     setError('');
     setGoogleLoading(true);
-    try { await signInGoogle(role); onClose(); }
+    try { await signInGoogle(role); onDone(); }
     catch (e: any) {
       // Teacher signing in as Parent via Google SSO → offer to club profiles
       if (e.message?.startsWith('TEACHER_ADD_PARENT:')) {
@@ -592,7 +416,7 @@ function SignupModal({ visible, onClose, onSwitchLogin, signUpEmail, signInGoogl
                 setGoogleLoading(true);
                 try {
                   await addParentRoleSSO(teacherEmail);
-                  onClose();
+                  onDone();
                 } catch {
                   setError('Could not add Parent profile. Please try again.');
                 } finally {
@@ -608,126 +432,95 @@ function SignupModal({ visible, onClose, onSwitchLogin, signUpEmail, signInGoogl
     } finally { setGoogleLoading(false); }
   }
 
-  // ── Email verification sent screen ──────────────────────────────────────────
-  if (emailSent) {
-    return (
-      <AuthModal visible={visible} onClose={() => { setEmailSent(false); onClose(); }}>
-        <View style={{ alignItems: 'center', gap: 16, paddingVertical: 12 }}>
-          <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: '#10b98120', alignItems: 'center', justifyContent: 'center' }}>
-            <Feather name="mail" size={30} color="#10b981" />
-          </View>
-          <Text style={[s.modalTitle, { textAlign: 'center' }]}>Check your email</Text>
-          <Text style={[s.modalSubtitle, { textAlign: 'center', lineHeight: 22 }]}>
-            We&apos;ve sent a verification link to{'\n'}
-            <Text style={{ color: CYAN, fontWeight: '700' }}>{email.trim()}</Text>
-            {'\n\n'}Click the link in the email to activate your account before signing in.
-          </Text>
-          <View style={{ backgroundColor: '#f59e0b18', borderRadius: 10, padding: 14, borderWidth: 1, borderColor: '#f59e0b40' }}>
-            <Text style={{ color: '#f59e0b', fontSize: 12, lineHeight: 18, textAlign: 'center' }}>
-              Didn&apos;t receive it? Check your spam folder or try signing up again.
-            </Text>
-          </View>
-          <GradientButton label="Go to Sign In" onPress={() => { setEmailSent(false); onClose(); onSwitchLogin(); }} style={{ width: '100%', marginTop: 4 }} />
-        </View>
-      </AuthModal>
-    );
-  }
+  const row = { flexDirection: twoCol ? 'row' as const : 'column' as const, gap: twoCol ? 16 : 0 };
+  const cell = twoCol ? { flex: 1 } : null;
 
-  // ── Main signup form ─────────────────────────────────────────────────────────
+  const passwordField = (
+    <AuthField
+      label="Password" value={pass} onChangeText={setPass} placeholder="At least 6 characters"
+      secureTextEntry={!showPass} autoCapitalize="none" autoComplete="new-password" textContentType="newPassword"
+      style={cell} invalid={!!error && !pass}
+      rightEl={<PasswordEye shown={showPass} onToggle={() => setShowPass(!showPass)} />}
+    />
+  );
+
   return (
-    <AuthModal visible={visible} onClose={onClose}>
-      <Text style={s.modalTitle}>Create your account</Text>
+    <>
+      <AuthHeading title="Create your account" align="left" ornament={false} />
+      <View style={{ width: 48, height: 2, backgroundColor: t.accent, marginTop: -12, marginBottom: 20, borderRadius: 1 }} />
 
       {/* Role FIRST — chosen before Google SSO (and used for email signup too) */}
-      <Text style={[s.formLabel, { marginBottom: 8 }]}>I&apos;m creating an account as</Text>
-      <RoleChips selected={role} onSelect={r => { setRole(r); setError(''); setDob(''); }} />
+      <FieldLabel>I&apos;m creating an account as</FieldLabel>
+      <View accessibilityRole="radiogroup" style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 14 }}>
+        {ROLE_LABELS.map(r => (
+          <RoleTile key={r} label={r.charAt(0).toUpperCase() + r.slice(1)} selected={role === r}
+            onPress={() => { setRole(r); setError(''); setDob(''); }} />
+        ))}
+      </View>
 
       {/* Under-14 notice — shown when student role selected */}
       {role === 'student' && (
-        <View style={{ backgroundColor: '#0B0B0B', borderRadius: 10, padding: 12, borderWidth: 1, borderColor: 'rgba(186,164,103,0.45)', marginTop: 12, marginBottom: 4 }}>
-          <Text style={{ color: GOLD, fontSize: 12, lineHeight: 18 }}>
-            Students aged 14 and above can register here.{'\n'}
-            If you are under 14, ask your parent or teacher to create your account.
-          </Text>
-        </View>
+        <Notice kind="info">
+          {'Students aged 14 and above can register here.\nIf you are under 14, ask your parent or teacher to create your account.'}
+        </Notice>
       )}
 
-      <TouchableOpacity style={[s.googleBtn, { marginTop: 16 }]} onPress={googleSignIn} activeOpacity={0.85}>
-        {googleLoading ? <ActivityIndicator size="small" color="#3c4043" /> : <GoogleIcon />}
-        <Text style={s.googleBtnText}>Sign up with Google</Text>
-      </TouchableOpacity>
+      <GoogleButton label="Sign up with Google" loading={googleLoading} onPress={googleSignIn} />
 
-      <View style={s.divider}><View style={s.divLine} /><Text style={s.divText}>or continue with email</Text><View style={s.divLine} /></View>
+      <OrDivider />
 
       {showCurriculum && (
         <View style={{ marginBottom: 18 }}>
-          <Text style={s.formLabel}>Curriculum</Text>
-          <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap', marginTop: 6 }}>
+          <FieldLabel>Curriculum</FieldLabel>
+          <View accessibilityRole="radiogroup" style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
             {CURRICULA.map(c => (
-              <TouchableOpacity key={c} onPress={() => setCurriculum(c)} activeOpacity={0.75}
-                style={[s.roleChip, curriculum === c && s.roleChipActive]}>
-                <Text style={[s.roleChipText, curriculum === c && s.roleChipTextActive]}>{c}</Text>
-              </TouchableOpacity>
+              <SelectChip key={c} label={c} selected={curriculum === c} onPress={() => setCurriculum(c)} />
             ))}
           </View>
         </View>
       )}
 
-      <FormInput label="Full name" value={name} onChange={setName} placeholder="Jane Smith" autoCapitalize="words" />
-      <FormInput label="Email address" value={email} onChange={setEmail} placeholder="you@example.com" keyboardType="email-address" />
-
-      {/* DOB — only for students */}
-      {role === 'student' && (
-        <DobPicker label="Date of birth" value={dob} onChange={setDob} />
-      )}
-
-      <View style={{ marginBottom: 6 }}>
-        <Text style={[s.formLabel, { marginBottom: 6 }]}>Password</Text>
-        <View style={s.inputWrap}>
-          <TextInput style={[s.input, { flex: 1 }]} value={pass} onChangeText={setPass}
-            placeholder="At least 6 characters" placeholderTextColor={DIM} secureTextEntry={!showPass} />
-          <TouchableOpacity onPress={() => setShowPass(!showPass)} style={{ padding: 4 }}>
-            <Feather name={showPass ? 'eye-off' : 'eye'} size={14} color={DIM} />
-          </TouchableOpacity>
-        </View>
+      <View style={row}>
+        <AuthField label="Full name" value={name} onChangeText={setName} placeholder="Jane Smith"
+          autoCapitalize="words" autoComplete="name" textContentType="name" style={cell}
+          invalid={!!error && !name.trim()} />
+        <AuthField label="Email address" value={email} onChangeText={setEmail} placeholder="you@example.com"
+          keyboardType="email-address" autoCapitalize="none" autoComplete="email" textContentType="emailAddress" style={cell}
+          invalid={!!error && !email.trim()} />
       </View>
+
+      {/* DOB — only for students; shares a row with the password when it fits */}
+      {role === 'student' ? (
+        <View style={row}>
+          <View style={cell}><DobPicker label="Date of birth" value={dob} onChange={setDob} /></View>
+          {passwordField}
+        </View>
+      ) : passwordField}
 
       {faceAvailable && (
-        <TouchableOpacity
-          testID="signup-add-face"
-          onPress={() => setAddFace((v) => !v)}
-          activeOpacity={0.8}
-          accessibilityRole="checkbox"
-          accessibilityState={{ checked: addFace }}
-          style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginTop: 6, marginBottom: 4, padding: 10, borderRadius: 10, borderWidth: 1, borderColor: addFace ? CYAN : BORDER }}
-        >
-          <Feather name={addFace ? 'check-square' : 'square'} size={16} color={addFace ? CYAN : DIM} style={{ marginTop: 1 }} />
-          <View style={{ flex: 1 }}>
-            <Text style={{ color: FORE, fontWeight: '700', fontSize: 13 }}>Add face login (optional)</Text>
-            <Text style={{ color: MUTED, fontSize: 12, lineHeight: 17, marginTop: 2 }}>
-              Next time, sign in with this device&apos;s face unlock (Face ID / Windows Hello) instead of your password. Your face never leaves your device.
-            </Text>
-          </View>
-        </TouchableOpacity>
+        <View style={{ marginBottom: 8 }}>
+          <Checkbox
+            testID="signup-add-face"
+            label="Add face login (optional)"
+            help="Next time, sign in with this device's face unlock (Face ID / Windows Hello) instead of your password. Your face never leaves your device."
+            checked={addFace}
+            onToggle={() => setAddFace((v) => !v)}
+          />
+        </View>
       )}
 
-      {!!error && <View style={s.errorBox}><Feather name="alert-circle" size={13} color={RED} /><Text style={s.errorText}>{error}</Text></View>}
+      {!!error && <Notice kind="error">{error}</Notice>}
 
-      <GradientButton label="Create Free Account" onPress={submit} loading={loading} style={{ marginTop: 8 }} />
-      <View style={s.formFooter}>
-        <Text style={s.footerText}>Already have an account? </Text>
-        <TouchableOpacity onPress={onSwitchLogin}><Text style={s.linkText}>Sign in</Text></TouchableOpacity>
-      </View>
-    </AuthModal>
+      <PrimaryButton label="Create Free Account" onPress={submit} loading={loading} tone="accent" style={{ marginTop: 6 }} />
+      <FooterLine text="Already have an account?" link="Sign in" onPress={onSwitchLogin} tone="primary" />
+    </>
   );
 }
 
 // ─────────────────────────────────────────────────────────
-// FORGOT PASSWORD MODAL
+// FORGOT PASSWORD form
 // ─────────────────────────────────────────────────────────
-function ForgotModal({ visible, onClose, onSwitchLogin }: {
-  visible: boolean; onClose: () => void; onSwitchLogin: () => void;
-}) {
+function ForgotForm({ onSwitchLogin }: { onSwitchLogin: () => void }) {
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -750,82 +543,146 @@ function ForgotModal({ visible, onClose, onSwitchLogin }: {
   }
 
   return (
-    <AuthModal visible={visible} onClose={onClose}>
-      <Text style={s.modalTitle}>Reset your password</Text>
-      <Text style={s.modalSubtitle}>Enter your email and we&apos;ll send you a reset link</Text>
+    <>
+      <AuthHeading title="Reset your password" subtitle="Enter your email and we'll send you a reset link" />
       {sent ? (
-        <View style={s.successBox}>
-          <Feather name="check-circle" size={16} color={GREEN} />
-          <Text style={s.successText}>Reset link sent to {email}. Check your inbox.</Text>
-        </View>
+        <Notice kind="success">{`Reset link sent to ${email}. Check your inbox.`}</Notice>
       ) : (
         <>
-          <FormInput label="Email address" value={email} onChange={setEmail} placeholder="you@example.com" keyboardType="email-address" />
-          <GradientButton label="Send Reset Link" onPress={submit} loading={loading} style={{ marginTop: 4 }} />
+          <AuthField label="Email address" value={email} onChangeText={setEmail} placeholder="you@example.com"
+            keyboardType="email-address" autoCapitalize="none" autoComplete="email" textContentType="emailAddress"
+            onSubmitEditing={submit} returnKeyType="send" />
+          <PrimaryButton label="Send Reset Link" onPress={submit} loading={loading} />
         </>
       )}
-      <View style={s.formFooter}>
-        <Text style={s.footerText}>Remembered it? </Text>
-        <TouchableOpacity onPress={onSwitchLogin}><Text style={s.linkText}>Back to Sign in</Text></TouchableOpacity>
-      </View>
-    </AuthModal>
+      <FooterLine text="Remembered it?" link="Back to Sign in" onPress={onSwitchLogin} />
+    </>
   );
 }
 
-// (mockup removed)
+// ─────────────────────────────────────────────────────────
+// Page layouts
+// ─────────────────────────────────────────────────────────
+function SignInLayout({ children, onBack }: { children: React.ReactNode; onBack: () => void }) {
+  const { isWide, width, height, gutter } = useAuthLayout();
+  // Wider card (same height) and a book sized from the screen so the page
+  // fits without scrolling: the art is 1.27× its width tall, the header and
+  // padding take ~210px, and the lying book reaches ~0.25× further left.
+  const cardWidth = width >= 1600 ? 580 : width >= 1280 ? 540 : 500;
+  const gap = Math.round(Math.min(150, width * 0.075));
+  const contentWidth = Math.min(width, 1440 + gutter * 2) - (gutter + 12) * 2;
+  const artWidth = Math.round(Math.max(260, Math.min((height - 210) / 1.27, (contentWidth - cardWidth - gap) / 1.32, 540)));
+  return (
+    <AuthShell onBack={onBack} contentMaxWidth={1440}>
+      <View style={{ flexDirection: isWide ? 'row' : 'column', alignItems: 'center', justifyContent: 'center', gap: isWide ? gap : 16 }}>
+        {isWide && <View style={{ marginLeft: artWidth * 0.25 }}><SignInArt width={artWidth} /></View>}
+        <AuthCard maxWidth={cardWidth}>{children}</AuthCard>
+      </View>
+    </AuthShell>
+  );
+}
 
+function SignUpLayout({ children, onBack }: { children: React.ReactNode; onBack: () => void }) {
+  const { width } = useAuthLayout();
+  const showArt = width >= 1100;
+  // Panel spans 80% of the page on wide screens; the book grows with it and
+  // leans 15° clockwise.
+  const panelWidth = showArt ? Math.round(width * 0.8) : 720;
+  const artWidth = Math.round(Math.min(400, Math.max(260, width * 0.19)));
+  return (
+    <AuthShell onBack={onBack} contentMaxWidth={showArt ? panelWidth : undefined}>
+      <FramedPanel maxWidth={panelWidth}>
+        <View style={{ flexDirection: showArt ? 'row' : 'column', alignItems: 'center', gap: 48 }}>
+          <View style={{ flex: showArt ? 1.3 : undefined, width: showArt ? undefined : '100%', maxWidth: showArt ? 780 : 620 }}>{children}</View>
+          {showArt && (
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+              <Decorative style={{ transform: [{ rotate: '15deg' }] }}><CreateBookArt width={artWidth} /></Decorative>
+            </View>
+          )}
+        </View>
+      </FramedPanel>
+    </AuthShell>
+  );
+}
 
 // ─────────────────────────────────────────────────────────
-// MAIN SCREEN
+// MAIN SCREEN — homepage + the signed-out pages
 // ─────────────────────────────────────────────────────────
 export default function LandingScreen() {
+  return (
+    <HomeThemeProvider>
+      <LandingRoutes />
+    </HomeThemeProvider>
+  );
+}
+
+function initialPage(): AuthPage {
+  if (!IS_WEB || typeof window === 'undefined') return 'home';
+  // ?signin=1 (used after email verification in another browser) opens Sign In.
+  if (new URLSearchParams(window.location.search).get('signin') === '1') return 'signin';
+  return authPageFromPath(window.location.pathname);
+}
+
+function LandingRoutes() {
   const { colors: c } = useTheme();
+  const { t } = useHomeTheme();
   const { signInWithEmail, signUpWithEmail, signInWithGoogle, demoLogin, addParentRoleToTeacher, addParentRoleToTeacherSSO, authError, clearAuthError, logout } = useAuth();
-  const [showLogin,    setShowLogin]    = useState(false);
-  const [showSignup,   setShowSignup]   = useState(false);
-  const [showForgot,   setShowForgot]   = useState(false);
+  const [page, setPage] = useState<AuthPage>(initialPage);
   const [teacherAddParentEmail, setTeacherAddParentEmail] = useState<string | null>(null);
   const [addingParentRole, setAddingParentRole] = useState(false);
 
-  // Open the login modal automatically when arriving with ?signin=1 — used after
-  // email verification when the verify tab wasn't logged in (e.g. link opened in a
-  // different browser/device), so the user can sign in and continue to onboarding.
+  // Navigate between the homepage and the signed-out pages. On web each page
+  // has its own URL, so browser Back/Forward and direct visits work.
+  function go(next: AuthPage, replace = false) {
+    if (page === 'signin' && next !== 'signin') clearAuthError();
+    if (IS_WEB && typeof window !== 'undefined') {
+      const url = next === 'home' ? '/' : AUTH_PAGE_PATHS[next];
+      if (window.location.pathname + window.location.search !== url) {
+        if (replace) window.history.replaceState(null, '', url);
+        else window.history.pushState(null, '', url);
+      }
+      window.scrollTo?.(0, 0);
+    }
+    setPage(next);
+  }
+
+  // Normalise ?signin=1 to /signin so a refresh doesn't keep re-opening it.
   useEffect(() => {
-    if (Platform.OS !== 'web' || typeof window === 'undefined') return;
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('signin') === '1') {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time init from URL on mount, external sync
-      setShowLogin(true);
-      // Clean the URL so a refresh doesn't keep re-opening it.
-      window.history.replaceState(null, '', '/');
+    if (!IS_WEB || typeof window === 'undefined') return;
+    if (new URLSearchParams(window.location.search).get('signin') === '1') {
+      window.history.replaceState(null, '', AUTH_PAGE_PATHS.signin);
     }
   }, []);
+
+  // Browser Back / Forward between pages.
+  useEffect(() => {
+    if (!IS_WEB || typeof window === 'undefined') return;
+    const onPop = () => setPage(authPageFromPath(window.location.pathname));
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+
+  // Android hardware Back on a page → homepage.
+  useEffect(() => {
+    if (IS_WEB || page === 'home') return;
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => { setPage('home'); return true; });
+    return () => sub.remove();
+  }, [page]);
 
   // Hidden demo access for sales/testing (the public buttons were removed).
   // e.g. localhost:3006/?demo=student | teacher | parent | super_admin
   useEffect(() => {
-    if (Platform.OS !== 'web' || typeof window === 'undefined') return;
+    if (!IS_WEB || typeof window === 'undefined') return;
     const d = new URLSearchParams(window.location.search).get('demo');
     if (d && ['student', 'teacher', 'parent', 'super_admin'].includes(d)) {
       demoLogin(d as UserRole);
     }
   }, []);
 
-  // Load the landing design fonts (Fraunces serif + Inter) once, on web.
-  useEffect(() => {
-    if (Platform.OS !== 'web' || typeof document === 'undefined') return;
-    if (document.getElementById('aivorah-landing-fonts')) return;
-    const link = document.createElement('link');
-    link.id = 'aivorah-landing-fonts';
-    link.rel = 'stylesheet';
-    link.href = 'https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400&family=Inter:wght@300;400;500;600;700&display=swap';
-    document.head.appendChild(link);
-  }, []);
-
   // Remove the browser's default body margin so the embedded landing iframe
   // sits flush to the viewport edges (no thin gaps on the left/right).
   useEffect(() => {
-    if (Platform.OS !== 'web' || typeof document === 'undefined') return;
+    if (!IS_WEB || typeof document === 'undefined') return;
     if (document.getElementById('aivorah-reset')) return;
     const style = document.createElement('style');
     style.id = 'aivorah-reset';
@@ -833,21 +690,25 @@ export default function LandingScreen() {
     document.head.appendChild(style);
   }, []);
 
-  // Embedded HTML landing (iframe) → open the REAL Login / Sign-up modal when its
-  // buttons are tapped. The iframe postMessages {type:'aivorah-auth', mode}.
+  // Embedded HTML pages (homepage, Book a Demo) → open the real pages.
+  // The homepage posts {type:'aivorah-auth', mode} for Login / Join buttons and
+  // {type:'aivorah-nav', page} for Book a Demo / Back to home.
   useEffect(() => {
-    if (Platform.OS !== 'web' || typeof window === 'undefined') return;
+    if (!IS_WEB || typeof window === 'undefined') return;
     const onMsg = (e: MessageEvent) => {
+      if (e.origin !== window.location.origin) return;
       if (e?.data?.type === 'aivorah-auth') {
-        if (e.data.mode === 'login') setShowLogin(true);
-        else setShowSignup(true);
+        go(e.data.mode === 'login' ? 'signin' : 'signup');
+      } else if (e?.data?.type === 'aivorah-nav') {
+        const target = e.data.page;
+        if (target === 'home' || target === 'book-demo' || target === 'signin' || target === 'signup') go(target);
       }
     };
     window.addEventListener('message', onMsg);
     return () => window.removeEventListener('message', onMsg);
-  }, []);
+  });
 
-  // Re-open login modal when authError is set (e.g. Google SSO role mismatch)
+  // Show Sign In when authError is set (e.g. Google SSO role mismatch)
   useEffect(() => {
     if (!authError) return;
     // Teacher trying to add Parent via Google SSO → show custom confirmation modal
@@ -855,81 +716,77 @@ export default function LandingScreen() {
       const teacherEmail = authError.replace('TEACHER_ADD_PARENT:', '');
       clearAuthError();
       // eslint-disable-next-line react-hooks/set-state-in-effect -- syncs an externally-owned auth-error signal, external sync
-      setShowLogin(false);
-      setShowSignup(false);
       setTeacherAddParentEmail(teacherEmail);
       return;
     }
-    setShowLogin(true);
+    if (page !== 'signin') go('signin');
   }, [authError]);
-  const [legalModal, setLegalModal] = useState<{ title: string; body: string } | null>(null);
 
-  function switchToSignup() { setShowLogin(false); setTimeout(() => setShowSignup(true), 200); }
-  function switchToLogin()  { setShowSignup(false); setShowForgot(false); setTimeout(() => setShowLogin(true), 200); }
-  function switchToForgot() { setShowLogin(false); setTimeout(() => setShowForgot(true), 200); }
+  const toHome = () => go('home');
+  let content: React.ReactNode;
+  if (page === 'signin') {
+    content = (
+      <SignInLayout onBack={toHome}>
+        <LoginForm
+          onDone={clearAuthError}
+          onSwitchSignup={() => go('signup')}
+          onSwitchForgot={() => go('forgot')}
+          signInEmail={signInWithEmail}
+          signInGoogle={signInWithGoogle}
+          addParentRoleSSO={addParentRoleToTeacherSSO}
+          externalError={authError}
+        />
+      </SignInLayout>
+    );
+  } else if (page === 'signup') {
+    content = (
+      <SignUpLayout onBack={toHome}>
+        <SignupForm
+          onDone={() => {}}
+          onSwitchLogin={() => go('signin')}
+          signUpEmail={signUpWithEmail}
+          signInGoogle={signInWithGoogle}
+          addParentRole={addParentRoleToTeacher}
+          addParentRoleSSO={addParentRoleToTeacherSSO}
+        />
+      </SignUpLayout>
+    );
+  } else if (page === 'forgot') {
+    content = (
+      <SignInLayout onBack={toHome}>
+        <ForgotForm onSwitchLogin={() => go('signin')} />
+      </SignInLayout>
+    );
+  } else if (page === 'book-demo' && IS_WEB) {
+    // Book a Demo is a standalone public page (public/book-demo.html) that keeps
+    // the original demo-request form and script. Its "Back to home" posts
+    // {type:'aivorah-nav', page:'home'}.
+    content = React.createElement('iframe', {
+      src: '/book-demo.html',
+      title: 'Book a Demo · Aivorah',
+      style: { border: 'none', width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 },
+    });
+  } else if (IS_WEB) {
+    // Marketing landing is the standalone HTML (public/landing.html), embedded
+    // full-screen. Its Login / Join / Book a Demo buttons postMessage (above).
+    content = React.createElement('iframe', {
+      src: '/landing.html',
+      title: 'Aivorah',
+      style: { border: 'none', width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 },
+    });
+  } else {
+    content = (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 24 }}>
+        <Text style={{ fontFamily: SERIF, fontSize: 32, fontWeight: '600', color: t.heading, marginBottom: 12 }}>Aivorah</Text>
+        <PrimaryButton label="Login" onPress={() => go('signin')} style={{ alignSelf: 'stretch' }} />
+        <OutlineButton label="Join Early Access" onPress={() => go('signup')} style={{ alignSelf: 'stretch' }} />
+      </View>
+    );
+  }
 
   return (
-    <View style={{ flex: 1, backgroundColor: LBG }}>
-      {/* Landing rendered for both web and native */}
-      {/* Marketing landing is the standalone HTML (server/public/landing.html),
-          embedded full-screen. Its Login / Join buttons postMessage 'aivorah-auth'
-          which the listener above turns into the real Login / Sign-up modals. */}
-      {Platform.OS === 'web'
-        ? React.createElement('iframe', {
-            src: '/landing.html',
-            title: 'Aivorah',
-            style: { border: 'none', width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 },
-          })
-        : (
-          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-            <GradientButton label="Login" onPress={() => setShowLogin(true)} />
-            <GhostButton label="Join Early Access" onPress={() => setShowSignup(true)} />
-          </View>
-        )
-      }
-
-      {/* ── LEGAL MODAL ──────────────────────────── */}
-      <Modal visible={!!legalModal} transparent animationType="fade" onRequestClose={() => setLegalModal(null)}>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
-          <View style={{ backgroundColor: '#1a1a1a', borderRadius: 16, borderWidth: 1, borderColor: '#333', padding: 28, width: '100%', maxWidth: 480, gap: 16 }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Text style={{ fontSize: 18, fontWeight: '700', color: '#fff' }}>{legalModal?.title}</Text>
-              <TouchableOpacity onPress={() => setLegalModal(null)}><Feather name="x" size={20} color="#888" /></TouchableOpacity>
-            </View>
-            <Text style={{ fontSize: 14, color: '#aaa', lineHeight: 22 }}>{legalModal?.body}</Text>
-            <TouchableOpacity onPress={() => setLegalModal(null)} style={{ backgroundColor: CYAN + '22', borderWidth: 1, borderColor: CYAN, borderRadius: 8, paddingVertical: 10, alignItems: 'center' }}>
-              <Text style={{ color: CYAN, fontWeight: '700' }}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* ── AUTH MODALS ───────────────────────────── */}
-      <LoginModal
-        visible={showLogin}
-        onClose={() => { setShowLogin(false); clearAuthError(); }}
-        onSwitchSignup={switchToSignup}
-        onSwitchForgot={switchToForgot}
-        signInEmail={signInWithEmail}
-        signInGoogle={signInWithGoogle}
-        addParentRoleSSO={addParentRoleToTeacherSSO}
-        externalError={authError}
-        onClearExternalError={clearAuthError}
-      />
-      <SignupModal
-        visible={showSignup}
-        onClose={() => setShowSignup(false)}
-        onSwitchLogin={switchToLogin}
-        signUpEmail={signUpWithEmail}
-        signInGoogle={signInWithGoogle}
-        addParentRole={addParentRoleToTeacher}
-        addParentRoleSSO={addParentRoleToTeacherSSO}
-      />
-      <ForgotModal
-        visible={showForgot}
-        onClose={() => setShowForgot(false)}
-        onSwitchLogin={switchToLogin}
-      />
+    <View style={{ flex: 1, backgroundColor: t.bg }}>
+      {content}
 
       {/* ── TEACHER → PARENT CLUB MODAL ──────────────────── */}
       <Modal visible={!!teacherAddParentEmail} transparent animationType="fade" onRequestClose={() => { setTeacherAddParentEmail(null); logout(); }}>
@@ -984,267 +841,3 @@ export default function LandingScreen() {
     </View>
   );
 }
-
-// ─────────────────────────────────────────────────────────
-// Styles
-// ─────────────────────────────────────────────────────────
-const s = StyleSheet.create({
-  pageContent: { paddingBottom: 12 },
-  bgWashTop: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 420,
-    backgroundColor: 'rgba(143,230,174,0.08)',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(244,184,74,0.10)',
-  },
-  bgWashMid: {
-    position: 'absolute',
-    top: 360,
-    left: 0,
-    right: 0,
-    height: 520,
-    backgroundColor: 'rgba(244,184,74,0.045)',
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: 'rgba(197,255,218,0.08)',
-  },
-  bgGrid: {
-    position: 'absolute',
-    top: 72,
-    left: 0,
-    right: 0,
-    height: 620,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: 'rgba(197,255,218,0.06)',
-    opacity: 0.75,
-  },
-  // ── Navbar
-  navbar: {
-    height: 72,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(197,255,218,0.14)',
-    backgroundColor: 'rgba(5,7,5,0.94)',
-    ...(IS_WEB ? { position: 'sticky', top: 0, zIndex: 100 } as any : {}),
-  },
-  navInner: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: IS_LARGE ? 48 : 20,
-  },
-  navBrand: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  navLogoBox: { width: 30, height: 30, borderRadius: 8, backgroundColor: SAGE, alignItems: 'center', justifyContent: 'center' },
-  navLogoMark: { fontFamily: SERIF, fontSize: 16, fontWeight: '600', color: LBG },
-  navBrandText: { fontFamily: SERIF, fontSize: 22, fontWeight: '500', color: LTEXT, letterSpacing: -0.4 },
-  navLinks: { flexDirection: 'row', gap: 32 },
-  navLink: { fontSize: 14, fontWeight: '500', color: MUTED },
-  navActions: { flexDirection: 'row', gap: 12, alignItems: 'center' },
-
-  ghostBtn: { paddingHorizontal: 16, paddingVertical: 9, borderRadius: 8, borderWidth: 1, borderColor: 'rgba(183,242,199,0.24)', backgroundColor: 'rgba(16,21,16,0.72)' },
-  ghostBtnText: { fontSize: 14, fontWeight: '600', color: CYAN },
-
-  // ── Sections
-  section: { paddingVertical: 72, paddingHorizontal: IS_LARGE ? 80 : 20 },
-
-  sectionTitle: { fontSize: IS_LARGE ? 36 : 28, fontWeight: '700', color: FORE, textAlign: 'center', marginBottom: 14, letterSpacing: 0 },
-  sectionSub: { fontSize: 17, color: MUTED, textAlign: 'center', maxWidth: 600, alignSelf: 'center', lineHeight: 26, marginBottom: 44 },
-
-  // ── Hero
-  heroSection: { paddingTop: 92, paddingBottom: 88, paddingHorizontal: IS_LARGE ? 80 : 20, alignItems: 'center' },
-  eyebrow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    backgroundColor: 'rgba(245,243,238,0.02)',
-    borderWidth: 1,
-    borderColor: LLINE,
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    marginBottom: 18,
-  },
-  eyebrowDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: SAGE },
-  eyebrowText: { fontSize: 11, fontWeight: '500', letterSpacing: 1.6, textTransform: 'uppercase', color: LMUTED },
-  heroTitle: { fontFamily: SERIF, fontSize: IS_LARGE ? 86 : 46, fontWeight: '400', letterSpacing: IS_LARGE ? -3 : -1.5, lineHeight: IS_LARGE ? 88 : 48, textAlign: 'center', color: LTEXT, marginBottom: 24 },
-  gradientText: { color: SAGE, fontStyle: 'italic', fontWeight: '300' },
-  heroSub: { fontSize: IS_LARGE ? 19 : 16, color: LMUTED, textAlign: 'center', maxWidth: 580, lineHeight: 30, marginBottom: 34 },
-  heroActions: { flexDirection: 'row', gap: 12, flexWrap: 'wrap', justifyContent: 'center' },
-  heroTrust: { marginTop: 32, flexDirection: 'row', alignItems: 'flex-start', gap: 12, maxWidth: 560 },
-  heroTrustText: { flex: 1, fontSize: 13.5, color: LMUTED, lineHeight: 20 },
-  demoStrip: {
-    marginTop: 32, alignItems: 'center', gap: 10, width: '100%', maxWidth: 820,
-    backgroundColor: SURFACE, borderRadius: 8,
-    borderWidth: 1, borderColor: BORDER, padding: 20,
-    shadowColor: '#8FE6AE', shadowOpacity: 0.08, shadowRadius: 20, shadowOffset: { width: 0, height: 8 },
-  },
-  demoStripLabel: { fontSize: 11, fontWeight: '700', color: MUTED, letterSpacing: 0.8, textTransform: 'uppercase' },
-  demoRow: { flexDirection: 'row', gap: 10, flexWrap: 'wrap', justifyContent: 'center' },
-  demoBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 7,
-    paddingHorizontal: 18, paddingVertical: 10,
-    borderRadius: 12, borderWidth: 1.2,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-  },
-  demoBtnText: { fontSize: 13, fontWeight: '700' },
-
-  // ── Stats bar
-  statsBar: {
-    flexDirection: IS_LARGE ? 'row' : 'column',
-    backgroundColor: SURFACE,
-    borderWidth: 1,
-    borderColor: BORDER,
-    paddingVertical: IS_LARGE ? 24 : 20,
-    paddingHorizontal: IS_LARGE ? 80 : 20,
-    gap: IS_LARGE ? 0 : 20,
-    marginHorizontal: IS_LARGE ? 32 : 16,
-    borderRadius: 8,
-  },
-  statItem: { flex: IS_LARGE ? 1 : undefined, flexDirection: 'row', alignItems: 'center', gap: 14, justifyContent: IS_LARGE ? 'center' : 'flex-start', paddingVertical: 4 },
-  statDivider: IS_LARGE ? { borderRightWidth: 1, borderRightColor: BORDER } : {},
-  statIconBox: { width: 40, height: 40, borderRadius: 8, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(197,255,218,0.16)' },
-  statValue: { fontSize: IS_LARGE ? 22 : 20, fontWeight: '800', color: FORE, letterSpacing: 0 },
-  statLabel: { fontSize: 12, color: MUTED, marginTop: 1 },
-
-  // ── Cards grid
-  grid3: { gap: 20 },
-  grid2: { gap: 20 },
-  card: {
-    backgroundColor: 'rgba(16,21,16,0.94)',
-    borderWidth: 1,
-    borderColor: BORDER,
-    borderRadius: 8,
-    padding: 28,
-  },
-  roleCard: {
-    backgroundColor: 'rgba(16,21,16,0.94)',
-    borderWidth: 1,
-    borderColor: BORDER,
-    borderRadius: 8,
-    padding: 28,
-    overflow: 'hidden',
-  },
-  cardIconWrap: { width: 52, height: 52, borderRadius: 8, backgroundColor: 'rgba(183,242,199,0.13)', borderWidth: 1, borderColor: 'rgba(244,184,74,0.18)', alignItems: 'center', justifyContent: 'center', marginBottom: 20 },
-  cardTitle: { fontSize: 20, fontWeight: '700', color: FORE, marginBottom: 6 },
-  roleTagline: { fontSize: 14, fontWeight: '500', marginBottom: 20, lineHeight: 20 },
-  cardDesc: { fontSize: 15, color: MUTED, lineHeight: 24 },
-  cardCta: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  cardCtaText: { fontSize: 13, fontWeight: '600' },
-  benefitsList: { gap: 10 },
-  benefitRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
-  benefitText: { fontSize: 14, color: MUTED, flex: 1, lineHeight: 20 },
-
-  // ── How it works
-  howRow: { gap: 24 },
-  howCard: {
-    backgroundColor: 'rgba(16,21,16,0.94)',
-    borderWidth: 1,
-    borderColor: BORDER,
-    borderRadius: 8,
-    padding: 28,
-    alignItems: 'flex-start',
-    position: 'relative',
-  },
-  connector: {
-    position: 'absolute',
-    top: 40,
-    right: -12,
-    width: 24,
-    height: 2,
-    backgroundColor: BORDER,
-    zIndex: 1,
-  },
-  howStepBadge: {
-    backgroundColor: 'rgba(244,184,74,0.14)',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    marginBottom: 16,
-  },
-  howStepNum: { fontSize: 11, fontWeight: '800', color: AMBER, letterSpacing: 0.5 },
-  howIconCircle: { width: 56, height: 56, borderRadius: 8, backgroundColor: 'rgba(183,242,199,0.12)', borderWidth: 1, borderColor: 'rgba(244,184,74,0.28)', alignItems: 'center', justifyContent: 'center', marginBottom: 18 },
-  howTitle: { fontSize: 18, fontWeight: '700', color: FORE, marginBottom: 10 },
-  howDesc: { fontSize: 14, color: MUTED, lineHeight: 22 },
-
-  // ── CTA
-  badge: { backgroundColor: 'rgba(183,242,199,0.14)', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 7, marginBottom: 16, borderWidth: 1, borderColor: 'rgba(244,184,74,0.25)' },
-  badgeText: { fontSize: 12, fontWeight: '600', color: CYAN },
-  ctaCard: {
-    borderWidth: 1,
-    borderColor: 'rgba(244,184,74,0.28)',
-    borderRadius: 8,
-    padding: IS_LARGE ? 64 : 36,
-    alignItems: 'center',
-    backgroundColor: 'rgba(16,21,16,0.72)',
-  },
-  ctaTitle: { fontSize: IS_LARGE ? 40 : 28, fontWeight: '700', color: FORE, marginBottom: 14, textAlign: 'center' },
-  ctaSub: { fontSize: 18, color: MUTED, marginBottom: 30, textAlign: 'center', lineHeight: 28 },
-
-  // ── Footer
-  footer: { borderTopWidth: 1, borderTopColor: BORDER, paddingVertical: 56, paddingHorizontal: IS_LARGE ? 80 : 20, backgroundColor: 'rgba(5,7,5,0.92)' },
-  footerTop: { flexDirection: IS_LARGE ? 'row' : 'column', justifyContent: 'space-between', marginBottom: 44 },
-  footerBrandText: { fontSize: 18, fontWeight: '700', color: FORE },
-  footerBrandDesc: { fontSize: 14, color: MUTED, lineHeight: 22 },
-  footerColHead: { fontSize: 14, fontWeight: '600', color: FORE, marginBottom: 14 },
-  footerColItem: { fontSize: 14, color: MUTED, marginBottom: 10 },
-  footerBottom: { borderTopWidth: 1, borderTopColor: BORDER, paddingTop: 22, flexDirection: 'row', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 },
-  footerCopy: { fontSize: 13, color: DIM },
-
-  // ── Modal
-  overlay: { position: 'absolute' as any, top: 0, left: 0, right: 0, bottom: 0, zIndex: 999, alignItems: 'center', justifyContent: 'center', paddingHorizontal: WIN_W < 400 ? 12 : 20, paddingVertical: 20 },
-  overlayBg: { position: 'absolute' as any, top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.7)' },
-  modal: { backgroundColor: '#0B0B0B', borderWidth: 1, borderColor: 'rgba(245,243,238,0.12)', borderRadius: 16, padding: WIN_W < 400 ? 18 : 36, width: '100%', maxWidth: 460, alignSelf: 'center', position: 'relative' },
-  modalClose: { position: 'absolute', top: 14, right: 14, padding: 6, borderRadius: 6 },
-  modalTitle: { fontSize: 24, fontWeight: '700', color: FORE, marginBottom: 6 },
-  modalSubtitle: { fontSize: 14, color: MUTED, marginBottom: 24 },
-
-  // Role chips
-  roleChip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 99, borderWidth: 1, borderColor: BORDER },
-  roleChipActive: { borderColor: CYAN, backgroundColor: 'rgba(183,242,199,0.18)' },
-  roleChipText: { fontSize: 13, fontWeight: '500', color: MUTED },
-  roleChipTextActive: { color: CYAN },
-
-  // Google button
-  googleBtn: { width: '100%', paddingVertical: 11, borderRadius: 8, backgroundColor: '#fff', borderWidth: 1, borderColor: '#dadce0', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 4 },
-  googleBtnText: { fontSize: 14, fontWeight: '500', color: '#3c4043' },
-
-  // Divider
-  divider: { flexDirection: 'row', alignItems: 'center', gap: 10, marginVertical: 16 },
-  divLine: { flex: 1, height: 1, backgroundColor: BORDER },
-  divText: { fontSize: 12, color: MUTED },
-
-  // Form
-  formLabel: { fontSize: 13, fontWeight: '500', color: '#d4d4d8' },
-  inputWrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: BG, borderWidth: 1, borderColor: BORDER, borderRadius: 7, paddingHorizontal: 14, height: 44, marginTop: 6 },
-  input: { flex: 1, fontSize: 14, color: FORE, outlineStyle: 'none', outlineWidth: 0 } as any,
-
-  // Date of birth picker
-  dobCal: { position: 'absolute', top: 74, left: 0, right: 0, backgroundColor: '#000000', borderWidth: 1, borderColor: BORDER, borderRadius: 12, padding: 12, zIndex: 50, shadowColor: '#000', shadowOpacity: 0.6, shadowRadius: 24, shadowOffset: { width: 0, height: 16 }, elevation: 12 } as any,
-  dobHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 },
-  dobHeadLabel: { fontSize: 14, fontWeight: '600', color: FORE },
-  dobNavGroup: { flexDirection: 'row', gap: 6 },
-  dobNav: { width: 30, height: 30, alignItems: 'center', justifyContent: 'center', borderRadius: 8, borderWidth: 1, borderColor: BORDER },
-  dobDow: { flexDirection: 'row' },
-  dobDowTxt: { flex: 1, textAlign: 'center', fontSize: 10.5, color: DIM, paddingVertical: 2 },
-  dobGrid: { flexDirection: 'row', flexWrap: 'wrap' },
-  dobCell: { width: `${100 / 7}%`, height: 32, alignItems: 'center', justifyContent: 'center', borderRadius: 7 } as any,
-  dobCellTxt: { fontSize: 12.5, color: FORE },
-  dobSel: { backgroundColor: CYAN },
-  dobYearGrid: { flexDirection: 'row', flexWrap: 'wrap' },
-  dobYear: { width: '25%', paddingVertical: 8, alignItems: 'center', justifyContent: 'center', borderRadius: 7 },
-  dobYearTxt: { fontSize: 13, color: FORE },
-
-  errorBox: { flexDirection: 'row', alignItems: 'center', gap: 7, backgroundColor: 'rgba(255,92,124,0.08)', borderWidth: 1, borderColor: 'rgba(255,92,124,0.25)', borderRadius: 7, padding: 12, marginBottom: 12 },
-  errorText: { fontSize: 12, color: RED, flex: 1 },
-
-  successBox: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(143,230,174,0.12)', borderWidth: 1, borderColor: 'rgba(143,230,174,0.3)', borderRadius: 7, padding: 14, marginBottom: 16 },
-  successText: { fontSize: 13, color: GREEN, flex: 1 },
-
-  formFooter: { flexDirection: 'row', justifyContent: 'center', marginTop: 18 },
-  footerText: { fontSize: 13, color: MUTED },
-  linkText: { fontSize: 13, color: CYAN, fontWeight: '500' },
-});

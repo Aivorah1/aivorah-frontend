@@ -1,8 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import {
-  View, Text, ScrollView, TouchableOpacity,
-  StyleSheet, useWindowDimensions, Platform, Alert, ActivityIndicator,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, useWindowDimensions, Platform, Alert } from 'react-native';
+import ActivityIndicator from '../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
@@ -13,8 +11,8 @@ import SERVER_URL from '../../config/serverUrl';
 
 const TEAL   = '#9FB2A4';  // sage
 const FOREST = '#7E9A86';  // deep sage
-const AMBER  = '#C5A56A';
-const ROSE   = '#E3D7B0';  // soft gold
+const AMBER  = '#24877B';
+const ROSE   = '#075D75';  // indigo (Max plan)
 const SAGE   = '#B2C2B7';
 
 /* ── Plan definitions ───────────────────────────────────────────── */
@@ -177,7 +175,7 @@ export default function SubscriptionScreen({ navigation }: any) {
           contact: '9876543210',
         },
         theme: {
-          color: '#BAA467', // Aivorah gold
+          color: '#24877B', // Aivorah gold
         },
         handler: async (response: any) => {
           // 3. Verify payment on backend
@@ -352,7 +350,7 @@ const makeStyles = (c: any, isWide: boolean) => StyleSheet.create({
   },
   brandLogoMark: {
     width: 44, height: 44, borderRadius: 12,
-    backgroundColor: '#BAA467',
+    backgroundColor: '#24877B',
     alignItems: 'center', justifyContent: 'center',
   },
   brandTitle: { fontSize: 20, fontWeight: '800', letterSpacing: -0.3 },

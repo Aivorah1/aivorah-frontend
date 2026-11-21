@@ -10,10 +10,8 @@
  * doesn't have curated chapter data yet.
  */
 import React, { useMemo, useState } from 'react';
-import {
-  View, Text, ScrollView, TouchableOpacity, TextInput, ActivityIndicator,
-  Platform, UIManager, Modal,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Platform, UIManager, Modal } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../../../context/ThemeContext';
 import { useStudentData } from '../../../../context/StudentDataContext';

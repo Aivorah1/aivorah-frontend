@@ -1,8 +1,6 @@
 import React, { useMemo } from 'react';
-import {
-  View, Text, ScrollView, TouchableOpacity,
-  StyleSheet, ActivityIndicator, Image, useWindowDimensions,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image, useWindowDimensions } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../../context/ThemeContext';
@@ -78,7 +76,7 @@ export default function BhagavathaStoriesScreen({ navigation }: any) {
 
                 <View style={isWide ? styles.grid : styles.list}>
                 {items.map(story => {
-                  const grad = PASTEL_GRAD[story.coverColor] ?? ['#9FB2A4', '#C5BD96'];
+                  const grad = PASTEL_GRAD[story.coverColor] ?? ['#9FB2A4', '#24877B'];
                   return (
                     <TouchableOpacity
                       key={story.id}

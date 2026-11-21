@@ -1,5 +1,6 @@
 import React from 'react';
-import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import type { AppColors } from '../../../../theme';
@@ -128,8 +129,8 @@ export default function ReviewView({ s, colors, result, words, wordStatuses, sta
           <Text style={{ color: colors.accentYellow, fontWeight: '600', fontSize: 14 }}>Try Again</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[s.actionBtn, s.primaryBtn, { backgroundColor: colors.accentYellow }]} onPress={onNewPassage} activeOpacity={0.7} accessibilityRole="button">
-          <Feather name="book-open" size={16} color="#fff" />
-          <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>New Passage</Text>
+          <Feather name="book-open" size={16} color={colors.onPrimary} />
+          <Text style={{ color: colors.onPrimary, fontWeight: '700', fontSize: 14 }}>New Passage</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

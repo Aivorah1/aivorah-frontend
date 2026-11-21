@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, TouchableOpacity, TextInput, Modal, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Modal, StyleSheet } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { radius, fonts } from '../../../../theme';
 import type { AppColors } from '../../../../theme';
@@ -165,7 +166,7 @@ export function StudentDetailDrawer({ visible, loading, detail, colors, onClose,
                       <Text style={styles.formCancelText}>Cancel</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.formSubmitBtn} onPress={handleSave} disabled={saving}>
-                      {saving ? <ActivityIndicator color="#0B0B0B" size="small" /> : <Text style={styles.formSubmitText}>Save changes</Text>}
+                      {saving ? <ActivityIndicator color={colors.onPrimary} size="small" /> : <Text style={styles.formSubmitText}>Save changes</Text>}
                     </TouchableOpacity>
                   </View>
                 </ScrollView>
@@ -234,35 +235,35 @@ function makeStyles(colors: AppColors) {
     drawerCard: { backgroundColor: colors.cardDark, borderRadius: 20, borderWidth: 1, borderColor: colors.borderColor, padding: 24, width: '100%', maxWidth: 420 },
     formHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
     formTitle: { fontFamily: fonts.serif, fontSize: 18, fontWeight: '700', color: colors.textHeading, flexShrink: 1 },
-    formSection: { fontFamily: fonts.serif, fontSize: 10.5, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase', color: colors.textDim, marginTop: 16, marginBottom: 8 },
+    formSection: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase', color: colors.textDim, marginTop: 16, marginBottom: 8 },
     formRow: { flexDirection: 'row', gap: 12 },
-    formLabel: { fontFamily: fonts.serif, fontSize: 11.5, fontWeight: '600', color: colors.textMuted, marginBottom: 5, marginTop: 8 },
+    formLabel: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '600', color: colors.textMuted, marginBottom: 5, marginTop: 8 },
     formInput: {
-      fontFamily: fonts.serif, fontSize: 13, color: colors.textMain,
+      fontFamily: fonts.serif, fontSize: 14, color: colors.textMain,
       borderWidth: 1, borderColor: colors.borderColor, borderRadius: radius.sm,
       paddingHorizontal: 12, paddingVertical: 9, backgroundColor: colors.bgDark,
     },
-    formHint: { fontFamily: fonts.serif, fontSize: 11, color: colors.textDim, marginTop: 6, lineHeight: 16 },
-    formError: { fontFamily: fonts.serif, fontSize: 12, color: colors.accentRed, marginTop: 12 },
+    formHint: { fontFamily: fonts.serif, fontSize: 14, color: colors.textDim, marginTop: 6, lineHeight: 16 },
+    formError: { fontFamily: fonts.serif, fontSize: 14, color: colors.accentRed, marginTop: 12 },
     formFooter: { flexDirection: 'row', gap: 10, marginTop: 18 },
-    formCancelBtn: { flex: 1, borderWidth: 1, borderColor: colors.borderColor, borderRadius: radius.sm, paddingVertical: 11, alignItems: 'center' },
-    formCancelText: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '600', color: colors.textMuted },
-    formSubmitBtn: { flex: 1, backgroundColor: colors.accentYellow, borderRadius: radius.sm, paddingVertical: 11, alignItems: 'center' },
-    formSubmitText: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '700', color: '#0B0B0B' },
+    formCancelBtn: { minHeight: 44, justifyContent: 'center', flex: 1, borderWidth: 1, borderColor: colors.borderColor, borderRadius: radius.sm, paddingVertical: 11, alignItems: 'center' },
+    formCancelText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '600', color: colors.textMuted },
+    formSubmitBtn: { minHeight: 44, justifyContent: 'center', flex: 1, backgroundColor: colors.accentYellow, borderRadius: radius.sm, paddingVertical: 11, alignItems: 'center' },
+    formSubmitText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.onPrimary },
 
     drawerActions: { flexDirection: 'row', gap: 8, flexWrap: 'wrap', marginTop: 4 },
-    bulkBtn: { paddingHorizontal: 12, paddingVertical: 7, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.borderColor, backgroundColor: colors.cardDark },
-    bulkBtnText: { fontFamily: fonts.serif, fontSize: 11.5, fontWeight: '700', color: colors.textMuted },
-    bulkBtnDanger: { paddingHorizontal: 12, paddingVertical: 7, borderRadius: radius.sm, borderWidth: 1, borderColor: `${colors.accentRed}55`, backgroundColor: `${colors.accentRed}14` },
-    bulkBtnDangerText: { fontFamily: fonts.serif, fontSize: 11.5, fontWeight: '700', color: colors.accentRed },
+    bulkBtn: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 12, paddingVertical: 7, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.borderColor, backgroundColor: colors.cardDark },
+    bulkBtnText: { minHeight: 44, justifyContent: 'center', fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.textMuted },
+    bulkBtnDanger: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 12, paddingVertical: 7, borderRadius: radius.sm, borderWidth: 1, borderColor: `${colors.accentRed}55`, backgroundColor: `${colors.accentRed}14` },
+    bulkBtnDangerText: { minHeight: 44, justifyContent: 'center', fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.accentRed },
 
-    deleteRowBtn: {
+    deleteRowBtn: { minHeight: 44, justifyContent: 'center',
       flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-start',
       borderWidth: 1, borderColor: `${colors.accentRed}55`, backgroundColor: `${colors.accentRed}0F`,
       borderRadius: radius.sm, paddingHorizontal: 14, paddingVertical: 9, marginTop: 2,
     },
-    deleteRowText: { fontFamily: fonts.serif, fontSize: 12.5, fontWeight: '700', color: colors.accentRed },
-    deleteConfirmBtn: { flex: 1, backgroundColor: colors.accentRed, borderRadius: radius.sm, paddingVertical: 11, alignItems: 'center' },
-    deleteConfirmText: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '700', color: '#fff' },
+    deleteRowText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.accentRed },
+    deleteConfirmBtn: { minHeight: 44, justifyContent: 'center', flex: 1, backgroundColor: colors.accentRed, borderRadius: radius.sm, paddingVertical: 11, alignItems: 'center' },
+    deleteConfirmText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: '#fff' },
   });
 }

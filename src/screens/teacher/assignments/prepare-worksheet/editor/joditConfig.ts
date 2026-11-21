@@ -86,7 +86,7 @@ export function worksheetPageCss(appBackground: string): string {
   return `
 .jodit-container.jodit.jodit_theme_default:not(.jodit_inline) { border: 0; background: ${appBackground}; }
 ${W} { background: ${appBackground}; }
-.jodit-container.jodit .jodit-toolbar__box:not(:empty) { background: #fff; border-bottom: 1px solid #e6e0d2; }
+.jodit-container.jodit .jodit-toolbar__box:not(:empty) { background: #fff; border-bottom: 1px solid #DDE3EC; }
 ${PAGE} {
   box-sizing: border-box; width: 794px; max-width: calc(100% - 32px); min-height: 1123px;
   margin: 24px auto; padding: 72px 76px; background: #fff; color: #000;
@@ -96,6 +96,16 @@ ${PAGE} {
 ${PAGE} table { border-collapse: collapse; }
 ${PAGE} td, ${PAGE} th { border: 1px solid #000; padding: 4px 8px; min-width: 24px; }
 ${PAGE} img { max-width: 100%; height: auto; }
-@media (max-width: 700px) { ${PAGE} { padding: 32px 24px; } }
+/* Placeholder sits exactly where the caret starts: page top margin + page padding,
+   page left edge (centred, max-width calc(100% - 32px)) + page padding. */
+${W} .jodit-placeholder {
+  padding: 0 !important; margin: 0 !important;
+  top: calc(24px + 72px) !important; left: calc(max(16px, 50% - 397px) + 76px) !important;
+  font-family: Calibri, Carlito, Arial, sans-serif; font-size: 11pt; line-height: 1.15; color: #6B7280;
+}
+@media (max-width: 700px) {
+  ${PAGE} { padding: 32px 24px; }
+  ${W} .jodit-placeholder { top: calc(24px + 32px) !important; left: calc(16px + 24px) !important; }
+}
 `;
 }

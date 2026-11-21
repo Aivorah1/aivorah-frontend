@@ -1,5 +1,6 @@
 import React from 'react';
-import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import type { AppColors } from '../../../../theme';
@@ -87,8 +88,8 @@ export default function PassagePreview({ s, colors, isDark, passage, words, list
         </TouchableOpacity>
 
         <TouchableOpacity style={[s.actionBtn, s.primaryBtn, { backgroundColor: colors.accentYellow }]} onPress={onStartReading} activeOpacity={0.7} accessibilityRole="button">
-          {preparing ? <ActivityIndicator size="small" color="#fff" /> : <Feather name="mic" size={18} color="#fff" />}
-          <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>{preparing ? 'Start Reading (Preparing engine...)' : 'Start Reading'}</Text>
+          {preparing ? <ActivityIndicator size="small" color={colors.onPrimary} /> : <Feather name="mic" size={18} color="#fff" />}
+          <Text style={{ color: colors.onPrimary, fontWeight: '700', fontSize: 14 }}>{preparing ? 'Start Reading (Preparing engine...)' : 'Start Reading'}</Text>
         </TouchableOpacity>
       </View>
       {preparing && (

@@ -4,7 +4,8 @@
  * first, with its date & time and score; tapping one opens its report.
  */
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import ActivityIndicator from '../../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import Header from '../../../../../components/common/Header';
 import ScreenLayout from '../../../../../components/common/ScreenLayout';
@@ -76,8 +77,8 @@ export function PracticeHistoryList({ topic, subject, attempts, loading, error, 
   onBack: () => void; onMenuPress: () => void; colors: AppColors;
 }) {
   const accent = colors.accentYellow;
-  const good = '#9FB2A4';
-  const warn = '#C98A8A';
+  const good = colors.accentGreen;
+  const warn = colors.accentRed;
   return (
     <Shell title="Practice History" topic={topic} subject={subject} onBack={onBack} onMenuPress={onMenuPress} colors={colors}>
       <Text style={[s.topic, { color: colors.textMain }]}>{topic}</Text>
@@ -95,7 +96,7 @@ export function PracticeHistoryList({ topic, subject, attempts, loading, error, 
           <Feather name="clock" size={26} color={colors.textDim} />
           <Text style={[s.emptyText, { color: colors.textMuted }]}>No tests for this topic yet.</Text>
           <TouchableOpacity onPress={onTakeTest} style={[s.smallBtn, { backgroundColor: accent, borderColor: accent }]} accessibilityRole="button">
-            <Text style={[s.smallBtnText, { color: '#fff' }]}>Take a Test</Text>
+            <Text style={[s.smallBtnText, { color: colors.onPrimary }]}>Take a Test</Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -112,16 +113,24 @@ export function PracticeHistoryList({ topic, subject, attempts, loading, error, 
                 accessibilityRole="button"
                 accessibilityLabel={`Test from ${formatTakenAt(a.createdAt)}, ${a.score} percent`}
               >
-                <View style={{ flex: 1, gap: 3 }}>
-                  <Text style={[s.rowDate, { color: colors.textMain }]}>{formatTakenAt(a.createdAt)}</Text>
+                {/* Columns: date + test/correct | clock + duration | score | open.
+                    Each group wraps as a unit on narrow screens. */}
+                <View style={s.rowMain}>
+                  <Text style={[s.rowDate, { color: colors.textHeading }]}>{formatTakenAt(a.createdAt)}</Text>
                   <Text style={[s.rowSub, { color: colors.textMuted }]}>
-                    {`Test ${a.attemptNumber || attempts.length - i} · ${a.correctAnswers} / ${a.totalQuestions || a.questions.length} correct · ${duration(a.timeSpentSeconds)}`}
+                    {`Test ${a.attemptNumber || attempts.length - i} · ${a.correctAnswers} / ${a.totalQuestions || a.questions.length} correct`}
                   </Text>
                 </View>
-                <View style={[s.scoreChip, { backgroundColor: tone + '1F', borderColor: tone + '60' }]}>
-                  <Text style={[s.scoreText, { color: tone }]}>{a.score}%</Text>
+                <View style={s.rowMetaGroup}>
+                  <View style={s.timeGroup}>
+                    <Feather name="clock" size={16} color={colors.textMuted} />
+                    <Text style={[s.timeText, { color: colors.textMain }]}>{duration(a.timeSpentSeconds)}</Text>
+                  </View>
+                  <View style={[s.scoreChip, { backgroundColor: tone + '1F', borderColor: tone + '60' }]}>
+                    <Text style={[s.scoreText, { color: tone }]}>{a.score}%</Text>
+                  </View>
+                  <Feather name="chevron-right" size={20} color={colors.textMuted} />
                 </View>
-                <Feather name="chevron-right" size={18} color={colors.textMuted} />
               </TouchableOpacity>
             );
           })}
@@ -139,15 +148,19 @@ const s = StyleSheet.create({
   card: { flexGrow: 1, flexBasis: 260, borderWidth: 1.5, borderRadius: 18, padding: 22, gap: 10 },
   cardIcon: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
   cardTitle: { fontSize: 18, fontWeight: '800' },
-  cardSub: { fontSize: 13.5, lineHeight: 20 },
+  cardSub: { fontSize: 14, lineHeight: 21 },
   list: { gap: 10 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 1, borderLeftWidth: 4, borderRadius: 14, padding: 14 },
-  rowDate: { fontSize: 15, fontWeight: '700' },
-  rowSub: { fontSize: 12.5 },
+  row: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: 16, rowGap: 10, minHeight: 56, borderWidth: 1, borderLeftWidth: 4, borderRadius: 16, paddingVertical: 14, paddingHorizontal: 16 },
+  rowMain: { flexGrow: 1, flexBasis: 220, gap: 4 },
+  rowDate: { fontSize: 16, lineHeight: 22, fontWeight: '700' },
+  rowSub: { fontSize: 14, lineHeight: 20 },
+  rowMetaGroup: { flexDirection: 'row', alignItems: 'center', gap: 16, marginLeft: 'auto' },
+  timeGroup: { flexDirection: 'row', alignItems: 'center', gap: 6, minWidth: 72 },
+  timeText: { fontSize: 14, lineHeight: 20, fontVariant: ['tabular-nums'] },
   scoreChip: { borderWidth: 1, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
-  scoreText: { fontSize: 13, fontWeight: '800' },
+  scoreText: { fontSize: 14, fontWeight: '800', fontVariant: ['tabular-nums'] },
   empty: { alignItems: 'center', gap: 12, paddingTop: 32 },
   emptyText: { fontSize: 14, textAlign: 'center' },
-  smallBtn: { borderWidth: 1.5, borderRadius: 22, paddingVertical: 9, paddingHorizontal: 18 },
-  smallBtnText: { fontWeight: '800', fontSize: 13.5 },
+  smallBtn: { borderWidth: 1.5, borderRadius: 22, minHeight: 44, paddingVertical: 9, paddingHorizontal: 18, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+  smallBtnText: { fontWeight: '800', fontSize: 14, textAlign: 'center' },
 });

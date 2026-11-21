@@ -124,8 +124,8 @@ export function AIReportModal({ assignment, colors, onClose }: { assignment: Ass
               style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 16, borderRadius: 12, backgroundColor: color }}
               onPress={onClose} activeOpacity={0.85}
             >
-              <Feather name="check" size={16} color="#fff" />
-              <Text style={{ fontSize: 15, fontWeight: '700', color: '#fff' }}>Close Report</Text>
+              <Feather name="check" size={16} color={colors.onPrimary} />
+              <Text style={{ fontSize: 15, fontWeight: '700', color: colors.onPrimary }}>Close Report</Text>
             </TouchableOpacity>
           </ScrollView>
         </View>

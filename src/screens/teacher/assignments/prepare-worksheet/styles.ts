@@ -25,7 +25,7 @@ export const makeWorksheetStyles = (c: AppColors) => StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 6,
     backgroundColor: c.accentYellow, paddingHorizontal: spacing.md, paddingVertical: 9, borderRadius: radius.md,
   },
-  primaryBtnText: { fontSize: 13, fontWeight: '700', color: '#fff' },
+  primaryBtnText: { fontSize: 13, fontWeight: '700', color: c.onPrimary },
   outlineBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     paddingHorizontal: spacing.md, paddingVertical: 9, borderRadius: radius.md,

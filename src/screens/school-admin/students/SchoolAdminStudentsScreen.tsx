@@ -20,7 +20,8 @@
  * see Sidebar.tsx / DrawerContent.tsx for the matching nav-item split.
  */
 import React, { useState, useCallback, useMemo } from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity, RefreshControl, TextInput, Pressable, Platform, Modal } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, RefreshControl, TextInput, Pressable, Platform, Modal } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import Header from '../../../components/common/Header';
@@ -43,7 +44,9 @@ import { useStudentsListState, getGradesForCurriculum, type StatusFilter, type S
 
 export default function SchoolAdminStudentsScreen({ navigation, route }: any) {
   const { colors } = useTheme();
-  const { isMobile } = useResponsive();
+  const { isMobile, width } = useResponsive();
+  // Table needs ~700px; tablets with the sidebar get compact rows instead of clipped columns.
+  const compactRows = isMobile || width < 1100;
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { user } = useAuth();
 
@@ -262,7 +265,7 @@ export default function SchoolAdminStudentsScreen({ navigation, route }: any) {
                   : 'No students match your filters.'}
               </Text>
             </View>
-          ) : isMobile ? (
+          ) : compactRows ? (
             items.map((s) => {
               const tint = statusTint(colors, s.status);
               return (
@@ -319,8 +322,8 @@ export default function SchoolAdminStudentsScreen({ navigation, route }: any) {
                       <View style={styles.nameCell}>
                         <View style={styles.avatar}><Text style={styles.avatarText}>{(s.name || '?').slice(0, 2).toUpperCase()}</Text></View>
                         <View style={{ minWidth: 0, flexShrink: 1 }}>
-                          <Text style={styles.tdName} numberOfLines={1}>{s.name || '—'}</Text>
-                          <Text style={styles.tdEmail} numberOfLines={1}>{s.email}</Text>
+                          <Text style={styles.tdName} numberOfLines={1} {...({ title: s.name } as any)}>{s.name || '—'}</Text>
+                          <Text style={styles.tdEmail} numberOfLines={1} {...({ title: s.email } as any)}>{s.email}</Text>
                         </View>
                       </View>
                     </View>
@@ -499,7 +502,7 @@ function PromoteDialog({ visible, allStudents, preselectedIds, facetGrades, face
               <Text style={styles.formCancelText}>Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.formSubmitBtn} onPress={handleConfirm} disabled={submitting || !targetGrade.trim() || selectedCount === 0}>
-              {submitting ? <ActivityIndicator color="#0B0B0B" size="small" /> : <Text style={styles.formSubmitText}>Promote {selectedCount} student{selectedCount === 1 ? '' : 's'}</Text>}
+              {submitting ? <ActivityIndicator color={colors.onPrimary} size="small" /> : <Text style={styles.formSubmitText}>Promote {selectedCount} student{selectedCount === 1 ? '' : 's'}</Text>}
             </TouchableOpacity>
           </View>
         </View>
@@ -513,20 +516,20 @@ function makeStyles(colors: AppColors) {
     screen: { flex: 1, backgroundColor: colors.bgDark },
     content: { padding: spacing.xl, paddingBottom: 60, width: '100%' },
     filterRow: { flexDirection: 'row', gap: 10, marginBottom: spacing.lg, flexWrap: 'wrap', alignItems: 'center', zIndex: 10, position: 'relative' },
-    resultsCount: { fontFamily: fonts.serif, fontSize: 12.5, color: colors.textDim, marginLeft: 'auto' },
-    promoteHint: { fontFamily: fonts.serif, fontSize: 12, color: colors.textDim, marginBottom: spacing.sm, fontStyle: 'italic' },
+    resultsCount: { fontFamily: fonts.serif, fontSize: 14, color: colors.textDim, marginLeft: 'auto' },
+    promoteHint: { fontFamily: fonts.serif, fontSize: 14, color: colors.textDim, marginBottom: spacing.sm, fontStyle: 'italic' },
 
     chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6 },
     chip: { borderWidth: 1, borderColor: colors.borderColor, backgroundColor: colors.bgDark, borderRadius: 999, paddingHorizontal: 11, paddingVertical: 5 },
     chipActive: { backgroundColor: colors.accentYellow, borderColor: colors.accentYellow },
-    chipText: { fontFamily: fonts.serif, fontSize: 11.5, fontWeight: '600', color: colors.textMuted },
-    chipTextActive: { color: '#0B0B0B', fontWeight: '700' },
+    chipText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '600', color: colors.textMuted },
+    chipTextActive: { color: colors.onPrimary, fontWeight: '700' },
 
     table: { backgroundColor: colors.cardDark, borderWidth: 1, borderColor: colors.borderColor, borderRadius: radius.md, overflow: 'hidden', zIndex: 1, position: 'relative' },
     theadRow: { flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: colors.borderColor, backgroundColor: colors.cardHover, paddingVertical: 4 },
     th: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 10, paddingHorizontal: 12, borderRadius: radius.sm },
     thHovered: { backgroundColor: colors.cardDark },
-    thText: { fontFamily: fonts.serif, fontSize: 10.5, fontWeight: '700', letterSpacing: 0.4, textTransform: 'uppercase', color: colors.textDim },
+    thText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', letterSpacing: 0.4, textTransform: 'uppercase', color: colors.textDim },
     thTextActive: { color: colors.textHeading },
     thStatic: { paddingVertical: 10, paddingHorizontal: 12 },
     thCheckCol: { width: 40, alignItems: 'center' },
@@ -539,49 +542,49 @@ function makeStyles(colors: AppColors) {
     trLast: { borderBottomWidth: 0 },
     checkbox: { padding: 4 },
     nameCell: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 12 },
-    td: { fontFamily: fonts.serif, fontSize: 12.5, color: colors.textMuted, paddingHorizontal: 12 },
-    tdName: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '700', color: colors.textHeading, flexShrink: 1 },
-    tdEmail: { fontFamily: fonts.serif, fontSize: 11.5, color: colors.textDim, marginTop: 1 },
+    td: { fontFamily: fonts.serif, fontSize: 14, color: colors.textMuted, paddingHorizontal: 12 },
+    tdName: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.textHeading, flexShrink: 1 },
+    tdEmail: { fontFamily: fonts.serif, fontSize: 14, color: colors.textDim, marginTop: 1 },
 
     card: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.cardDark, borderWidth: 1, borderColor: colors.borderColor, borderRadius: radius.sm, paddingVertical: 9, paddingHorizontal: 12, marginBottom: 6 },
-    cardName: { fontFamily: fonts.serif, fontSize: 13.5, fontWeight: '700', color: colors.textHeading },
-    cardMeta: { fontFamily: fonts.serif, fontSize: 11.5, color: colors.textMuted, marginTop: 1 },
+    cardName: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.textHeading },
+    cardMeta: { fontFamily: fonts.serif, fontSize: 14, color: colors.textMuted, marginTop: 1 },
 
     avatar: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', flexShrink: 0, backgroundColor: `${colors.primary}22` },
-    avatarText: { fontFamily: fonts.serif, fontSize: 10, fontWeight: '700', color: colors.primary },
+    avatarText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.primary },
 
     emptyBox: { alignItems: 'center', paddingTop: 56, gap: 10, paddingHorizontal: 24 },
-    emptyText: { fontFamily: fonts.serif, fontSize: 13, color: colors.textMuted, textAlign: 'center', lineHeight: 19 },
-    retryBtn: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.borderColor },
-    retryText: { fontFamily: fonts.serif, fontSize: 12.5, fontWeight: '700', color: colors.accentYellow },
+    emptyText: { fontFamily: fonts.serif, fontSize: 14, color: colors.textMuted, textAlign: 'center', lineHeight: 19 },
+    retryBtn: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 14, paddingVertical: 7, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.borderColor },
+    retryText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.accentYellow },
 
     overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.65)', justifyContent: 'center', alignItems: 'center', padding: 24 },
     formCard: { backgroundColor: colors.cardDark, borderRadius: 20, borderWidth: 1, borderColor: colors.borderColor, padding: 24, width: '100%', maxWidth: 460 },
     drawerCard: { backgroundColor: colors.cardDark, borderRadius: 20, borderWidth: 1, borderColor: colors.borderColor, padding: 24, width: '100%', maxWidth: 420 },
     formHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
     formTitle: { fontFamily: fonts.serif, fontSize: 18, fontWeight: '700', color: colors.textHeading, flexShrink: 1 },
-    formLabel: { fontFamily: fonts.serif, fontSize: 11.5, fontWeight: '600', color: colors.textMuted, marginBottom: 5, marginTop: 8 },
+    formLabel: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '600', color: colors.textMuted, marginBottom: 5, marginTop: 8 },
     formInput: {
-      fontFamily: fonts.serif, fontSize: 13, color: colors.textMain,
+      fontFamily: fonts.serif, fontSize: 14, color: colors.textMain,
       borderWidth: 1, borderColor: colors.borderColor, borderRadius: radius.sm,
       paddingHorizontal: 12, paddingVertical: 9, backgroundColor: colors.bgDark,
     },
-    formHint: { fontFamily: fonts.serif, fontSize: 11, color: colors.textDim, marginTop: 6, lineHeight: 16 },
-    formError: { fontFamily: fonts.serif, fontSize: 12, color: colors.accentRed, marginTop: 12 },
+    formHint: { fontFamily: fonts.serif, fontSize: 14, color: colors.textDim, marginTop: 6, lineHeight: 16 },
+    formError: { fontFamily: fonts.serif, fontSize: 14, color: colors.accentRed, marginTop: 12 },
     formFooter: { flexDirection: 'row', gap: 10, marginTop: 18 },
-    formCancelBtn: { flex: 1, borderWidth: 1, borderColor: colors.borderColor, borderRadius: radius.sm, paddingVertical: 11, alignItems: 'center' },
-    formCancelText: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '600', color: colors.textMuted },
-    formSubmitBtn: { flex: 1, backgroundColor: colors.accentYellow, borderRadius: radius.sm, paddingVertical: 11, alignItems: 'center' },
-    formSubmitText: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '700', color: '#0B0B0B' },
+    formCancelBtn: { minHeight: 44, justifyContent: 'center', flex: 1, borderWidth: 1, borderColor: colors.borderColor, borderRadius: radius.sm, paddingVertical: 11, alignItems: 'center' },
+    formCancelText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '600', color: colors.textMuted },
+    formSubmitBtn: { minHeight: 44, justifyContent: 'center', flex: 1, backgroundColor: colors.accentYellow, borderRadius: radius.sm, paddingVertical: 11, alignItems: 'center' },
+    formSubmitText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.onPrimary },
 
     credCard: { backgroundColor: colors.cardDark, borderRadius: 20, borderWidth: 1, borderColor: colors.borderColor, padding: 26, width: '100%', maxWidth: 380, alignItems: 'center', gap: 4 },
     credIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.accentGreen, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
     credTitle: { fontFamily: fonts.serif, fontSize: 17, fontWeight: '700', color: colors.textHeading },
-    credSub: { fontFamily: fonts.serif, fontSize: 12, color: colors.textMuted, textAlign: 'center', lineHeight: 17, marginBottom: 12 },
+    credSub: { fontFamily: fonts.serif, fontSize: 14, color: colors.textMuted, textAlign: 'center', lineHeight: 17, marginBottom: 12 },
     credRow: { flexDirection: 'row', justifyContent: 'space-between', width: '100%', paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: colors.borderColor },
-    credLabel: { fontFamily: fonts.serif, fontSize: 12, color: colors.textDim },
-    credValue: { fontFamily: fonts.serif, fontSize: 12, fontWeight: '700', color: colors.textHeading },
-    credDoneBtn: { marginTop: 16, backgroundColor: colors.accentYellow, borderRadius: radius.sm, paddingVertical: 10, paddingHorizontal: 28 },
-    credDoneText: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '700', color: '#0B0B0B' },
+    credLabel: { fontFamily: fonts.serif, fontSize: 14, color: colors.textDim },
+    credValue: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.textHeading },
+    credDoneBtn: { minHeight: 44, justifyContent: 'center', marginTop: 16, backgroundColor: colors.accentYellow, borderRadius: radius.sm, paddingVertical: 10, paddingHorizontal: 28 },
+    credDoneText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.onPrimary },
   });
 }

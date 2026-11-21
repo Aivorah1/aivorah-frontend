@@ -20,12 +20,12 @@ export function CompletedTopicsSection({ styles, colors, completedSet, navigatio
       <View style={styles.topicsList}>
         {[...completedSet].slice(0, 6).map(topic => (
           <View key={topic} style={styles.topicChip}>
-            <Feather name="check-circle" size={13} color="#C9A24E" />
+            <Feather name="check-circle" size={13} color="#24877B" />
             <Text style={styles.topicChipText} numberOfLines={1}>{topic}</Text>
           </View>
         ))}
         {completedSet.size > 6 && (
-          <View style={[styles.topicChip, { backgroundColor: 'rgba(255,255,255,0.04)' }]}>
+          <View style={[styles.topicChip, { backgroundColor: colors.cardHover }]}>
             <Text style={[styles.topicChipText, { color: colors.textMuted }]}>+{completedSet.size - 6} more</Text>
           </View>
         )}

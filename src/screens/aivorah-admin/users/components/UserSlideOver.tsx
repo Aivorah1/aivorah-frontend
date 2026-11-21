@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Modal, ScrollView, ActivityIndicator, StyleSheet, Animated, Easing, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Modal, ScrollView, StyleSheet, Animated, Easing, Platform } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../../../context/ThemeContext';
 import type { AppColors } from '../../../../theme';
@@ -21,7 +22,7 @@ const BLOCK_REASONS = ['Policy violation', 'Unpaid / contract ended', 'Security 
 const NO_SCHOOL = '__b2c__';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
-export type SlideOverMode = { type: 'edit' | 'block'; user: AdminUser } | { type: 'add' } | null;
+export type SlideOverMode = { type: 'view' | 'edit' | 'block'; user: AdminUser } | { type: 'add' } | null;
 
 export function UserSlideOver({ mode, onClose, onDone }: { mode: SlideOverMode; onClose: () => void; onDone: (message: string) => void }) {
   const { colors } = useTheme();
@@ -30,9 +31,12 @@ export function UserSlideOver({ mode, onClose, onDone }: { mode: SlideOverMode; 
   return <SlidePanel mode={mode} s={s} colors={colors} onClose={onClose} onDone={onDone} />;
 }
 
-const PANEL_WIDTH = 440;
+const PANEL_WIDTH = 560;
 
-function SlidePanel({ mode, s, colors, onClose, onDone }: { mode: NonNullable<SlideOverMode>; s: any; colors: AppColors; onClose: () => void; onDone: (m: string) => void }) {
+// Centered dialog over a dimmed table (was a right-side drawer). View details can
+// switch to Edit / Block in place; the body scrolls inside the card.
+function SlidePanel({ mode: initialMode, s, colors, onClose, onDone }: { mode: NonNullable<SlideOverMode>; s: any; colors: AppColors; onClose: () => void; onDone: (m: string) => void }) {
+  const [mode, setMode] = useState(initialMode);
   const [progress] = useState(() => new Animated.Value(0));
   const closing = useRef(false);
   const nativeDriver = Platform.OS !== 'web';
@@ -48,14 +52,14 @@ function SlidePanel({ mode, s, colors, onClose, onDone }: { mode: NonNullable<Sl
       .start(() => onClose());
   }, [progress, nativeDriver, onClose]);
 
-  const translateX = progress.interpolate({ inputRange: [0, 1], outputRange: [PANEL_WIDTH, 0] });
+  const scale = progress.interpolate({ inputRange: [0, 1], outputRange: [0.96, 1] });
 
   return (
     <Modal visible transparent animationType="none" onRequestClose={close}>
       <View style={s.backdrop}>
         <Animated.View style={[StyleSheet.absoluteFill, s.scrim, { opacity: progress }]} />
-        <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={close} testID="users-panel-backdrop" />
-        <Animated.View style={[s.panel, { transform: [{ translateX }] }]}>
+        <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={close} testID="users-panel-backdrop" accessibilityLabel="Close dialog" />
+        <Animated.View style={[s.panel, { opacity: progress, transform: [{ scale }] }]} {...((Platform.OS === 'web' ? { role: 'dialog', 'aria-modal': true } : {}) as any)}>
           <TouchableOpacity
             style={s.closeBtn}
             onPress={close}
@@ -69,6 +73,8 @@ function SlidePanel({ mode, s, colors, onClose, onDone }: { mode: NonNullable<Sl
           <ScrollView contentContainerStyle={s.panelBody}>
             {mode.type === 'add'
               ? <AddBody s={s} colors={colors} onClose={close} onDone={onDone} />
+              : mode.type === 'view'
+              ? <ViewBody user={mode.user} s={s} colors={colors} onClose={close} onEdit={() => setMode({ type: 'edit', user: mode.user })} onBlock={() => setMode({ type: 'block', user: mode.user })} />
               : mode.type === 'edit'
               ? <EditBody user={mode.user} s={s} colors={colors} onClose={close} onDone={onDone} />
               : <BlockBody user={mode.user} s={s} colors={colors} onClose={close} onDone={onDone} />}
@@ -304,31 +310,90 @@ function BlockBody({ user, s, colors, onClose, onDone }: { user: AdminUser; s: a
 
 function makeStyles(c: AppColors) {
   return StyleSheet.create({
-    backdrop: { flex: 1, flexDirection: 'row' },
-    scrim: { backgroundColor: 'rgba(0,0,0,0.5)' },
-    panel: { width: '100%', maxWidth: PANEL_WIDTH, height: '100%', backgroundColor: c.cardDark, borderLeftWidth: 1, borderLeftColor: c.borderColor },
-    closeBtn: { position: 'absolute', top: 16, right: 16, zIndex: 2, width: 36, height: 36, borderRadius: 18, borderWidth: 1, borderColor: c.borderColor, backgroundColor: c.cardDark, alignItems: 'center', justifyContent: 'center' },
+    backdrop: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 16 },
+    scrim: { backgroundColor: 'rgba(8,14,20,0.55)' },
+    panel: { width: '100%', maxWidth: PANEL_WIDTH, maxHeight: '90%', backgroundColor: c.cardDark, borderWidth: 1, borderColor: c.borderColor, borderRadius: 16, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.25, shadowRadius: 30, shadowOffset: { width: 0, height: 12 }, elevation: 24 },
+    detailGrid: { flexDirection: 'row', flexWrap: 'wrap', borderWidth: 1, borderColor: c.borderColor, borderRadius: 12, overflow: 'hidden' },
+    detailCell: { flexGrow: 1, flexBasis: 160, paddingVertical: 10, paddingHorizontal: 14, borderBottomWidth: 1, borderBottomColor: c.borderColor, gap: 2 },
+    detailLabel: { fontSize: 14, color: c.textMuted },
+    detailValue: { fontSize: 15, fontWeight: '600', color: c.textMain },
+    viewActions: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 10, marginTop: 4 },
+    viewBtn: { minHeight: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingHorizontal: 18, borderRadius: 12, borderWidth: 1 },
+    closeBtn: { minHeight: 44, position: 'absolute', top: 16, right: 16, zIndex: 2, width: 36, height: 36, borderRadius: 18, borderWidth: 1, borderColor: c.borderColor, backgroundColor: c.cardDark, alignItems: 'center', justifyContent: 'center' },
     panelBody: { padding: 28, gap: 18, flexGrow: 1 },
-    eyebrow: { fontSize: 11, fontWeight: '700', letterSpacing: 1 },
+    eyebrow: { fontSize: 12, fontWeight: '700', letterSpacing: 1 },
     title: { fontSize: 22, fontWeight: '800', color: c.textMain, marginTop: 4 },
     body: { fontSize: 14, lineHeight: 21, color: c.textMuted },
     field: { gap: 6 },
-    label: { fontSize: 11, fontWeight: '700', letterSpacing: 0.8, color: c.textMuted },
+    label: { fontSize: 12, fontWeight: '700', letterSpacing: 0.8, color: c.textMuted },
     input: { height: 44, borderRadius: 12, borderWidth: 1, borderColor: c.borderColor, backgroundColor: c.cardDark, paddingHorizontal: 12, fontSize: 14, color: c.textMain },
     inputReadOnly: { backgroundColor: c.bgDark, color: c.textMuted },
     hint: { fontSize: 12, color: c.textDim, lineHeight: 17 },
-    resetBtn: { flexDirection: 'row', alignItems: 'center', gap: 10, height: 44, borderRadius: 12, borderWidth: 1, borderColor: c.borderColor, paddingHorizontal: 14 },
-    resetBtnText: { fontSize: 13.5, fontWeight: '700', color: c.textMain },
+    resetBtn: { minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 10, height: 44, borderRadius: 12, borderWidth: 1, borderColor: c.borderColor, paddingHorizontal: 14 },
+    resetBtnText: { minHeight: 44, fontSize: 14, fontWeight: '700', color: c.textMain },
     confirm: { borderWidth: 1, borderRadius: 12, padding: 12 },
-    confirmText: { fontSize: 13, color: c.textMain, lineHeight: 19 },
-    error: { fontSize: 13, color: c.accentRed },
+    confirmText: { fontSize: 14, color: c.textMain, lineHeight: 19 },
+    error: { fontSize: 14, color: c.accentRed },
     checkRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     check: { width: 18, height: 18, borderRadius: 4, borderWidth: 1.5, borderColor: c.textDim, alignItems: 'center', justifyContent: 'center' },
-    checkText: { fontSize: 13.5, color: c.textMain },
+    checkText: { fontSize: 14, color: c.textMain },
     actions: { flexDirection: 'row', gap: 10, marginTop: 'auto' as any, paddingTop: 8 },
-    primaryBtn: { flex: 1, height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-    primaryBtnText: { fontSize: 14, fontWeight: '700' },
-    cancelBtn: { height: 48, paddingHorizontal: 20, borderRadius: 12, borderWidth: 1, borderColor: c.borderColor, justifyContent: 'center' },
+    primaryBtn: { minHeight: 44, flex: 1, height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+    primaryBtnText: { minHeight: 44, fontSize: 14, fontWeight: '700' },
+    cancelBtn: { minHeight: 44, height: 48, paddingHorizontal: 20, borderRadius: 12, borderWidth: 1, borderColor: c.borderColor, justifyContent: 'center' },
     cancelText: { fontSize: 14, fontWeight: '700', color: c.textMain },
   });
+}
+
+// Read-only account summary. Block stays visually separate (left, outlined
+// rose) from Close / Edit; it opens the existing Block flow with its confirmation.
+function ViewBody({ user, s, colors, onClose, onEdit, onBlock }: { user: AdminUser; s: any; colors: AppColors; onClose: () => void; onEdit: () => void; onBlock: () => void }) {
+  const blocked = user.status === 'blocked';
+  const rows: [string, string][] = [
+    ['Role', roleLabel(String(user.role))],
+    ['School', user.school || 'Direct (B2C)'],
+    ['Status', blocked ? 'Blocked' : 'Active'],
+    ['Joined', user.created_at ? new Date(user.created_at).toLocaleDateString() : '—'],
+    ['Last active', user.last_active_at ? new Date(user.last_active_at).toLocaleString() : '—'],
+  ];
+  if (user.curriculum) rows.push(['Curriculum', user.curriculum]);
+  if (user.grade) rows.push(['Grade', user.grade]);
+  if (user.section) rows.push(['Section', user.section]);
+  return (
+    <>
+      <View style={{ gap: 4, paddingRight: 40 }}>
+        <Text style={{ fontSize: 24, fontWeight: '700', color: colors.textHeading }}>User details</Text>
+        <Text style={{ fontSize: 14, color: colors.textMuted }}>Account summary (read-only)</Text>
+      </View>
+      <View style={{ gap: 2 }}>
+        <Text style={{ fontSize: 20, fontWeight: '700', color: colors.textHeading }} selectable>{user.name || '—'}{user.isPlatformAdmin ? '  ·  Admin' : ''}</Text>
+        <Text style={{ fontSize: 15, color: colors.textMuted }} selectable>{user.email}</Text>
+      </View>
+      <View style={s.detailGrid} testID="users-detail-grid">
+        {rows.map(([k, v]) => (
+          <View key={k} style={s.detailCell}>
+            <Text style={s.detailLabel}>{k}</Text>
+            <Text style={s.detailValue} selectable>{v}</Text>
+          </View>
+        ))}
+      </View>
+      <View style={s.viewActions}>
+        {!user.isPlatformAdmin && (
+          <TouchableOpacity testID="users-view-block" onPress={onBlock} accessibilityRole="button"
+            style={[s.viewBtn, { borderColor: blocked ? colors.accentGreen : colors.accentRed, backgroundColor: (blocked ? colors.accentGreen : colors.accentRed) + '14' }]}>
+            <Feather name={blocked ? 'unlock' : 'slash'} size={16} color={blocked ? colors.accentGreen : colors.accentRed} />
+            <Text style={{ fontSize: 15, fontWeight: '700', color: blocked ? colors.accentGreen : colors.accentRed }}>{blocked ? 'Unblock User' : 'Block User'}</Text>
+          </TouchableOpacity>
+        )}
+        <View style={{ flex: 1 }} />
+        <TouchableOpacity onPress={onClose} accessibilityRole="button" style={[s.viewBtn, { borderColor: colors.borderColor }]}>
+          <Text style={{ fontSize: 15, fontWeight: '700', color: colors.textMain }}>Close</Text>
+        </TouchableOpacity>
+        <TouchableOpacity testID="users-view-edit" onPress={onEdit} accessibilityRole="button" style={[s.viewBtn, { borderColor: colors.primary, backgroundColor: colors.primary }]}>
+          <Feather name="edit-2" size={16} color={colors.onPrimary} />
+          <Text style={{ fontSize: 15, fontWeight: '700', color: colors.onPrimary }}>Edit</Text>
+        </TouchableOpacity>
+      </View>
+    </>
+  );
 }

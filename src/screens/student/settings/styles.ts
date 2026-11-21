@@ -177,7 +177,7 @@ export const makeStyles = (c: AppColors, isDark: boolean) => StyleSheet.create({
   },
   modalCancelText: { fontSize: 14, fontWeight: '600', color: c.textMuted },
   modalSaveBtn: { flex: 1, height: 46, borderRadius: radius.md, backgroundColor: c.accentYellow, alignItems: 'center', justifyContent: 'center' },
-  modalSaveText: { fontSize: 14, fontWeight: '700', color: 'white' },
+  modalSaveText: { fontSize: 14, fontWeight: '700', color: c.onPrimary },
 
   editBtn: { paddingHorizontal: spacing.lg, paddingVertical: 9, borderRadius: radius.md, borderWidth: 1, borderColor: c.borderColor },
   editBtnText: { fontSize: 13, fontWeight: '600', color: c.textMain },

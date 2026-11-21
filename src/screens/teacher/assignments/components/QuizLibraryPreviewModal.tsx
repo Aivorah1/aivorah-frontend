@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, Modal, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, Platform } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { WebView } from 'react-native-webview';
 import type { AppColors } from '../../../../theme';
@@ -40,7 +41,7 @@ export function QuizLibraryPreviewModal({ quiz, loading, colors, gold, styles, o
               activeOpacity={0.8}
               onPress={() => onAssign(q)}
             >
-              <Text style={{ fontSize: 13, fontWeight: '700', color: '#fff' }}>Assign</Text>
+              <Text style={{ fontSize: 13, fontWeight: '700', color: colors.onPrimary }}>Assign</Text>
             </TouchableOpacity>
           </View>
           {/* Real interactive quiz — same rendered HTML the student sees,

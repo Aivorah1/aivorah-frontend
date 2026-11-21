@@ -10,10 +10,8 @@
  * Mobile: list-only, tapping an item swaps to a detail view with a back button.
  */
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import {
-  View, Text, ScrollView, StyleSheet, TouchableOpacity,
-  ActivityIndicator, RefreshControl, TextInput, Platform, Linking,
-} from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, RefreshControl, TextInput, Platform, Linking } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import Header from '../../../components/common/Header';

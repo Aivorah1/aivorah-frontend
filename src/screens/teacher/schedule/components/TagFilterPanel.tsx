@@ -55,7 +55,7 @@ export default function TagFilterPanel({
                 borderWidth: 1.5, borderColor: allAssignmentOn ? gold : colors.textDim,
                 alignItems: 'center', justifyContent: 'center',
               }}>
-                {allAssignmentOn && <Feather name="check" size={12} color="white" />}
+                {allAssignmentOn && <Feather name="check" size={12} color={colors.onPrimary} />}
               </View>
               <Text style={{ fontSize: 12, fontWeight: '800', color: colors.textMain, textTransform: 'uppercase', letterSpacing: 0.5 }}>
                 ASSIGNMENT TAGS
@@ -77,7 +77,7 @@ export default function TagFilterPanel({
                     borderWidth: 1.5, borderColor: on ? tag.color : colors.textDim + '60',
                     alignItems: 'center', justifyContent: 'center',
                   }}>
-                    {on && <Feather name="check" size={12} color="white" />}
+                    {on && <Feather name="check" size={12} color={colors.onPrimary} />}
                   </View>
                   <Text style={{ fontSize: 13, color: colors.textMain, fontWeight: '500' }}>{tag.key}</Text>
                 </TouchableOpacity>
@@ -95,7 +95,7 @@ export default function TagFilterPanel({
                 borderWidth: 1.5, borderColor: allEventOn ? gold : colors.textDim,
                 alignItems: 'center', justifyContent: 'center',
               }}>
-                {allEventOn && <Feather name="check" size={12} color="white" />}
+                {allEventOn && <Feather name="check" size={12} color={colors.onPrimary} />}
               </View>
               <Text style={{ fontSize: 12, fontWeight: '800', color: colors.textMain, textTransform: 'uppercase', letterSpacing: 0.5 }}>
                 EVENT TAGS
@@ -117,7 +117,7 @@ export default function TagFilterPanel({
                     borderWidth: 1.5, borderColor: on ? tag.color : colors.textDim + '60',
                     alignItems: 'center', justifyContent: 'center',
                   }}>
-                    {on && <Feather name="check" size={12} color="white" />}
+                    {on && <Feather name="check" size={12} color={colors.onPrimary} />}
                   </View>
                   <Text style={{ fontSize: 13, color: colors.textMain, fontWeight: '500' }}>{tag.key}</Text>
                 </TouchableOpacity>

@@ -4,11 +4,8 @@
  *   WATCH (video) → LEARN (voice + visual scenes) → PRACTICE (adaptive quiz)
  */
 import React, { useEffect, useState, useRef } from 'react';
-import {
-  View, Text, ScrollView, TouchableOpacity,
-  StyleSheet, ActivityIndicator, Image, Animated,
-  BackHandler, Alert,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image, Animated, BackHandler, Alert } from 'react-native';
+import ActivityIndicator from '../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { Platform } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
@@ -45,7 +42,7 @@ type Phase = 'select' | 'watch' | 'learn' | 'practice' | 'complete';
 const CHARACTER_CONFIG = {
   zara:  {
     name: 'Ms. Zara',
-    color: '#BAA467',
+    color: '#24877B',
     desc: 'Warm & patient teacher',
     tag: 'Your Guide',
     available: true,
@@ -53,7 +50,7 @@ const CHARACTER_CONFIG = {
   },
   zappy: {
     name: 'Zappy',
-    color: '#f59e0b',
+    color: '#3FB8A8',
     desc: 'Energetic & super fun!',
     tag: 'Coming Soon',
     available: false,
@@ -80,8 +77,8 @@ const EMOTION_ICON: Record<string, string> = {
   celebrating: 'award', surprised: 'zap', questioning: 'help-circle',
 };
 const EMOTION_COLOR: Record<string, string> = {
-  happy: '#9FB2A4', excited: '#C9A24E', thinking: '#BAA467',
-  celebrating: '#BAA467', surprised: '#C98A8A', questioning: '#C9A24E',
+  happy: '#9FB2A4', excited: '#24877B', thinking: '#24877B',
+  celebrating: '#24877B', surprised: '#C98A8A', questioning: '#24877B',
 };
 
 // ── Web Video Player ─────────────────────────────────────────────────────────
@@ -537,8 +534,8 @@ function WatchPhase({ topic, textChunks, colors, onDone }: {
 
       {/* Hook question */}
       {hookText ? (
-        <View style={[ph.hookCard, { backgroundColor: '#f59e0b15', borderColor: '#f59e0b40' }]}>
-          <Feather name="help-circle" size={18} color="#f59e0b" />
+        <View style={[ph.hookCard, { backgroundColor: '#3FB8A815', borderColor: '#3FB8A840' }]}>
+          <Feather name="help-circle" size={18} color="#3FB8A8" />
           <Text style={{ color: colors.textMain, fontSize: 14, fontWeight: '600', flex: 1, lineHeight: 22 }}>
             {hookText}
           </Text>
@@ -779,14 +776,14 @@ function LearnPhase({ topic, grade, textChunks, imageChunks, colors, onDone, cha
 
   const scene  = scenes[sceneIdx];
   const isLast = sceneIdx >= scenes.length - 1;
-  const eColor = EMOTION_COLOR[scene?.emotion] ?? '#BAA467';
+  const eColor = EMOTION_COLOR[scene?.emotion] ?? '#24877B';
   const eIcon  = EMOTION_ICON[scene?.emotion]  ?? 'smile';
   const pct    = scenes.length ? Math.round(((sceneIdx + 1) / scenes.length) * 100) : 0;
 
   if (loading) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16 }}>
-        <ActivityIndicator size="large" color="#BAA467" />
+        <ActivityIndicator size="large" color="#24877B" />
         <Text style={{ color: colors.textMuted, fontSize: 14 }}>Ms. Zara is preparing your lesson…</Text>
         <Text style={{ color: colors.textDim, fontSize: 12, textAlign: 'center', paddingHorizontal: 32 }}>
           Groq AI is reading the chapter and creating a lesson just for you
@@ -800,7 +797,7 @@ function LearnPhase({ topic, grade, textChunks, imageChunks, colors, onDone, cha
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16, padding: 32 }}>
         <Feather name="alert-circle" size={40} color="#ef4444" />
         <Text style={{ color: '#ef4444', textAlign: 'center' }}>{error}</Text>
-        <TouchableOpacity style={[lp.btn, { backgroundColor: '#BAA467' }]} onPress={loadLesson}>
+        <TouchableOpacity style={[lp.btn, { backgroundColor: '#24877B' }]} onPress={loadLesson}>
           <Feather name="refresh-cw" size={16} color="#fff" />
           <Text style={lp.btnText}>Try Again</Text>
         </TouchableOpacity>
@@ -1144,8 +1141,8 @@ const lp = StyleSheet.create({
 
 // ── CHECKPOINT CARD — interactive pause between scenes ───────────────────────
 const CP_CONFIG = {
-  quick_check:   { label: 'Quick Check!',  icon: 'zap' as const,        color: '#f59e0b' },
-  tap_reveal:    { label: 'Predict!',      icon: 'help-circle' as const, color: '#BAA467' },
+  quick_check:   { label: 'Quick Check!',  icon: 'zap' as const,        color: '#3FB8A8' },
+  tap_reveal:    { label: 'Predict!',      icon: 'help-circle' as const, color: '#24877B' },
   tap_highlight: { label: 'Spot It!',      icon: 'target' as const,      color: '#10b981' },
 };
 
@@ -1247,8 +1244,8 @@ function CheckpointCard({ checkpoint, colors, onDone }: {
             borderColor: isCorrect ? '#10b98140' : '#ef444440',
           }]}>
             {audioPlaying
-              ? <ActivityIndicator size="small" color={isCorrect ? '#10b981' : '#f59e0b'} />
-              : <Feather name={isCorrect ? 'award' : 'info'} size={18} color={isCorrect ? '#10b981' : '#f59e0b'} />
+              ? <ActivityIndicator size="small" color={isCorrect ? '#10b981' : '#3FB8A8'} />
+              : <Feather name={isCorrect ? 'award' : 'info'} size={18} color={isCorrect ? '#10b981' : '#3FB8A8'} />
             }
             <Text style={[cp.feedbackText, { color: colors.textMain }]}>
               {audioPlaying ? 'Ms. Zara is explaining…' :
@@ -1261,7 +1258,7 @@ function CheckpointCard({ checkpoint, colors, onDone }: {
         {/* Continue button */}
         {revealed && (
           <TouchableOpacity
-            style={[cp.continueBtn, { backgroundColor: isCorrect ? '#10b981' : '#BAA467' }]}
+            style={[cp.continueBtn, { backgroundColor: isCorrect ? '#10b981' : '#24877B' }]}
             onPress={onDone}
             activeOpacity={0.85}
           >
@@ -1412,11 +1409,11 @@ function PracticePhase({ topic, textChunks, colors, onComplete, fixedQuiz, isSci
       <ScrollView contentContainerStyle={{ gap: spacing.lg, padding: spacing.xl, paddingBottom: 48 }} showsVerticalScrollIndicator={false}>
         {/* Score */}
         <View style={[pr.scoreBanner, {
-          backgroundColor: pct >= 80 ? '#10b98115' : pct >= 60 ? '#f59e0b15' : '#ef444415',
-          borderColor:     pct >= 80 ? '#10b98140' : pct >= 60 ? '#f59e0b40' : '#ef444440',
+          backgroundColor: pct >= 80 ? '#10b98115' : pct >= 60 ? '#3FB8A815' : '#ef444415',
+          borderColor:     pct >= 80 ? '#10b98140' : pct >= 60 ? '#3FB8A840' : '#ef444440',
         }]}>
           <Feather name={pct >= 80 ? 'award' : pct >= 60 ? 'star' : 'target'}
-            size={44} color={pct >= 80 ? '#10b981' : pct >= 60 ? '#f59e0b' : '#ef4444'} />
+            size={44} color={pct >= 80 ? '#10b981' : pct >= 60 ? '#3FB8A8' : '#ef4444'} />
           <Text style={{ color: colors.textMain, fontSize: 30, fontWeight: '900' }}>{score}/{questions.length}</Text>
           <Text style={{ color: colors.textMuted, fontSize: 14, textAlign: 'center', lineHeight: 20 }}>
             {pct >= 80
@@ -1479,7 +1476,7 @@ function PracticePhase({ topic, textChunks, colors, onComplete, fixedQuiz, isSci
               {!isCorrect && (
                 <View style={{ marginTop: 14 }}>
                   {hasExp ? (
-                    <View style={[pr.expBox, { borderColor: '#BAA46730' }]}>
+                    <View style={[pr.expBox, { borderColor: '#24877B30' }]}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
                         <Text style={{ color: '#818cf8', fontSize: 12, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5 }}>
                           Ms. Zara explains
@@ -1504,7 +1501,7 @@ function PracticePhase({ topic, textChunks, colors, onComplete, fixedQuiz, isSci
                     </View>
                   ) : (
                     <TouchableOpacity
-                      style={[pr.btn, { backgroundColor: '#BAA467' }]}
+                      style={[pr.btn, { backgroundColor: '#24877B' }]}
                       onPress={() => explainWrong(qi)}
                       disabled={isLoadExp}
                     >
@@ -1523,7 +1520,7 @@ function PracticePhase({ topic, textChunks, colors, onComplete, fixedQuiz, isSci
         {/* Action buttons */}
         <View style={{ gap: spacing.md }}>
           {pct < 80 && (
-            <TouchableOpacity style={[pr.btn, { backgroundColor: '#f59e0b' }]} onPress={loadQuiz}>
+            <TouchableOpacity style={[pr.btn, { backgroundColor: '#3FB8A8' }]} onPress={loadQuiz}>
               <Feather name="refresh-cw" size={16} color="#fff" />
               <Text style={pr.btnText}>Try Again</Text>
             </TouchableOpacity>
@@ -1619,7 +1616,7 @@ const pr = StyleSheet.create({
   optBtn:      { flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 12, borderWidth: 2, padding: 14 },
   radio:       { width: 20, height: 20, borderRadius: 10, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
   radioDot:    { width: 8, height: 8, borderRadius: 4, backgroundColor: '#fff' },
-  expBox:      { backgroundColor: '#BAA46715', borderRadius: 14, padding: 16, borderWidth: 1 },
+  expBox:      { backgroundColor: '#24877B15', borderRadius: 14, padding: 16, borderWidth: 1 },
   btn:         { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 16, borderRadius: radius.lg },
   btnText:     { color: '#fff', fontSize: 15, fontWeight: '700' },
 });
@@ -1633,7 +1630,7 @@ function CompletePhase({ topic, score, colors, onBack }: {
   const coins = Math.max(1, score);
   const perfect = pct === 100;
   const great = pct >= 80;
-  const celebColor = perfect ? '#4ade80' : great ? '#10b981' : '#f59e0b';
+  const celebColor = perfect ? '#4ade80' : great ? '#10b981' : '#3FB8A8';
 
   return (
     <ScrollView contentContainerStyle={{ padding: 28, gap: 20, paddingBottom: 48, alignItems: 'center' }} showsVerticalScrollIndicator={false}>
@@ -1662,8 +1659,8 @@ function CompletePhase({ topic, score, colors, onBack }: {
           <Text style={{ color: colors.textMuted, fontSize: 11, fontWeight: '600' }}>XP EARNED</Text>
         </View>
         <View style={{ flex: 1, backgroundColor: colors.cardDark, borderRadius: 16, padding: 16, alignItems: 'center', gap: 4, borderWidth: 1, borderColor: colors.borderColor }}>
-          <Feather name="dollar-sign" size={22} color="#f59e0b" />
-          <Text style={{ color: '#f59e0b', fontSize: 22, fontWeight: '900' }}>+{coins}</Text>
+          <Feather name="dollar-sign" size={22} color="#3FB8A8" />
+          <Text style={{ color: '#3FB8A8', fontSize: 22, fontWeight: '900' }}>+{coins}</Text>
           <Text style={{ color: colors.textMuted, fontSize: 11, fontWeight: '600' }}>COINS</Text>
         </View>
       </View>

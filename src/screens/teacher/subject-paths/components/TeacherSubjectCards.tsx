@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { useNavigation } from '@react-navigation/native';
 import type { AppColors } from '../../../../theme';
 import { useAuth } from '../../../../context/AuthContext';

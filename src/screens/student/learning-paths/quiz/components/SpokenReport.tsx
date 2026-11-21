@@ -40,8 +40,8 @@ export default function SpokenReport({ question, said, evaluation, colors }: {
   colors: AppColors;
 }) {
   const accent = colors.accentYellow;
-  const good = '#9FB2A4';
-  const warn = '#C98A8A';
+  const good = colors.accentGreen;
+  const warn = colors.accentRed;
   const ev = evaluation || {};
   const score = typeof ev.score === 'number' ? ev.score : null;
   const passed = !!ev.passed;
@@ -90,8 +90,8 @@ const s = StyleSheet.create({
   question: { flex: 1, fontSize: 14.5, fontWeight: '700', lineHeight: 22 },
   scoreChip: { borderWidth: 1, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 3 },
   scoreText: { fontSize: 13, fontWeight: '800' },
-  verdict: { fontSize: 12.5, fontWeight: '800', marginLeft: 38 },
-  label: { fontSize: 11, fontWeight: '800', letterSpacing: 0.4, textTransform: 'uppercase', marginTop: 4 },
+  verdict: { fontSize: 14, fontWeight: '800', marginLeft: 38 },
+  label: { fontSize: 12, fontWeight: '800', letterSpacing: 0.4, textTransform: 'uppercase', marginTop: 4 },
   said: { borderRadius: 8, padding: 12 },
   saidText: { fontSize: 14, lineHeight: 21, fontStyle: 'italic' },
   listBlock: { gap: 4, marginTop: 2 },

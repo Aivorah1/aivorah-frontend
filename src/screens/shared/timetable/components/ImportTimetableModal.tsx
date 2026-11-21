@@ -3,7 +3,8 @@
  * matched classes → save the ticked ones. Nothing is saved before "Save".
  */
 import React, { useMemo, useState } from 'react';
-import { View, Text, Modal, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, Modal, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../../../context/ThemeContext';
 import { radius, fonts } from '../../../../theme';

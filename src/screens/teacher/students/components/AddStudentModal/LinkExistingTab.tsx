@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, ScrollView, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TextInput, TouchableOpacity } from 'react-native';
+import ActivityIndicator from '../../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../../theme';
 import { normalizeGrade } from '../../../student-progress/utils/rosterFilters';
@@ -160,7 +161,7 @@ export default function LinkExistingTab({
           disabled={linking || (selectedStudents.length === 0 && !linkEmail.trim())}
         >
           {linking
-            ? <ActivityIndicator color="white" size="small" />
+            ? <ActivityIndicator color={colors.onPrimary} size="small" />
             : <Text style={styles.modalSaveText}>{selectedStudents.length > 1 ? `Link ${selectedStudents.length} Students` : 'Link Student'}</Text>}
         </TouchableOpacity>
       </View>

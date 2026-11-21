@@ -1,5 +1,6 @@
 import React from 'react';
-import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../theme';
 import { DEFAULT_GRADIENT } from '../utils/levelMeta';
@@ -55,8 +56,8 @@ export function RecordingPreview({ s, colors, text, gradient, recordingTime, isP
             <Text style={[s.previewBtnText, { color: colors.textMuted }]}>Retry</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={onSubmit} style={[s.previewSubmitBtn, { backgroundColor: colors.accentYellow, borderColor: colors.accentYellow }]} activeOpacity={0.7} accessibilityRole="button">
-            <Feather name="send" size={16} color="#fff" />
-            <Text style={[s.previewBtnText, { color: '#fff', fontWeight: '800' }]}>Submit</Text>
+            <Feather name="send" size={16} color={colors.onPrimary} />
+            <Text style={[s.previewBtnText, { color: colors.onPrimary, fontWeight: '800' }]}>Submit</Text>
           </TouchableOpacity>
         </View>
       </View>

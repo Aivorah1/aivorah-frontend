@@ -51,8 +51,8 @@ export default function InsightsColumns({
         {/* Column 2: Assignments */}
         <View style={[styles.insightCol, styles.insightColBorder]}>
           <View style={styles.colHeader}>
-            <Feather name="edit-3" size={11} color="#8A8358" />
-            <Text style={[styles.colHeaderText, { color: '#8A8358' }]}>Assignments</Text>
+            <Feather name="edit-3" size={11} color="#0E6E86" />
+            <Text style={[styles.colHeaderText, { color: '#0E6E86' }]}>Assignments</Text>
           </View>
           {assignmentTiles.map((tile, i) => {
             const idx = learningPathTiles.length + i;

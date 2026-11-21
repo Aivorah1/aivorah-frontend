@@ -40,10 +40,10 @@ export const cardStyles = StyleSheet.create({
     paddingHorizontal: 9,
     paddingVertical: 4,
   },
-  pctText: { fontSize: 11, fontWeight: '800' },
-  subjectName: { fontSize: 16, fontWeight: '800', marginTop: 12, marginBottom: 10 },
+  pctText: { fontSize: 12, fontWeight: '800' },
+  subjectName: { fontSize: 18, lineHeight: 24, fontWeight: '700', marginTop: 12, marginBottom: 8, fontFamily: fonts.title },
   statRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  statMini: { fontSize: 11, fontWeight: '600' },
+  statMini: { fontSize: 13, lineHeight: 19, fontWeight: '600' },
   track: {
     marginTop: 12,
     height: 5,

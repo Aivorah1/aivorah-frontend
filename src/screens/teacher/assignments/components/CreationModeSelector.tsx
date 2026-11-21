@@ -25,91 +25,91 @@ export function CreationModeSelector({
   onPrepareWorksheet: () => void;
 }) {
   return (
-    <View style={{ gap: 16 }}>
-      <Text style={{ fontSize: 13, color: colors.textDim, lineHeight: 18 }}>
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 14 }}>
+      <Text style={{ width: '100%', fontSize: 16, color: colors.textMuted, lineHeight: 24 }}>
         Choose how you want to create this assignment:
       </Text>
 
       {/* Option 1: Prepare Worksheet — write one in the Word-style editor, then assign it */}
       <TouchableOpacity
         testID="create-mode-prepare-worksheet"
-        style={{ padding: 16, borderRadius: 14, borderWidth: 1.5, borderColor: gold + '40', backgroundColor: gold + '18', gap: 8 }}
+        style={{ flexGrow: 1, flexBasis: 260, minHeight: 96, padding: 18, borderRadius: 16, borderWidth: 1, borderColor: colors.borderColor, backgroundColor: colors.tintBlue, gap: 8, justifyContent: 'center' }}
         onPress={onPrepareWorksheet}
         activeOpacity={0.8}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-          <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: gold + '20', alignItems: 'center', justifyContent: 'center' }}>
-            <Feather name="edit" size={20} color={gold} />
+          <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: colors.cardDark, alignItems: 'center', justifyContent: 'center' }}>
+            <Feather name="edit" size={22} color={colors.primary} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 15, fontWeight: '800', color: gold }}>Prepare Worksheet</Text>
-            <Text style={{ fontSize: 11, color: colors.textDim, marginTop: 2 }}>
+            <Text style={{ fontSize: 17, lineHeight: 23, fontWeight: '700', color: colors.textHeading }}>Prepare Worksheet</Text>
+            <Text style={{ fontSize: 14, lineHeight: 21, color: colors.textMuted, marginTop: 4 }}>
               Create and edit a worksheet in a Word-style editor, then assign it to students.
             </Text>
           </View>
-          <Feather name="chevron-right" size={18} color={gold} />
+          <Feather name="chevron-right" size={20} color={colors.textMuted} />
         </View>
       </TouchableOpacity>
 
       {/* Option 2: Upload Worksheet */}
       <TouchableOpacity
-        style={{ padding: 16, borderRadius: 14, borderWidth: 1.5, borderColor: gold + '40', backgroundColor: gold + '18', gap: 8 }}
+        style={{ flexGrow: 1, flexBasis: 260, minHeight: 96, padding: 18, borderRadius: 16, borderWidth: 1, borderColor: colors.borderColor, backgroundColor: colors.tintPeach, gap: 8, justifyContent: 'center' }}
         onPress={() => { setCreateMode('upload'); setUploadStep(1); uploadScrollRef.current?.scrollTo({ y: 0, animated: false }); }}
         activeOpacity={0.8}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-          <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: gold + '20', alignItems: 'center', justifyContent: 'center' }}>
-            <Feather name="upload" size={20} color={gold} />
+          <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: colors.cardDark, alignItems: 'center', justifyContent: 'center' }}>
+            <Feather name="upload" size={22} color={colors.primary} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 15, fontWeight: '800', color: gold }}>Upload Worksheet (PDF / Image)</Text>
-            <Text style={{ fontSize: 11, color: colors.textDim, marginTop: 2 }}>
+            <Text style={{ fontSize: 17, lineHeight: 23, fontWeight: '700', color: colors.textHeading }}>Upload Worksheet (PDF / Image)</Text>
+            <Text style={{ fontSize: 14, lineHeight: 21, color: colors.textMuted, marginTop: 4 }}>
               Extract questions from worksheet, use as-is or convert to interactive quiz
             </Text>
           </View>
-          <Feather name="chevron-right" size={18} color={gold} />
+          <Feather name="chevron-right" size={20} color={colors.textMuted} />
         </View>
       </TouchableOpacity>
 
       {/* Option 3: AI Assignment */}
       <TouchableOpacity
-        style={{ padding: 16, borderRadius: 14, borderWidth: 1.5, borderColor: gold + '40', backgroundColor: gold + '18', gap: 8 }}
+        style={{ flexGrow: 1, flexBasis: 260, minHeight: 96, padding: 18, borderRadius: 16, borderWidth: 1, borderColor: colors.borderColor, backgroundColor: colors.tintLilac, gap: 8, justifyContent: 'center' }}
         onPress={() => { setCreateMode('ai'); setType('assignment'); }}
         activeOpacity={0.8}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-          <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: gold + '20', alignItems: 'center', justifyContent: 'center' }}>
-            <Feather name="cpu" size={20} color={gold} />
+          <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: colors.cardDark, alignItems: 'center', justifyContent: 'center' }}>
+            <Feather name="cpu" size={22} color={colors.primary} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 15, fontWeight: '800', color: gold }}>
+            <Text style={{ fontSize: 17, lineHeight: 23, fontWeight: '700', color: colors.textHeading }}>
               {isIBPYP ? 'Generate IB PYP Assignment' : 'Generate AI Assignment'}
             </Text>
-            <Text style={{ fontSize: 11, color: colors.textDim, marginTop: 2 }}>
+            <Text style={{ fontSize: 14, lineHeight: 21, color: colors.textMuted, marginTop: 4 }}>
               AI creates Purpose, Learning Outcomes, Task Steps, Word Bank, and Stamps
             </Text>
           </View>
-          <Feather name="chevron-right" size={18} color={gold} />
+          <Feather name="chevron-right" size={20} color={colors.textMuted} />
         </View>
       </TouchableOpacity>
 
       {/* Option 4: Bulk Upload — several separate worksheets at once */}
       <TouchableOpacity
-        style={{ padding: 16, borderRadius: 14, borderWidth: 1.5, borderColor: gold + '40', backgroundColor: gold + '18', gap: 8 }}
+        style={{ flexGrow: 1, flexBasis: 260, minHeight: 96, padding: 18, borderRadius: 16, borderWidth: 1, borderColor: colors.borderColor, backgroundColor: colors.tintMint, gap: 8, justifyContent: 'center' }}
         onPress={() => { setCreateMode('bulk'); setBulkPhase('pick'); setBulkItems([]); }}
         activeOpacity={0.8}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-          <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: gold + '20', alignItems: 'center', justifyContent: 'center' }}>
-            <Feather name="layers" size={20} color={gold} />
+          <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: colors.cardDark, alignItems: 'center', justifyContent: 'center' }}>
+            <Feather name="layers" size={22} color={colors.primary} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 15, fontWeight: '800', color: gold }}>Bulk Upload (Multiple Worksheets)</Text>
-            <Text style={{ fontSize: 11, color: colors.textDim, marginTop: 2 }}>
+            <Text style={{ fontSize: 17, lineHeight: 23, fontWeight: '700', color: colors.textHeading }}>Bulk Upload (Multiple Worksheets)</Text>
+            <Text style={{ fontSize: 14, lineHeight: 21, color: colors.textMuted, marginTop: 4 }}>
               Upload several separate worksheets at once — each becomes its own assignment
             </Text>
           </View>
-          <Feather name="chevron-right" size={18} color={gold} />
+          <Feather name="chevron-right" size={20} color={colors.textMuted} />
         </View>
       </TouchableOpacity>
     </View>

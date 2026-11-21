@@ -18,7 +18,8 @@
  *        -> { created, updated, errors: [{row,error}], credentials: [{name,email,password,role}] }
  */
 import React, { useState, useMemo, useEffect } from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity, Pressable, Platform } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Pressable, Platform } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import Header from '../../../components/common/Header';
 import ScreenLayout from '../../../components/common/ScreenLayout';
@@ -113,7 +114,7 @@ function StepIndicator({ step, colors }: { step: number; colors: AppColors }) {
           <React.Fragment key={label}>
             <View style={styles.stepItem}>
               <View style={[styles.stepCircle, filled && styles.stepCircleActive]}>
-                {done ? <Feather name="check" size={13} color="#0B0B0B" /> : <Text style={[styles.stepCircleText, filled && styles.stepCircleTextActive]}>{num}</Text>}
+                {done ? <Feather name="check" size={13} color={colors.onPrimary} /> : <Text style={[styles.stepCircleText, filled && styles.stepCircleTextActive]}>{num}</Text>}
               </View>
               <Text style={[styles.stepLabel, filled && styles.stepLabelActive]}>{label}</Text>
             </View>
@@ -383,7 +384,7 @@ export default function SchoolAdminTeacherBulkImportScreen({ navigation }: any) 
           {step === 3 && (
             <>
               <View style={styles.summaryCard}>
-                <View style={[styles.summaryIcon, invalidRows.length > 0 && { backgroundColor: colors.accentYellow }]}><Feather name={invalidRows.length > 0 ? 'alert-triangle' : 'check'} size={20} color="#0B0B0B" /></View>
+                <View style={[styles.summaryIcon, invalidRows.length > 0 && { backgroundColor: colors.accentYellow }]}><Feather name={invalidRows.length > 0 ? 'alert-triangle' : 'check'} size={20} color={colors.onPrimary} /></View>
                 <Text style={styles.summaryTitle}>{invalidRows.length === 0 ? 'All rows look good' : `${invalidRows.length} row${invalidRows.length === 1 ? '' : 's'} need attention`}</Text>
                 <View style={styles.statRow}>
                   <View style={styles.statBox}><Text style={styles.statNum}>{validRows.length}</Text><Text style={styles.statLabel}>Valid</Text></View>
@@ -436,7 +437,7 @@ export default function SchoolAdminTeacherBulkImportScreen({ navigation }: any) 
               <View style={styles.footerRow}>
                 <TouchableOpacity style={styles.secondaryBtn} onPress={() => setStep(3)} disabled={submitting}><Text style={styles.secondaryBtnText}>Back</Text></TouchableOpacity>
                 <TouchableOpacity style={[styles.primaryBtn, submitting && styles.primaryBtnDisabled]} onPress={submitImport} disabled={submitting}>
-                  {submitting ? <ActivityIndicator color="#0B0B0B" size="small" /> : <Text style={styles.primaryBtnText}>Import {validRows.length} Teacher{validRows.length === 1 ? '' : 's'}</Text>}
+                  {submitting ? <ActivityIndicator color={colors.onPrimary} size="small" /> : <Text style={styles.primaryBtnText}>Import {validRows.length} Teacher{validRows.length === 1 ? '' : 's'}</Text>}
                 </TouchableOpacity>
               </View>
             </>
@@ -445,7 +446,7 @@ export default function SchoolAdminTeacherBulkImportScreen({ navigation }: any) 
           {step === 5 && result && (
             <>
               <View style={styles.summaryCard}>
-                <View style={styles.summaryIcon}><Feather name="check" size={20} color="#0B0B0B" /></View>
+                <View style={styles.summaryIcon}><Feather name="check" size={20} color={colors.onPrimary} /></View>
                 <Text style={styles.summaryTitle}>Import finished</Text>
                 <View style={styles.statRow}>
                   <View style={styles.statBox}><Text style={styles.statNum}>{result.created}</Text><Text style={styles.statLabel}>Created</Text></View>
@@ -479,7 +480,7 @@ export default function SchoolAdminTeacherBulkImportScreen({ navigation }: any) 
                   </View>
                 </View>
               )}
-              <TouchableOpacity style={styles.primaryBtn} onPress={resetAll}><Feather name="upload" size={15} color="#0B0B0B" /><Text style={styles.primaryBtnText}>Import another file</Text></TouchableOpacity>
+              <TouchableOpacity style={styles.primaryBtn} onPress={resetAll}><Feather name="upload" size={15} color={colors.onPrimary} /><Text style={styles.primaryBtnText}>Import another file</Text></TouchableOpacity>
             </>
           )}
         </ScrollView>
@@ -496,60 +497,60 @@ function makeStyles(colors: AppColors) {
     stepItem: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     stepCircle: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: colors.borderColor, backgroundColor: colors.cardDark },
     stepCircleActive: { backgroundColor: colors.accentYellow, borderColor: colors.accentYellow },
-    stepCircleText: { fontFamily: fonts.serif, fontSize: 12.5, fontWeight: '700', color: colors.textDim },
-    stepCircleTextActive: { color: '#0B0B0B' },
-    stepLabel: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '600', color: colors.textDim },
+    stepCircleText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.textDim },
+    stepCircleTextActive: { color: colors.onPrimary },
+    stepLabel: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '600', color: colors.textDim },
     stepLabelActive: { color: colors.textHeading, fontWeight: '700' },
     stepConnector: { width: 28, height: 1, borderTopWidth: 1, borderStyle: 'dashed', borderColor: colors.borderColor, marginHorizontal: 10 },
     topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: spacing.xl, flexWrap: 'wrap' },
-    templateBtnGroup: { flexDirection: 'row', gap: 8 },
-    templateBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, backgroundColor: colors.bgDark, borderWidth: 1, borderColor: colors.borderColor, borderRadius: radius.sm, paddingHorizontal: 14, height: 38 },
-    templateBtnText: { fontFamily: fonts.serif, fontSize: 12.5, fontWeight: '700', color: colors.textHeading },
+    templateBtnGroup: { minHeight: 44, justifyContent: 'center', flexDirection: 'row', gap: 8 },
+    templateBtn: { minHeight: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, backgroundColor: colors.bgDark, borderWidth: 1, borderColor: colors.borderColor, borderRadius: radius.sm, paddingHorizontal: 14, height: 38 },
+    templateBtnText: { minHeight: 44, justifyContent: 'center', fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.textHeading },
     dropzone: { borderWidth: 1.5, borderStyle: 'dashed', borderColor: colors.borderColor, backgroundColor: colors.cardDark, borderRadius: radius.lg, paddingVertical: 48, paddingHorizontal: 24, alignItems: 'center', gap: 6, marginBottom: spacing.lg },
     dropzoneActive: { borderColor: colors.accentYellow, backgroundColor: `${colors.accentYellow}0D` },
     dropzoneIconWrap: { width: 44, height: 44, borderRadius: 22, backgroundColor: `${colors.accentYellow}18`, alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
     dropzoneTitle: { fontFamily: fonts.serif, fontSize: 15, fontWeight: '700', color: colors.textHeading },
-    dropzoneSub: { fontFamily: fonts.serif, fontSize: 12.5, color: colors.textMuted, textAlign: 'center', lineHeight: 18, maxWidth: 440 },
+    dropzoneSub: { fontFamily: fonts.serif, fontSize: 14, color: colors.textMuted, textAlign: 'center', lineHeight: 18, maxWidth: 440 },
     fileChip: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: colors.bgDark, borderWidth: 1, borderColor: colors.borderColor, borderRadius: radius.sm, paddingHorizontal: 12, paddingVertical: 8, marginTop: 14, maxWidth: '100%' },
-    fileChipText: { fontFamily: fonts.serif, fontSize: 12.5, fontWeight: '600', color: colors.textHeading, flexShrink: 1 },
-    fileChipCount: { fontFamily: fonts.serif, fontSize: 11.5, color: colors.textDim },
+    fileChipText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '600', color: colors.textHeading, flexShrink: 1 },
+    fileChipCount: { fontFamily: fonts.serif, fontSize: 14, color: colors.textDim },
     footerRow: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10, marginTop: spacing.md },
-    primaryBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, backgroundColor: colors.accentYellow, borderRadius: radius.sm, paddingHorizontal: 18, height: 42 },
-    primaryBtnDisabled: { opacity: 0.45 },
-    primaryBtnText: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '700', color: '#0B0B0B' },
-    secondaryBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: colors.cardDark, borderWidth: 1, borderColor: colors.borderColor, borderRadius: radius.sm, paddingHorizontal: 16, height: 42 },
-    secondaryBtnText: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '700', color: colors.textHeading },
+    primaryBtn: { minHeight: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, backgroundColor: colors.accentYellow, borderRadius: radius.sm, paddingHorizontal: 18, height: 42 },
+    primaryBtnDisabled: { minHeight: 44, justifyContent: 'center', opacity: 0.45 },
+    primaryBtnText: { minHeight: 44, justifyContent: 'center', fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.onPrimary },
+    secondaryBtn: { minHeight: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: colors.cardDark, borderWidth: 1, borderColor: colors.borderColor, borderRadius: radius.sm, paddingHorizontal: 16, height: 42 },
+    secondaryBtnText: { minHeight: 44, justifyContent: 'center', fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.textHeading },
     card: { backgroundColor: colors.cardDark, borderWidth: 1, borderColor: colors.borderColor, borderRadius: radius.md, padding: spacing.lg, marginBottom: spacing.lg },
     cardTitle: { fontFamily: fonts.serif, fontSize: 15, fontWeight: '700', color: colors.textHeading, marginBottom: 4 },
-    cardSub: { fontFamily: fonts.serif, fontSize: 12, color: colors.textMuted, marginBottom: 4, lineHeight: 17 },
+    cardSub: { fontFamily: fonts.serif, fontSize: 14, color: colors.textMuted, marginBottom: 4, lineHeight: 17 },
     mapList: { marginTop: 14, gap: 10 },
     mapRow: { flexDirection: 'row', alignItems: 'center', gap: 12, position: 'relative', zIndex: 1 },
     mapRowOpen: { zIndex: 50 },
     mapSource: { flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 },
-    mapSourceText: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '600', color: colors.textHeading, flexShrink: 1 },
+    mapSourceText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '600', color: colors.textHeading, flexShrink: 1 },
     mapTargetWrap: { width: 220, flexShrink: 0 },
     warnBox: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 14, backgroundColor: `${colors.accentYellow}14`, borderWidth: 1, borderColor: `${colors.accentYellow}40`, borderRadius: radius.sm, paddingHorizontal: 12, paddingVertical: 9 },
-    warnBoxText: { fontFamily: fonts.serif, fontSize: 12, fontWeight: '600', color: colors.textHeading, flex: 1 },
+    warnBoxText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '600', color: colors.textHeading, flex: 1 },
     ddTrigger: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, borderWidth: 1, borderColor: colors.borderColor, backgroundColor: colors.bgDark, borderRadius: radius.sm, paddingHorizontal: 12, height: 36 },
-    ddTriggerText: { fontFamily: fonts.serif, fontSize: 12.5, fontWeight: '600', color: colors.textHeading, flexShrink: 1 },
+    ddTriggerText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '600', color: colors.textHeading, flexShrink: 1 },
     ddBackdropWeb: { position: 'fixed' as any, top: 0, left: 0, right: 0, bottom: 0, zIndex: 19 },
     ddBackdropNative: { position: 'absolute', top: -1000, left: -1000, right: -1000, bottom: -1000, zIndex: 19 },
     ddMenu: { position: 'absolute', top: 40, right: 0, minWidth: 200, backgroundColor: colors.cardDark, borderWidth: 1, borderColor: colors.borderColor, borderRadius: radius.sm, paddingVertical: 4, zIndex: 21, maxHeight: 260, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 8 },
     ddItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12, paddingVertical: 9 },
     ddItemHovered: { backgroundColor: colors.cardHover },
     ddItemActive: { backgroundColor: `${colors.accentYellow}14` },
-    ddItemText: { fontFamily: fonts.serif, fontSize: 12.5, color: colors.textMuted },
+    ddItemText: { fontFamily: fonts.serif, fontSize: 14, color: colors.textMuted },
     ddItemTextActive: { color: colors.textHeading, fontWeight: '700' },
     previewHeader: { marginBottom: spacing.sm },
-    previewCount: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '700', color: colors.textHeading },
+    previewCount: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.textHeading },
     table: { backgroundColor: colors.cardDark, borderWidth: 1, borderColor: colors.borderColor, borderRadius: radius.md, overflow: 'hidden', marginBottom: spacing.lg },
     theadRow: { flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: colors.borderColor, backgroundColor: colors.cardHover, paddingVertical: 4 },
-    thText: { fontFamily: fonts.serif, fontSize: 10.5, fontWeight: '700', letterSpacing: 0.4, textTransform: 'uppercase', color: colors.textDim, paddingVertical: 10, paddingHorizontal: 12 },
+    thText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', letterSpacing: 0.4, textTransform: 'uppercase', color: colors.textDim, paddingVertical: 10, paddingHorizontal: 12 },
     tr: { flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: colors.borderColor, paddingVertical: 8 },
     trLast: { borderBottomWidth: 0 },
-    td: { fontFamily: fonts.serif, fontSize: 12.5, color: colors.textMuted, paddingHorizontal: 12 },
-    tdStrong: { fontFamily: fonts.serif, fontSize: 12.5, fontWeight: '700', color: colors.textHeading, paddingHorizontal: 12 },
-    tdMono: { fontFamily: Platform.select({ web: 'monospace', default: fonts.serif }), fontSize: 12.5, fontWeight: '600', color: colors.textHeading, paddingHorizontal: 12 },
+    td: { fontFamily: fonts.serif, fontSize: 14, color: colors.textMuted, paddingHorizontal: 12 },
+    tdStrong: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.textHeading, paddingHorizontal: 12 },
+    tdMono: { fontFamily: Platform.select({ web: 'monospace', default: fonts.serif }), fontSize: 14, fontWeight: '600', color: colors.textHeading, paddingHorizontal: 12 },
     pName: { flex: 2, minWidth: 130 },
     pEmail: { flex: 2.4, minWidth: 160 },
     pSub: { flex: 2, minWidth: 120 },
@@ -563,15 +564,15 @@ function makeStyles(colors: AppColors) {
     statRow: { flexDirection: 'row', gap: 12, width: '100%', justifyContent: 'center' },
     statBox: { flex: 1, maxWidth: 160, alignItems: 'center', backgroundColor: colors.bgDark, borderWidth: 1, borderColor: colors.borderColor, borderRadius: radius.sm, paddingVertical: 14 },
     statNum: { fontFamily: fonts.serif, fontSize: 24, fontWeight: '700', color: colors.textHeading },
-    statLabel: { fontFamily: fonts.serif, fontSize: 11, fontWeight: '600', letterSpacing: 0.4, textTransform: 'uppercase', color: colors.textDim, marginTop: 4 },
+    statLabel: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '600', letterSpacing: 0.4, textTransform: 'uppercase', color: colors.textDim, marginTop: 4 },
     errorList: { marginTop: 10, gap: 8 },
     errorRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     errorBadge: { backgroundColor: `${colors.accentRed}18`, borderWidth: 1, borderColor: `${colors.accentRed}55`, borderRadius: radius.sm, paddingHorizontal: 8, paddingVertical: 3, flexShrink: 0 },
-    errorBadgeText: { fontFamily: fonts.serif, fontSize: 11, fontWeight: '700', color: colors.accentRed },
-    errorMsg: { fontFamily: fonts.serif, fontSize: 12.5, color: colors.textMuted, flex: 1 },
+    errorBadgeText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.accentRed },
+    errorMsg: { fontFamily: fonts.serif, fontSize: 14, color: colors.textMuted, flex: 1 },
     credHeader: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 12 },
-    warnText: { fontFamily: fonts.serif, fontSize: 11.5, color: colors.accentYellow, marginTop: 3 },
+    warnText: { fontFamily: fonts.serif, fontSize: 14, color: colors.accentYellow, marginTop: 3 },
     emptyBox: { alignItems: 'center', paddingTop: 20, paddingBottom: 20, gap: 10, paddingHorizontal: 24, marginBottom: spacing.md },
-    emptyText: { fontFamily: fonts.serif, fontSize: 13, color: colors.textMuted, textAlign: 'center', lineHeight: 19 },
+    emptyText: { fontFamily: fonts.serif, fontSize: 14, color: colors.textMuted, textAlign: 'center', lineHeight: 19 },
   });
 }

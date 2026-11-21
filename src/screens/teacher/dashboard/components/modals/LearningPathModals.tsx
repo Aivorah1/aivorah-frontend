@@ -57,8 +57,8 @@ export function renderLearningPathModal(tileIndex: number, ctx: ModalRenderCtx) 
                       onPress={() => ctx.onViewProgress?.(s.id, r.kind === 'topic_help' ? r.skillId : undefined)}
                       accessibilityRole="button" accessibilityLabel={`${r.label}: ${r.detail}`} testID={`need-support-reason-${r.kind}`}>
                       <Text style={[styles.tableChip, { alignSelf: 'flex-start' }, r.kind === 'topic_help'
-                        ? { color: '#8A6A1F', borderColor: '#C9A24E60', backgroundColor: '#C9A24E18' }
-                        : { color: '#8A8358', borderColor: '#8A835840', backgroundColor: '#8A835810' }]}>
+                        ? { color: '#0E6E86', borderColor: '#0E6E8660', backgroundColor: '#0E6E8618' }
+                        : { color: '#0E6E86', borderColor: '#0E6E8640', backgroundColor: '#0E6E8610' }]}>
                         {r.label}
                       </Text>
                       <Text style={{ fontSize: 12, color: colors.textMuted, marginTop: 3 }}>{r.detail}</Text>
@@ -135,7 +135,7 @@ export function renderLearningPathModal(tileIndex: number, ctx: ModalRenderCtx) 
           </View>
           <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
             {ranked.map((s, i) => {
-              const medal = i === 0 ? '#C5BD96' : i === 1 ? '#7AADA8' : i === 2 ? '#C4836A' : colors.textDim;
+              const medal = i === 0 ? '#0E6E86' : i === 1 ? '#7AADA8' : i === 2 ? '#C4836A' : colors.textDim;
               // Group this student's completed topics by subject, e.g. "Mathematics: 2, English: 1".
               // Always show every subject this teacher is scoped to (even at 0 done) so
               // monitoring is complete at a glance, not just whichever subjects happen to

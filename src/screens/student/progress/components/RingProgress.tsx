@@ -10,7 +10,7 @@ export function RingProgress({ progress, color, size = 90, strokeWidth = 8 }: {
   const offset = circumference * (1 - Math.min(Math.max(progress, 0), 1));
   return (
     <Svg width={size} height={size}>
-      <Circle cx={cx} cy={cx} r={r} stroke="rgba(255,255,255,0.08)" strokeWidth={strokeWidth} fill="none" />
+      <Circle cx={cx} cy={cx} r={r} stroke="rgba(128,140,155,0.28)" strokeWidth={strokeWidth} fill="none" />
       <G transform={`rotate(-90 ${cx} ${cx})`}>
         <Circle cx={cx} cy={cx} r={r} stroke={color} strokeWidth={strokeWidth} fill="none"
           strokeLinecap="round" strokeDasharray={`${circumference}`} strokeDashoffset={offset} />

@@ -47,16 +47,16 @@ function makeStyles(colors: AppColors) {
   return StyleSheet.create({
     table: { backgroundColor: colors.cardDark, borderWidth: 1, borderColor: colors.borderColor, borderRadius: radius.md, overflow: 'hidden' },
     theadRow: { flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: colors.borderColor, backgroundColor: colors.cardHover, paddingVertical: 10 },
-    thText: { fontFamily: fonts.serif, fontSize: 10.5, fontWeight: '700', letterSpacing: 0.4, textTransform: 'uppercase', color: colors.textDim, paddingHorizontal: 14 },
+    thText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', letterSpacing: 0.4, textTransform: 'uppercase', color: colors.textDim, paddingHorizontal: 14 },
     tr: { flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: colors.borderColor, paddingVertical: 12 },
     trLast: { borderBottomWidth: 0 },
     colClass: { flex: 1.6, minWidth: 150, paddingHorizontal: 14 },
     colTeacher: { flex: 1.6, minWidth: 140, paddingHorizontal: 14 },
     colStudents: { flex: 1, minWidth: 100, paddingHorizontal: 14 },
     colAction: { width: 140, paddingHorizontal: 14, alignItems: 'flex-end' },
-    td: { fontFamily: fonts.serif, fontSize: 12.5, color: colors.textMuted },
-    tdStrong: { fontFamily: fonts.serif, fontSize: 13.5, fontWeight: '700', color: colors.textHeading },
-    tdUnassigned: { fontFamily: fonts.serif, fontSize: 12.5, fontStyle: 'italic', color: colors.textDim },
-    actionLink: { fontFamily: fonts.serif, fontSize: 12.5, fontWeight: '700', color: colors.accentYellow },
+    td: { fontFamily: fonts.serif, fontSize: 14, color: colors.textMuted },
+    tdStrong: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.textHeading },
+    tdUnassigned: { fontFamily: fonts.serif, fontSize: 14, fontStyle: 'italic', color: colors.textDim },
+    actionLink: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.accentYellow },
   });
 }

@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, Image } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, TextInput, Image } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../theme';
 import type { BulkItem, StudentItem } from '../types';
@@ -252,8 +253,8 @@ export function BulkUploadFlow({
                       <Text style={{ fontSize: 11, fontWeight: '700', color: colors.textDim }}>Language</Text>
                       <View style={styles.chipRow}>
                         {(item.language && !languagesForCurriculum(curriculum).includes(item.language) ? [...languagesForCurriculum(curriculum), item.language] : languagesForCurriculum(curriculum)).map(lang => (
-                          <TouchableOpacity key={lang} style={[styles.chip, item.language === lang && { backgroundColor: '#BAA46720', borderColor: '#BAA467' }]} onPress={() => updateBulkItem(item.id, { language: lang })} activeOpacity={0.75}>
-                            <Text style={[styles.chipText, item.language === lang && { color: '#BAA467' }]}>{lang}</Text>
+                          <TouchableOpacity key={lang} style={[styles.chip, item.language === lang && { backgroundColor: '#0E6E8620', borderColor: '#0E6E86' }]} onPress={() => updateBulkItem(item.id, { language: lang })} activeOpacity={0.75}>
+                            <Text style={[styles.chipText, item.language === lang && { color: '#0E6E86' }]}>{lang}</Text>
                           </TouchableOpacity>
                         ))}
                       </View>

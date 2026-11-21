@@ -15,7 +15,7 @@ export function makeStyles(colors: AppColors) {
     },
     summaryCell: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     summaryIcon: { width: 32, height: 32, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center' },
-    summaryLabel: { fontSize: 11, color: colors.textDim, marginBottom: 2 },
+    summaryLabel: { fontSize: 12, color: colors.textDim, marginBottom: 2 },
     summaryValue: { fontFamily: fonts.serif, fontSize: 16, fontWeight: '800', color: colors.textHeading },
     summaryDivider: { width: 1, height: 28, backgroundColor: colors.borderColor },
 
@@ -24,11 +24,11 @@ export function makeStyles(colors: AppColors) {
       backgroundColor: colors.accentYellow + '12', borderWidth: 1, borderColor: colors.accentYellow + '30',
       borderRadius: radius.sm, paddingHorizontal: 14, paddingVertical: 10, marginBottom: 14,
     },
-    selectionBarText: { fontSize: 12.5, color: colors.textMain, fontWeight: '600' },
+    selectionBarText: { fontSize: 14, color: colors.textMain, fontWeight: '600' },
     selectionBarClear: { fontSize: 12, color: colors.accentYellow, fontWeight: '700' },
 
     cardTitleRow: { marginBottom: 14 },
-    cardSubtitle: { fontSize: 11.5, color: colors.textDim, marginTop: 2 },
+    cardSubtitle: { fontSize: 14, color: colors.textDim, marginTop: 2 },
 
     toolbar: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' },
 
@@ -39,7 +39,7 @@ export function makeStyles(colors: AppColors) {
       height: 36, paddingHorizontal: 12, borderRadius: radius.sm,
       borderWidth: 1, borderColor: colors.borderColor, backgroundColor: colors.cardDark,
     },
-    searchInput: { flex: 1, fontSize: 13, color: colors.textMain },
+    searchInput: { flex: 1, fontSize: 14, color: colors.textMain },
     selectedCount: { fontSize: 12, color: colors.textDim, marginLeft: 'auto' as any },
 
     // Grade / School / Status single-select dropdowns
@@ -53,7 +53,7 @@ export function makeStyles(colors: AppColors) {
       paddingHorizontal: 10, paddingVertical: 5, borderRadius: radius.full,
       backgroundColor: colors.accentYellow + '18', borderWidth: 1, borderColor: colors.accentYellow + '40',
     },
-    activeChipText: { fontSize: 11.5, color: colors.textMain, fontWeight: '600' },
+    activeChipText: { fontSize: 14, color: colors.textMain, fontWeight: '600' },
     clearAllText: { fontSize: 12, color: colors.accentYellow, fontWeight: '700' },
     resultCount: { fontSize: 12, color: colors.textDim },
 
@@ -63,26 +63,26 @@ export function makeStyles(colors: AppColors) {
       borderWidth: 1, borderColor: colors.borderColor, backgroundColor: colors.cardDark,
     },
     filterChipActive: { backgroundColor: colors.accentYellow + '18', borderColor: colors.accentYellow },
-    filterChipText: { fontFamily: fonts.serif, fontSize: 12.5, fontWeight: '600', color: colors.textMain },
+    filterChipText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '600', color: colors.textMain },
 
     table: {
       backgroundColor: colors.cardDark, borderWidth: 1, borderColor: colors.borderColor,
       borderRadius: radius.md, padding: 20, marginBottom: 20,
     },
     tableHeading: { fontFamily: fonts.serif, fontSize: 15, fontWeight: '800', color: colors.textHeading, marginBottom: 4 },
-    tableSubheading: { fontSize: 11.5, color: colors.textDim, marginBottom: 16 },
+    tableSubheading: { fontSize: 14, color: colors.textDim, marginBottom: 16 },
     tableHeaderRow: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: colors.borderColor, paddingBottom: 8, marginBottom: 4 },
-    tableHeaderCell: { flex: 1, fontSize: 10.5, fontWeight: '700', color: colors.textDim, letterSpacing: 0.4 },
+    tableHeaderCell: { flex: 1, fontSize: 12, fontWeight: '700', color: colors.textDim, letterSpacing: 0.4 },
     tableRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.borderColor },
     tableRowSelected: { backgroundColor: colors.accentYellow + '1A' },
-    tableCell: { flex: 1, fontSize: 13, color: colors.textMain, fontFamily: fonts.sans },
+    tableCell: { flex: 1, fontSize: 14, color: colors.textMain, fontFamily: fonts.sans },
     // borderColor token is a faint rgba — use the hex textDim so unchecked boxes stay clearly visible.
     checkbox: {
       width: 18, height: 18, borderRadius: 4, borderWidth: 1.5, borderColor: colors.textDim,
       backgroundColor: colors.cardDark, alignItems: 'center', justifyContent: 'center', marginRight: 12,
     },
     checkboxChecked: { backgroundColor: colors.accentYellow, borderColor: colors.accentYellow },
-    emptyRowText: { fontSize: 12.5, color: colors.textDim, paddingVertical: 20, textAlign: 'center' },
+    emptyRowText: { fontSize: 14, color: colors.textDim, paddingVertical: 20, textAlign: 'center' },
 
     // Paginated student roster (avatar + name/email, sortable columns, status pill)
     roster: { borderWidth: 1, borderColor: colors.borderColor, borderRadius: radius.sm, overflow: 'hidden' },
@@ -95,13 +95,13 @@ export function makeStyles(colors: AppColors) {
       backgroundColor: colors.textHeading + '17', borderBottomWidth: 1.5, borderBottomColor: colors.borderColor,
     },
     rosterHeadText: { fontSize: 12, fontWeight: '800', color: colors.textMain, letterSpacing: 0.2 },
-    rosterSortBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start' },
+    rosterSortBtn: { minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start' },
     rosterCheckCell: { width: 48, alignItems: 'center', justifyContent: 'center' },
     rosterCell: {
       minWidth: 0, paddingHorizontal: 12, paddingVertical: 10, justifyContent: 'center',
       borderLeftWidth: 1, borderLeftColor: colors.borderColor,
     },
-    rosterCellText: { fontSize: 13, color: colors.textMain, fontFamily: fonts.sans },
+    rosterCellText: { fontSize: 14, color: colors.textMain, fontFamily: fonts.sans },
     rosterDash: { alignSelf: 'stretch', textAlign: 'center', color: colors.textDim },
     rosterRow: {
       flexDirection: 'row', alignItems: 'stretch', minHeight: 60,
@@ -110,9 +110,9 @@ export function makeStyles(colors: AppColors) {
     rosterRowAlt: { backgroundColor: colors.bgDark + '80' },
     rosterStudentCell: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     rosterAvatar: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
-    rosterAvatarText: { fontSize: 11.5, fontWeight: '700' },
-    rosterName: { fontSize: 13, fontWeight: '700', color: colors.textHeading },
-    rosterEmail: { fontSize: 11.5, color: colors.textDim, marginTop: 2 },
+    rosterAvatarText: { fontSize: 14, fontWeight: '700' },
+    rosterName: { fontSize: 14, fontWeight: '700', color: colors.textHeading },
+    rosterEmail: { fontSize: 14, color: colors.textDim, marginTop: 2 },
     rosterTeacherText: { fontSize: 12, fontWeight: '600', color: colors.textMain },
     assignedTeacherLine: { gap: 3 },
     assignedSubjects: { flexDirection: 'row', flexWrap: 'wrap', gap: 4 },
@@ -120,10 +120,10 @@ export function makeStyles(colors: AppColors) {
       paddingHorizontal: 6, paddingVertical: 1, borderRadius: radius.full,
       backgroundColor: colors.accentBlue + '18', borderWidth: 1, borderColor: colors.accentBlue + '35',
     },
-    assignedSubjectText: { fontSize: 10.5, fontWeight: '600', color: colors.accentBlue },
+    assignedSubjectText: { fontSize: 12, fontWeight: '600', color: colors.accentBlue },
     rosterFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 14, paddingVertical: 10 },
     rosterPager: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    pagerBtn: {
+    pagerBtn: { minHeight: 44,
       width: 32, height: 32, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.borderColor,
       alignItems: 'center', justifyContent: 'center', backgroundColor: colors.cardDark,
     },
@@ -142,7 +142,7 @@ export function makeStyles(colors: AppColors) {
       flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 4,
       borderRadius: radius.full, backgroundColor: colors.accentYellow + '1A', borderWidth: 1, borderColor: colors.accentYellow + '40',
     },
-    countBadgeText: { fontSize: 11.5, fontWeight: '700', color: colors.accentYellow },
+    countBadgeText: { fontSize: 14, fontWeight: '700', color: colors.accentYellow },
     assignColumns: { flexDirection: 'row', flexWrap: 'wrap', gap: 16, alignItems: 'flex-start' },
     assignColTeacher: { flexGrow: 3, flexBasis: 420, minWidth: 300 },
     assignColSubjects: { flexGrow: 2, flexBasis: 340, minWidth: 280 },
@@ -155,10 +155,10 @@ export function makeStyles(colors: AppColors) {
       backgroundColor: colors.accentYellow + '1F',
     },
     stepNumActive: { backgroundColor: colors.accentYellow },
-    stepNumText: { fontSize: 12.5, fontWeight: '800', color: colors.accentYellow },
-    stepNumTextActive: { fontSize: 12.5, fontWeight: '800', color: '#FFFFFF' },
+    stepNumText: { fontSize: 14, fontWeight: '800', color: colors.accentYellow },
+    stepNumTextActive: { fontSize: 14, fontWeight: '800', color: '#FFFFFF' },
     stepTitle: { fontSize: 15, fontWeight: '800', color: colors.textHeading },
-    stepMeta: { fontSize: 11.5, color: colors.textDim, marginLeft: 'auto' as any },
+    stepMeta: { fontSize: 14, color: colors.textDim, marginLeft: 'auto' as any },
 
     switchRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     switchTrack: {
@@ -191,7 +191,7 @@ export function makeStyles(colors: AppColors) {
       alignItems: 'center', justifyContent: 'center',
     },
     subjectCheckOn: { backgroundColor: colors.accentYellow, borderColor: colors.accentYellow },
-    subjectChipText: { fontSize: 12.5, color: colors.textMain },
+    subjectChipText: { fontSize: 14, color: colors.textMain },
     subjectChipTextOn: { fontWeight: '700' },
 
     summaryBox: {
@@ -202,7 +202,7 @@ export function makeStyles(colors: AppColors) {
       flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 10,
       borderBottomWidth: 1, borderBottomColor: colors.borderColor,
     },
-    summaryBoxTitle: { fontSize: 12.5, fontWeight: '800', color: colors.textHeading },
+    summaryBoxTitle: { fontSize: 14, fontWeight: '800', color: colors.textHeading },
     summaryLine: {
       flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, paddingVertical: 9,
       borderBottomWidth: 1, borderBottomColor: colors.borderColor,
@@ -213,13 +213,13 @@ export function makeStyles(colors: AppColors) {
       paddingHorizontal: 8, paddingVertical: 3, borderRadius: radius.full,
       backgroundColor: colors.accentYellow + '1A', borderWidth: 1, borderColor: colors.accentYellow + '40',
     },
-    miniChipText: { fontSize: 10.5, fontWeight: '700', color: colors.accentYellow },
+    miniChipText: { fontSize: 12, fontWeight: '700', color: colors.accentYellow },
 
     infoNote: {
       flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12, padding: 10,
       borderRadius: radius.sm, backgroundColor: colors.accentBlue + '14', borderWidth: 1, borderColor: colors.accentBlue + '30',
     },
-    infoNoteText: { flex: 1, fontSize: 11.5, color: colors.textMain },
+    infoNoteText: { flex: 1, fontSize: 14, color: colors.textMain },
     teacherRow: {
       flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 14, paddingVertical: 11,
       borderBottomWidth: 1, borderBottomColor: colors.borderColor, backgroundColor: colors.cardDark,
@@ -235,8 +235,8 @@ export function makeStyles(colors: AppColors) {
       width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center',
       backgroundColor: colors.accentBlue + '22',
     },
-    teacherAvatarText: { fontSize: 11, fontWeight: '700', color: colors.accentBlue },
-    teacherTeaches: { width: 104, fontSize: 11.5, color: colors.textDim, textAlign: 'right' },
+    teacherAvatarText: { fontSize: 12, fontWeight: '700', color: colors.accentBlue },
+    teacherTeaches: { width: 104, fontSize: 14, color: colors.textDim, textAlign: 'right' },
 
     assignCard: {
       backgroundColor: colors.cardDark, borderWidth: 1, borderColor: colors.borderColor,
@@ -245,38 +245,38 @@ export function makeStyles(colors: AppColors) {
     assignCardTitle: { fontFamily: fonts.serif, fontSize: 15, fontWeight: '800', color: colors.textHeading, marginBottom: 14 },
     row: { flexDirection: 'row', gap: 12, flexWrap: 'wrap' },
     field: { flex: 1, minWidth: 180, marginBottom: 12 },
-    label: { fontSize: 11.5, fontWeight: '700', color: colors.textDim, marginBottom: 6, letterSpacing: 0.3 },
+    label: { fontSize: 14, fontWeight: '700', color: colors.textDim, marginBottom: 6, letterSpacing: 0.3 },
     input: {
       fontFamily: fonts.serif, fontSize: 14, color: colors.textMain,
       borderWidth: 1, borderColor: colors.borderColor, borderRadius: radius.sm,
       paddingHorizontal: 12, paddingVertical: 10, backgroundColor: colors.cardDark,
     },
-    hint: { fontSize: 11.5, color: colors.textDim, marginTop: 6 },
+    hint: { fontSize: 14, color: colors.textDim, marginTop: 6 },
 
     errorBanner: {
       flexDirection: 'row', alignItems: 'center', gap: 8,
       backgroundColor: colors.accentRed + '12', borderWidth: 1, borderColor: colors.accentRed + '30',
       borderRadius: radius.sm, padding: 10, marginBottom: 14,
     },
-    errorText: { fontSize: 12.5, color: colors.accentRed, flex: 1 },
+    errorText: { fontSize: 14, color: colors.accentRed, flex: 1 },
     successBanner: {
       flexDirection: 'row', alignItems: 'center', gap: 8,
       backgroundColor: colors.accentCyan + '12', borderWidth: 1, borderColor: colors.accentCyan + '30',
       borderRadius: radius.sm, padding: 10, marginBottom: 14,
     },
-    successText: { fontSize: 12.5, color: colors.accentCyan, flex: 1 },
+    successText: { fontSize: 14, color: colors.accentCyan, flex: 1 },
 
     chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 },
-    submitBtn: {
+    submitBtn: { minHeight: 44,
       flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
       backgroundColor: colors.accentYellow, borderRadius: radius.sm, paddingVertical: 12,
       alignSelf: 'center', marginTop: 18, minWidth: 180, paddingHorizontal: 32,
     },
-    submitBtnText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: '#0B0B0B' },
+    submitBtnText: { minHeight: 44, fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.onPrimary },
 
     emptyBox: { alignItems: 'center', paddingTop: 56, gap: 12, paddingHorizontal: 24 },
-    emptyText: { fontFamily: fonts.serif, fontSize: 13, color: colors.textMuted, textAlign: 'center', lineHeight: 19, maxWidth: 360 },
-    retryBtn: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.borderColor },
-    retryText: { fontFamily: fonts.serif, fontSize: 12.5, fontWeight: '700', color: colors.accentYellow },
+    emptyText: { fontFamily: fonts.serif, fontSize: 14, color: colors.textMuted, textAlign: 'center', lineHeight: 19, maxWidth: 360 },
+    retryBtn: { minHeight: 44, paddingHorizontal: 14, paddingVertical: 7, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.borderColor },
+    retryText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.accentYellow },
   });
 }

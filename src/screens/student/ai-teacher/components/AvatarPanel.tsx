@@ -82,7 +82,7 @@ export default function AvatarPanel({ source, name, status, caption, active, onT
       <View style={styles.controls}>
         <TouchableOpacity onPress={onToggle} style={[styles.button, { backgroundColor: colors.accentYellow }]} accessibilityRole="button"
           accessibilityLabel={active ? 'Stop voice' : 'Start voice'} testID="ai-teacher-voice">
-          <Feather name={active ? 'mic' : 'mic-off'} size={20} color="#FFFFFF" />
+          <Feather name={active ? 'mic' : 'mic-off'} size={20} color={colors.onPrimary} />
           <Text style={styles.buttonText}>{active ? 'Stop' : 'Start'}</Text>
         </TouchableOpacity>
         <Text style={[styles.micState, { color: colors.textMuted }]} testID="ai-teacher-mic-state">{active ? 'Microphone on' : 'Microphone off'}</Text>

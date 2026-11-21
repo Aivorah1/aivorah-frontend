@@ -369,7 +369,7 @@ export function LearningBuddyModal({
               justifyContent: 'center',
             }}
           >
-            <Feather name="check" size={9} color="white" />
+            <Feather name="check" size={9} color={colors.onPrimary} />
           </View>
         )}
       </TouchableOpacity>

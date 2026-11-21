@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity, TextInput, Modal } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput, Modal } from 'react-native';
+import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { radius, fonts } from '../../../../theme';
 import type { AppColors } from '../../../../theme';
@@ -88,18 +89,18 @@ function makeStyles(colors: AppColors) {
     pickerCard: { backgroundColor: colors.cardDark, borderRadius: 18, borderWidth: 1, borderColor: colors.borderColor, padding: 22, width: '100%', maxWidth: 460 },
     pickerHeader: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14, gap: 10 },
     pickerTitle: { fontFamily: fonts.serif, fontSize: 16, fontWeight: '700', color: colors.textHeading },
-    pickerSub: { fontFamily: fonts.serif, fontSize: 12, color: colors.textDim, marginTop: 2 },
+    pickerSub: { fontFamily: fonts.serif, fontSize: 14, color: colors.textDim, marginTop: 2 },
     pickerSearchBar: { flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderColor: colors.borderColor, backgroundColor: colors.bgDark, borderRadius: radius.sm, paddingHorizontal: 12, paddingVertical: 9, marginBottom: 10 },
-    pickerSearchInput: { flex: 1, fontFamily: fonts.serif, fontSize: 13, color: colors.textMain },
+    pickerSearchInput: { flex: 1, fontFamily: fonts.serif, fontSize: 14, color: colors.textMain },
     unassignRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 9, paddingHorizontal: 4, marginBottom: 6 },
-    unassignText: { fontFamily: fonts.serif, fontSize: 12.5, fontWeight: '600', color: colors.accentRed || '#F87171' },
-    pickerEmpty: { fontFamily: fonts.serif, fontSize: 12.5, color: colors.textDim, textAlign: 'center', paddingVertical: 20 },
+    unassignText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '600', color: colors.accentRed || '#F87171' },
+    pickerEmpty: { fontFamily: fonts.serif, fontSize: 14, color: colors.textDim, textAlign: 'center', paddingVertical: 20 },
     teacherRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10, paddingHorizontal: 8, borderRadius: radius.sm },
     teacherRowActive: { backgroundColor: `${colors.accentYellow}14` },
-    teacherName: { fontFamily: fonts.serif, fontSize: 13, fontWeight: '700', color: colors.textHeading },
-    teacherEmail: { fontFamily: fonts.serif, fontSize: 11.5, color: colors.textDim, marginTop: 1 },
+    teacherName: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.textHeading },
+    teacherEmail: { fontFamily: fonts.serif, fontSize: 14, color: colors.textDim, marginTop: 1 },
     teachesTag: { backgroundColor: `${colors.accentYellow}18`, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
-    teachesTagText: { fontFamily: fonts.serif, fontSize: 10.5, fontWeight: '700', color: colors.accentYellow },
-    pickerErr: { fontFamily: fonts.serif, fontSize: 12, color: colors.accentRed, marginTop: 8 },
+    teachesTagText: { fontFamily: fonts.serif, fontSize: 14, fontWeight: '700', color: colors.accentYellow },
+    pickerErr: { fontFamily: fonts.serif, fontSize: 14, color: colors.accentRed, marginTop: 8 },
   });
 }

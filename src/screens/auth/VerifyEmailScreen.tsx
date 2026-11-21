@@ -1,97 +1,26 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Animated,
-  Easing,
-  ScrollView,
-  Platform,
-} from 'react-native';
-import { Feather } from '@expo/vector-icons';
-import Svg, { Path, Rect, Circle, Defs, Stop, LinearGradient as SvgGrad } from 'react-native-svg';
-import { auth } from '../../config/firebase';
+import { View, Text, Animated, Easing, Platform } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
-import { useTheme } from '../../context/ThemeContext';
-import { spacing, radius } from '../../theme';
-import type { AppColors } from '../../theme';
-import SERVER_URL from '../../config/serverUrl';
 import FaceLoginCard from '../../components/common/FaceLoginCard';
 import { faceLoginOffered } from '../../services/faceLogin';
 import AUTH_SERVER_URL from '../../config/authServerUrl';
-
-// ── Landing-page "Enchanting Forest" palette (matches the marketing/auth UI) ──
-const BG     = '#050705';
-const CARD   = '#101510';
-const SURFACE= '#151D17';
-const BORDER = 'rgba(197,255,218,0.18)';
-const MUTED  = '#B6C7B9';
-const DIM    = '#728173';
-const FORE   = '#F5F7F0';
-const CYAN   = '#B7F2C7';
-const AMBER  = '#F4B84A';
-const GOLD   = '#BAA467';
-const RED    = '#E07F7F';
-const GREEN  = '#8FE6AE';
-
-// Gold→sage gradient CTA, identical to the landing page's primary button.
-function GradientButton({ label, onPress, icon, loading, disabled, style }: {
-  label: string; onPress: () => void; icon?: string; loading?: boolean; disabled?: boolean; style?: any;
-}) {
-  const [h, setH] = useState(52);
-  const [w, setW] = useState(200);
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      activeOpacity={0.85}
-      disabled={loading || disabled}
-      onLayout={e => { setH(e.nativeEvent.layout.height); setW(e.nativeEvent.layout.width); }}
-      style={[{ overflow: 'hidden', borderRadius: 10, width: '100%', opacity: disabled ? 0.5 : 1 }, style]}
-    >
-      <Svg style={StyleSheet.absoluteFill as any} width={w} height={h} pointerEvents="none">
-        <Defs>
-          <SvgGrad id="vbtn" x1="0" y1="0" x2="1" y2="0">
-            <Stop offset="0" stopColor="#8FE6AE" stopOpacity="1" />
-            <Stop offset="0.58" stopColor="#B7F2C7" stopOpacity="1" />
-            <Stop offset="1" stopColor="#F4B84A" stopOpacity="1" />
-          </SvgGrad>
-        </Defs>
-        <Rect x="0" y="0" width={w} height={h} fill="url(#vbtn)" />
-      </Svg>
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 15 }}>
-        {icon && <Feather name={icon as any} size={16} color="#061008" />}
-        <Text style={{ fontSize: 15, fontWeight: '700', color: '#061008' }}>{label}</Text>
-      </View>
-    </TouchableOpacity>
-  );
-}
-
-// ─── Envelope SVG illustration ───────────────────────────────────────────────
-function EnvelopeIllustration({ color, accent }: { color: string; accent: string }) {
-  return (
-    <Svg width={96} height={80} viewBox="0 0 96 80">
-      {/* Envelope body */}
-      <Rect x="4" y="20" width="88" height="56" rx="6" fill={color} />
-      {/* Envelope flap (open) */}
-      <Path d="M4 20 L48 52 L92 20" stroke={accent} strokeWidth="2.5" fill="none" strokeLinejoin="round" />
-      {/* Left fold line */}
-      <Path d="M4 76 L36 46" stroke={accent} strokeWidth="1.5" strokeOpacity={0.45} />
-      {/* Right fold line */}
-      <Path d="M92 76 L60 46" stroke={accent} strokeWidth="1.5" strokeOpacity={0.45} />
-      {/* Notification dot */}
-      <Circle cx="76" cy="20" r="12" fill="#ef4444" />
-      <Path d="M76 13 L76 21 M76 24 L76 25" stroke="white" strokeWidth="2.2" strokeLinecap="round" />
-    </Svg>
-  );
-}
+import {
+  HomeThemeProvider, useHomeTheme, AuthShell, AuthCard, AuthHeading, Notice, PrimaryButton, OutlineButton, TextLink, EnvelopeArt, Decorative, SANS,
+} from './authTheme';
 
 // ─── Main Screen ─────────────────────────────────────────────────────────────
 export default function VerifyEmailScreen() {
+  return (
+    <HomeThemeProvider>
+      <VerifyEmailContent />
+    </HomeThemeProvider>
+  );
+}
+
+function VerifyEmailContent() {
   const { user, updateUser, logout } = useAuth();
+  const { t } = useHomeTheme();
   const [showFaceOffer, setShowFaceOffer] = useState(faceLoginOffered);
-  const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
 
   const [cooldown, setCooldown] = useState(0);
   const [verifyError, setVerifyError] = useState('');
@@ -243,258 +172,76 @@ export default function VerifyEmailScreen() {
     }
   }
 
+
   return (
-    <ScrollView
-      contentContainerStyle={styles.scrollContent}
-      keyboardShouldPersistTaps="handled"
-    >
-      <View style={styles.card}>
-        {/* Illustration */}
-        <Animated.View style={[styles.illustrationWrap, { transform: [{ scale: pulseAnim }] }]}>
-          <View style={styles.illustrationBg}>
-            <EnvelopeIllustration color="#0A0F0B" accent={CYAN} />
+    <AuthShell>
+      <View style={{ alignItems: 'center' }}>
+        <AuthCard maxWidth={470} style={{ alignItems: 'center' }}>
+          {/* Illustration */}
+          <Animated.View style={{ marginBottom: 10, transform: [{ scale: pulseAnim }] }}>
+            <Decorative><EnvelopeArt width={170} /></Decorative>
+          </Animated.View>
+
+          <View style={{ width: '100%' }}>
+            <AuthHeading title="Check your inbox" subtitle="We sent a verification link to" ornament={false} />
           </View>
-        </Animated.View>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: t.input, borderRadius: 999, borderWidth: 1, borderColor: t.line, paddingHorizontal: 14, paddingVertical: 8, marginTop: -8, marginBottom: 14, maxWidth: '100%' }}>
+            <Text style={{ fontFamily: SANS, fontSize: 15, fontWeight: '700', color: t.heading, flexShrink: 1 }} numberOfLines={1}>{user?.email || 'your email'}</Text>
+          </View>
+          <Text style={{ fontFamily: SANS, fontSize: 15, lineHeight: 22, color: t.muted, textAlign: 'center', marginBottom: 18 }}>
+            Open the email and click the link to verify your account, then come back here.
+          </Text>
 
-        {/* Title */}
-        <Text style={styles.title}>Check your inbox</Text>
-        <Text style={styles.sub}>
-          We sent a verification link to
-        </Text>
-        <View style={styles.emailPill}>
-          <Feather name="mail" size={13} color={CYAN} style={{ marginRight: 6 }} />
-          <Text style={styles.emailText}>{user?.email || 'your email'}</Text>
-        </View>
-        <Text style={styles.hint}>
-          Open the email and click the link to verify your account, then come back here.
-        </Text>
+          {/* Face login chosen at sign-up: set it up now, while signed in */}
+          {showFaceOffer && (
+            <View style={{ width: '100%', marginBottom: 16 }}>
+              <FaceLoginCard
+                variant="setup"
+                colors={{ cardDark: t.input, borderColor: t.line, textMain: t.heading, textMuted: t.muted, accentYellow: t.accent, accentRed: t.danger }}
+                onDone={() => setShowFaceOffer(false)}
+              />
+            </View>
+          )}
 
-        {/* Face login chosen at sign-up: set it up now, while signed in */}
-        {showFaceOffer && (
-          <View style={{ width: '100%', marginTop: 16 }}>
-            <FaceLoginCard
-              variant="setup"
-              colors={{ cardDark: SURFACE, borderColor: 'rgba(197,255,218,0.18)', textMain: FORE, textMuted: MUTED, accentYellow: GOLD, accentRed: RED }}
-              onDone={() => setShowFaceOffer(false)}
+          <View style={{ width: '100%' }}>
+            {/* Spam folder warning */}
+            <Notice kind="warn">
+              <Text style={{ fontFamily: SANS, fontSize: 14, fontWeight: '700', color: t.accent, marginBottom: 3 }}>Can&apos;t find the email?</Text>
+              <Text style={{ fontFamily: SANS, fontSize: 13.5, lineHeight: 20, color: t.text }}>
+                Check your <Text style={{ fontWeight: '700' }}>Spam</Text> or <Text style={{ fontWeight: '700' }}>Junk</Text> folder.
+                Gmail and Outlook sometimes filter verification emails. If you find it there, mark it as &quot;Not Spam&quot; to receive future emails.
+              </Text>
+            </Notice>
+
+            {/* Error or success */}
+            {verifyError !== '' && <Notice kind="error">{verifyError}</Notice>}
+            {resendSuccess && <Notice kind="success">Verification email sent!</Notice>}
+            {verifiedSuccess && <Notice kind="success">Email verified! Taking you in...</Notice>}
+
+            {/* I've Verified */}
+            <PrimaryButton
+              label={checking ? 'Checking...' : "I've Verified My Email"}
+              icon={checking ? undefined : 'check'}
+              onPress={handleVerified}
+              disabled={checking}
+              style={{ marginBottom: 12 }}
+            />
+
+            {/* Resend */}
+            <OutlineButton
+              label={cooldown > 0 ? `Resend Email (${cooldown}s)` : 'Resend Email'}
+              icon="refresh-cw"
+              onPress={handleResend}
+              disabled={cooldown > 0}
             />
           </View>
-        )}
 
-        {/* Spam folder warning */}
-        <View style={styles.spamWarning}>
-          <Feather name="alert-triangle" size={15} color={GOLD} style={{ marginRight: 8, marginTop: 1 }} />
-          <View style={{ flex: 1 }}>
-            <Text style={styles.spamTitle}>Can&apos;t find the email?</Text>
-            <Text style={styles.spamText}>
-              Check your <Text style={{ fontWeight: '700' }}>Spam</Text> or <Text style={{ fontWeight: '700' }}>Junk</Text> folder.
-              Gmail and Outlook sometimes filter verification emails. If you find it there, mark it as &quot;Not Spam&quot; to receive future emails.
-            </Text>
+          {/* Sign out */}
+          <View style={{ marginTop: 18 }}>
+            <TextLink label="Sign out" onPress={logout} />
           </View>
-        </View>
-
-        {/* Error or success */}
-        {verifyError !== '' && (
-          <View style={styles.errorBox}>
-            <Feather name="alert-circle" size={14} color={RED} style={{ marginRight: 6 }} />
-            <Text style={styles.errorText}>{verifyError}</Text>
-          </View>
-        )}
-        {resendSuccess && (
-          <View style={styles.successBox}>
-            <Feather name="check-circle" size={14} color={GREEN} style={{ marginRight: 6 }} />
-            <Text style={styles.successText}>Verification email sent!</Text>
-          </View>
-        )}
-        {verifiedSuccess && (
-          <View style={styles.successBox}>
-            <Feather name="check-circle" size={14} color={GREEN} style={{ marginRight: 6 }} />
-            <Text style={styles.successText}>Email verified! Taking you in...</Text>
-          </View>
-        )}
-
-        {/* I've Verified */}
-        <GradientButton
-          label={checking ? 'Checking...' : "I've Verified My Email"}
-          icon={checking ? undefined : 'check'}
-          onPress={handleVerified}
-          disabled={checking}
-          style={{ marginBottom: spacing.md }}
-        />
-
-        {/* Resend */}
-        <TouchableOpacity
-          style={[styles.secondaryBtn, cooldown > 0 && styles.btnDisabled]}
-          onPress={handleResend}
-          activeOpacity={0.75}
-          disabled={cooldown > 0}
-        >
-          <Feather name="refresh-cw" size={15} color={cooldown > 0 ? DIM : CYAN} style={{ marginRight: 7 }} />
-          <Text style={[styles.secondaryBtnText, cooldown > 0 && styles.dimText]}>
-            {cooldown > 0 ? `Resend Email (${cooldown}s)` : 'Resend Email'}
-          </Text>
-        </TouchableOpacity>
-
-        {/* Sign out */}
-        <TouchableOpacity onPress={logout} style={styles.signOutLink} activeOpacity={0.7}>
-          <Text style={styles.signOutText}>Sign out</Text>
-        </TouchableOpacity>
+        </AuthCard>
       </View>
-    </ScrollView>
+    </AuthShell>
   );
 }
-
-// ─── Styles ──────────────────────────────────────────────────────────────────
-const makeStyles = (_c: AppColors) =>
-  StyleSheet.create({
-    scrollContent: {
-      flexGrow: 1,
-      backgroundColor: BG,
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: spacing.xl,
-    },
-    card: {
-      width: '100%',
-      maxWidth: 440,
-      backgroundColor: '#000000',
-      borderRadius: radius.xl,
-      borderWidth: 1,
-      borderColor: BORDER,
-      alignItems: 'center',
-      padding: spacing.xxxl,
-    },
-    illustrationWrap: {
-      marginBottom: spacing.xxl,
-    },
-    illustrationBg: {
-      width: 140,
-      height: 140,
-      borderRadius: 70,
-      backgroundColor: SURFACE,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: BORDER,
-    },
-    title: {
-      fontSize: 24,
-      fontWeight: '700',
-      color: FORE,
-      letterSpacing: -0.4,
-      marginBottom: spacing.sm,
-    },
-    sub: {
-      fontSize: 14,
-      color: MUTED,
-      textAlign: 'center',
-      marginBottom: spacing.sm,
-    },
-    emailPill: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: SURFACE,
-      borderRadius: 20,
-      paddingHorizontal: spacing.md,
-      paddingVertical: 6,
-      marginBottom: spacing.md,
-      borderWidth: 1,
-      borderColor: BORDER,
-    },
-    emailText: {
-      fontSize: 13,
-      fontWeight: '600',
-      color: CYAN,
-    },
-    hint: {
-      fontSize: 13,
-      color: MUTED,
-      textAlign: 'center',
-      lineHeight: 20,
-      marginBottom: spacing.md,
-    },
-    spamWarning: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      backgroundColor: '#000000',
-      borderRadius: radius.md,
-      padding: spacing.md,
-      marginBottom: spacing.xl,
-      borderWidth: 1,
-      borderColor: 'rgba(186,164,103,0.40)',
-      width: '100%',
-    },
-    spamTitle: {
-      fontSize: 13,
-      fontWeight: '700',
-      color: GOLD,
-      marginBottom: 3,
-    },
-    spamText: {
-      fontSize: 12,
-      color: MUTED,
-      lineHeight: 18,
-    },
-    errorBox: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: 'rgba(224,127,127,0.12)',
-      borderRadius: radius.sm,
-      padding: spacing.md,
-      marginBottom: spacing.md,
-      borderWidth: 1,
-      borderColor: 'rgba(224,127,127,0.40)',
-      width: '100%',
-    },
-    errorText: {
-      flex: 1,
-      fontSize: 13,
-      color: RED,
-    },
-    successBox: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: 'rgba(143,230,174,0.12)',
-      borderRadius: radius.sm,
-      padding: spacing.md,
-      marginBottom: spacing.md,
-      borderWidth: 1,
-      borderColor: 'rgba(143,230,174,0.40)',
-      width: '100%',
-    },
-    successText: {
-      flex: 1,
-      fontSize: 13,
-      color: GREEN,
-    },
-    secondaryBtn: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: SURFACE,
-      borderRadius: radius.md,
-      paddingVertical: 13,
-      width: '100%',
-      borderWidth: 1,
-      borderColor: BORDER,
-      marginBottom: spacing.xl,
-    },
-    secondaryBtnText: {
-      fontSize: 14,
-      fontWeight: '600',
-      color: CYAN,
-    },
-    btnDisabled: {
-      opacity: 0.5,
-    },
-    dimText: {
-      color: DIM,
-    },
-    signOutLink: {
-      paddingVertical: spacing.sm,
-    },
-    signOutText: {
-      fontSize: 13,
-      color: MUTED,
-      textDecorationLine: 'underline',
-    },
-  });

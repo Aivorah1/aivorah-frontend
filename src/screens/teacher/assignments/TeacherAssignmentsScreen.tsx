@@ -1,9 +1,6 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
-import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  ActivityIndicator, Modal, RefreshControl,
-  Platform, KeyboardAvoidingView, Image,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, RefreshControl, Platform, KeyboardAvoidingView, Image } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { spacing, radius } from '../../../theme';
 import type { AppColors } from '../../../theme';
@@ -451,7 +448,7 @@ export default function TeacherAssignmentsScreen({ navigation, route }: any) {
               <Text style={[styles.createBtnText, { color: inLibrary ? '#0F0F0F' : gold }]}>Library</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.createBtn} onPress={() => setShowModal(true)} activeOpacity={0.85}>
-              <Feather name="plus" size={15} color="#fff" />
+              <Feather name="plus" size={15} color={colors.onPrimary} />
               <Text style={styles.createBtnText}>New</Text>
             </TouchableOpacity>
           </View>
@@ -537,7 +534,7 @@ export default function TeacherAssignmentsScreen({ navigation, route }: any) {
                       onPress={() => { setActiveTab('All'); setShowModal(true); }}
                       activeOpacity={0.85}
                     >
-                      <Feather name="plus" size={15} color="#fff" />
+                      <Feather name="plus" size={15} color={colors.onPrimary} />
                       <Text style={styles.createBtnText}>Create New Quiz</Text>
                     </TouchableOpacity>
                   </View>
@@ -586,7 +583,7 @@ export default function TeacherAssignmentsScreen({ navigation, route }: any) {
                                 uploadScrollRef.current?.scrollTo({ y: 0, animated: false });
                               }}
                             >
-                              <Text style={{ fontSize: 13, fontWeight: '700', color: '#fff' }}>Assign</Text>
+                              <Text style={{ fontSize: 13, fontWeight: '700', color: colors.onPrimary }}>Assign</Text>
                             </TouchableOpacity>
                           </View>
                         </View>
@@ -863,7 +860,7 @@ export default function TeacherAssignmentsScreen({ navigation, route }: any) {
                             borderColor: colors.borderColor,
                           }}>
                             {uploadStep > s.num ? (
-                              <Feather name="check" size={14} color="#fff" />
+                              <Feather name="check" size={14} color={colors.onPrimary} />
                             ) : (
                               <Text style={{ fontSize: 13, fontWeight: '800', color: uploadStep >= s.num ? '#fff' : colors.textDim }}>{s.num}</Text>
                             )}
@@ -1038,7 +1035,7 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
     backgroundColor: c.accentYellow, paddingHorizontal: spacing.md, paddingVertical: 9,
     borderRadius: radius.md,
   },
-  createBtnText: { fontSize: 13, fontWeight: '700', color: '#fff' },
+  createBtnText: { fontSize: 13, fontWeight: '700', color: c.onPrimary },
 
   empty: { alignItems: 'center', gap: 8, paddingTop: 40, paddingBottom: 20 },
   emptyTitle: { fontSize: 16, fontWeight: '700', color: c.textMain },
@@ -1103,7 +1100,7 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
     gap: 6, paddingVertical: 12, borderRadius: radius.md,
     backgroundColor: c.accentYellow,
   },
-  modalSaveBtnText: { fontSize: 14, fontWeight: '700', color: '#fff' },
+  modalSaveBtnText: { fontSize: 14, fontWeight: '700', color: c.onPrimary },
   modalCancelBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 6, paddingVertical: 12, borderRadius: radius.md,
@@ -1154,7 +1151,7 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     backgroundColor: c.accentYellow, padding: 16, borderRadius: radius.md, marginTop: spacing.sm,
   },
-  submitBtnText: { fontSize: 15, fontWeight: '700', color: '#fff' },
+  submitBtnText: { fontSize: 15, fontWeight: '700', color: c.onPrimary },
   // Student picker
   studentPickerBox: { borderWidth: 1, borderColor: c.borderColor, borderRadius: radius.md, overflow: 'hidden' },
   studentSearch: {

@@ -2,7 +2,7 @@ import React from 'react';
 import { useWindowDimensions, View } from 'react-native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { DrawerParamList } from './types';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme, StudentThemeProvider } from '../context/ThemeContext';
 
 import DrawerContent from '../components/common/DrawerContent';
 import DashboardScreen from '../screens/student/dashboard/DashboardScreen';
@@ -59,6 +59,14 @@ const StudentAttendanceScreen = screens.lazyScreen(() => import('../screens/stud
 const Drawer = createDrawerNavigator<DrawerParamList>();
 
 export default function AppNavigator() {
+  return (
+    <StudentThemeProvider>
+      <StudentNavigator />
+    </StudentThemeProvider>
+  );
+}
+
+function StudentNavigator() {
   // Wake this role's services and, on a good connection, prefetch its screens.
   useRoleWarmup(screens, STUDENT_SERVICES);
   const { width } = useWindowDimensions();

@@ -23,11 +23,17 @@ const MONTHS = ['January','February','March','April','May','June','July','August
 const DAYS   = ['Su','Mo','Tu','We','Th','Fr','Sa'];
 
 // mode: 'day' | 'month' | 'year'
-export function DatePickerInput({ value, onChange, colors }: {
+export function DatePickerInput({ value, onChange, colors, accent, onAccent }: {
   value: string;
   onChange: (v: string) => void;
   colors: any;
+  /** Selection colour; defaults to the onboarding teal. */
+  accent?: string;
+  /** Text colour on the selection; defaults to white. */
+  onAccent?: string;
 }) {
+  const ACC = accent || TEAL;
+  const ON_ACC = onAccent || '#fff';
   const [open, setOpen] = useState(false);
   const [pos,  setPos]  = useState({ top: 0, left: 0 });
   const [mode, setMode] = useState<'day'|'month'|'year'>('day');
@@ -72,7 +78,7 @@ export function DatePickerInput({ value, onChange, colors }: {
 
   const calendarContent = (
     <View style={{
-      backgroundColor: bg, borderWidth: 1.5, borderColor: TEAL + '99',
+      backgroundColor: bg, borderWidth: 1.5, borderColor: ACC + '99',
       borderRadius: 14, padding: 16, width: 290,
       shadowColor: '#000', shadowOffset: { width: 0, height: 8 },
       shadowOpacity: 0.5, shadowRadius: 16,
@@ -82,7 +88,7 @@ export function DatePickerInput({ value, onChange, colors }: {
         <View>
           <View style={{ flexDirection:'row', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
             <TouchableOpacity onPress={() => { if (viewMonth===0){setViewMonth(11);setViewYear(y=>y-1);}else setViewMonth(m=>m-1); }}
-              style={{ padding:6 }}><Text style={{ color:TEAL, fontSize:18 }}>‹</Text></TouchableOpacity>
+              style={{ padding:6 }}><Text style={{ color:ACC, fontSize:18 }}>‹</Text></TouchableOpacity>
             <View style={{ flexDirection:'row', gap:4 }}>
               <TouchableOpacity onPress={() => setMode('month')} style={{ padding:4 }}>
                 <Text style={{ color:text, fontWeight:'700', fontSize:15, textDecorationLine:'underline' }}>{MONTHS[viewMonth]}</Text>
@@ -92,7 +98,7 @@ export function DatePickerInput({ value, onChange, colors }: {
               </TouchableOpacity>
             </View>
             <TouchableOpacity onPress={() => { if (viewMonth===11){setViewMonth(0);setViewYear(y=>y+1);}else setViewMonth(m=>m+1); }}
-              style={{ padding:6 }}><Text style={{ color:TEAL, fontSize:18 }}>›</Text></TouchableOpacity>
+              style={{ padding:6 }}><Text style={{ color:ACC, fontSize:18 }}>›</Text></TouchableOpacity>
           </View>
           <View style={{ flexDirection:'row', marginBottom:6 }}>
             {DAYS.map(d => <Text key={d} style={{ flex:1, textAlign:'center', fontSize:11, fontWeight:'700', color:muted }}>{d}</Text>)}
@@ -108,8 +114,8 @@ export function DatePickerInput({ value, onChange, colors }: {
                     const dd = String(day).padStart(2,'0'), mm = String(viewMonth+1).padStart(2,'0');
                     onChange(`${dd}/${mm}/${viewYear}`); setOpen(false);
                   }} style={{ flex:1, height:34, borderRadius:8, alignItems:'center', justifyContent:'center',
-                    backgroundColor: isSel ? TEAL : isToday ? TEAL+'33' : 'transparent' }}>
-                    <Text style={{ fontSize:13, color: isSel?'#fff': day?text:'transparent', fontWeight: isSel||isToday?'700':'400' }}>{day??''}</Text>
+                    backgroundColor: isSel ? ACC : isToday ? ACC+'33' : 'transparent' }}>
+                    <Text style={{ fontSize:13, color: isSel?ON_ACC: day?text:'transparent', fontWeight: isSel||isToday?'700':'400' }}>{day??''}</Text>
                   </TouchableOpacity>
                 );
               })}
@@ -127,18 +133,18 @@ export function DatePickerInput({ value, onChange, colors }: {
       {mode === 'month' && (
         <View>
           <View style={{ flexDirection:'row', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
-            <TouchableOpacity onPress={() => setViewYear(y=>y-1)} style={{ padding:6 }}><Text style={{ color:TEAL, fontSize:18 }}>‹</Text></TouchableOpacity>
+            <TouchableOpacity onPress={() => setViewYear(y=>y-1)} style={{ padding:6 }}><Text style={{ color:ACC, fontSize:18 }}>‹</Text></TouchableOpacity>
             <TouchableOpacity onPress={() => { setYearRangeStart(Math.floor(viewYear/12)*12); setMode('year'); }} style={{ padding:4 }}>
               <Text style={{ color:text, fontWeight:'700', fontSize:15, textDecorationLine:'underline' }}>{viewYear}</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => setViewYear(y=>y+1)} style={{ padding:6 }}><Text style={{ color:TEAL, fontSize:18 }}>›</Text></TouchableOpacity>
+            <TouchableOpacity onPress={() => setViewYear(y=>y+1)} style={{ padding:6 }}><Text style={{ color:ACC, fontSize:18 }}>›</Text></TouchableOpacity>
           </View>
           {Array.from({length:3}, (_,row) => (
             <View key={row} style={{ flexDirection:'row', gap:4, marginBottom:4 }}>
               {Array.from({length:4}, (_,col) => { const mi=row*4+col; const isSel=mi===viewMonth; return (
                 <TouchableOpacity key={mi} onPress={() => { setViewMonth(mi); setMode('day'); }}
-                  style={{ flex:1, padding:10, borderRadius:8, alignItems:'center', backgroundColor: isSel?TEAL:'transparent' }}>
-                  <Text style={{ color:isSel?'#fff':text, fontSize:13, fontWeight:isSel?'700':'400' }}>{MONTHS[mi].slice(0,3)}</Text>
+                  style={{ flex:1, padding:10, borderRadius:8, alignItems:'center', backgroundColor: isSel?ACC:'transparent' }}>
+                  <Text style={{ color:isSel?ON_ACC:text, fontSize:13, fontWeight:isSel?'700':'400' }}>{MONTHS[mi].slice(0,3)}</Text>
                 </TouchableOpacity>
               );})}
             </View>
@@ -150,16 +156,16 @@ export function DatePickerInput({ value, onChange, colors }: {
       {mode === 'year' && (
         <View>
           <View style={{ flexDirection:'row', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
-            <TouchableOpacity onPress={() => setYearRangeStart(s=>(s||Math.floor(viewYear/12)*12)-12)} style={{ padding:6 }}><Text style={{ color:TEAL, fontSize:18 }}>‹</Text></TouchableOpacity>
+            <TouchableOpacity onPress={() => setYearRangeStart(s=>(s||Math.floor(viewYear/12)*12)-12)} style={{ padding:6 }}><Text style={{ color:ACC, fontSize:18 }}>‹</Text></TouchableOpacity>
             <Text style={{ color:text, fontWeight:'700', fontSize:14 }}>{yearStart} – {yearStart+11}</Text>
-            <TouchableOpacity onPress={() => setYearRangeStart(s=>(s||Math.floor(viewYear/12)*12)+12)} style={{ padding:6 }}><Text style={{ color:TEAL, fontSize:18 }}>›</Text></TouchableOpacity>
+            <TouchableOpacity onPress={() => setYearRangeStart(s=>(s||Math.floor(viewYear/12)*12)+12)} style={{ padding:6 }}><Text style={{ color:ACC, fontSize:18 }}>›</Text></TouchableOpacity>
           </View>
           {Array.from({length:3}, (_,row) => (
             <View key={row} style={{ flexDirection:'row', gap:4, marginBottom:4 }}>
               {yearGrid.slice(row*4, row*4+4).map(yr => { const isSel=yr===viewYear; return (
                 <TouchableOpacity key={yr} onPress={() => { setViewYear(yr); setMode('month'); }}
-                  style={{ flex:1, padding:10, borderRadius:8, alignItems:'center', backgroundColor: isSel?TEAL:'transparent' }}>
-                  <Text style={{ color:isSel?'#fff':text, fontSize:13, fontWeight:isSel?'700':'400' }}>{yr}</Text>
+                  style={{ flex:1, padding:10, borderRadius:8, alignItems:'center', backgroundColor: isSel?ACC:'transparent' }}>
+                  <Text style={{ color:isSel?ON_ACC:text, fontSize:13, fontWeight:isSel?'700':'400' }}>{yr}</Text>
                 </TouchableOpacity>
               );})}
             </View>
@@ -175,11 +181,11 @@ export function DatePickerInput({ value, onChange, colors }: {
         style={{
           flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
           height: 48, paddingHorizontal: 14, borderRadius: 10,
-          borderWidth: 1, borderColor: open ? TEAL : border,
+          borderWidth: 1, borderColor: open ? ACC : border,
           backgroundColor: bg, minWidth: 220,
         }}>
         <Text style={{ fontSize: 15, color: value ? text : muted, marginRight: 12 }}>{displayValue}</Text>
-        <Feather name="calendar" size={16} color={open ? TEAL : muted} />
+        <Feather name="calendar" size={16} color={open ? ACC : muted} />
       </TouchableOpacity>
 
       <Modal visible={open} transparent animationType="none" onRequestClose={() => setOpen(false)}>

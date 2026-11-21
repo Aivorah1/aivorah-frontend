@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Modal, View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { Modal, View, Text, TextInput, TouchableOpacity } from 'react-native';
+import ActivityIndicator from '../../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../../theme';
 import type { WorksheetStyles } from '../styles';
@@ -58,7 +59,7 @@ export function SaveNameDialog({ visible, initialName, saving, error, onCancel, 
               disabled={!trimmed || saving}
               accessibilityRole="button"
             >
-              {saving ? <ActivityIndicator size="small" color="#fff" /> : <Feather name="save" size={15} color="#fff" />}
+              {saving ? <ActivityIndicator size="small" color={colors.onPrimary} /> : <Feather name="save" size={15} color={colors.onPrimary} />}
               <Text style={styles.primaryBtnText}>Save</Text>
             </TouchableOpacity>
           </View>

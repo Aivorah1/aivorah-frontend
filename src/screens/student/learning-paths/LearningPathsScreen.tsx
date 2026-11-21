@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from '@react-navigation/native';
@@ -92,7 +93,7 @@ export default function LearningPathsScreen({ navigation }: any) {
             onPress={() => navigation.navigate('Settings')}
             activeOpacity={0.85}
           >
-            <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>Go to Settings</Text>
+            <Text style={{ color: colors.onPrimary, fontWeight: '700', fontSize: 14 }}>Go to Settings</Text>
           </TouchableOpacity>
         </View>
       </ScreenLayout>
@@ -149,10 +150,10 @@ export default function LearningPathsScreen({ navigation }: any) {
           keyboardShouldPersistTaps="handled"
         >
           <LinearGradient
-            colors={[colors.accentYellow + '35', colors.accentYellow + '20', colors.cardDark]}
+            colors={[colors.cardDark, colors.cardDark]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={[styles.heroCard, { borderColor: colors.accentYellow + '45' }]}
+            style={[styles.heroCard, { borderColor: colors.borderColor }]}
           >
             <View style={styles.heroTop}>
               <View style={styles.heroTitleWrap}>

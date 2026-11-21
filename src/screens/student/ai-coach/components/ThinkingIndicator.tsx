@@ -25,7 +25,7 @@ export default function ThinkingIndicator({ colors }: { colors: AppColors }) {
         opacity: shimmer,
       }}>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          <Feather name="zap" size={10} color="#fff" />
+          <Feather name="zap" size={10} color={colors.onPrimary} />
         </View>
       </Animated.View>
       <Animated.Text style={{ fontSize: 13, color: colors.textMuted, opacity: shimmer, fontWeight: '500' }}>
