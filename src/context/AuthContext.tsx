@@ -10,6 +10,7 @@ import {
   updateProfile,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithCredential,
 } from 'firebase/auth';
 import { auth } from '../config/firebase';
 import SERVER_URL from '../config/serverUrl';
@@ -20,6 +21,7 @@ import { useTheme } from './ThemeContext';
 import { prefetchStudentDashboard } from '../utils/curriculumPrefetch';
 import { BLOCKED_ACCOUNT_MESSAGE } from '../constants/supportContact';
 import { normalizeCurriculum, normalizeUserCurricula } from '../utils/curriculum';
+import { getNativeGoogleIdToken, nativeGoogleErrorMessage, signOutNativeGoogle } from '../services/nativeGoogleSignIn';
 
 const PROFILE_KEY = 'ai_mentor_user_profile';
 
@@ -239,6 +241,22 @@ let _isAddingRole = false; // true when an existing user is adding a second role
 const GOOGLE_SIGN_IN_PENDING = '__google_sign_in_pending__';
 let _googleSignInResolvingEmail: string | null = null;
 
+// The page's ?query string on the website; '' in the Android / iOS app, where
+// React Native defines `window` but there is no `window.location`.
+function webSearch(): string {
+  return Platform.OS === 'web' && typeof window !== 'undefined' && window.location
+    ? window.location.search
+    : '';
+}
+
+// Where Aivorah's verification links should open: this site on the web, the
+// public site from the app.
+function verificationOrigin(): string {
+  return Platform.OS === 'web' && typeof window !== 'undefined' && window.location
+    ? window.location.origin
+    : 'https://aivorah.ai';
+}
+
 // The in-memory `_isAddingRole` flag is lost on a page reload, which dropped a
 // teacher mid "add parent profile" back to the teacher dashboard on refresh.
 // This transient AsyncStorage flag (value = the email being onboarded) survives
@@ -355,8 +373,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // is what made the dashboard read "0 Students".
       //
       // It is now opt-in only: append ?mockUser=1 to deliberately load it.
-      const wantsMock = typeof window !== 'undefined'
-        && /[?&]mockUser=1(&|$)/.test(window.location.search);
+      const wantsMock = /[?&]mockUser=1(&|$)/.test(webSearch());
       if (!cached && wantsMock) {
         cached = {
           name: 'Praveen', email: 'teacheraivorah@gmail.com', role: 'teacher',
@@ -667,9 +684,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         //
         // Local teacher testing is still available, but only when asked for
         // explicitly: append ?forceRole=teacher (or parent / school_admin).
-        const forcedRole = (typeof window !== 'undefined'
-          ? (window.location.search.match(/[?&]forceRole=([a-z_]+)/) || [])[1]
-          : undefined) as UserRole | undefined;
+        const forcedRole = (webSearch().match(/[?&]forceRole=([a-z_]+)/) || [])[1] as UserRole | undefined;
         if (isLocalDev && forcedRole) {
           resolvedUser.role = forcedRole;
           resolvedUser.activeRole = forcedRole;
@@ -903,6 +918,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await AsyncStorage.removeItem(PROFILE_KEY).catch(() => {});
     await AsyncStorage.removeItem(PENDING_VERIFY_KEY).catch(() => {});
     await signOut(auth).catch(() => {});
+    await signOutNativeGoogle();
   }
 
   async function signInWithEmail(email: string, password: string) {
@@ -1062,9 +1078,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }).catch(() => {});
 
       // Send branded verification email from aivorah24@gmail.com (not Firebase spam)
-      const frontendOrigin = Platform.OS === 'web' && typeof window !== 'undefined'
-        ? window.location.origin
-        : 'https://aivorah.ai';
+      const frontendOrigin = verificationOrigin();
       const safeName = name?.trim() || email.split('@')[0]; // fallback if name is empty
       try {
         const verifyRes = await fetch(`${AUTH_SERVER_URL}/user/send-verification`, {
@@ -1135,194 +1149,199 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // old "This account is registered as a Student" error.
     _pendingRoleSet = false;
     markAuthAction();
-    if (Platform.OS === 'web') {
-      let resolvingEmail: string | null = null;
+    let resolvingEmail: string | null = null;
+    try {
+      _googleSignInResolvingEmail = GOOGLE_SIGN_IN_PENDING;
+      // Website: Firebase's Google popup. Android / iOS: Google's native account
+      // picker, whose ID token Firebase exchanges for the same Firebase user.
+      // (The app used to call demoLogin() here, signing everyone in as a demo account.)
+      let cred;
+      if (Platform.OS === 'web') {
+        cred = await withNetworkRetry(() => signInWithPopup(auth, new GoogleAuthProvider()));
+      } else {
+        const idToken = await getNativeGoogleIdToken();
+        if (!idToken) throw new Error('Google sign-in was cancelled.');
+        cred = await withNetworkRetry(() => signInWithCredential(auth, GoogleAuthProvider.credential(idToken)));
+      }
+      resolvingEmail = normalizeEmail(cred.user.email);
+      _googleSignInResolvingEmail = resolvingEmail;
+      // Google's own displayName — only the right value for a brand-new signup.
+      // A returning user's in-app rename must win once `profile` is fetched below,
+      // mirroring signInWithEmail's `profile.name || ...` precedence — otherwise
+      // every Google login silently reverted the student's saved name back to
+      // whatever Google has on file (or the email's local-part as a last resort).
+      const googleDisplayName = cred.user.displayName || cred.user.email?.split('@')[0] || 'User';
+      const email = cred.user.email || '';
+      const [profile, savedRaw] = await Promise.all([
+        fetchSupabaseProfile(email),
+        AsyncStorage.getItem(PROFILE_KEY).catch(() => null),
+      ]);
+      const name = profile.name || googleDisplayName;
+      let savedLocal: Partial<User> = {};
       try {
-        _googleSignInResolvingEmail = GOOGLE_SIGN_IN_PENDING;
-        const provider = new GoogleAuthProvider();
-        const cred = await withNetworkRetry(() => signInWithPopup(auth, provider));
-        resolvingEmail = normalizeEmail(cred.user.email);
-        _googleSignInResolvingEmail = resolvingEmail;
-        // Google's own displayName — only the right value for a brand-new signup.
-        // A returning user's in-app rename must win once `profile` is fetched below,
-        // mirroring signInWithEmail's `profile.name || ...` precedence — otherwise
-        // every Google login silently reverted the student's saved name back to
-        // whatever Google has on file (or the email's local-part as a last resort).
-        const googleDisplayName = cred.user.displayName || cred.user.email?.split('@')[0] || 'User';
-        const email = cred.user.email || '';
-        const [profile, savedRaw] = await Promise.all([
-          fetchSupabaseProfile(email),
-          AsyncStorage.getItem(PROFILE_KEY).catch(() => null),
-        ]);
-        const name = profile.name || googleDisplayName;
-        let savedLocal: Partial<User> = {};
-        try {
-          if (savedRaw) {
-            const parsed = JSON.parse(savedRaw);
-            savedLocal = isCachedProfileForEmail(parsed, email) ? parsed : {};
-          }
-        } catch {}
-
-        const existingRole = profile.role as UserRole | undefined;
-
-        // NEW Google user with no role → came from the LOGIN modal (sign-in needs no
-        // role). We can't create an account without a role, so clear the transient
-        // Google session (prevents the deleted-account guard firing) and bounce them
-        // to the Sign-Up modal to choose a role.
-        if (!existingRole && !role) {
-          await signOut(auth).catch(() => {});
-          throw new Error(`NEW_GOOGLE_USER:${email}`);
+        if (savedRaw) {
+          const parsed = JSON.parse(savedRaw);
+          savedLocal = isCachedProfileForEmail(parsed, email) ? parsed : {};
         }
+      } catch {}
 
-        // EXISTING account → always sign in with the STORED role. The role chip is
-        // ignored for returning users (they just tap Google). The single exception is
-        // the dual-profile case: a Teacher who explicitly picks "Parent" is offered
-        // to add a Parent profile. No "wrong role" rejection — a returning user can
-        // never be locked out by which chip happened to be selected.
-        if (existingRole) {
-          // Returning user → ignore the role chip; the stored role is used. The one
-          // exception: a Teacher explicitly picking "Parent" → offer a Parent profile.
-          const registeredRoles: UserRole[] = Array.isArray(profile.roles) && profile.roles.length > 0
-            ? profile.roles as UserRole[]
-            : [existingRole];
-          if (role === 'parent' && existingRole === 'teacher' && !registeredRoles.includes('parent')) {
-            throw new Error(`TEACHER_ADD_PARENT:${email}`);
-          }
-        }
+      const existingRole = profile.role as UserRole | undefined;
 
-        // Returning → stored role; brand-new signup → the role chosen BEFORE the tap.
-        // Because the role is known before account creation, there's never an
-        // "authenticated but account-less" window — so the core routing/guard is
-        // untouched by this flow.
-        const effectiveRole: UserRole = existingRole || role || 'student';
+      // NEW Google user with no role → came from the LOGIN modal (sign-in needs no
+      // role). We can't create an account without a role, so clear the transient
+      // Google session (prevents the deleted-account guard firing) and bounce them
+      // to the Sign-Up modal to choose a role.
+      if (!existingRole && !role) {
+        await signOut(auth).catch(() => {});
+        throw new Error(`NEW_GOOGLE_USER:${email}`);
+      }
 
-        const serverHasOnboardingComplete = profile.onboardingComplete !== undefined;
-        const onboardingComplete = serverHasOnboardingComplete
-          ? profile.onboardingComplete === true
-          : savedLocal.onboardingComplete === true;
-
-        // isAlreadyVerified must be computed from AIVORAH's own accountStatus
-        // (not cred.user.emailVerified, which is Google's flag and is true for
-        // every Google account regardless of whether the Aivorah verification
-        // step ran) BEFORE newUser is built or cached — see regression note below.
-        const isLocalDev = __DEV__ || (Platform.OS === 'web' && typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'));
-        const isAlreadyVerified = profile.accountStatus === 'active' || isLocalDev;
-        // Same forced-teacher override as in the auth-state handler, on the
-        // Google sign-in path. This is the one a Google-SSO account actually
-        // hits: the server returns role "student", and this replaced it with
-        // "teacher" purely because the host is localhost. Opt in explicitly with
-        // ?forceRole=teacher when local role testing is genuinely wanted.
-        const forcedRoleG = (typeof window !== 'undefined'
-          ? (window.location.search.match(/[?&]forceRole=([a-z_]+)/) || [])[1]
-          : undefined) as UserRole | undefined;
-        const useForced = isLocalDev && !!forcedRoleG;
-        const finalRole = useForced ? forcedRoleG! : effectiveRole;
-        const finalRoles = useForced ? [forcedRoleG!] : (Array.isArray(profile.roles) ? profile.roles as UserRole[] : [effectiveRole]);
-        
-        const newUser: User = {
-          name,
-          email, 
-          role: finalRole,
-          activeRole: finalRole,
-          roles: finalRoles,
-          grade:              profile.grade      || undefined,
-          curriculum:         profile.curriculum || undefined,
-          school:             profile.school     || undefined,
-          schoolId:           profile.schoolId   ?? null,
-          location:           profile.location   || 'Hyderabad, India',
-          // Always trust the real DB value, on localhost too — a silent
-          // force-true here (removed 2026-08-28) meant local Google-SSO
-          // logins never reflected an account's actual onboarding state,
-          // diverging from every other login path (email/password,
-          // refreshProfile) which always honoured onboardingComplete for
-          // real. That's not needed for local testing and only hid genuine
-          // "onboarding not actually complete" states during dev.
-          onboardingComplete,
-          // First-time Google SSO users must verify via Aivorah email before entering.
-          // REGRESSION GUARD (2026-07-20, broke in e2a7f90 on top of the Jul-9
-          // "sticky emailVerified" cache): this must be Aivorah's own
-          // isAlreadyVerified, never cred.user.emailVerified. Google's flag is
-          // always true, so using it here — combined with setUser/AsyncStorage
-          // writes that ran BEFORE this check existed — poisoned the sticky
-          // local cache with emailVerified:true on every single Google login,
-          // letting unverified users fall through to onboarding. Do not move
-          // the setUser/AsyncStorage.setItem calls below to before this line,
-          // and do not swap this back to cred.user.emailVerified.
-          emailVerified: isLocalDev ? true : (existingRole ? isAlreadyVerified : false),
-          authProvider: 'google',
-          // dob/gender/state/country: added 2026-08-26 — see fetchSupabaseProfile.
-          dob:                profile.dob     || undefined,
-          gender:             profile.gender  || undefined,
-          state:              profile.state   || undefined,
-          country:            profile.country || undefined,
-          avatarStyle:        profile.avatarStyle,
-          learningStyle:      profile.learningStyle,
-          interests:          profile.interests,
-          bio:                profile.bio,
-          photoUrl:           profile.photoUrl,
-        };
-        setUser(newUser);
-        prefetchStudentDashboard(newUser);
-        AsyncStorage.setItem(PROFILE_KEY, JSON.stringify(newUser)).catch(() => {});
-
-        // Send Aivorah activation email if not yet verified (covers new users + returning unverified)
-        if (!isAlreadyVerified && !isLocalDev) {
-          // Persist to AsyncStorage — survives multiple onAuthStateChanged fires
-          await AsyncStorage.setItem(PENDING_VERIFY_KEY, email).catch(() => {});
-
-          // Sync user to Supabase first so user_preferences row exists for token storage
-          await fetch(`${AUTH_SERVER_URL}/user/sync`, {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, role: effectiveRole, authProvider: 'google' }),
-          }).catch(() => {});
-
-          // Now send the verification email
-          const frontendOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://aivorah.ai';
-          try {
-            const vRes = await fetch(`${AUTH_SERVER_URL}/user/send-verification`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email, name, frontendOrigin }),
-            });
-            if (!vRes.ok) {
-              const d = await vRes.json().catch(() => ({}));
-              console.error('[google-sso] send-verification failed:', d.error || vRes.status);
-            }
-          } catch (err: any) {
-            console.error('[google-sso] send-verification network error:', err.message);
-          }
-        } else {
-          // Returning verified user — `name` already prefers profile.name (see above),
-          // so this just echoes it back rather than overwriting with Google's displayName.
-          fetch(`${AUTH_SERVER_URL}/user/sync`, {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, name, role: effectiveRole, authProvider: 'google' }),
-          }).catch(() => {});
-        }
-      } catch (error: any) {
-        // Re-throw our custom errors (role mismatch etc.) directly — don't replace message
-        if (!error.code) throw error;
-        console.error('Google Signin Error:', error.code, error.message);
-        let message = 'An error occurred during Google signin.';
-        if (error.code === 'auth/popup-closed-by-user') {
-          message = 'Google sign-in was cancelled.';
-        } else if (error.code === 'auth/network-request-failed') {
-          message = 'Network error. Please check your connection.';
-        } else if (error.code === 'auth/user-disabled') {
-          message = BLOCKED_ACCOUNT_MESSAGE;
-        }
-        throw new Error(message);
-      } finally {
-        if (
-          !resolvingEmail ||
-          _googleSignInResolvingEmail === resolvingEmail ||
-          _googleSignInResolvingEmail === GOOGLE_SIGN_IN_PENDING
-        ) {
-          _googleSignInResolvingEmail = null;
+      // EXISTING account → always sign in with the STORED role. The role chip is
+      // ignored for returning users (they just tap Google). The single exception is
+      // the dual-profile case: a Teacher who explicitly picks "Parent" is offered
+      // to add a Parent profile. No "wrong role" rejection — a returning user can
+      // never be locked out by which chip happened to be selected.
+      if (existingRole) {
+        // Returning user → ignore the role chip; the stored role is used. The one
+        // exception: a Teacher explicitly picking "Parent" → offer a Parent profile.
+        const registeredRoles: UserRole[] = Array.isArray(profile.roles) && profile.roles.length > 0
+          ? profile.roles as UserRole[]
+          : [existingRole];
+        if (role === 'parent' && existingRole === 'teacher' && !registeredRoles.includes('parent')) {
+          throw new Error(`TEACHER_ADD_PARENT:${email}`);
         }
       }
-    } else {
-      demoLogin(role || 'student');
+
+      // Returning → stored role; brand-new signup → the role chosen BEFORE the tap.
+      // Because the role is known before account creation, there's never an
+      // "authenticated but account-less" window — so the core routing/guard is
+      // untouched by this flow.
+      const effectiveRole: UserRole = existingRole || role || 'student';
+
+      const serverHasOnboardingComplete = profile.onboardingComplete !== undefined;
+      const onboardingComplete = serverHasOnboardingComplete
+        ? profile.onboardingComplete === true
+        : savedLocal.onboardingComplete === true;
+
+      // isAlreadyVerified must be computed from AIVORAH's own accountStatus
+      // (not cred.user.emailVerified, which is Google's flag and is true for
+      // every Google account regardless of whether the Aivorah verification
+      // step ran) BEFORE newUser is built or cached — see regression note below.
+      const isLocalDev = __DEV__ || (Platform.OS === 'web' && typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'));
+      const isAlreadyVerified = profile.accountStatus === 'active' || isLocalDev;
+      // Same forced-teacher override as in the auth-state handler, on the
+      // Google sign-in path. This is the one a Google-SSO account actually
+      // hits: the server returns role "student", and this replaced it with
+      // "teacher" purely because the host is localhost. Opt in explicitly with
+      // ?forceRole=teacher when local role testing is genuinely wanted.
+      const forcedRoleG = (webSearch().match(/[?&]forceRole=([a-z_]+)/) || [])[1] as UserRole | undefined;
+      const useForced = isLocalDev && !!forcedRoleG;
+      const finalRole = useForced ? forcedRoleG! : effectiveRole;
+      const finalRoles = useForced ? [forcedRoleG!] : (Array.isArray(profile.roles) ? profile.roles as UserRole[] : [effectiveRole]);
+      
+      const newUser: User = {
+        name,
+        email, 
+        role: finalRole,
+        activeRole: finalRole,
+        roles: finalRoles,
+        grade:              profile.grade      || undefined,
+        curriculum:         profile.curriculum || undefined,
+        school:             profile.school     || undefined,
+        schoolId:           profile.schoolId   ?? null,
+        location:           profile.location   || 'Hyderabad, India',
+        // Always trust the real DB value, on localhost too — a silent
+        // force-true here (removed 2026-08-28) meant local Google-SSO
+        // logins never reflected an account's actual onboarding state,
+        // diverging from every other login path (email/password,
+        // refreshProfile) which always honoured onboardingComplete for
+        // real. That's not needed for local testing and only hid genuine
+        // "onboarding not actually complete" states during dev.
+        onboardingComplete,
+        // First-time Google SSO users must verify via Aivorah email before entering.
+        // REGRESSION GUARD (2026-07-20, broke in e2a7f90 on top of the Jul-9
+        // "sticky emailVerified" cache): this must be Aivorah's own
+        // isAlreadyVerified, never cred.user.emailVerified. Google's flag is
+        // always true, so using it here — combined with setUser/AsyncStorage
+        // writes that ran BEFORE this check existed — poisoned the sticky
+        // local cache with emailVerified:true on every single Google login,
+        // letting unverified users fall through to onboarding. Do not move
+        // the setUser/AsyncStorage.setItem calls below to before this line,
+        // and do not swap this back to cred.user.emailVerified.
+        emailVerified: isLocalDev ? true : (existingRole ? isAlreadyVerified : false),
+        authProvider: 'google',
+        // dob/gender/state/country: added 2026-08-26 — see fetchSupabaseProfile.
+        dob:                profile.dob     || undefined,
+        gender:             profile.gender  || undefined,
+        state:              profile.state   || undefined,
+        country:            profile.country || undefined,
+        avatarStyle:        profile.avatarStyle,
+        learningStyle:      profile.learningStyle,
+        interests:          profile.interests,
+        bio:                profile.bio,
+        photoUrl:           profile.photoUrl,
+      };
+      setUser(newUser);
+      prefetchStudentDashboard(newUser);
+      AsyncStorage.setItem(PROFILE_KEY, JSON.stringify(newUser)).catch(() => {});
+
+      // Send Aivorah activation email if not yet verified (covers new users + returning unverified)
+      if (!isAlreadyVerified && !isLocalDev) {
+        // Persist to AsyncStorage — survives multiple onAuthStateChanged fires
+        await AsyncStorage.setItem(PENDING_VERIFY_KEY, email).catch(() => {});
+
+        // Sync user to Supabase first so user_preferences row exists for token storage
+        await fetch(`${AUTH_SERVER_URL}/user/sync`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, role: effectiveRole, authProvider: 'google' }),
+        }).catch(() => {});
+
+        // Now send the verification email
+        const frontendOrigin = verificationOrigin();
+        try {
+          const vRes = await fetch(`${AUTH_SERVER_URL}/user/send-verification`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, name, frontendOrigin }),
+          });
+          if (!vRes.ok) {
+            const d = await vRes.json().catch(() => ({}));
+            console.error('[google-sso] send-verification failed:', d.error || vRes.status);
+          }
+        } catch (err: any) {
+          console.error('[google-sso] send-verification network error:', err.message);
+        }
+      } else {
+        // Returning verified user — `name` already prefers profile.name (see above),
+        // so this just echoes it back rather than overwriting with Google's displayName.
+        fetch(`${AUTH_SERVER_URL}/user/sync`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, name, role: effectiveRole, authProvider: 'google' }),
+        }).catch(() => {});
+      }
+    } catch (error: any) {
+      // Re-throw our custom errors (role mismatch etc.) directly — don't replace message
+      if (!error.code) throw error;
+      const nativeMessage = nativeGoogleErrorMessage(error);
+      if (nativeMessage) throw new Error(nativeMessage);
+      console.error('Google Signin Error:', error.code, error.message);
+      let message = 'An error occurred during Google signin.';
+      if (error.code === 'auth/popup-closed-by-user') {
+        message = 'Google sign-in was cancelled.';
+      } else if (error.code === 'auth/network-request-failed') {
+        message = 'Network error. Please check your connection.';
+      } else if (error.code === 'auth/user-disabled') {
+        message = BLOCKED_ACCOUNT_MESSAGE;
+      }
+      throw new Error(message);
+    } finally {
+      if (
+        !resolvingEmail ||
+        _googleSignInResolvingEmail === resolvingEmail ||
+        _googleSignInResolvingEmail === GOOGLE_SIGN_IN_PENDING
+      ) {
+        _googleSignInResolvingEmail = null;
+      }
     }
   }
 
