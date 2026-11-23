@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { spacing, radius, typography, fonts } from '../../theme';
+import { spacing, radius, typography } from '../../theme';
 import type { AppColors } from '../../theme';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -34,21 +34,14 @@ function schoolInitials(name: string): string {
 const STUDENT_NAV_ITEMS = [
   { label: 'Dashboard', icon: 'grid', screen: 'Dashboard', group: 'MENU' },
   { label: 'Profile', icon: 'user', screen: 'Profile', group: 'MENU' },
-  { label: 'My Learning Paths', icon: 'book-open', screen: 'LearningPaths', group: 'MENU',
-    childScreens: [
-      'SubjectTopics', 'SubjectSyllabus', 'LessonScreen', 'TopicLesson',
-      'VideoLesson', 'VideoPlayer', 'Quiz', 'Learn5E', 'MathHelper',
-      'WordWizard', 'DrawingBuddy', 'AIStoryteller', 'NCERTChapters',
-    ] },
+  { label: 'My Learning Paths', icon: 'book-open', screen: 'LearningPaths', group: 'MENU' },
   { label: 'AI Coach', icon: 'message-circle', screen: 'AICoach', group: 'MENU' },
-  { label: 'AI Teacher', icon: 'user-check', screen: 'AITeacher', group: 'MENU' },
   { label: 'Schedule', icon: 'calendar', screen: 'Schedule', group: 'MENU' },
   { label: 'Attendance', icon: 'clipboard', screen: 'StudentAttendance', group: 'MENU' },
   { label: 'Timetable', icon: 'columns', screen: 'Timetable', group: 'MENU' },
   { label: 'Resources', icon: 'folder', screen: 'Resources', group: 'MENU' },
   { label: 'Announcements', icon: 'volume-2', screen: 'Announcements', group: 'MENU' },
-  { label: 'The World & You', icon: 'globe', screen: 'WorldAndYou', group: 'MENU',
-    childScreens: ['CurrentAffairs', 'CurrentAffairsStory', 'CurrentAffairsQuiz'] },
+  { label: 'The World & You', icon: 'globe', screen: 'WorldAndYou', group: 'MENU' },
   { label: 'Bedtime Stories', icon: 'book', screen: 'BhagavathaStories', group: 'MENU', premium: false },
   { label: 'Daily Habits', icon: 'sun', screen: 'DailyHabits', group: 'MENU' },
   { label: 'Read Aloud', icon: 'mic', screen: 'ReadAloud', group: 'MENU' },
@@ -162,10 +155,8 @@ export default function DrawerContent(props: any) {
   const { state, navigation } = props;
   const currentRoute = state.routes[state.index]?.name;
   const { logout, user, updateUser } = useAuth();
-  const { colors, themeMode, setThemeMode, portal } = useTheme();
-  // Redesigned portals (student, teacher) share these nav/header styles.
-  const isStudentPortal = !!portal; // student, teacher or parent
-  const styles = useMemo(() => makeStyles(colors, isStudentPortal), [colors, isStudentPortal]);
+  const { colors, themeMode, setThemeMode } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
 
   const isAdmin = isAdminEmail(user?.email);
   const isSuperAdmin = user?.role === 'super_admin';
@@ -187,6 +178,7 @@ export default function DrawerContent(props: any) {
     })();
     return () => { cancelled = true; };
   }, [isSchoolAdmin, user]));
+  const isStudent = user?.role === 'student';
   const isTeacher = user?.role === 'teacher';
   const isParent = user?.role === 'parent';
   const NAV_ITEMS_ROLE = isAdmin ? ADMIN_NAV_ITEMS : isSuperAdmin ? SUPER_ADMIN_NAV_ITEMS : isSchoolAdmin ? SCHOOL_ADMIN_NAV_ITEMS : isTeacher ? TEACHER_NAV_ITEMS : isParent ? PARENT_NAV_ITEMS : STUDENT_NAV_ITEMS;
@@ -202,13 +194,22 @@ export default function DrawerContent(props: any) {
     ? NAV_ITEMS_ROLE.filter((i) => !SCHOOL_ONLY_SCREENS.includes(i.screen))
     : NAV_ITEMS_ROLE;
 
-  // ── Mobile app = focused teacher/parent companion ──────────────────────────
-  // On native (the mobile app) show only the founder-approved modules. Web keeps
-  // the full menu untouched. (Other screens stay registered for deep navigation.)
+  // ── Mobile app = focused four-portal companion ─────────────────────────────
+  // On native (the mobile app) show only the founder-approved modules per portal.
+  // Web keeps the full menu untouched. (Other screens stay registered for deep nav.)
+  const MOBILE_STUDENT_SCREENS = ['Dashboard', 'Profile', 'LearningPaths', 'AICoach', 'AITeacher', 'Schedule', 'Assignments', 'Challenges', 'Leaderboard', 'Progress', 'Messages', 'HelpCenter', 'Settings'];
   const MOBILE_TEACHER_SCREENS = ['TeacherDashboard', 'TeacherStudents', 'TeacherAttendance', 'TeacherAssignments', 'TeacherSchedule', 'TeacherProgress', 'TeacherMessages', 'TeacherSettings', 'TeacherHelp'];
   const MOBILE_PARENT_SCREENS  = ['ParentDashboard', 'ParentMyKids', 'ParentDailyTasks', 'ParentSchedule', 'ParentProgress', 'ParentMessages', 'ParentControls', 'ParentSettings', 'ParentHelp'];
-  // Not for admins: their menu is ADMIN_NAV_ITEMS even when the underlying role is teacher/parent.
-  const mobileAllow = Platform.OS !== 'web' && !isAdmin ? (isTeacher ? MOBILE_TEACHER_SCREENS : isParent ? MOBILE_PARENT_SCREENS : null) : null;
+  const MOBILE_SCHOOL_ADMIN_SCREENS = ['SchoolAdminDashboard', 'SchoolAdminStudents', 'SchoolAdminTeachers', 'SchoolAdminParents', 'Timetable', 'Resources', 'SchoolAdminSettings', 'TeacherHelp'];
+  // Not for Platform Admin: their menu is ADMIN_NAV_ITEMS even when the underlying role is teacher/parent.
+  // Platform Admin is explicitly out of mobile scope this phase.
+  const mobileAllow = Platform.OS !== 'web' && !isAdmin
+    ? (isStudent ? MOBILE_STUDENT_SCREENS
+      : isTeacher ? MOBILE_TEACHER_SCREENS
+      : isParent ? MOBILE_PARENT_SCREENS
+      : isSchoolAdmin ? MOBILE_SCHOOL_ADMIN_SCREENS
+      : null)
+    : null;
   const NAV_ITEMS = (mobileAllow ? NAV_ITEMS_BASE.filter((i) => mobileAllow.includes(i.screen)) : NAV_ITEMS_BASE)
     .filter((i) => i.screen !== 'ReadAloud' || hasReadAloudStories(user?.grade));
   // The logo / brand name takes you to your own dashboard (the first item of
@@ -228,13 +229,9 @@ export default function DrawerContent(props: any) {
     <View style={styles.container}>
       {/* Logo */}
       <TouchableOpacity style={styles.logo} activeOpacity={0.7} onPress={goToDashboard} accessibilityRole="button" accessibilityLabel="Go to your dashboard" testID="logo-home">
-          {isStudentPortal ? (
-          <Feather name="book-open" size={24} color={colors.textHeading} />
-        ) : (
-          <View style={styles.logoMark}>
-            <Feather name="zap" size={18} color="white" />
-          </View>
-        )}
+        <View style={styles.logoMark}>
+          <Feather name="zap" size={18} color="white" />
+        </View>
         <Text style={styles.logoText}>Aivorah</Text>
       </TouchableOpacity>
 
@@ -267,9 +264,7 @@ export default function DrawerContent(props: any) {
                 // its screen is a distinct route (own route name/URL). An
                 // item that instead reaches a shared screen via runtime
                 // `params` must not get the persistent active highlight.
-                const childScreens: string[] | undefined = (item as any).childScreens;
-                const isActive = !(item as any).params &&
-                  (currentRoute === item.screen || (childScreens?.includes(currentRoute) ?? false));
+                const isActive = !(item as any).params && currentRoute === item.screen;
                 return (
                   <TouchableOpacity
                     key={`${item.screen}-${item.label}`}
@@ -277,11 +272,11 @@ export default function DrawerContent(props: any) {
                     onPress={() => navigation.navigate(item.screen, (item as any).params)}
                     activeOpacity={0.7}
                   >
-                    {isActive && !isStudentPortal && <View style={styles.activeBar} />}
+                    {isActive && <View style={styles.activeBar} />}
                     <Feather
                       name={item.icon as any}
                       size={17}
-                      color={isActive ? (isStudentPortal ? colors.navActiveText : colors.accentYellow) : colors.textMuted}
+                      color={isActive ? colors.accentYellow : colors.textMuted}
                     />
                     <Text
                       style={[
@@ -314,10 +309,10 @@ export default function DrawerContent(props: any) {
                     {(item as any).premium && (
                       <View style={styles.premiumIndicator}>
                         {!(user as any)?.isPro && (
-                          <Feather name="lock" size={9} color={isStudentPortal ? colors.accentOrange : '#C5A56A'} style={{ marginRight: 3 }} />
+                          <Feather name="lock" size={9} color="#C5A56A" style={{ marginRight: 3 }} />
                         )}
                         {(user as any)?.isPro && (
-                          <Feather name="star" size={9} color={isStudentPortal ? colors.accentOrange : '#C5A56A'} style={{ marginRight: 3 }} />
+                          <Feather name="star" size={9} color="#C5A56A" style={{ marginRight: 3 }} />
                         )}
                         <Text style={styles.premiumIndicatorText}>PRO</Text>
                       </View>
@@ -387,7 +382,7 @@ export default function DrawerContent(props: any) {
   );
 }
 
-const makeStyles = (c: AppColors, s = false) => StyleSheet.create({
+const makeStyles = (c: AppColors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: c.sidebarDark,
@@ -413,11 +408,10 @@ const makeStyles = (c: AppColors, s = false) => StyleSheet.create({
     justifyContent: 'center',
   },
   logoText: {
-    fontSize: s ? 20 : 18,
+    fontSize: 18,
     fontWeight: '700',
-    color: s ? c.textHeading : 'white',
+    color: 'white',
     letterSpacing: -0.3,
-    ...(s ? { fontFamily: fonts.nav } : null),
   },
   schoolCard: {
     flexDirection: 'row',
@@ -466,7 +460,6 @@ const makeStyles = (c: AppColors, s = false) => StyleSheet.create({
   },
   navLabel: {
     ...typography.label,
-    ...(s ? { fontFamily: fonts.nav } : null),
     color: c.textDim,
     marginBottom: spacing.md,
     paddingLeft: spacing.md,
@@ -483,7 +476,7 @@ const makeStyles = (c: AppColors, s = false) => StyleSheet.create({
     position: 'relative',
   },
   navItemActive: {
-    backgroundColor: s ? c.navActiveBg : c.accentYellow + '12',
+    backgroundColor: c.accentYellow + '12',
   },
   activeBar: {
     position: 'absolute',
@@ -491,18 +484,17 @@ const makeStyles = (c: AppColors, s = false) => StyleSheet.create({
     top: 6,
     bottom: 6,
     width: 3,
-    backgroundColor: s ? c.accent : c.accentYellow,
+    backgroundColor: c.accentYellow,
     borderTopRightRadius: 4,
     borderBottomRightRadius: 4,
   },
   navItemText: {
     fontSize: 14,
     fontWeight: '500',
-    color: s ? c.textMain : c.textMuted,
-    ...(s ? { fontFamily: fonts.nav } : null),
+    color: c.textMuted,
   },
   navItemTextActive: {
-    color: s ? c.navActiveText : c.accentYellow,
+    color: c.accentYellow,
     fontWeight: '700',
   },
   navBadge: {
@@ -523,11 +515,11 @@ const makeStyles = (c: AppColors, s = false) => StyleSheet.create({
   premiumIndicator: {
     flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: 7, paddingVertical: 2, borderRadius: 8,
-    backgroundColor: (s ? c.accentOrange : '#C5A56A') + '18', borderWidth: 1, borderColor: (s ? c.accentOrange : '#C5A56A') + '40',
+    backgroundColor: '#C5A56A18', borderWidth: 1, borderColor: '#C5A56A40',
     marginLeft: 'auto',
   },
   premiumIndicatorText: {
-    fontSize: 8, fontWeight: '800', color: (s ? c.accentOrange : '#C5A56A'),
+    fontSize: 8, fontWeight: '800', color: '#C5A56A',
     letterSpacing: 0.6,
   },
   userRow: {
