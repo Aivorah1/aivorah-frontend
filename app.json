@@ -23,7 +23,10 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "permissions": ["NOTIFICATIONS", "POST_NOTIFICATIONS"],
+      "permissions": [
+        "NOTIFICATIONS",
+        "POST_NOTIFICATIONS"
+      ],
       "predictiveBackGestureEnabled": false
     },
     "web": {
@@ -41,7 +44,14 @@
         {
           "color": "#C5A56A"
         }
-      ]
-    ]
+      ],
+      "expo-font"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "bf83b69e-975f-4109-b188-35b9854ebd85"
+      }
+    },
+    "owner": "aivorah24s-team"
   }
 }
