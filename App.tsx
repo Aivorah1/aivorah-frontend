@@ -133,6 +133,7 @@ const LINKING_SCREENS = {
   ParentAnnouncements: 'parent/announcements',
 };
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StyleSheet, View, Platform, Text, TextInput, TouchableOpacity, Modal } from 'react-native';
 import ActivityIndicator from './src/components/common/AivorahLoader';
 import { useFonts } from 'expo-font';
@@ -1073,11 +1074,13 @@ export default function App() {
   }
 
   return (
-    <GestureHandlerRootView style={styles.root}>
-      <ThemeProvider>
-        <ThemedRoot />
-      </ThemeProvider>
-    </GestureHandlerRootView>
+    <SafeAreaProvider>
+      <GestureHandlerRootView style={styles.root}>
+        <ThemeProvider>
+          <ThemedRoot />
+        </ThemeProvider>
+      </GestureHandlerRootView>
+    </SafeAreaProvider>
   );
 }
 
