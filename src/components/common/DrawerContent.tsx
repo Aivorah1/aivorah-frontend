@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { spacing, radius, typography } from '../../theme';
+import { spacing, radius, typography, fonts } from '../../theme';
 import type { AppColors } from '../../theme';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -34,14 +34,21 @@ function schoolInitials(name: string): string {
 const STUDENT_NAV_ITEMS = [
   { label: 'Dashboard', icon: 'grid', screen: 'Dashboard', group: 'MENU' },
   { label: 'Profile', icon: 'user', screen: 'Profile', group: 'MENU' },
-  { label: 'My Learning Paths', icon: 'book-open', screen: 'LearningPaths', group: 'MENU' },
+  { label: 'My Learning Paths', icon: 'book-open', screen: 'LearningPaths', group: 'MENU',
+    childScreens: [
+      'SubjectTopics', 'SubjectSyllabus', 'LessonScreen', 'TopicLesson',
+      'VideoLesson', 'VideoPlayer', 'Quiz', 'Learn5E', 'MathHelper',
+      'WordWizard', 'DrawingBuddy', 'AIStoryteller', 'NCERTChapters',
+    ] },
   { label: 'AI Coach', icon: 'message-circle', screen: 'AICoach', group: 'MENU' },
+  { label: 'AI Teacher', icon: 'user-check', screen: 'AITeacher', group: 'MENU' },
   { label: 'Schedule', icon: 'calendar', screen: 'Schedule', group: 'MENU' },
   { label: 'Attendance', icon: 'clipboard', screen: 'StudentAttendance', group: 'MENU' },
   { label: 'Timetable', icon: 'columns', screen: 'Timetable', group: 'MENU' },
   { label: 'Resources', icon: 'folder', screen: 'Resources', group: 'MENU' },
   { label: 'Announcements', icon: 'volume-2', screen: 'Announcements', group: 'MENU' },
-  { label: 'The World & You', icon: 'globe', screen: 'WorldAndYou', group: 'MENU' },
+  { label: 'The World & You', icon: 'globe', screen: 'WorldAndYou', group: 'MENU',
+    childScreens: ['CurrentAffairs', 'CurrentAffairsStory', 'CurrentAffairsQuiz'] },
   { label: 'Bedtime Stories', icon: 'book', screen: 'BhagavathaStories', group: 'MENU', premium: false },
   { label: 'Daily Habits', icon: 'sun', screen: 'DailyHabits', group: 'MENU' },
   { label: 'Read Aloud', icon: 'mic', screen: 'ReadAloud', group: 'MENU' },
@@ -155,8 +162,10 @@ export default function DrawerContent(props: any) {
   const { state, navigation } = props;
   const currentRoute = state.routes[state.index]?.name;
   const { logout, user, updateUser } = useAuth();
-  const { colors, themeMode, setThemeMode } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { colors, themeMode, setThemeMode, portal } = useTheme();
+  // Redesigned portals (student, teacher) share these nav/header styles.
+  const isStudentPortal = !!portal; // student, teacher or parent
+  const styles = useMemo(() => makeStyles(colors, isStudentPortal), [colors, isStudentPortal]);
 
   const isAdmin = isAdminEmail(user?.email);
   const isSuperAdmin = user?.role === 'super_admin';
@@ -229,9 +238,13 @@ export default function DrawerContent(props: any) {
     <View style={styles.container}>
       {/* Logo */}
       <TouchableOpacity style={styles.logo} activeOpacity={0.7} onPress={goToDashboard} accessibilityRole="button" accessibilityLabel="Go to your dashboard" testID="logo-home">
-        <View style={styles.logoMark}>
-          <Feather name="zap" size={18} color="white" />
-        </View>
+          {isStudentPortal ? (
+          <Feather name="book-open" size={24} color={colors.textHeading} />
+        ) : (
+          <View style={styles.logoMark}>
+            <Feather name="zap" size={18} color="white" />
+          </View>
+        )}
         <Text style={styles.logoText}>Aivorah</Text>
       </TouchableOpacity>
 
@@ -264,7 +277,9 @@ export default function DrawerContent(props: any) {
                 // its screen is a distinct route (own route name/URL). An
                 // item that instead reaches a shared screen via runtime
                 // `params` must not get the persistent active highlight.
-                const isActive = !(item as any).params && currentRoute === item.screen;
+                const childScreens: string[] | undefined = (item as any).childScreens;
+                const isActive = !(item as any).params &&
+                  (currentRoute === item.screen || (childScreens?.includes(currentRoute) ?? false));
                 return (
                   <TouchableOpacity
                     key={`${item.screen}-${item.label}`}
@@ -272,11 +287,11 @@ export default function DrawerContent(props: any) {
                     onPress={() => navigation.navigate(item.screen, (item as any).params)}
                     activeOpacity={0.7}
                   >
-                    {isActive && <View style={styles.activeBar} />}
+                    {isActive && !isStudentPortal && <View style={styles.activeBar} />}
                     <Feather
                       name={item.icon as any}
                       size={17}
-                      color={isActive ? colors.accentYellow : colors.textMuted}
+                      color={isActive ? (isStudentPortal ? colors.navActiveText : colors.accentYellow) : colors.textMuted}
                     />
                     <Text
                       style={[
@@ -309,10 +324,10 @@ export default function DrawerContent(props: any) {
                     {(item as any).premium && (
                       <View style={styles.premiumIndicator}>
                         {!(user as any)?.isPro && (
-                          <Feather name="lock" size={9} color="#C5A56A" style={{ marginRight: 3 }} />
+                          <Feather name="lock" size={9} color={isStudentPortal ? colors.accentOrange : '#C5A56A'} style={{ marginRight: 3 }} />
                         )}
                         {(user as any)?.isPro && (
-                          <Feather name="star" size={9} color="#C5A56A" style={{ marginRight: 3 }} />
+                          <Feather name="star" size={9} color={isStudentPortal ? colors.accentOrange : '#C5A56A'} style={{ marginRight: 3 }} />
                         )}
                         <Text style={styles.premiumIndicatorText}>PRO</Text>
                       </View>
@@ -382,7 +397,7 @@ export default function DrawerContent(props: any) {
   );
 }
 
-const makeStyles = (c: AppColors) => StyleSheet.create({
+const makeStyles = (c: AppColors, s = false) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: c.sidebarDark,
@@ -408,10 +423,11 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
     justifyContent: 'center',
   },
   logoText: {
-    fontSize: 18,
+    fontSize: s ? 20 : 18,
     fontWeight: '700',
-    color: 'white',
+    color: s ? c.textHeading : 'white',
     letterSpacing: -0.3,
+    ...(s ? { fontFamily: fonts.nav } : null),
   },
   schoolCard: {
     flexDirection: 'row',
@@ -460,6 +476,7 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
   },
   navLabel: {
     ...typography.label,
+    ...(s ? { fontFamily: fonts.nav } : null),
     color: c.textDim,
     marginBottom: spacing.md,
     paddingLeft: spacing.md,
@@ -476,7 +493,7 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
     position: 'relative',
   },
   navItemActive: {
-    backgroundColor: c.accentYellow + '12',
+    backgroundColor: s ? c.navActiveBg : c.accentYellow + '12',
   },
   activeBar: {
     position: 'absolute',
@@ -484,17 +501,18 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
     top: 6,
     bottom: 6,
     width: 3,
-    backgroundColor: c.accentYellow,
+    backgroundColor: s ? c.accent : c.accentYellow,
     borderTopRightRadius: 4,
     borderBottomRightRadius: 4,
   },
   navItemText: {
     fontSize: 14,
     fontWeight: '500',
-    color: c.textMuted,
+    color: s ? c.textMain : c.textMuted,
+    ...(s ? { fontFamily: fonts.nav } : null),
   },
   navItemTextActive: {
-    color: c.accentYellow,
+    color: s ? c.navActiveText : c.accentYellow,
     fontWeight: '700',
   },
   navBadge: {
@@ -515,11 +533,11 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
   premiumIndicator: {
     flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: 7, paddingVertical: 2, borderRadius: 8,
-    backgroundColor: '#C5A56A18', borderWidth: 1, borderColor: '#C5A56A40',
+    backgroundColor: (s ? c.accentOrange : '#C5A56A') + '18', borderWidth: 1, borderColor: (s ? c.accentOrange : '#C5A56A') + '40',
     marginLeft: 'auto',
   },
   premiumIndicatorText: {
-    fontSize: 8, fontWeight: '800', color: '#C5A56A',
+    fontSize: 8, fontWeight: '800', color: (s ? c.accentOrange : '#C5A56A'),
     letterSpacing: 0.6,
   },
   userRow: {
