@@ -16,9 +16,16 @@ declare const __DEV__: boolean;
 
 const LIVE_BACKEND = 'https://aivorah.ai';
 
+// Staging override — points every service config that reads SERVER_URL at a
+// staging backend instead of live. Set EXPO_PUBLIC_API_BASE_URL at build time
+// (EAS env var / Vercel project env var) to switch the whole app to staging
+// without editing source. Credentials stay out of source; the value lives only
+// in the build environment.
+const OVERRIDE = process.env.EXPO_PUBLIC_API_BASE_URL;
+
 const SERVER_URL =
   Platform.OS === 'web'
-    ? (USE_LOCAL_SERVICES ? 'http://localhost:3007' : LIVE_BACKEND)
-    : LIVE_BACKEND;
+    ? (USE_LOCAL_SERVICES ? 'http://localhost:3007' : OVERRIDE || LIVE_BACKEND)
+    : OVERRIDE || LIVE_BACKEND;
 
 export default SERVER_URL;
