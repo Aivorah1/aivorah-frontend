@@ -8,6 +8,15 @@ import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react-native';
 import DashboardScreen from '../DashboardScreen';
 
+// Continue Learning is a website-only card (hidden in the Android/iOS app), and
+// jest-expo runs as iOS by default, so this suite renders the dashboard as the web app.
+jest.mock('react-native/Libraries/Utilities/Platform', () => ({
+  __esModule: true,
+  default: { OS: 'web', select: (obj: any) => obj.web ?? obj.default },
+  OS: 'web',
+  select: (obj: any) => obj.web ?? obj.default,
+}));
+
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ navigate: jest.fn(), goBack: jest.fn() }),
   useRoute: () => ({ key: 'Dashboard', name: 'Dashboard' }),

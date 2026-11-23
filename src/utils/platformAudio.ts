@@ -50,17 +50,18 @@ class WebAudio implements PlatformAudio {
   }
 
   async load(uri: string) {
-    this.audio = new (window as any).Audio(uri);
+    const audio: HTMLAudioElement = new (window as any).Audio(uri);
+    this.audio = audio;
     this._loaded = false;
-    this._supportsEvents = typeof (this.audio as any).addEventListener === 'function';
+    this._supportsEvents = typeof (audio as any).addEventListener === 'function';
     this.emit('loading');
     if (this._supportsEvents) {
       try {
         const onReady = () => { this._loaded = true; if (this._wantPlay) { this._wantPlay = false; this.emit('playing'); } };
-        this.audio.addEventListener('loadeddata', onReady, { once: true });
-        this.audio.addEventListener('loadedmetadata', onReady, { once: true });
-        this.audio.addEventListener('ended', () => { this.emit('ended'); this.endedCb?.(); }, { once: true });
-        this.audio.addEventListener('error', (e) => { this.emit('error'); this.errorCb?.(e); }, { once: true });
+        audio.addEventListener('loadeddata', onReady, { once: true });
+        audio.addEventListener('loadedmetadata', onReady, { once: true });
+        audio.addEventListener('ended', () => { this.emit('ended'); this.endedCb?.(); }, { once: true });
+        audio.addEventListener('error', (e) => { this.emit('error'); this.errorCb?.(e); }, { once: true });
       } catch {}
     } else {
       // Mocked test doubles without event support are treated as immediately ready.

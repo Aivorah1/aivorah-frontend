@@ -1,12 +1,13 @@
 // Current Affairs lives inside The World & You (its Current Affairs tab), so
 // the menus have no separate item; World & You stays highlighted on its pages.
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import { render, screen, fireEvent } from '@testing-library/react-native';
 import Sidebar from '../Sidebar';
 import DrawerContent from '../DrawerContent';
 
 let mockUser: any;
+afterEach(() => jest.restoreAllMocks()); // undoes the drawer test's Platform.OS switch
 jest.mock('../../../context/AuthContext', () => ({
   useAuth: () => ({ user: mockUser, logout: jest.fn(), updateUser: jest.fn(), switchRole: jest.fn(), beginAddParentProfile: jest.fn() }),
 }));
@@ -40,6 +41,9 @@ test('sidebar: no separate Current Affairs item; The World & You opens it', asyn
 });
 
 test('drawer: no separate Current Affairs item', async () => {
+  // The website drawer. The Android/iOS app's drawer shows only the approved
+  // mobile screens (no World & You), and jest-expo runs as iOS by default.
+  jest.replaceProperty(Platform, 'OS', 'web');
   mockUser = STUDENT;
   const navigation = { navigate: jest.fn(), closeDrawer: jest.fn() };
   await render(<DrawerContent state={{ routes: [{ name: 'Dashboard' }], index: 0 }} navigation={navigation} />);
