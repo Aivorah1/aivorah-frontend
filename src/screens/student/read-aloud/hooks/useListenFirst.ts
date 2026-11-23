@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Platform } from 'react-native';
+
 import { notify } from '../utils/notify';
 import { fetchSpeech } from '../services/readAloudApi';
 import type { Passage, WordTiming } from '../types';
 import { buildWordBoundaries, estimatedWordIndex, timedWordIndex } from '../utils/listenTiming';
 import { splitWords } from '../utils/wordMatching';
+import { createPlatformAudio, type PlatformAudio, type AudioStatus } from '../../../../utils/platformAudio';
 
 const hasSpeechSynthesis = () => typeof window !== 'undefined' && 'speechSynthesis' in window;
 
@@ -14,10 +15,11 @@ export function useListenFirst(passage: Passage | null) {
   const [isPaused, setIsPaused] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [highlightIdx, setHighlightIdx] = useState(-1);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioRef = useRef<PlatformAudio | null>(null);
   const timingsRef = useRef<WordTiming[] | null>(null);
   const rafRef = useRef(0);
   const passageRef = useRef(passage);
+  const genRef = useRef(0);
 
   useEffect(() => { passageRef.current = passage; }, [passage]);
 
@@ -32,16 +34,19 @@ export function useListenFirst(passage: Passage | null) {
     setIsLoading(false);
   }, []);
 
-  const startHighlightLoop = useCallback((audio: HTMLAudioElement) => {
+  const startHighlightLoop = useCallback((audio: PlatformAudio) => {
     cancelHighlightLoop();
     const timings = timingsRef.current;
     const words = splitWords(passageRef.current?.text || '');
     const bounds = timings ? null : buildWordBoundaries(words);
     let last = -1;
     const tick = () => {
-      if (audio.paused || audio.ended) return;
-      if (!timings && !audio.duration) { rafRef.current = requestAnimationFrame(tick); return; }
-      const idx = timings ? timedWordIndex(timings, audio.currentTime, audio.duration) : estimatedWordIndex(bounds!, audio.currentTime, audio.duration);
+      const status = audio.getStatus();
+      if (status === 'paused' || status === 'ended' || status === 'error' || status === 'idle') return;
+      if (!timings && !audio.getDuration()) { rafRef.current = requestAnimationFrame(tick); return; }
+      const idx = timings
+        ? timedWordIndex(timings, audio.getPosition(), audio.getDuration())
+        : estimatedWordIndex(bounds!, audio.getPosition(), audio.getDuration());
       if (idx !== last) { last = idx; setHighlightIdx(idx); }
       rafRef.current = requestAnimationFrame(tick);
     };
@@ -88,11 +93,12 @@ export function useListenFirst(passage: Passage | null) {
       return true;
     }
     const audio = audioRef.current;
-    if (audio && audio.paused && !audio.ended) {
-      audio.play();
-      setIsPaused(false);
-      setIsPlaying(true);
-      startHighlightLoop(audio);
+    if (audio && audio.getStatus() === 'paused') {
+      audio.play().then(() => {
+        setIsPaused(false);
+        setIsPlaying(true);
+        startHighlightLoop(audio);
+      }).catch(() => {});
       return true;
     }
     return false;
@@ -100,9 +106,10 @@ export function useListenFirst(passage: Passage | null) {
 
   const play = useCallback(async () => {
     const p = passageRef.current;
-    if (Platform.OS !== 'web' || !p) return;
+    if (!p) return;
     if (resume()) return;
 
+    const gen = ++genRef.current;
     setIsLoading(true);
     setIsPlaying(true);
     setIsPaused(false);
@@ -110,18 +117,24 @@ export function useListenFirst(passage: Passage | null) {
     try {
       const data = await fetchSpeech(p.text);
       if (!data.audioUrl) { playBrowserVoice(); return; }
-      const audio = new window.Audio(data.audioUrl);
-      audio.crossOrigin = 'anonymous';
-      audio.preload = 'auto';
+
+      const audio = createPlatformAudio();
       audioRef.current = audio;
       timingsRef.current = data.wordTimings || null;
-      audio.addEventListener('loadeddata', () => {
-        setIsLoading(false);
-        audio.play().then(() => startHighlightLoop(audio)).catch(playBrowserVoice);
-      }, { once: true });
-      audio.addEventListener('ended', () => { cancelHighlightLoop(); resetPlayback(); }, { once: true });
-      audio.addEventListener('error', () => { cancelHighlightLoop(); playBrowserVoice(); }, { once: true });
-      audio.load();
+
+      audio.onStatusChange((status: AudioStatus) => {
+        if (genRef.current !== gen) return;
+        if (status === 'playing') {
+          setIsLoading(false);
+          startHighlightLoop(audio);
+        }
+      });
+      audio.onEnded(() => { cancelHighlightLoop(); resetPlayback(); });
+      audio.onError(() => { cancelHighlightLoop(); playBrowserVoice(); });
+
+      await audio.load(data.audioUrl);
+      if (genRef.current !== gen) { await audio.unload(); return; }
+      await audio.play();
     } catch {
       playBrowserVoice();
     }
@@ -135,8 +148,8 @@ export function useListenFirst(passage: Passage | null) {
       return;
     }
     const audio = audioRef.current;
-    if (audio && !audio.paused) {
-      audio.pause();
+    if (audio && audio.getStatus() === 'playing') {
+      audio.pause().catch(() => {});
       cancelHighlightLoop();
       setIsPaused(true);
       setIsPlaying(false);
@@ -150,7 +163,8 @@ export function useListenFirst(passage: Passage | null) {
     cancelHighlightLoop();
     const audio = audioRef.current;
     if (audio) {
-      try { audio.pause(); audio.currentTime = 0; } catch { /* not loaded */ }
+      audio.stop().catch(() => {});
+      audio.unload().catch(() => {});
       audioRef.current = null;
     }
     timingsRef.current = null;
@@ -163,7 +177,8 @@ export function useListenFirst(passage: Passage | null) {
       try { window.speechSynthesis.cancel(); } catch { /* already stopped */ }
     }
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    audioRef.current?.pause();
+    const audio = audioRef.current;
+    if (audio) { audio.stop().catch(() => {}); audio.unload().catch(() => {}); audioRef.current = null; }
   }, []);
 
   return {

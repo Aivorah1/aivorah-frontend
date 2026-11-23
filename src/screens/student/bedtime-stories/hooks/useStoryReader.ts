@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Platform } from 'react-native';
+import { useEffect, useRef, useState } from "react";
+import { Animated } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SERVER_URL from '../../../../config/bedtimeStoriesServerUrl';
 import { splitWords, buildBoundaries } from '../utils/textFormatting';
 import { playPageFlip, silenceAllAmbient, createAmbient } from '../utils/ambientAudio';
+import { createPlatformAudio, type PlatformAudio, type AudioStatus } from '../../../../utils/platformAudio';
 import type { Story, VoiceOption } from '../types';
 
 export function useStoryReader(storyId: string) {
@@ -18,10 +19,10 @@ export function useStoryReader(storyId: string) {
   const [donePages,    setDonePages]    = useState<Set<number>>(new Set());
   const [playbackRate, setPlaybackRate] = useState(1);
   const [donePagesLoaded, setDonePagesLoaded] = useState(false);
-  const [resumedFrom,  setResumedFrom]  = useState<number | null>(null);  // 1-based page we auto-resumed to
+  const [resumedFrom,  setResumedFrom]  = useState<number | null>(null);
   const didResume      = useRef(false);
 
-  const audioRef   = useRef<any>(null);
+  const audioRef   = useRef<PlatformAudio | null>(null);
   const ambientRef = useRef<any>(null);
   const playGenRef = useRef(0);
   const fadeAnim   = useRef(new Animated.Value(1)).current;
@@ -37,20 +38,18 @@ export function useStoryReader(storyId: string) {
   }, [storyId]);
 
   // Resume where the reader left off (YouTube-style): jump to the first page not yet finished.
-  // Runs once, after both the story and the saved progress are loaded.
   useEffect(() => {
     if (didResume.current || !story || !donePagesLoaded) return;
     didResume.current = true;
     const idx = story.pages.findIndex(p => !donePages.has(p.pageNumber));
     if (idx > 0) {                 // -1 (all done) or 0 (at start) → no resume needed
-      // one-time async resume (depends on story + AsyncStorage load), not derivable state
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setCurrentPage(idx);
-      setResumedFrom(idx + 1);     // 1-based page number for the banner
+      setResumedFrom(idx + 1);
     }
   }, [story, donePagesLoaded, donePages]);
 
-  // Auto-hide the "resumed" banner after a few seconds (Start-over stays available via top dots).
+  // Auto-hide the "resumed" banner after a few seconds.
   useEffect(() => {
     if (resumedFrom == null) return;
     const t = setTimeout(() => setResumedFrom(null), 8000);
@@ -63,16 +62,13 @@ export function useStoryReader(storyId: string) {
       .then((data: Story) => {
         setStory(data);
         setLoading(false);
-        // NOTE: ambient music intentionally NOT auto-started here — it starts with the
-        // narration (in speakPage) so it shares one lifecycle and always stops on pause.
       })
       .catch(() => setLoading(false));
-    return () => { stopAudio(); ambientRef.current?.stop(); ambientRef.current = null; };
+    return () => { stopAudio(); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storyId]);
 
-  // Reset word highlight when the page changes — adjusted during render (React's
-  // documented "adjusting state when a prop changes" pattern) instead of an effect.
+  // Reset word highlight when the page changes.
   const [wordIndexPage, setWordIndexPage] = useState(currentPage);
   if (wordIndexPage !== currentPage) {
     setWordIndexPage(currentPage);
@@ -82,7 +78,7 @@ export function useStoryReader(storyId: string) {
   // Apply playback rate change to audio that's already playing
   useEffect(() => {
     if (audioRef.current) {
-      try { audioRef.current.playbackRate = playbackRate; } catch {}
+      audioRef.current.setRate(playbackRate).catch(() => {});
     }
   }, [playbackRate]);
 
@@ -100,7 +96,7 @@ export function useStoryReader(storyId: string) {
   }
 
   function startHighlightLoop(
-    audio: any,
+    audio: PlatformAudio,
     words: string[],
     timings: { startTime: number; endTime: number }[] | null,
     wordBounds: number[] | null,
@@ -109,24 +105,25 @@ export function useStoryReader(storyId: string) {
     cancelHighlightLoop();
     let lastRendered = -1;
     function tick() {
-      if (!audio || audio.paused || audio.ended) return;
+      if (!audio) return;
+      const status = audio.getStatus();
+      if (status === 'paused' || status === 'ended' || status === 'error' || status === 'idle') return;
       let idx: number;
+      const position = audio.getPosition();
+      const duration = audio.getDuration();
       if (timings) {
-        // ElevenLabs & Whisper = exact timestamps from actual audio → no offset.
-        const t = audio.currentTime;
+        const t = position;
         idx = 0;
         for (let i = 0; i < timings.length; i++) {
-          const wordEnd = timings[i + 1]?.startTime ?? (audio.duration + 1);
+          const wordEnd = timings[i + 1]?.startTime ?? (duration + 1);
           if (t >= timings[i].startTime && t < wordEnd) { idx = i; break; }
           if (t >= timings[i].startTime) idx = i;
         }
       } else {
-        // Pure proportion fallback (no silence data at all).
-        // Apply a small lag so highlight trails audio instead of jumping ahead.
-        if (!audio.duration) { rafRef.current = requestAnimationFrame(tick); return; }
-        const LAG = 0.18 / (audio.playbackRate || 1);
-        const t = Math.max(0, audio.currentTime - LAG);
-        const ratio = t / audio.duration;
+        if (!duration) { rafRef.current = requestAnimationFrame(tick); return; }
+        const LAG = 0.18 / (playbackRate || 1);
+        const t = Math.max(0, position - LAG);
+        const ratio = t / duration;
         const found = wordBounds!.findIndex(b => ratio < b);
         idx = found === -1 ? words.length - 1 : found;
       }
@@ -146,8 +143,7 @@ export function useStoryReader(storyId: string) {
 
   function pauseAudio() {
     cancelHighlightLoop();
-    if (audioRef.current) try { audioRef.current.pause(); } catch {}
-    // Pause the current ambient, then force-silence ANY stray ambient instance (safety net).
+    if (audioRef.current) audioRef.current.pause().catch(() => {});
     try { ambientRef.current?.pause(); } catch {}
     silenceAllAmbient();
     setPlaying(false);
@@ -158,7 +154,8 @@ export function useStoryReader(storyId: string) {
     audioMeta.current = null;
     playGenRef.current++;
     if (audioRef.current) {
-      try { audioRef.current.pause(); audioRef.current.currentTime = 0; } catch {}
+      audioRef.current.stop().catch(() => {});
+      audioRef.current.unload().catch(() => {});
       audioRef.current = null;
     }
     ambientRef.current?.stop(); ambientRef.current = null;
@@ -167,23 +164,20 @@ export function useStoryReader(storyId: string) {
 
   function resumeAudio() {
     if (!audioRef.current) return;
-    try {
-      audioRef.current.play();
-      // Restart highlight loop from current position
+    audioRef.current.play().then(() => {
       if (audioMeta.current) {
         const { words, timings, wordBounds, timingProvider } = audioMeta.current;
-        startHighlightLoop(audioRef.current, words, timings, wordBounds, timingProvider);
+        startHighlightLoop(audioRef.current!, words, timings, wordBounds, timingProvider);
       }
-      // Fade ambient back in
       try { ambientRef.current?.resume(); } catch {}
       setPlaying(true);
-    } catch {}
+    }).catch(() => {});
   }
 
   async function speakPage(pageNum: number) {
     if (!story) return;
     // If audio loaded and paused mid-way, resume from same position
-    if (audioRef.current && audioRef.current.paused && audioRef.current.currentTime > 0) {
+    if (audioRef.current && audioRef.current.getStatus() === 'paused' && audioRef.current.getPosition() > 0) {
       resumeAudio(); return;
     }
     stopAudio();
@@ -195,39 +189,49 @@ export function useStoryReader(storyId: string) {
       if (playGenRef.current !== gen) return;
       if (!data.audioUrl) { setIsLoading(false); return; }
 
-      if (Platform.OS === 'web') {
-        const audio = new (window as any).Audio(`${SERVER_URL}${data.audioUrl}`);
-        if (playGenRef.current !== gen) return;
-        audio.playbackRate = playbackRate;
-        audioRef.current = audio;
-        setIsLoading(false); setPlaying(true);
+      const audio = createPlatformAudio();
+      audioRef.current = audio;
 
-        const pageText      = story.pages.find(p => p.pageNumber === pageNum)?.text ?? '';
-        const words         = splitWords(pageText);
-        const timings: { startTime: number; endTime: number }[] | null = data.wordTimings || null;
-        const wordBounds    = timings ? null : buildBoundaries(words);
-        const timingProvider: string = data.timingProvider || 'none';
+      const pageText      = story.pages.find(p => p.pageNumber === pageNum)?.text ?? '';
+      const words         = splitWords(pageText);
+      const timings: { startTime: number; endTime: number }[] | null = data.wordTimings || null;
+      const wordBounds    = timings ? null : buildBoundaries(words);
+      const timingProvider: string = data.timingProvider || 'none';
+      audioMeta.current = { words, timings, wordBounds, timingProvider };
 
-        // Store metadata so resume can restart the loop
-        audioMeta.current = { words, timings, wordBounds, timingProvider };
+      // Start ambient music matched to this page's scene/mood
+      const currentPageObj = story.pages.find(p => p.pageNumber === pageNum);
+      ambientRef.current = createAmbient(story.id, currentPageObj);
+      ambientRef.current?.start?.();
 
-        // Start ambient music matched to this page's scene/mood
-        const currentPageObj = story.pages.find(p => p.pageNumber === pageNum);
-        ambientRef.current = createAmbient(story.id, currentPageObj);
+      audio.setRate(playbackRate).catch(() => {});
+      audio.onStatusChange((status: AudioStatus) => {
+        if (status === 'playing' && playGenRef.current === gen) {
+          setIsLoading(false);
+          setPlaying(true);
+          startHighlightLoop(audio, words, timings, wordBounds, timingProvider);
+        }
+      });
+      audio.onEnded(() => {
+        cancelHighlightLoop();
+        setWordIndex(words.length);
+        setPlaying(false);
+        markPageDone(pageNum);
+        ambientRef.current?.stop(); ambientRef.current = null;
+        if (autoPlay && story && currentPage < story.pages.length - 1) goToPage(currentPage + 1);
+      });
+      audio.onError(() => {
+        cancelHighlightLoop();
+        setIsLoading(false); setPlaying(false);
+        ambientRef.current?.stop(); ambientRef.current = null;
+      });
 
-        audio.onended = () => {
-          cancelHighlightLoop();
-          setWordIndex(words.length); // past all words → nothing highlighted
-          setPlaying(false);
-          markPageDone(pageNum);
-          ambientRef.current?.stop(); ambientRef.current = null;
-          if (autoPlay && story && currentPage < story.pages.length - 1) goToPage(currentPage + 1);
-        };
-        audio.onerror = () => { cancelHighlightLoop(); setIsLoading(false); setPlaying(false); ambientRef.current?.stop(); ambientRef.current = null; };
-        audio.play();
-        startHighlightLoop(audio, words, timings, wordBounds, timingProvider);
-      } else { setIsLoading(false); }
-    } catch { if (playGenRef.current === gen) { setIsLoading(false); setPlaying(false); } }
+      await audio.load(`${SERVER_URL}${data.audioUrl}`);
+      if (playGenRef.current !== gen) { await audio.unload(); return; }
+      await audio.play();
+    } catch {
+      if (playGenRef.current === gen) { setIsLoading(false); setPlaying(false); }
+    }
   }
 
   function animateTurn(cb: () => void) {
@@ -250,7 +254,7 @@ export function useStoryReader(storyId: string) {
     animateTurn(() => setCurrentPage(idx));
   }
 
-  const isPaused = !playing && !isLoading && audioRef.current && audioRef.current.currentTime > 0;
+  const isPaused = !playing && !isLoading && audioRef.current && audioRef.current.getStatus() !== 'idle' && audioRef.current.getStatus() !== 'ended';
 
   return {
     story, loading, currentPage, voice, setVoice, isLoading, playing, autoPlay, setAutoPlay,

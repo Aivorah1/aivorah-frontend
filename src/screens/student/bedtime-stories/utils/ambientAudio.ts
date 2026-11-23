@@ -30,9 +30,11 @@ export function playPageFlip() {
 // even if a wrapper instance leaks (e.g. auto-start race). Safety net.
 const _ambientAudios = new Set<HTMLAudioElement>();
 const _ambientCtxs   = new Set<AudioContext>();
+const _ambientNative = new Set<any>(); // expo-av Sound instances on native
 export function silenceAllAmbient() {
   _ambientAudios.forEach(a => { try { a.pause(); } catch {} });
   _ambientCtxs.forEach(c => { try { if (c.state === 'running') c.suspend(); } catch {} });
+  _ambientNative.forEach(s => { try { s.pauseAsync(); } catch {} });
 }
 
 // Indian ambient music via Web Audio API — story-specific instrument styles
@@ -43,13 +45,11 @@ function createAmbientMusic(storyId: string, moodProfile?: AmbientProfile) {
     const intensity = profile.intensity ?? 1;
     const ctx = new ((window as any).AudioContext || (window as any).webkitAudioContext)();
     _ambientCtxs.add(ctx);
-    // Resume in case browser auto-suspended the context
     if (ctx.state === 'suspended') ctx.resume();
     const master = ctx.createGain();
     master.gain.value = 0;
     master.connect(ctx.destination);
 
-    // Reverb convolver for warmth
     function makeReverb(duration: number, decay: number) {
       const len = ctx.sampleRate * duration;
       const buf = ctx.createBuffer(2, len, ctx.sampleRate);
@@ -64,11 +64,10 @@ function createAmbientMusic(storyId: string, moodProfile?: AmbientProfile) {
     const reverb = makeReverb(2.5, 3);
     reverb.connect(master);
 
-    const root = profile.root; // e.g. 220 Hz = A3
+    const root = profile.root;
     const nodes: any[] = [];
 
     if (profile.style === 'tanpura') {
-      // Tanpura: 4 strings — Pa, Sa (low), Sa (high), Ma plucked in slow cycle
       const strings = [root * 0.75, root, root * 2, root * 4/3];
       strings.forEach((freq, si) => {
         function pluck() {
@@ -93,7 +92,6 @@ function createAmbientMusic(storyId: string, moodProfile?: AmbientProfile) {
       });
 
     } else if (profile.style === 'flute') {
-      // Bansuri flute: breathy sine + noise, melodic Sa-Re-Ga phrases
       const scale = [root, root*9/8, root*5/4, root*4/3, root*3/2, root*5/3, root*15/8, root*2];
       const phrases = [[0,2,4,2,0], [4,5,4,2,0], [0,4,7,4,0], [2,4,5,4,2]];
       let phraseIdx = 0;
@@ -104,7 +102,6 @@ function createAmbientMusic(storyId: string, moodProfile?: AmbientProfile) {
           phrase.forEach((deg, ni) => {
             const freq = scale[deg % scale.length];
             const t0 = ctx.currentTime + ni * 0.9;
-            // Breath noise
             const noiseLen = ctx.sampleRate * 0.7;
             const nbuf = ctx.createBuffer(1, noiseLen, ctx.sampleRate);
             const nd = nbuf.getChannelData(0);
@@ -115,7 +112,6 @@ function createAmbientMusic(storyId: string, moodProfile?: AmbientProfile) {
             nsrc.connect(nbpf); nbpf.connect(nenv); nenv.connect(master);
             nenv.gain.setValueAtTime(0, t0); nenv.gain.linearRampToValueAtTime(0.04, t0 + 0.08); nenv.gain.linearRampToValueAtTime(0, t0 + 0.65);
             nsrc.start(t0); nsrc.stop(t0 + 0.7);
-            // Tone
             const osc = ctx.createOscillator(); osc.type = 'sine'; osc.frequency.value = freq;
             const vib = ctx.createOscillator(); vib.type = 'sine'; vib.frequency.value = 5.5;
             const vibG = ctx.createGain(); vibG.gain.value = freq * 0.012;
@@ -133,7 +129,6 @@ function createAmbientMusic(storyId: string, moodProfile?: AmbientProfile) {
       playPhrase();
 
     } else if (profile.style === 'tabla') {
-      // Tabla: bol pattern — dha dhin dhin dha (16-beat teentaal feel, slow)
       const bpm = profile.bpm ?? 52;
       const beat = 60000 / bpm;
       const pattern = [1,0,0.6,0,1,0,0.6,0.4,1,0,0.6,0,1,0,0.6,0];
@@ -160,7 +155,6 @@ function createAmbientMusic(storyId: string, moodProfile?: AmbientProfile) {
       tick();
 
     } else if (profile.style === 'veena') {
-      // Veena: plucked string — arpeggiated Sa-Ma-Pa-Sa chord, slow and meditative
       const chord = [root, root*5/4, root*3/2, root*2];
       function arpeggio() {
         try {
@@ -169,9 +163,7 @@ function createAmbientMusic(storyId: string, moodProfile?: AmbientProfile) {
             const osc = ctx.createOscillator();
             const env = ctx.createGain();
             const filt = ctx.createBiquadFilter(); filt.type = 'peaking'; filt.frequency.value = freq; filt.gain.value = 6; filt.Q.value = 2;
-            // Pluck: triangle wave (warmer than sawtooth)
             osc.type = 'triangle'; osc.frequency.value = freq;
-            // Add slight 2nd harmonic
             const osc2 = ctx.createOscillator(); osc2.type = 'sine'; osc2.frequency.value = freq * 2;
             const g2 = ctx.createGain(); g2.gain.value = 0.18;
             osc2.connect(g2); g2.connect(env);
@@ -188,7 +180,6 @@ function createAmbientMusic(storyId: string, moodProfile?: AmbientProfile) {
       arpeggio();
     }
 
-    // Sa drone (root + octave) — very soft undertone for all styles
     [root, root * 2].forEach((freq, i) => {
       const osc = ctx.createOscillator();
       const g = ctx.createGain(); g.gain.value = [0.018, 0.009][i];
@@ -199,7 +190,6 @@ function createAmbientMusic(storyId: string, moodProfile?: AmbientProfile) {
       nodes.push(osc);
     });
 
-    // Fade in gently — keep gain low so it doesn't compete with narration
     const TARGET_GAIN = 0.35 * intensity;
     master.gain.setValueAtTime(0, ctx.currentTime);
     master.gain.linearRampToValueAtTime(TARGET_GAIN, ctx.currentTime + 3);
@@ -213,13 +203,12 @@ function createAmbientMusic(storyId: string, moodProfile?: AmbientProfile) {
           master.gain.cancelScheduledValues(now);
           master.gain.setValueAtTime(v, now);
           master.gain.linearRampToValueAtTime(0, now + 0.25);
-          // Hard-stop the audio clock after the fade — guaranteed silence, can't be undone by stray ramps.
           setTimeout(() => { try { ctx.suspend(); } catch {} }, 280);
         } catch {}
       },
       resume() {
         try {
-          if (ctx.state === 'suspended') ctx.resume();   // un-suspend first
+          if (ctx.state === 'suspended') ctx.resume();
           const now = ctx.currentTime, v = master.gain.value;
           master.gain.cancelScheduledValues(now);
           master.gain.setValueAtTime(Math.max(v, 0.0001), now);
@@ -240,7 +229,7 @@ function createAmbientMusic(storyId: string, moodProfile?: AmbientProfile) {
   } catch { return null; }
 }
 
-// Smoothly ramp an <audio> element's volume.
+// Smoothly ramp an <audio> element's volume (web only).
 function rampVolume(audio: HTMLAudioElement, to: number, ms: number) {
   const from = audio.volume; const steps = 24; let i = 0;
   const id = setInterval(() => {
@@ -251,44 +240,137 @@ function rampVolume(audio: HTMLAudioElement, to: number, ms: number) {
   return id;
 }
 
-// Looping recorded background track — same pause/resume/stop interface as the synth.
-function createAmbientTrack(url: string) {
+// Looping recorded background track — web version (HTML5 Audio).
+function createAmbientTrackWeb(url: string) {
   try {
     const audio = new (window as any).Audio(url) as HTMLAudioElement;
     _ambientAudios.add(audio);
     audio.loop = true;
     audio.volume = 0;
-    const TARGET = 0.28; // soft — must sit under the narration
+    const TARGET = 0.28;
     const pr = audio.play(); if (pr && (pr as any).catch) (pr as any).catch(() => {});
     rampVolume(audio, TARGET, 2000);
     return {
       _audio: audio,
-      pause()  { try { audio.pause(); } catch {} },                          // synchronous, guaranteed stop
+      pause()  { try { audio.pause(); } catch {} },
       resume() { try { audio.volume = 0; const p = audio.play(); if (p && (p as any).catch) (p as any).catch(() => {}); } catch {} rampVolume(audio, TARGET, 700); },
-      stop()   { try { audio.pause(); audio.src = ''; } catch {} _ambientAudios.delete(audio); }, // synchronous, guaranteed stop
+      stop()   { try { audio.pause(); audio.src = ''; } catch {} _ambientAudios.delete(audio); },
     };
   } catch { return null; }
 }
 
+// Looping recorded background track — native version (expo-av).
+function createAmbientTrackNative(url: string) {
+  let Sound: any = null;
+  let sound: any = null;
+  let volumeTimer: ReturnType<typeof setInterval> | null = null;
+  let currentVolume = 0;
+  const TARGET = 0.28;
+
+  async function ensureLoaded() {
+    if (Sound) return;
+    const expoAv = await import('expo-av');
+    Sound = expoAv.Audio;
+  }
+
+  async function init() {
+    await ensureLoaded();
+    const { sound: s } = await Sound.Sound.createAsync(
+      { uri: url },
+      { shouldPlay: false, isLooping: true, isMuted: false },
+      { playsInSilentModeIOS: true },
+    );
+    sound = s;
+    _ambientNative.add(sound);
+    sound.setOnPlaybackStatusUpdateListener((st: any) => {
+      if (st.isLoaded && st.didJustFinish && !st.isLooping) {
+        // safety: force loop if server track isn't looping
+        sound.setIsLoopingAsync(true).catch(() => {});
+      }
+    });
+    await sound.playAsync();
+    // Ramp volume up over 2s
+    const steps = 24; let i = 0;
+    volumeTimer = setInterval(() => {
+      i++;
+      currentVolume = Math.min(TARGET, TARGET * (i / steps));
+      sound.setVolumeAsync(currentVolume).catch(() => {});
+      if (i >= steps) clearInterval(volumeTimer!);
+    }, Math.max(10, 2000 / steps));
+  }
+
+  return {
+    async pause() {
+      if (volumeTimer) { clearInterval(volumeTimer); volumeTimer = null; }
+      try { await sound?.pauseAsync(); } catch {}
+    },
+    async resume() {
+      try { await sound?.setVolumeAsync(0); await sound?.playAsync(); } catch {}
+      const steps = 8; let i = 0;
+      volumeTimer = setInterval(() => {
+        i++;
+        currentVolume = Math.min(TARGET, TARGET * (i / steps));
+        sound?.setVolumeAsync(currentVolume).catch(() => {});
+        if (i >= steps) clearInterval(volumeTimer!);
+      }, Math.max(10, 700 / steps));
+    },
+    async stop() {
+      if (volumeTimer) { clearInterval(volumeTimer); volumeTimer = null; }
+      try {
+        sound?.setOnPlaybackStatusUpdateListener(null);
+        await sound?.stopAsync();
+        await sound?.unloadAsync();
+      } catch {}
+      if (sound) _ambientNative.delete(sound);
+      sound = null;
+    },
+    _init: init, // called by createAmbient after construction
+  };
+}
+
 // Prefer a real mood track if one is mapped; if the file is missing/errors, seamlessly fall back to the synth.
 export function createAmbient(storyId: string, page?: { sceneIcon?: string; sceneLabel?: string; sceneEmoji?: string; text?: string } | null) {
-  if (Platform.OS !== 'web') return null;
-  let inner: any = null;
-  let paused = false;
   const moodProfile = getPageMoodProfile(page, storyId);
   const mood = STORY_MOOD[storyId];
   const path = mood ? MOOD_TRACK[mood] : null;
-  const fallBackToSynth = () => { inner = createAmbientMusic(storyId, moodProfile); if (paused) { try { inner?.pause?.(); } catch {} } };
-  if (path) {
-    const track = createAmbientTrack(`${SERVER_URL}${path}`);
-    if (track) {
-      inner = track;
-      track._audio?.addEventListener?.('error', () => { try { track.stop(); } catch {} fallBackToSynth(); }, { once: true });
+
+  if (Platform.OS === 'web') {
+    let inner: any = null;
+    let paused = false;
+    const fallBackToSynth = () => { inner = createAmbientMusic(storyId, moodProfile); if (paused) { try { inner?.pause?.(); } catch {} } };
+    if (path) {
+      const track = createAmbientTrackWeb(`${SERVER_URL}${path}`);
+      if (track) {
+        inner = track;
+        track._audio?.addEventListener?.('error', () => { try { track.stop(); } catch {} fallBackToSynth(); }, { once: true });
+      } else { fallBackToSynth(); }
     } else { fallBackToSynth(); }
-  } else { fallBackToSynth(); }
+    return {
+      pause()  { try { inner?.pause?.(); } catch {} },
+      resume() { try { inner?.resume?.(); } catch {} },
+      stop()   { try { inner?.stop?.(); } catch {} inner = null; },
+    };
+  }
+
+  // ── Native path ──
+  let inner: any = null;
+  let initialized = false;
+  const initInner = () => {
+    if (initialized) return;
+    initialized = true;
+    if (path) {
+      const track = createAmbientTrackNative(`${SERVER_URL}${path}`);
+      track._init().then(() => { inner = track; }).catch(() => { inner = createAmbientMusic(storyId, moodProfile); });
+    } else {
+      inner = createAmbientMusic(storyId, moodProfile); // synth returns null on native → silent fallback (acceptable)
+    }
+  };
+  // Kick off async init lazily on first interaction (ambient starts with narration in useStoryReader).
   return {
-    pause()  { paused = true;  try { inner?.pause?.(); } catch {} },
-    resume() { paused = false; try { inner?.resume?.(); } catch {} },
+    pause()  { try { inner?.pause?.(); } catch {} },
+    resume() { try { inner?.resume?.(); } catch {} },
     stop()   { try { inner?.stop?.(); } catch {} inner = null; },
+    // Called by useStoryReader right after ambientRef is assigned to start playback.
+    start()  { initInner(); },
   };
 }
