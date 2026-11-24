@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Modal, TouchableOpacity } from 'react-native';
+import { View, Text, Modal, TouchableOpacity, Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../../theme';
 import type { AddTab } from '../../types';
@@ -65,20 +65,28 @@ export default function AddStudentModal({
               <Feather name="link" size={13} color={addTab === 'link' ? gold : colors.textMuted} />
               <Text style={[styles.modalTabText, addTab === 'link' && { color: gold }]}>Link Existing</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              testID="teacher-students-tab-bulk"
-              style={[styles.modalTab, addTab === 'bulk' && styles.modalTabActive]}
-              onPress={onSelectBulkTab}
-              activeOpacity={0.8}
-            >
-              <Feather name="upload" size={13} color={addTab === 'bulk' ? gold : colors.textMuted} />
-              <Text style={[styles.modalTabText, addTab === 'bulk' && { color: gold }]}>Bulk Import</Text>
-            </TouchableOpacity>
+            {/* Bulk Import is web-only — file upload via hidden <input> is a DOM
+                operation unavailable on Android/iOS. Keep the tab hidden on mobile
+                so the UI never offers an unsupported action. */}
+            {Platform.OS === 'web' && (
+              <TouchableOpacity
+                testID="teacher-students-tab-bulk"
+                style={[styles.modalTab, addTab === 'bulk' && styles.modalTabActive]}
+                onPress={onSelectBulkTab}
+                activeOpacity={0.8}
+              >
+                <Feather name="upload" size={13} color={addTab === 'bulk' ? gold : colors.textMuted} />
+                <Text style={[styles.modalTabText, addTab === 'bulk' && { color: gold }]}>Bulk Import</Text>
+              </TouchableOpacity>
+            )}
           </View>
 
           {addTab === 'create' && <CreateStudentTab {...createProps} />}
           {addTab === 'link' && <LinkExistingTab {...linkProps} />}
-          {addTab === 'bulk' && <BulkImportTab {...bulkProps} />}
+          {addTab === 'bulk' && Platform.OS === 'web' && <BulkImportTab {...bulkProps} />}
+          {/* Defensive fallback: if addTab is 'bulk' on mobile (where the tab is
+              hidden), show the Create New tab instead of a blank modal body. */}
+          {addTab === 'bulk' && Platform.OS !== 'web' && <CreateStudentTab {...createProps} />}
         </View>
       </View>
     </Modal>
