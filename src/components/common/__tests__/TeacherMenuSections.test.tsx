@@ -126,7 +126,11 @@ describe('phone drawer', () => {
   test('on the phone app, sections with no allowed screens get no heading', async () => {
     Object.defineProperty(Platform, 'OS', { get: () => 'ios', configurable: true });
     await render(<DrawerContent state={{ routes: [{ name: 'TeacherDashboard' }], index: 0 }} navigation={nav()} />);
-    expect(screen.queryByText('RESOURCES')).toBeNull();
+    // RESOURCES now renders on mobile because School Policies (Resources) is allowed;
+    // only that one item appears since Student Report and Portfolio stay web-only.
+    expect(screen.getByText('RESOURCES')).toBeTruthy();
+    expect(screen.getByText('School Policies')).toBeTruthy();
+    expect(screen.queryByText('Student Report')).toBeNull();
     expect(screen.queryByText('TEACHING DEVELOPMENT')).toBeNull();
     expect(screen.getByText('CLASS')).toBeTruthy();
   });

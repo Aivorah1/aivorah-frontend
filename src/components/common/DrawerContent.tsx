@@ -208,7 +208,7 @@ export default function DrawerContent(props: any) {
   // On native (the mobile app) show only the founder-approved modules per portal.
   // Web keeps the full menu untouched. (Other screens stay registered for deep nav.)
   const MOBILE_STUDENT_SCREENS = ['Dashboard', 'Profile', 'LearningPaths', 'AICoach', 'AITeacher', 'Schedule', 'Assignments', 'Challenges', 'Leaderboard', 'Progress', 'Rewards', 'Messages', 'HelpCenter', 'Settings', 'Subscription'];
-  const MOBILE_TEACHER_SCREENS = ['TeacherDashboard', 'TeacherStudents', 'TeacherAttendance', 'TeacherAssignments', 'TeacherSchedule', 'TeacherProgress', 'TeacherMessages', 'TeacherSettings', 'TeacherHelp', 'TeacherStudentReport', 'TeacherPortfolio'];
+  const MOBILE_TEACHER_SCREENS = ['TeacherDashboard', 'TeacherStudents', 'TeacherAttendance', 'TeacherAssignments', 'TeacherSchedule', 'TeacherProgress', 'TeacherMessages', 'TeacherSettings', 'TeacherHelp', 'TeacherStudentReport', 'TeacherPortfolio', 'Resources', 'TeacherClassLearningPaths'];
   const MOBILE_PARENT_SCREENS  = ['ParentDashboard', 'ParentMyKids', 'ParentDailyTasks', 'ParentSchedule', 'ParentProgress', 'ParentMessages', 'ParentControls', 'ParentSettings', 'ParentHelp', 'ParentSubscription'];
   const MOBILE_SCHOOL_ADMIN_SCREENS = ['SchoolAdminDashboard', 'SchoolAdminStudents', 'SchoolAdminTeachers', 'SchoolAdminParents', 'Timetable', 'Resources', 'SchoolAdminSettings', 'TeacherHelp'];
   // Not for Platform Admin: their menu is ADMIN_NAV_ITEMS even when the underlying role is teacher/parent.
