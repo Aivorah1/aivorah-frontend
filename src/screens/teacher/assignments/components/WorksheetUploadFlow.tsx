@@ -1,9 +1,11 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image, Platform } from 'react-native';
 import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../theme';
 import type { StudentItem } from '../types';
+
+const IS_WEB = Platform.OS === 'web';
 import { generateQuizHTMLPreview } from '../utils/quizHtml';
 import SERVER_URL from '../../../../config/serverUrl';
 import ASSIGNMENTS_SERVER_URL from '../../../../config/assignmentsServerUrl';
@@ -137,7 +139,7 @@ export function WorksheetUploadFlow(props: {
           <Feather name="plus-circle" size={18} color={gold} />
         )}
         <Text style={[styles.uploadDocText, { color: gold }]}>
-          {uploadingDoc ? 'Uploading...' : extractingQuestions ? 'Analyzing worksheet...' : docFiles.length === 0 ? 'Upload worksheet (image, PDF or DOCX)' : 'Add another page'}
+          {uploadingDoc ? 'Uploading...' : extractingQuestions ? 'Analyzing worksheet...' : docFiles.length === 0 ? (IS_WEB ? 'Upload worksheet (image, PDF or DOCX)' : 'Upload worksheet (image)') : 'Add another page'}
         </Text>
       </TouchableOpacity>
       )}

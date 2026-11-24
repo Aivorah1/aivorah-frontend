@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import { SUBJECTS, LANGUAGES } from '../constants';
 import { pdfToImages, imagesToPdfBase64 } from '../utils/pdfHelpers';
 import { stripGradePrefix, gradeFromLabel } from '../utils/helpers';
 import { pollJob, detectWorksheetMeta } from '../services/jobsService';
 import { normalizeCurriculum } from '../../../../utils/curriculum';
 import ASSIGNMENTS_SERVER_URL from '../../../../config/assignmentsServerUrl';
+
+// Native worksheet upload: on Android/iOS the teacher picks IMAGES from the
+// photo library (expo-image-picker, already a dependency). PDFs and DOCX need
+// a browser DOM / pdfjs rendering that isn't available natively, so those
+// formats stay web-only and the teacher is told to use the web app for them.
+const IS_WEB = Platform.OS === 'web';
 
 interface UseUploadWorksheetArgs {
   user: any;
@@ -77,31 +83,55 @@ export function useUploadWorksheet({
   const uploadScrollRef = React.useRef<any>(null);
 
   function pickDoc() {
-    if (typeof document === 'undefined') return;
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-    input.multiple = true;
-    input.onchange = async (e: any) => {
-      const files: File[] = Array.from(e.target.files || []);
-      if (files.length === 0) return;
+    if (IS_WEB) {
+      if (typeof document === 'undefined') return;
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      input.multiple = true;
+      input.onchange = async (e: any) => {
+        const files: File[] = Array.from(e.target.files || []);
+        if (files.length === 0) return;
+        setUploadingDoc(true);
+
+        // Read all files as base64
+        const readFile = (f: File): Promise<{ name: string; base64: string; mime: string }> =>
+          new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+              const result = ev.target?.result as string;
+              resolve({ name: f.name, base64: result.split(',')[1], mime: f.type });
+            };
+            reader.readAsDataURL(f);
+          });
+
+        const picked = await Promise.all(files.map(readFile));
+        await processWorksheetFiles(picked, files[0]?.name);
+      };
+      input.click();
+      return;
+    }
+
+    // Native: pick images from the photo library only. PDF/DOCX are web-only.
+    const ImagePicker = require('expo-image-picker');
+    ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      base64: true,
+      quality: 0.85,
+      allowsMultipleSelection: true,
+    }).then(async (res: any) => {
+      if (res.canceled || !res.assets || res.assets.length === 0) return;
       setUploadingDoc(true);
-
-      // Read all files as base64
-      const readFile = (f: File): Promise<{ name: string; base64: string; mime: string }> =>
-        new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onload = (ev) => {
-            const result = ev.target?.result as string;
-            resolve({ name: f.name, base64: result.split(',')[1], mime: f.type });
-          };
-          reader.readAsDataURL(f);
-        });
-
-      const picked = await Promise.all(files.map(readFile));
-      await processWorksheetFiles(picked, files[0]?.name);
-    };
-    input.click();
+      const picked = res.assets.map((a: any) => ({
+        name: a.fileName || `image-${Date.now()}.jpg`,
+        base64: a.base64 || '',
+        mime: a.mimeType || 'image/jpeg',
+      }));
+      await processWorksheetFiles(picked, picked[0]?.name);
+    }).catch(() => {
+      setUploadingDoc(false);
+      Alert.alert('Upload worksheet', 'Could not open your photo library. Please try again.');
+    });
   }
 
   // Prepare Worksheet > Assign: the prepared document (.docx) goes through the
