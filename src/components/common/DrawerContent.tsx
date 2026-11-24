@@ -78,6 +78,7 @@ const PARENT_NAV_ITEMS = [
   { label: 'Challenges',       icon: 'target',       screen: 'ParentChallenges',  group: 'CHILDREN' },
   { label: 'Progress',         icon: 'bar-chart-2',  screen: 'ParentProgress',    group: 'CHILDREN' },
   { label: 'Parental Controls',icon: 'shield',       screen: 'ParentControls',    group: 'SYSTEM' },
+  { label: 'Plans & Billing',  icon: 'credit-card',  screen: 'ParentSubscription', group: 'SYSTEM' },
   { label: 'Settings',         icon: 'settings',     screen: 'ParentSettings',    group: 'SYSTEM' },
   { label: 'Help Centre',      icon: 'help-circle',  screen: 'ParentHelp',        group: 'SYSTEM' },
 ];
