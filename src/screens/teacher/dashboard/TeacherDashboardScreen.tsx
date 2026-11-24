@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { View, StyleSheet, RefreshControl, ScrollView, Modal } from 'react-native';
+import { View, StyleSheet, RefreshControl, ScrollView, Modal, Platform } from 'react-native';
 import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { spacing, radius } from '../../../theme';
 import type { AppColors } from '../../../theme';
@@ -101,15 +101,20 @@ export default function TeacherDashboardScreen({ navigation }: any) {
           showsVerticalScrollIndicator={false}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchStudents(); }} tintColor={colors.accentYellow} />}
         >
-          <AISuggestedActionCard
-            gold={gold}
-            title={aiActionTitle}
-            body={aiActionBody}
-            hasNeedsAttention={allNeedsAttention.length > 0}
-            avgProgress={avgProgress}
-            styles={styles}
-            navigation={navigation}
-          />
+          {/* AI Suggested Action — web-only on Android/iOS. Contains the
+              "Create First Assignment" call-to-action; native teacher flow
+              starts from the Assignments screen instead. */}
+          {Platform.OS === 'web' && (
+            <AISuggestedActionCard
+              gold={gold}
+              title={aiActionTitle}
+              body={aiActionBody}
+              hasNeedsAttention={allNeedsAttention.length > 0}
+              avgProgress={avgProgress}
+              styles={styles}
+              navigation={navigation}
+            />
+          )}
 
           {/* ── ROW 1: Student Overview + Class Progress ─── */}
           <View style={[styles.row, { marginBottom: spacing.xl }]}>
