@@ -206,7 +206,7 @@ export default function DrawerContent(props: any) {
   // ── Mobile app = focused four-portal companion ─────────────────────────────
   // On native (the mobile app) show only the founder-approved modules per portal.
   // Web keeps the full menu untouched. (Other screens stay registered for deep nav.)
-  const MOBILE_STUDENT_SCREENS = ['Dashboard', 'Profile', 'LearningPaths', 'AICoach', 'AITeacher', 'Schedule', 'Assignments', 'Challenges', 'Leaderboard', 'Progress', 'Rewards', 'Messages', 'HelpCenter', 'Settings'];
+  const MOBILE_STUDENT_SCREENS = ['Dashboard', 'Profile', 'LearningPaths', 'AICoach', 'AITeacher', 'Schedule', 'Assignments', 'Challenges', 'Leaderboard', 'Progress', 'Rewards', 'Messages', 'HelpCenter', 'Settings', 'Subscription'];
   const MOBILE_TEACHER_SCREENS = ['TeacherDashboard', 'TeacherStudents', 'TeacherAttendance', 'TeacherAssignments', 'TeacherSchedule', 'TeacherProgress', 'TeacherMessages', 'TeacherSettings', 'TeacherHelp'];
   const MOBILE_PARENT_SCREENS  = ['ParentDashboard', 'ParentMyKids', 'ParentDailyTasks', 'ParentSchedule', 'ParentProgress', 'ParentMessages', 'ParentControls', 'ParentSettings', 'ParentHelp'];
   const MOBILE_SCHOOL_ADMIN_SCREENS = ['SchoolAdminDashboard', 'SchoolAdminStudents', 'SchoolAdminTeachers', 'SchoolAdminParents', 'Timetable', 'Resources', 'SchoolAdminSettings', 'TeacherHelp'];
