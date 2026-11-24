@@ -105,10 +105,10 @@ test('when the pictures could not be read, the note says why and offers Retry', 
   const onRegenerate = jest.fn();
   const quiz = {
     ...QUIZ, visualUnderstandingAvailable: false,
-    conversionReport: { overallStatus: 'REVIEW_REQUIRED', visionNote: 'The picture-reading AI could not be reached (Gemini was overloaded or timed out; Mistral is rate-limited), so this quiz was built from the worksheet\'s text only. Press Retry in a few minutes to read the pictures too.', items: [{ title: 'Task 2', status: 'REQUIRES_REVIEW', reason: 'x' }] },
+    conversionReport: { overallStatus: 'REVIEW_REQUIRED', visionNote: 'The picture-reading AI could not be reached (Gemini was overloaded, timed out or gave an unusable answer; Groq vision is rate-limited), so this quiz was built from the worksheet\'s text only. Press Retry in a few minutes to read the pictures too.', items: [{ title: 'Task 2', status: 'REQUIRES_REVIEW', reason: 'x' }] },
   };
   await render(<InteractiveQuizPreviewModal quiz={quiz} setQuiz={jest.fn()} onClose={jest.fn()} onRegenerate={onRegenerate} />);
-  expect(screen.getByTestId('quiz-preview-text-only-note')).toHaveTextContent(/Gemini was overloaded or timed out; Mistral is rate-limited/);
+  expect(screen.getByTestId('quiz-preview-text-only-note')).toHaveTextContent(/Gemini was overloaded, timed out or gave an unusable answer; Groq vision is rate-limited/);
   await user.press(screen.getByTestId('review-notes-retry'));
   expect(onRegenerate).toHaveBeenCalled();
 });

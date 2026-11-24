@@ -74,7 +74,7 @@ export function useUploadWorksheet({
   const [extractedQuestions, setExtractedQuestions] = useState<{ question: string; answer: string; comment: string }[]>([]);
   const [showPreview, setShowPreview] = useState(false);
   const [generatingFromExtracted, setGeneratingFromExtracted] = useState(false);
-  // Interactive quiz generation (Claude Vision primary, Mistral fallback)
+  // Interactive quiz generation (the assignments service reads it with Gemini, then Groq)
   const [interactiveQuiz, setInteractiveQuiz] = useState<any>(null);
   const [generatingInteractiveQuiz, setGeneratingInteractiveQuiz] = useState(false);
   // Why the last generation failed, shown under the Generate button with a
@@ -338,7 +338,7 @@ export function useUploadWorksheet({
       }
   }
 
-  // Generate interactive quiz via Mistral (PDF/image → structured quiz with answers, hints, solutions)
+  // Generate interactive quiz (PDF/image → structured quiz with answers, hints, solutions) — Gemini / Groq on the service
   async function generateInteractiveQuiz() {
     if (docFiles.length === 0) return;
     // Guard against double-taps: without this, each tap while a generation was
