@@ -41,6 +41,7 @@ function Harness({ docFiles }: { docFiles: any[] }) {
       <Text testID="sourceDocKey">{h.interactiveQuiz?._sourceDocKey ?? ''}</Text>
       <Text testID="curriculum">{h.interactiveQuiz?.curriculum ?? ''}</Text>
       <Text testID="school">{h.interactiveQuiz?.school ?? ''}</Text>
+      <Text testID="quizError">{h.interactiveQuizError}</Text>
       <TouchableOpacity testID="generate" onPress={() => h.generateInteractiveQuiz()} />
     </View>
   );
@@ -192,5 +193,20 @@ describe('useUploadWorksheet.generateInteractiveQuiz integration', () => {
       expect(screen.getByTestId('lang').props.children).toBe('[Tamil]');
       expect(renders[renders.length - 1].language).toBe('Tamil');
     });
+  });
+
+  test('a failed generation keeps its specific reason for the Retry card (Alert does nothing on the website)', async () => {
+    const docFiles = [{ name: 'mhle31.pdf', base64: 'BASE64PDF', mime: 'application/pdf' }];
+    const reason = 'No questions could be read from this worksheet. Press Retry in a few minutes, or upload a clearer PDF/Word file.';
+    global.fetch = jest.fn().mockImplementation((url: string) => {
+      if (String(url).includes('/quiz/generate-async')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ jobId: 'job-9' }) });
+      if (String(url).includes('/jobs/')) return Promise.resolve({ json: () => Promise.resolve({ status: 'failed', error: reason }) });
+      return Promise.reject(new Error('unexpected ' + url));
+    }) as any;
+    const user = userEvent.setup();
+    await render(<Harness docFiles={docFiles} />);
+    await user.press(screen.getByTestId('generate'));
+    await waitFor(() => expect(screen.getByTestId('quizError')).toHaveTextContent(reason));
+    expect(screen.getByTestId('generating')).toHaveTextContent('false');
   });
 });

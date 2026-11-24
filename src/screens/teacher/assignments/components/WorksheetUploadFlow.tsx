@@ -41,6 +41,7 @@ export function WorksheetUploadFlow(props: {
   topicsLoading: boolean; availableTopics: string[];
   dueDate: string; setDueDate: (v: string) => void;
   interactiveQuiz: any; generatingInteractiveQuiz: boolean; generateInteractiveQuiz: () => void;
+  interactiveQuizError?: string;
   setShowInteractivePreview: (v: boolean) => void;
   teacherEmail: string;
   setLoadingSavedQuizzes: (v: boolean) => void;
@@ -63,7 +64,7 @@ export function WorksheetUploadFlow(props: {
     grade, setGrade, effectiveGrade, gradeOptions, isIBPYP,
     curriculum, setCurriculum, effectiveCurriculum, curriculumOptions, teacherCurriculum,
     chapter, setChapter, topicsLoading, availableTopics, dueDate, setDueDate,
-    interactiveQuiz, generatingInteractiveQuiz, generateInteractiveQuiz, setShowInteractivePreview,
+    interactiveQuiz, generatingInteractiveQuiz, generateInteractiveQuiz, setShowInteractivePreview, interactiveQuizError,
     teacherEmail, setLoadingSavedQuizzes, setShowReuseQuizModal, setSavedQuizzes, setStudentPreviewHtml,
     assignTo, setAssignTo, selectedStudent, setSelectedStudent, studentSearch, setStudentSearch,
     students, studentsLoaded, formError, colors, gold, styles, preparedName,
@@ -223,6 +224,29 @@ export function WorksheetUploadFlow(props: {
               <Feather name={interactiveQuiz ? 'external-link' : 'chevron-right'} size={18} color={interactiveQuiz ? colors.accentGreen : gold} />
             )}
           </TouchableOpacity>
+
+          {/* Generation failed: say exactly why, and offer to try again. */}
+          {!!interactiveQuizError && !generatingInteractiveQuiz && !interactiveQuiz && (
+            <View testID="quiz-generate-error" accessibilityRole="alert" style={{ padding: 14, borderRadius: 12, borderWidth: 1, borderColor: colors.accentRed + '66', backgroundColor: colors.accentRed + '12', gap: 10 }}>
+              <View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-start' }}>
+                <Feather name="alert-circle" size={18} color={colors.accentRed} style={{ marginTop: 1 }} />
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 14, fontWeight: '700', color: colors.textMain }}>The quiz could not be generated</Text>
+                  <Text style={{ fontSize: 13, color: colors.textMuted, marginTop: 4, lineHeight: 19 }}>{interactiveQuizError}</Text>
+                </View>
+              </View>
+              <TouchableOpacity
+                testID="quiz-generate-retry"
+                accessibilityRole="button"
+                onPress={generateInteractiveQuiz}
+                activeOpacity={0.8}
+                style={{ alignSelf: 'flex-start', minHeight: 40, paddingHorizontal: 16, borderRadius: 10, backgroundColor: colors.primary, flexDirection: 'row', alignItems: 'center', gap: 8 }}
+              >
+                <Feather name="refresh-cw" size={15} color={colors.onPrimary} />
+                <Text style={{ fontSize: 14, fontWeight: '700', color: colors.onPrimary }}>Retry</Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
           {/* Preview button when quiz is ready */}
           {interactiveQuiz && !generatingInteractiveQuiz && (

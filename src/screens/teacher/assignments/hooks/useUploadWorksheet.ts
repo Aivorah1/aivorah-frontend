@@ -74,9 +74,13 @@ export function useUploadWorksheet({
   const [extractedQuestions, setExtractedQuestions] = useState<{ question: string; answer: string; comment: string }[]>([]);
   const [showPreview, setShowPreview] = useState(false);
   const [generatingFromExtracted, setGeneratingFromExtracted] = useState(false);
-  // Interactive quiz generation (Claude Vision primary, Mistral fallback)
+  // Interactive quiz generation (the assignments service reads it with Gemini, then Groq)
   const [interactiveQuiz, setInteractiveQuiz] = useState<any>(null);
   const [generatingInteractiveQuiz, setGeneratingInteractiveQuiz] = useState(false);
+  // Why the last generation failed, shown under the Generate button with a
+  // Retry (Alert.alert does nothing on the website, so a failed job used to
+  // leave the teacher with no message at all).
+  const [interactiveQuizError, setInteractiveQuizError] = useState('');
   const [showInteractivePreview, setShowInteractivePreview] = useState(false);
   // Upload wizard step: 1=Upload & Classify, 2=Generate & Review, 3=Assign & Publish
   const [uploadStep, setUploadStep] = useState<1 | 2 | 3>(1);
@@ -334,7 +338,7 @@ export function useUploadWorksheet({
       }
   }
 
-  // Generate interactive quiz via Mistral (PDF/image → structured quiz with answers, hints, solutions)
+  // Generate interactive quiz (PDF/image → structured quiz with answers, hints, solutions) — Gemini / Groq on the service
   async function generateInteractiveQuiz() {
     if (docFiles.length === 0) return;
     // Guard against double-taps: without this, each tap while a generation was
@@ -343,6 +347,7 @@ export function useUploadWorksheet({
     if (generatingInteractiveQuiz) return;
     setGeneratingInteractiveQuiz(true);
     setInteractiveQuiz(null);
+    setInteractiveQuizError('');
     try {
       // Prefer original PDF (sends ALL pages to Gemini Vision) over single-page images.
       // CRITICAL: only ever use a PDF that belongs to the CURRENT docFiles set — an
@@ -405,7 +410,9 @@ export function useUploadWorksheet({
         });
         const jobData = await jobRes.json();
         if (!jobRes.ok || !jobData.jobId) throw new Error(jobData.error || 'Could not start quiz generation.');
-        data = await pollJob(jobData.jobId, ASSIGNMENTS_SERVER_URL);
+        // The server keeps trying to read the pictures with vision AI for a
+        // few minutes when it is busy, so allow longer than the default.
+        data = await pollJob(jobData.jobId, ASSIGNMENTS_SERVER_URL, { intervalMs: 2500, timeoutMs: 10 * 60 * 1000 });
       }
       if (data.quiz) {
         // Force school/curriculum to the teacher's REAL account values, always —
@@ -432,10 +439,12 @@ export function useUploadWorksheet({
         setInteractiveQuiz(quizData);
         setShowInteractivePreview(true);
       } else {
-        Alert.alert('Error', data.error || 'Failed to generate interactive quiz');
+        setInteractiveQuizError(data.error || 'The quiz could not be generated.');
+        if (Platform.OS !== 'web') Alert.alert('Could not generate the quiz', data.error || 'Failed to generate interactive quiz');
       }
     } catch (err: any) {
-      Alert.alert('Error', err.message || 'Failed to generate interactive quiz');
+      setInteractiveQuizError(err.message || 'The quiz could not be generated.');
+      if (Platform.OS !== 'web') Alert.alert('Could not generate the quiz', err.message || 'Failed to generate interactive quiz');
     } finally {
       setGeneratingInteractiveQuiz(false);
     }
@@ -509,6 +518,7 @@ export function useUploadWorksheet({
     extractedQuestions, setExtractedQuestions, showPreview, setShowPreview,
     generatingFromExtracted, setGeneratingFromExtracted,
     interactiveQuiz, setInteractiveQuiz, generatingInteractiveQuiz, setGeneratingInteractiveQuiz,
+    interactiveQuizError, setInteractiveQuizError,
     showInteractivePreview, setShowInteractivePreview,
     uploadStep, setUploadStep, uploadScrollRef,
     pickDoc, addPreparedWorksheet, generateInteractiveQuiz, generateQuizFromExtracted, resetUploadState,
