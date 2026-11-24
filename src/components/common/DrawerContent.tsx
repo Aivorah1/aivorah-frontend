@@ -208,7 +208,7 @@ export default function DrawerContent(props: any) {
   // Web keeps the full menu untouched. (Other screens stay registered for deep nav.)
   const MOBILE_STUDENT_SCREENS = ['Dashboard', 'Profile', 'LearningPaths', 'AICoach', 'AITeacher', 'Schedule', 'Assignments', 'Challenges', 'Leaderboard', 'Progress', 'Rewards', 'Messages', 'HelpCenter', 'Settings', 'Subscription'];
   const MOBILE_TEACHER_SCREENS = ['TeacherDashboard', 'TeacherStudents', 'TeacherAttendance', 'TeacherAssignments', 'TeacherSchedule', 'TeacherProgress', 'TeacherMessages', 'TeacherSettings', 'TeacherHelp'];
-  const MOBILE_PARENT_SCREENS  = ['ParentDashboard', 'ParentMyKids', 'ParentDailyTasks', 'ParentSchedule', 'ParentProgress', 'ParentMessages', 'ParentControls', 'ParentSettings', 'ParentHelp'];
+  const MOBILE_PARENT_SCREENS  = ['ParentDashboard', 'ParentMyKids', 'ParentDailyTasks', 'ParentSchedule', 'ParentProgress', 'ParentMessages', 'ParentControls', 'ParentSettings', 'ParentHelp', 'ParentSubscription'];
   const MOBILE_SCHOOL_ADMIN_SCREENS = ['SchoolAdminDashboard', 'SchoolAdminStudents', 'SchoolAdminTeachers', 'SchoolAdminParents', 'Timetable', 'Resources', 'SchoolAdminSettings', 'TeacherHelp'];
   // Not for Platform Admin: their menu is ADMIN_NAV_ITEMS even when the underlying role is teacher/parent.
   // Platform Admin is explicitly out of mobile scope this phase.
