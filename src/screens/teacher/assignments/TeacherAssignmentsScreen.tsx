@@ -183,7 +183,7 @@ export default function TeacherAssignmentsScreen({ navigation, route }: any) {
   const {
     docFiles, setDocFiles, uploadingDoc, extractingQuestions,
     extractedQuestions, showPreview, setShowPreview,
-    interactiveQuiz, setInteractiveQuiz, generatingInteractiveQuiz,
+    interactiveQuiz, setInteractiveQuiz, generatingInteractiveQuiz, interactiveQuizError,
     showInteractivePreview, setShowInteractivePreview,
     uploadStep, setUploadStep, uploadScrollRef,
     pickDoc, addPreparedWorksheet, generateInteractiveQuiz, resetUploadState,
@@ -781,6 +781,10 @@ export default function TeacherAssignmentsScreen({ navigation, route }: any) {
             quiz={interactiveQuiz}
             setQuiz={setInteractiveQuiz}
             onClose={closeInteractivePreviewModal}
+            meta={{ school: user?.school, grade: grade || effectiveGrade, subject }}
+            // Regenerate from the uploaded worksheet (single-upload flow only;
+            // a bulk item is regenerated from its own row).
+            onRegenerate={!editingBulkItemId && docFiles.length ? () => { closeInteractivePreviewModal(); generateInteractiveQuiz(); } : undefined}
           />
         )}
 
@@ -917,6 +921,7 @@ export default function TeacherAssignmentsScreen({ navigation, route }: any) {
                       dueDate={dueDate} setDueDate={setDueDate}
                       interactiveQuiz={interactiveQuiz} generatingInteractiveQuiz={generatingInteractiveQuiz}
                       generateInteractiveQuiz={generateInteractiveQuiz} setShowInteractivePreview={setShowInteractivePreview}
+                      interactiveQuizError={interactiveQuizError}
                       teacherEmail={teacherEmail}
                       setLoadingSavedQuizzes={setLoadingSavedQuizzes} setShowReuseQuizModal={setShowReuseQuizModal}
                       setSavedQuizzes={setSavedQuizzes} setStudentPreviewHtml={setStudentPreviewHtml}
