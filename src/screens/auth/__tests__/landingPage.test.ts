@@ -157,7 +157,7 @@ describe('board layout details', () => {
 
 describe('hero artwork', () => {
   it('shows both student portraits as decorative images', () => {
-    for (const file of ['student-girl.svg', 'student-boy.svg']) {
+    for (const file of ['student-girl.webp', 'student-boy.webp']) {
       expect(body).toContain(`src="/home/${file}" alt=""`);
       expect(fs.existsSync(path.join(ROOT, 'public/home', file))).toBe(true);
     }

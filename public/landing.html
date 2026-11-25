@@ -304,13 +304,9 @@
   .hero-ctas{margin-top:22px;display:flex;flex-wrap:wrap;justify-content:center;gap:14px}
   .hero-trust{margin-top:14px;font-size:13.5px;line-height:1.5;color:var(--text);max-width:520px}
   .hero-trust b{color:var(--text);font-weight:500}
-  .portraits{position:relative;z-index:1;display:flex;justify-content:center;align-items:flex-end;gap:0;width:100%;max-width:520px;margin-top:22px}
-  .portrait{position:relative;flex:1 1 50%;aspect-ratio:1/1}
-  .portrait .blob{inset:6% 2% 0 2%;border-radius:50% 50% 0 0 / 60% 60% 0 0}
-  .portrait img{position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:78%;height:auto;z-index:1}
-  .hero .wedge{position:absolute;bottom:0;z-index:0;width:clamp(110px,26vw,320px);height:clamp(60px,12vw,150px)}
-  .hero .wedge-l{left:0;border-radius:0 100% 0 0 / 0 100% 0 0}
-  .hero .wedge-r{right:0;border-radius:100% 0 0 0 / 100% 0 0 0}
+  .portraits{position:relative;z-index:1;display:flex;justify-content:center;align-items:flex-end;gap:4%;width:calc(100% + 2 * var(--gutter));max-width:620px;margin:22px calc(-1 * var(--gutter)) 0}
+  .portrait{position:relative;flex:1 1 48%;min-width:0;line-height:0}
+  .portrait img{display:block;width:100%;height:auto}
   .hero .pencil{top:6px;left:clamp(6px,4vw,70px);width:clamp(52px,6vw,96px)}
   .hero .plane{top:14px;right:clamp(6px,4vw,70px);width:clamp(58px,6.5vw,104px)}
   @media (max-width:479px){
@@ -319,22 +315,18 @@
     .hero .plane{top:30px;right:2px;width:52px}
   }
   /* Wide: portraits frame the centred copy on both sides. */
-  @media (min-width:720px){
+  @media (min-width:900px){
     .hero{padding-top:28px}
     .hero-grid{grid-template-columns:minmax(0,1fr) minmax(0,780px) minmax(0,1fr);align-items:end;column-gap:clamp(8px,1.5vw,24px)}
     .hero-inner{grid-column:2;grid-row:1;padding-bottom:40px;padding-top:12px}
     .portraits{display:contents}
-    .portrait{width:calc(100% + var(--gutter));max-width:340px;aspect-ratio:4/5}
-    .portrait .blob{inset:14% -4% 4% 4%;border-radius:52% 48% 56% 44% / 50% 52% 48% 50%}
-    .portrait-r .blob{inset:14% 4% 4% -4%;border-radius:48% 52% 44% 56% / 52% 50% 50% 48%}
-    .portrait img{width:94%}
+    .portrait{width:calc(100% + var(--gutter));max-width:340px}
     .portrait-l{grid-column:1;grid-row:1;justify-self:start;margin-left:calc(-1 * var(--gutter))}
     .portrait-r{grid-column:3;grid-row:1;justify-self:end;margin-right:calc(-1 * var(--gutter))}
-    .hero .wedge{width:clamp(140px,16vw,300px);height:clamp(70px,8vw,140px)}
   }
-  @media (min-width:720px) and (max-width:1023px){
-    .hero-grid{grid-template-columns:minmax(0,1fr) minmax(0,480px) minmax(0,1fr)}
-    .hero h1{font-size:clamp(36px, 4.6vw, 46px)}
+  @media (min-width:900px) and (max-width:1279px){
+    .hero-grid{grid-template-columns:minmax(0,1fr) minmax(0,560px) minmax(0,1fr)}
+    .hero h1{font-size:clamp(42px, 4.2vw, 52px)}
     .hero-inner{padding-bottom:28px}
   }
   @media (min-width:1920px){
@@ -357,7 +349,7 @@
   @media (min-width:900px){.boards .crest:nth-child(4n+1){border-left:1px solid var(--line)}.boards .crest:first-child{border-left:0}}
   .crest svg{display:none}
   .crest .lbl{display:flex;flex-direction:column;align-items:center;line-height:1.2;min-width:0}
-  .crest .lbl b{font-family:var(--sans);font-size:16px;font-weight:700;color:var(--heading);overflow-wrap:anywhere}
+  .crest .lbl b{font-family:var(--sans);font-size:16px;font-weight:700;color:var(--heading);overflow-wrap:normal;-webkit-hyphens:auto;hyphens:auto}
   .crest .lbl small{font-size:11.5px;color:var(--text);margin-top:3px}
   @media (max-width:479px){.crest{padding:2px 3px}.crest .lbl b{font-size:12px;overflow-wrap:normal;word-break:normal}.crest .lbl small{font-size:10px}}
   @media (max-width:399px){.crest .lbl b{font-size:10.5px;letter-spacing:-.01em;-webkit-hyphens:auto;hyphens:auto}.crest .lbl small{font-size:9.5px}}
@@ -599,7 +591,7 @@
   @media (min-width:1024px){
     .portrait{max-width:410px;width:calc(100% + var(--gutter) + 24px)}
     .trust-label{font-size:15px}
-    .crest .lbl b{font-size:19px}
+    .crest .lbl b{font-size:clamp(16px, 0.9vw + 6px, 19px)}
     .crest .lbl small{font-size:13px}
     .trust-note{font-size:14.5px}
     .demo-stage{max-width:900px}
@@ -811,8 +803,6 @@
 <header class="hero">
   <div class="deco pencil" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#d-pencil"/></svg></div>
   <div class="deco plane" aria-hidden="true"><svg viewBox="0 0 130 110"><use href="#d-plane"/></svg></div>
-  <span class="blob blob-orange wedge wedge-l" aria-hidden="true"></span>
-  <span class="blob blob-blue wedge wedge-r" aria-hidden="true"></span>
 
   <div class="container">
     <div class="hero-grid">
@@ -831,8 +821,8 @@
         </div>
       </div>
       <div class="portraits" aria-hidden="true">
-        <div class="portrait portrait-l"><span class="blob blob-green"></span><img src="/home/student-girl.svg" alt="" width="240" height="300"/></div>
-        <div class="portrait portrait-r"><span class="blob blob-yellow"></span><img src="/home/student-boy.svg" alt="" width="240" height="300"/></div>
+        <div class="portrait portrait-l"><img src="/home/student-girl.webp" alt="" width="741" height="943" decoding="async"/></div>
+        <div class="portrait portrait-r"><img src="/home/student-boy.webp" alt="" width="734" height="957" decoding="async"/></div>
       </div>
     </div>
   </div>
