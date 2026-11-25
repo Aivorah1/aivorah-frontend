@@ -45,6 +45,7 @@ const mockSetVoice = jest.fn();
 const mockSetAutoPlay = jest.fn();
 const mockSetPlaybackRate = jest.fn();
 const mockSetResumedFrom = jest.fn();
+const mockRetryAudio = jest.fn();
 
 let hookState: any;
 
@@ -73,6 +74,8 @@ function baseHookState(overrides: any = {}) {
     resumeAudio: mockResumeAudio,
     speakPage: mockSpeakPage,
     goToPage: mockGoToPage,
+    audioError: null,
+    retryAudio: mockRetryAudio,
     ...overrides,
   };
 }
@@ -206,5 +209,22 @@ describe('StoryReaderScreen — navigation wiring', () => {
     await user.press(await screen.findByText('Start over'));
     expect(mockSetResumedFrom).toHaveBeenCalledWith(null);
     expect(mockGoToPage).toHaveBeenCalledWith(0);
+  });
+});
+
+describe('StoryReaderScreen — narration that could not play', () => {
+  test('no error box while the narration is fine', async () => {
+    await render(<StoryReaderScreen route={routeProp()} navigation={navProp()} />);
+    await screen.findByText('Listen');
+    expect(screen.queryByTestId('narration-error')).toBeNull();
+  });
+
+  test('shows the message and a Try again button that retries the narration', async () => {
+    hookState = baseHookState({ audioError: 'The story voice isn’t available right now. Please try again in a moment.' });
+    const user = userEvent.setup();
+    await render(<StoryReaderScreen route={routeProp()} navigation={navProp()} />);
+    expect(await screen.findByText(/story voice isn’t available/)).toBeTruthy();
+    await user.press(screen.getByText('Try again'));
+    expect(mockRetryAudio).toHaveBeenCalledTimes(1);
   });
 });

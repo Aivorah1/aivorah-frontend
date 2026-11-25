@@ -114,11 +114,13 @@ export function useListenFirst(passage: Passage | null) {
     setIsPlaying(true);
     setIsPaused(false);
     setHighlightIdx(0);
+    // Unlock the player inside the tap, before the fetch (browser autoplay policy).
+    const audio = createPlatformAudio();
+    audio.prime();
     try {
       const data = await fetchSpeech(p.text);
       if (!data.audioUrl) { playBrowserVoice(); return; }
 
-      const audio = createPlatformAudio();
       audioRef.current = audio;
       timingsRef.current = data.wordTimings || null;
 

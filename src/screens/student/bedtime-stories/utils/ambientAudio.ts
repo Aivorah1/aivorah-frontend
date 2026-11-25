@@ -278,11 +278,10 @@ function createAmbientTrackNative(url: string) {
     const { sound: s } = await Sound.Sound.createAsync(
       { uri: url },
       { shouldPlay: false, isLooping: true, isMuted: false },
-      { playsInSilentModeIOS: true },
     );
     sound = s;
     _ambientNative.add(sound);
-    sound.setOnPlaybackStatusUpdateListener((st: any) => {
+    sound.setOnPlaybackStatusUpdate((st: any) => {
       if (st.isLoaded && st.didJustFinish && !st.isLooping) {
         // safety: force loop if server track isn't looping
         sound.setIsLoopingAsync(true).catch(() => {});
@@ -317,7 +316,7 @@ function createAmbientTrackNative(url: string) {
     async stop() {
       if (volumeTimer) { clearInterval(volumeTimer); volumeTimer = null; }
       try {
-        sound?.setOnPlaybackStatusUpdateListener(null);
+        sound?.setOnPlaybackStatusUpdate(null);
         await sound?.stopAsync();
         await sound?.unloadAsync();
       } catch {}
