@@ -1,11 +1,11 @@
-import React, { useMemo, useState, useEffect, useRef } from 'react';
-import { View, Text, Animated, Easing, Platform } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, Platform } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import FaceLoginCard from '../../components/common/FaceLoginCard';
 import { faceLoginOffered } from '../../services/faceLogin';
 import AUTH_SERVER_URL from '../../config/authServerUrl';
 import {
-  HomeThemeProvider, useHomeTheme, AuthShell, AuthCard, AuthHeading, Notice, PrimaryButton, OutlineButton, TextLink, EnvelopeArt, Decorative, SANS,
+  HomeThemeProvider, useHomeTheme, AuthShell, AuthCard, AuthHeading, Notice, PrimaryButton, OutlineButton, TextLink, EnvelopeArt, Decorative, ShapeFrame, Sparks, SANS,
 } from './authTheme';
 
 // ─── Main Screen ─────────────────────────────────────────────────────────────
@@ -87,28 +87,6 @@ function VerifyEmailContent() {
     };
   }, [user?.email]);
 
-  // Pulsing animation
-  const pulseAnim = useMemo(() => new Animated.Value(1), []);
-
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 1.1,
-          duration: 900,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 1,
-          duration: 900,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-  }, []);
-
   // Cooldown countdown
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -175,17 +153,18 @@ function VerifyEmailContent() {
 
   return (
     <AuthShell>
-      <View style={{ alignItems: 'center' }}>
-        <AuthCard maxWidth={470} style={{ alignItems: 'center' }}>
-          {/* Illustration */}
-          <Animated.View style={{ marginBottom: 10, transform: [{ scale: pulseAnim }] }}>
-            <Decorative><EnvelopeArt width={170} /></Decorative>
-          </Animated.View>
+      <ShapeFrame style={{ maxWidth: 500, alignSelf: 'center' }}>
+        <AuthCard maxWidth={500} style={{ alignItems: 'center' }}>
+          {/* Illustration: the envelope opens once */}
+          <Decorative style={{ marginBottom: 14, marginTop: 4, flexDirection: 'row', alignItems: 'flex-start' }}>
+            <EnvelopeArt width={120} />
+            <View style={{ marginLeft: 2, marginTop: -6 }}><Sparks size={28} /></View>
+          </Decorative>
 
           <View style={{ width: '100%' }}>
             <AuthHeading title="Check your inbox" subtitle="We sent a verification link to" ornament={false} />
           </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: t.input, borderRadius: 999, borderWidth: 1, borderColor: t.line, paddingHorizontal: 14, paddingVertical: 8, marginTop: -8, marginBottom: 14, maxWidth: '100%' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: t.infoBg, borderRadius: 999, borderWidth: 1, borderColor: t.infoLine, paddingHorizontal: 16, paddingVertical: 8, marginTop: -8, marginBottom: 14, maxWidth: '100%' }}>
             <Text style={{ fontFamily: SANS, fontSize: 15, fontWeight: '700', color: t.heading, flexShrink: 1 }} numberOfLines={1}>{user?.email || 'your email'}</Text>
           </View>
           <Text style={{ fontFamily: SANS, fontSize: 15, lineHeight: 22, color: t.muted, textAlign: 'center', marginBottom: 18 }}>
@@ -241,7 +220,7 @@ function VerifyEmailContent() {
             <TextLink label="Sign out" onPress={logout} />
           </View>
         </AuthCard>
-      </View>
+      </ShapeFrame>
     </AuthShell>
   );
 }
