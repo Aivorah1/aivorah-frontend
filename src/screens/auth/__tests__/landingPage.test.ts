@@ -83,13 +83,19 @@ describe('header', () => {
     // Between them only the Login / Join buttons, which the compact header hides.
     const between = nav.slice(toggle, menu);
     expect(between.match(/class="btn /g)).toHaveLength(2);
-    expect(style).toMatch(/@media \(max-width:1099px\)\{\s*\.nav-links,\.nav-cta \.btn\{display:none\}/);
+    expect(style).toMatch(/@media \(max-width:1023px\)\{\s*\.nav-links,\.nav-cta \.btn\{display:none\}/);
   });
 
   it('exposes the switch state and menu state to assistive tech', () => {
     expect(nav).toMatch(/id="themeToggle" type="button" role="switch" aria-checked="false" aria-label="Dark mode"/);
     expect(nav).toMatch(/id="menuBtn" type="button" aria-label="Menu" aria-expanded="false" aria-controls="mobileMenu"/);
     expect(html).toContain("mb.setAttribute('aria-expanded', open ? 'true' : 'false')");
+  });
+
+  it('labels the switch Light / Dark on wide screens and shows sun / moon on small ones', () => {
+    expect(nav).toMatch(/class="tt-opt tt-light"[\s\S]*?class="tt-sun"[\s\S]*?<span class="tt-word">Light<\/span>/);
+    expect(nav).toMatch(/class="tt-opt tt-dark"[\s\S]*?class="tt-moon"[\s\S]*?<span class="tt-word">Dark<\/span>/);
+    expect(style).toMatch(/@media \(min-width:1280px\)\{[\s\S]*?\.theme-toggle \.tt-word\{display:inline\}/);
   });
 
   it('keeps Login and Join Early Access in the menu', () => {
@@ -129,6 +135,23 @@ describe('Phase 1 design tokens', () => {
 
   it('animates the theme switch in about 200 ms', () => {
     expect(style).toContain('--t:200ms');
+  });
+});
+
+describe('board layout details', () => {
+  it('shows the curriculum boards as text, without crest drawings', () => {
+    const boards = body.slice(body.indexOf('id="curriculumTrack"'), body.indexOf('class="trust-note"'));
+    expect(boards).not.toContain('<svg');
+  });
+
+  it('labels tutor and learner messages above their bubbles, without avatars', () => {
+    const sim = body.slice(body.indexOf('id="sim"'), body.indexOf('id="replay"'));
+    expect(sim).not.toContain('class="avatar');
+    expect(sim.match(/<div class="tag">[^<]+<\/div>\s*<div class="bubble/g)).toHaveLength(4);
+  });
+
+  it('lets the hero headline wrap naturally', () => {
+    expect(body).toContain('<h1>AI-Powered Learning, <span class="grad">for everyone.</span></h1>');
   });
 });
 
