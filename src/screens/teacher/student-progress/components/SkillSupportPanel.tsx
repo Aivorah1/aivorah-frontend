@@ -43,7 +43,7 @@ export default function SkillSupportPanel({ studentId, skillId, studentName, col
       {!!error && <Text style={[styles.body, { color: colors.textMuted }]}>{error}</Text>}
       {!!data && (
         <>
-          <Text style={[styles.status, { color: data.needsTopicHelp ? '#0E6E86' : colors.accentGreen }]} testID="skill-support-status">
+          <Text style={[styles.status, { color: data.needsTopicHelp ? colors.primary : colors.accentGreen }]} testID="skill-support-status">
             {data.needsTopicHelp ? `Needs topic help · difficulty on ${data.flag?.evidenceCount ?? 2} questions` : 'No open topic-help flag for this skill'}
           </Text>
           <Text style={[styles.section, { color: colors.textMain }]}>What to practise next</Text>

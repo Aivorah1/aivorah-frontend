@@ -7,7 +7,7 @@
 <meta name="description" content="A patient, personalised AI tutor for every student, with real-time classroom insight for teachers and weekly progress for parents. Aligned to IB, CBSE, ICSE and Cambridge." />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
 <script>
 /* Homepage theme: apply before first paint so there is no flash of the wrong
    palette. Saved choice wins; otherwise follow the system; light as fallback.
@@ -19,579 +19,755 @@
     t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
   }
   document.documentElement.setAttribute('data-theme', t);
+  try { if (!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) document.documentElement.classList.add('motion'); } catch (e) {}
 })();
 </script>
 <style>
-  /* ── Theme tokens (homepage-scoped) ───────────────────────────────────── */
+  /* ── Theme tokens (homepage-scoped) — Website Redesign, Phase 1 palette ── */
   :root{
-    --bg:#F7F5EC;
-    --surface:#FFFDF7;
-    --surface-2:#EBF0E4;
-    --heading:#15372C;
-    --text:#202C25;
-    --muted:#506054;
-    --accent:#8B520C;
-    --primary:#28533F;
+    --bg:#F7F3E9;            /* warm ivory page */
+    --surface:#FFFCF6;       /* warm white cards */
+    --surface-2:#F0E8DA;     /* soft sand */
+    --heading:#302117;       /* espresso */
+    --text:#4F4035;          /* cocoa body copy */
+    --muted:#6A584A;
+    --accent:#B84312;        /* burnt orange */
+    --eyebrow:#B3311A;       /* red-orange section labels */
+    --primary:#B84312;       /* primary button */
+    --primary-hover:#9F390E;
     --on-primary:#FFFFFF;
-    --line:#D7DCCE;
-    --focus:#28533F;
+    --line:#D5C6B3;          /* sand borders */
+    --line-soft:#E8DED0;
+    --focus:#1D5DB5;         /* deep blue focus ring */
 
-    --glass:rgba(255,253,247,0.74);
-    --glass-strong:rgba(255,253,247,0.94);
-    --ok:#3E7A55;
-    --ok-soft:rgba(62,122,85,0.12);
-    --warn:#B4533A;
-    --warn-soft:rgba(180,83,58,0.07);
-    --accent-soft:rgba(139,82,12,0.08);
-    --bubble-me:#E6ECF6;
-    --bubble-ai:#EBF0E4;
-    --chart-1:#5D9468;
-    --chart-2:rgba(93,148,104,0.22);
-    --shadow:0 1px 2px rgba(21,55,44,0.05), 0 8px 24px -14px rgba(21,55,44,0.16);
-    --shadow-lg:0 2px 4px rgba(21,55,44,0.04), 0 24px 48px -26px rgba(21,55,44,0.26);
-    --scrim:rgba(21,40,32,0.42);
+    --shape-green:#77B742;
+    --shape-yellow:#F6C931;
+    --shape-orange:#F58B3A;
+    --shape-blue:#61ABD7;
 
-    /* decorative artwork */
-    --leaf:#A3BB88;
-    --leaf-2:#C6D5B0;
-    --stem:#8EA676;
-    --hill:#E9EDDD;
-    --hill-2:#DDE5CD;
-    --book:#6F9460;
-    --book-2:#9DBA8A;
-    --pages:#F4EAD0;
-    --pages-line:#D9CBA6;
+    --pill:#23803A;          /* solid green status pills */
+    --on-pill:#FFFFFF;
+    --good:#23803A;          /* green figures */
 
-    /* aliases used by inline styles in the product previews */
-    --sage:var(--ok);
-    --gold:var(--accent);
+    --glass:rgba(247,243,233,0.82);
+    --glass-strong:rgba(247,243,233,0.96);
+    --ok:#3D7A24;
+    --ok-soft:rgba(119,183,66,0.16);
+    --warn:#B3261E;
+    --warn-soft:rgba(179,38,30,0.07);
+    --accent-soft:rgba(184,67,18,0.08);
+    --bubble-me:#F9D3E2;     /* learner */
+    --bubble-ai:#FBE8C8;     /* tutor */
+    --chart-bar:#F4B5CC;
+    --chart-peak:#23803A;
+    --sweep:rgba(246,201,49,0.42);
+    --shadow:0 1px 2px rgba(48,33,23,0.06), 0 6px 18px -10px rgba(48,33,23,0.22);
+    --shadow-lg:0 2px 4px rgba(48,33,23,0.05), 0 16px 34px -18px rgba(48,33,23,0.34);
+    --scrim:rgba(48,33,23,0.42);
 
-    --radius:20px;
+    /* closing banner */
+    --banner:linear-gradient(100deg,#C9521C 0%,#EE7A33 60%,#F58B3A 100%);
+    --on-banner:#FFFFFF;
+    --banner-btn:#FFFCF6;
+    --on-banner-btn:#9F2F14;
+    --banner-btn-2:#FFFCF6;
+    --on-banner-btn-2:#302117;
+
+    /* artwork */
+    --book-a:#61ABD7; --book-b:#77B742; --book-c:#F58B3A; --pages:#FFF6E2; --pages-line:#E6D5B5;
+    --leaf:#4E9A3A; --leaf-2:#77B742; --pencil:#F6C931; --pencil-2:#E0A812; --plane:#302117;
+
+    --radius:18px;
     --radius-card:16px;
-    --max:1200px;
+    --max:1180px;
     --gutter:18px;
+    --rise:10px;
     --ease:cubic-bezier(.2,.7,.2,1);
-    --t:180ms;
+    --t:200ms;
     --serif:"Fraunces", ui-serif, Georgia, serif;
-    --sans:"Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --sans:"DM Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     color-scheme:light;
   }
   :root[data-theme="dark"]{
-    --bg:#101729;
-    --surface:#1C2942;
-    --surface-2:#23334D;
-    --heading:#F8F4EC;
-    --text:#DFE8F5;
-    --muted:#B9C8DD;
-    --accent:#F3CC92;
-    --primary:#B6D5FF;
-    --on-primary:#101729;
-    --line:#3B4F6C;
-    --focus:#B6D5FF;
+    --bg:#101827;            /* ink navy */
+    --surface:#1C2A40;       /* slate blue cards */
+    --surface-2:#162238;     /* deep slate */
+    --heading:#FFF3DC;       /* warm cream */
+    --text:#DCE6F4;          /* cool white */
+    --muted:#B4C3D8;
+    --accent:#FFB27A;
+    --eyebrow:#FF9E6E;
+    --primary:#A9D5FF;       /* pale blue */
+    --primary-hover:#C3E4FF;
+    --on-primary:#101827;
+    --line:#425775;          /* blue slate */
+    --line-soft:#33465F;
+    --focus:#8DD1FF;         /* sky blue */
 
-    --glass:rgba(28,41,66,0.72);
-    --glass-strong:rgba(28,41,66,0.94);
-    --ok:#9CC8FF;
-    --ok-soft:rgba(156,200,255,0.14);
-    --warn:#F2A48C;
-    --warn-soft:rgba(242,164,140,0.08);
-    --accent-soft:rgba(243,204,146,0.1);
-    --bubble-me:#2D4870;
-    --bubble-ai:#23334D;
-    --chart-1:#9CC8FF;
-    --chart-2:rgba(156,200,255,0.22);
-    --shadow:0 1px 2px rgba(0,0,0,0.25), 0 8px 24px -14px rgba(0,0,0,0.55);
-    --shadow-lg:0 2px 4px rgba(0,0,0,0.2), 0 24px 48px -26px rgba(0,0,0,0.65);
+    --shape-green:#6A9F3E;
+    --shape-yellow:#DCA928;
+    --shape-orange:#C85F24;
+    --shape-blue:#477EAB;
+
+    --pill:#2E8B45;
+    --on-pill:#FFFFFF;
+    --good:#7BD389;
+
+    --glass:rgba(16,24,39,0.82);
+    --glass-strong:rgba(16,24,39,0.96);
+    --ok:#9BD17A;
+    --ok-soft:rgba(106,159,62,0.24);
+    --warn:#FF9C8A;
+    --warn-soft:rgba(255,156,138,0.1);
+    --accent-soft:rgba(255,178,122,0.1);
+    --bubble-me:#F4B9D0;
+    --bubble-ai:#2A3B57;
+    --chart-bar:#E9A3BF;
+    --chart-peak:#5DBB63;
+    --sweep:rgba(220,169,40,0.3);
+    --shadow:0 1px 2px rgba(0,0,0,0.3), 0 6px 18px -10px rgba(0,0,0,0.6);
+    --shadow-lg:0 2px 4px rgba(0,0,0,0.25), 0 16px 34px -18px rgba(0,0,0,0.7);
     --scrim:rgba(5,9,20,0.72);
 
-    --leaf:#4F6C92;
-    --leaf-2:#7F9CC4;
-    --stem:#5E7AA0;
-    --hill:#152037;
-    --hill-2:#1A2741;
-    --book:#4E6E98;
-    --book-2:#7E9CC4;
-    --pages:#E7D9B8;
-    --pages-line:#B9A57E;
+    --banner:#A9D5FF;
+    --on-banner:#101827;
+    --banner-btn:#101827;
+    --on-banner-btn:#C3E4FF;
+    --banner-btn-2:#FFFFFF;
+    --on-banner-btn-2:#101827;
+
+    --book-a:#477EAB; --book-b:#6A9F3E; --book-c:#C85F24; --pages:#E9DDC3; --pages-line:#BBA885;
+    --leaf:#4F8A35; --leaf-2:#6A9F3E; --pencil:#DCA928; --pencil-2:#B88A16; --plane:#FFF3DC;
     color-scheme:dark;
   }
   @media (min-width:640px){:root{--gutter:28px}}
-  @media (min-width:1024px){:root{--gutter:40px}}
-  @media (min-width:1920px){:root{--max:1440px;--gutter:48px}}
+  @media (min-width:1024px){:root{--gutter:40px;--rise:14px}}
+  @media (min-width:1280px){:root{--max:1320px}}
+  @media (min-width:1920px){:root{--max:1440px;--gutter:64px;--rise:10px}}
 
   /* ── Base ─────────────────────────────────────────────────────────────── */
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
   html{scroll-behavior:smooth;background:var(--bg)}
-  section[id]{scroll-margin-top:96px}
+  section[id]{scroll-margin-top:88px}
   section{position:relative}
   body{
     background:var(--bg);
     color:var(--text);
     font-family:var(--sans);
     font-size:16px;
-    line-height:1.6;
+    line-height:1.55;
     -webkit-font-smoothing:antialiased;
     text-rendering:optimizeLegibility;
     overflow-x:hidden;
+    transition:background-color var(--t) var(--ease), color var(--t) var(--ease);
   }
-  @media (min-width:1920px){body{font-size:17px}}
-  ::selection{background:var(--ok-soft);color:var(--heading)}
+  @media (min-width:1920px){body{font-size:18px}}
+  /* TV / ultrawide: scale the 1920 layout up so headings, controls and margins
+     grow together while line lengths stay readable. */
+  @media (min-width:2560px){body{zoom:1.3}}
+  @media (min-width:3200px){body{zoom:1.6}}
+  ::selection{background:var(--shape-yellow);color:#302117}
   a{color:inherit;text-decoration:none}
   button{font-family:inherit}
   img{max-width:100%;display:block}
   h1,h2,h3,h4{font-family:var(--serif);font-weight:600;letter-spacing:-0.015em;margin:0;color:var(--heading)}
-  p{margin:0;color:var(--muted)}
+  p{margin:0;color:var(--text)}
   .container{max-width:calc(var(--max) + 2 * var(--gutter));margin:0 auto;padding:0 var(--gutter)}
   :where(a,button,input,textarea,[tabindex]):focus{outline:none}
-  :where(a,button,[tabindex]):focus-visible{outline:2px solid var(--focus);outline-offset:3px;border-radius:8px}
+  :where(a,button,[tabindex]):focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:8px}
+  @media (min-width:1920px){:where(a,button,[tabindex]):focus-visible{outline-width:4px;outline-offset:4px}}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  /* Theme switch recolours surfaces smoothly; geometry never changes. */
+  nav,.mobile-menu,.visual,.sim,.step,.f,.banner,footer,.btn,.bubble,.question,.stat,.cs-card{
+    transition:background-color var(--t) var(--ease), border-color var(--t) var(--ease), color var(--t) var(--ease), box-shadow var(--t) var(--ease), transform var(--t) var(--ease);
+  }
 
   .eyebrow{
-    display:inline-flex;align-items:center;gap:10px;
-    font-size:12px;letter-spacing:.2em;text-transform:uppercase;
-    color:var(--accent);font-weight:600;line-height:1.4;
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--eyebrow);font-weight:700;line-height:1.4;
   }
-  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
-  .hero .eyebrow,.section-head .eyebrow,.closing .eyebrow{gap:14px}
-  .hero .eyebrow .dot,.section-head .eyebrow .dot,.closing .eyebrow .dot{display:none}
-  .hero .eyebrow::before,.hero .eyebrow::after,
-  .section-head .eyebrow::before,.section-head .eyebrow::after,
-  .closing .eyebrow::before,.closing .eyebrow::after{content:"";width:44px;height:1px;background:currentColor;opacity:.55;flex-shrink:0}
-  @media (max-width:479px){
-    .hero .eyebrow::before,.hero .eyebrow::after,
-    .section-head .eyebrow::before,.section-head .eyebrow::after,
-    .closing .eyebrow::before,.closing .eyebrow::after{width:20px}
-    .eyebrow{letter-spacing:.14em;font-size:11.5px}
-  }
+  .eyebrow .dot{display:none}
+  /* Accent words keep the heading colour, as in the approved boards. */
+  h1 .grad,h2 em{font-style:normal;color:inherit}
 
   /* ── Buttons ──────────────────────────────────────────────────────────── */
   .btn{
     display:inline-flex;align-items:center;justify-content:center;gap:10px;
-    min-height:46px;padding:0 22px;border-radius:999px;border:1.5px solid transparent;
-    font-size:15px;font-weight:600;letter-spacing:.005em;line-height:1.2;text-align:center;cursor:pointer;
-    transition:transform var(--t) var(--ease), background-color var(--t) var(--ease), border-color var(--t) var(--ease), color var(--t) var(--ease), box-shadow var(--t) var(--ease);
+    min-height:46px;padding:0 24px;border-radius:999px;border:1.5px solid transparent;
+    font-size:15.5px;font-weight:700;letter-spacing:.005em;line-height:1.2;text-align:center;cursor:pointer;
   }
-  .btn svg{width:16px;height:16px;flex-shrink:0;transition:transform var(--t) var(--ease)}
+  .btn svg{width:17px;height:17px;flex-shrink:0;transition:transform var(--t) var(--ease)}
   .btn:focus-visible{border-radius:999px}
   .btn-primary,.btn-sage{background:var(--primary);color:var(--on-primary);box-shadow:var(--shadow)}
-  .btn-primary:hover,.btn-sage:hover{transform:translateY(-1px);box-shadow:var(--shadow-lg)}
-  .btn-primary:hover svg,.btn-sage:hover svg{transform:translateX(2px)}
-  .btn-ghost{background:transparent;color:var(--accent);border-color:var(--accent)}
-  .btn-ghost:hover{background:var(--accent-soft);transform:translateY(-1px)}
-  .btn:active{transform:translateY(0) scale(.98);box-shadow:none}
+  .btn-primary:hover,.btn-sage:hover{background:var(--primary-hover)}
+  .btn-primary:hover svg,.btn-sage:hover svg{transform:translateX(3px)}
+  .btn-ghost{background:var(--surface);color:var(--heading);border-color:var(--heading)}
+  .btn-ghost:hover{background:var(--accent-soft)}
+  .btn:active{transform:translateY(1px) scale(.98);box-shadow:none}
   .btn[disabled]{opacity:.6;cursor:default;transform:none;box-shadow:none}
+  @media (min-width:1920px){.btn{min-height:54px;padding:0 30px;font-size:18px}}
 
-  .reveal{opacity:0;transform:translateY(14px);transition:opacity .6s var(--ease), transform .6s var(--ease)}
-  .reveal.in{opacity:1;transform:none}
-  @media (prefers-reduced-motion:reduce){
-    html{scroll-behavior:auto}
-    .reveal{opacity:1;transform:none;transition:none}
-    *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}
-  }
-
-  /* ── Decorative artwork (never interactive) ───────────────────────────── */
+  /* ── Decorative shapes (never interactive) ────────────────────────────── */
   .deco{position:absolute;z-index:0;pointer-events:none;user-select:none;line-height:0}
   .deco svg{display:block;width:100%;height:auto;overflow:visible}
-  .deco-flip svg{transform:scaleX(-1)}
-  .deco-hill{bottom:0;width:min(48vw,640px);height:clamp(64px,8vw,140px)}
-  .deco-hill svg{height:100%}
-  .deco-hill-l{left:0}
-  .deco-hill-r{right:0}
-  .deco-books{width:clamp(150px,15vw,250px)}
-  @media (max-width:1023px){
-    .deco-books{display:none}
-    .deco-branch{opacity:.75}
-  }
-  @media (max-width:639px){.deco-branch{display:none}}
+  .blob{position:absolute;pointer-events:none;z-index:0}
+  .blob-green{background:var(--shape-green)}
+  .blob-yellow{background:var(--shape-yellow)}
+  .blob-orange{background:var(--shape-orange)}
+  .blob-blue{background:var(--shape-blue)}
 
   /* ── Navigation ───────────────────────────────────────────────────────── */
-  .nav-wrap{position:sticky;top:0;z-index:50;padding-top:12px}
-  nav{
-    display:flex;align-items:center;justify-content:space-between;gap:12px;
-    height:64px;padding:0 10px 0 18px;border-radius:20px;border:1px solid var(--line);
-    background:var(--glass-strong);box-shadow:var(--shadow);
-    transition:background-color var(--t) var(--ease), box-shadow var(--t) var(--ease);
+  .nav-wrap{position:sticky;top:0;z-index:50;background:var(--glass-strong);border-bottom:1px solid transparent;transition:border-color var(--t) var(--ease), background-color var(--t) var(--ease)}
+  @supports ((-webkit-backdrop-filter:blur(14px)) or (backdrop-filter:blur(14px))){
+    .nav-wrap{background:var(--glass);-webkit-backdrop-filter:blur(14px) saturate(1.15);backdrop-filter:blur(14px) saturate(1.15)}
   }
-  @supports ((-webkit-backdrop-filter:blur(16px)) or (backdrop-filter:blur(16px))){
-    nav{background:var(--glass);-webkit-backdrop-filter:blur(16px) saturate(1.2);backdrop-filter:blur(16px) saturate(1.2)}
-  }
-  .nav-wrap.scrolled nav{background:var(--glass-strong);box-shadow:var(--shadow-lg)}
-  .logo{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-weight:600;font-size:22px;letter-spacing:-0.02em;color:var(--heading);flex-shrink:0}
-  .logo-mark{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;
-    background:linear-gradient(135deg,var(--primary),var(--accent));color:var(--on-primary);font-family:var(--serif);font-weight:600;font-size:16px;line-height:1}
+  .nav-wrap.scrolled{border-bottom-color:var(--line-soft)}
+  nav{display:flex;align-items:center;justify-content:space-between;gap:12px;height:70px}
+  .logo{display:flex;align-items:center;font-family:var(--serif);font-weight:600;font-size:28px;letter-spacing:-0.02em;color:var(--heading);flex-shrink:0;line-height:1}
   .nav-links{display:flex;align-items:center;gap:26px}
-  .nav-links a{font-size:14px;font-weight:500;color:var(--text);padding:8px 2px;transition:color var(--t) var(--ease)}
-  .nav-links a:hover{color:var(--heading);text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:6px}
-  .nav-cta{display:flex;gap:8px;align-items:center}
-  .nav-cta .btn{min-height:44px;padding:0 18px;font-size:14px}
-  .nav-cta .btn-ghost{color:var(--heading);border-color:var(--primary)}
-  .nav-cta .btn-ghost:hover{background:var(--ok-soft)}
-  .menu-btn{display:none;background:transparent;border:1px solid var(--line);border-radius:12px;width:44px;height:44px;color:var(--heading);cursor:pointer;align-items:center;justify-content:center;flex-shrink:0;transition:border-color var(--t) var(--ease)}
-  .menu-btn svg{width:20px;height:20px}
-  .menu-btn:hover{border-color:var(--primary)}
+  .nav-links a{font-size:14.5px;font-weight:500;color:var(--heading);padding:8px 2px}
+  .nav-links a:hover{text-decoration:underline;text-decoration-color:var(--shape-orange);text-decoration-thickness:2px;text-underline-offset:7px}
+  .nav-cta{display:flex;gap:10px;align-items:center}
+  .nav-cta .btn{min-height:42px;padding:0 20px;font-size:14.5px}
+  .nav-cta .btn-ghost{background:transparent}
+  .menu-btn{display:none;background:transparent;border:0;border-radius:12px;width:46px;height:46px;color:var(--heading);cursor:pointer;align-items:center;justify-content:center;flex-shrink:0}
+  .menu-btn svg{width:28px;height:28px}
+  .menu-btn:hover{background:var(--accent-soft)}
   .menu-btn:focus-visible{border-radius:12px}
+  @media (min-width:1024px) and (max-width:1279px){.nav-links{gap:20px}.nav-links a{font-size:14px}.nav-cta .btn{padding:0 16px}}
+  @media (min-width:1920px){
+    nav{height:86px}
+    .logo{font-size:34px}
+    .nav-links{gap:36px}
+    .nav-links a{font-size:17.5px}
+    .nav-cta .btn{min-height:52px;padding:0 26px;font-size:17px}
+  }
 
-  /* Sun / moon switch */
+  /* Theme switch: one control on every device with a sliding thumb.
+     Phones/tablets show sun + moon; wide screens also spell out Light / Dark. */
   .theme-toggle{
-    position:relative;display:inline-flex;align-items:center;justify-content:space-between;flex-shrink:0;
-    width:72px;height:40px;padding:0 10px;border-radius:999px;border:1px solid var(--line);
-    background:var(--surface-2);color:var(--muted);cursor:pointer;
+    position:relative;display:inline-grid;grid-template-columns:1fr 1fr;align-items:center;flex-shrink:0;
+    width:84px;height:42px;padding:3px;border-radius:999px;border:1.5px solid var(--heading);
+    background:var(--surface);color:var(--heading);cursor:pointer;
     transition:border-color var(--t) var(--ease), background-color var(--t) var(--ease);
   }
   .theme-toggle::before{content:"";position:absolute;inset:-3px -2px}
-  .theme-toggle:hover{border-color:var(--primary)}
   .theme-toggle:focus-visible{border-radius:999px}
-  .theme-toggle svg{position:relative;z-index:1;width:18px;height:18px;transition:color var(--t) var(--ease)}
-  .theme-toggle .tt-knob{position:absolute;top:3px;left:3px;width:32px;height:32px;border-radius:50%;
-    background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.18);
+  .theme-toggle .tt-knob{position:absolute;top:3px;bottom:3px;left:3px;width:calc(50% - 3px);border-radius:999px;
+    background:var(--primary);
     transition:transform var(--t) var(--ease), background-color var(--t) var(--ease)}
-  .theme-toggle .tt-sun{color:var(--accent)}
-  .theme-toggle[aria-checked="true"] .tt-knob{transform:translateX(32px);background:var(--primary)}
-  .theme-toggle[aria-checked="true"] .tt-sun{color:var(--muted)}
-  .theme-toggle[aria-checked="true"] .tt-moon{color:var(--on-primary)}
-
-  .mobile-menu{display:none;margin:8px var(--gutter) 0;padding:6px 18px 12px;border-radius:20px;border:1px solid var(--line);background:var(--glass-strong);box-shadow:var(--shadow-lg)}
-  @supports ((-webkit-backdrop-filter:blur(16px)) or (backdrop-filter:blur(16px))){
-    .mobile-menu{background:var(--glass);-webkit-backdrop-filter:blur(16px) saturate(1.2);backdrop-filter:blur(16px) saturate(1.2)}
+  .theme-toggle .tt-opt{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:6px;height:100%;font-size:13.5px;font-weight:700;transition:color var(--t) var(--ease)}
+  .theme-toggle svg{width:18px;height:18px}
+  .theme-toggle .tt-word{display:none}
+  .theme-toggle .tt-light{color:var(--on-primary)}
+  .theme-toggle[aria-checked="true"] .tt-knob{transform:translateX(100%)}
+  .theme-toggle[aria-checked="true"] .tt-light{color:var(--heading)}
+  .theme-toggle[aria-checked="true"] .tt-dark{color:var(--on-primary)}
+  @media (min-width:1280px){
+    .theme-toggle{width:124px}
+    .theme-toggle .tt-word{display:inline}
+    .theme-toggle svg{display:none}
   }
+  @media (min-width:1920px){
+    .theme-toggle{width:150px;height:52px}
+    .theme-toggle .tt-opt{font-size:16px}
+  }
+
+  .mobile-menu{display:none;margin:0 var(--gutter) 12px;padding:6px 18px 14px;border-radius:18px;border:1px solid var(--line);background:var(--surface);box-shadow:var(--shadow-lg)}
   .mobile-menu.open{display:block}
-  .mobile-menu a{display:flex;align-items:center;min-height:46px;color:var(--text);font-weight:500;border-bottom:1px solid var(--line)}
+  .mobile-menu a{display:flex;align-items:center;min-height:48px;color:var(--text);font-weight:500;border-bottom:1px solid var(--line-soft)}
   .mobile-menu a:last-child{border-bottom:0}
-  .mobile-menu .mm-join{display:none}
+  .mobile-menu .mm-join{justify-content:center;margin-top:12px;border:0;border-radius:999px;background:var(--primary);color:var(--on-primary);font-weight:700}
+  .mobile-menu .mm-join:focus-visible{border-radius:999px}
+  /* Compact header (phones + tablets): wordmark · space · toggle · menu.
+     Navigation and account actions move into the menu. */
   @media (max-width:1023px){
-    .nav-links,.nav-cta .btn-ghost{display:none}
+    .nav-links,.nav-cta .btn{display:none}
     .menu-btn{display:inline-flex}
   }
   @media (min-width:1024px){.mobile-menu,.mobile-menu.open{display:none}}
-  @media (max-width:559px){
-    nav{padding:0 8px 0 14px}
-    .nav-cta .btn-primary{display:none}
-    .mobile-menu .mm-join{display:flex;justify-content:center;margin-top:10px;border:0;border-radius:999px;background:var(--primary);color:var(--on-primary);font-weight:600}
-    .mobile-menu .mm-join:focus-visible{border-radius:999px}
-  }
-  @media (max-width:359px){
-    .logo{font-size:20px;gap:8px}
-    .logo-mark{width:28px;height:28px}
-  }
+  @media (max-width:359px){.logo{font-size:24px}}
 
   /* ── Hero ─────────────────────────────────────────────────────────────── */
-  .hero{position:relative;padding:56px 0 72px;overflow:hidden;isolation:isolate}
-  .hero-inner{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;text-align:center;max-width:820px;margin:0 auto}
+  .hero{position:relative;padding:22px 0 0;overflow:hidden;isolation:isolate}
+  .hero-grid{position:relative;display:grid;grid-template-columns:minmax(0,1fr);justify-items:center}
+  .hero-inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center;max-width:820px;margin:0 auto}
+  .hero .eyebrow{font-size:11.5px}
   .hero h1{
-    font-size:clamp(36px, 4.2vw + 16px, 64px);
-    line-height:1.08;letter-spacing:-0.025em;margin-top:18px;font-weight:650;
-    text-wrap:balance;
+    font-size:clamp(38px, 4.2vw + 16px, 66px);
+    line-height:1.04;letter-spacing:-0.02em;margin-top:10px;font-weight:600;
+    max-width:13.5em;
   }
-  .hero h1 .grad{color:var(--accent)}
-  .hero .sub{margin-top:20px;font-size:clamp(16px, 0.35vw + 14.6px, 18px);line-height:1.6;max-width:600px;color:var(--text)}
-  .hero-ctas{margin-top:28px;display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
-  .hero-trust{margin-top:22px;font-size:15px;line-height:1.55;color:var(--text);max-width:520px}
+  .hero .sub{margin-top:16px;font-size:clamp(15.5px, 0.3vw + 14.4px, 18px);line-height:1.5;max-width:34em;color:var(--heading)}
+  .hero-ctas{margin-top:22px;display:flex;flex-wrap:wrap;justify-content:center;gap:14px}
+  .hero-trust{margin-top:14px;font-size:13.5px;line-height:1.5;color:var(--text);max-width:520px}
+  .hero-trust b{color:var(--text);font-weight:500}
+  .portraits{position:relative;z-index:1;display:flex;justify-content:center;align-items:flex-end;gap:4%;width:calc(100% + 2 * var(--gutter));max-width:620px;margin:22px calc(-1 * var(--gutter)) 0}
+  .portrait{position:relative;flex:1 1 48%;min-width:0;line-height:0}
+  .portrait img{display:block;width:100%;height:auto}
+  .hero .pencil{top:6px;left:clamp(6px,4vw,70px);width:clamp(52px,6vw,96px)}
+  .hero .plane{top:14px;right:clamp(6px,4vw,70px);width:clamp(58px,6.5vw,104px)}
   @media (max-width:479px){
-    .hero{padding:40px 0 64px}
-    .hero-ctas{flex-direction:column;align-items:stretch;width:100%;max-width:360px}
+    .hero-ctas{flex-direction:column;align-items:stretch;width:100%;max-width:400px;gap:10px}
+    .hero .pencil{top:30px;left:2px;width:46px}
+    .hero .plane{top:30px;right:2px;width:52px}
+  }
+  /* Wide: portraits frame the centred copy on both sides. */
+  @media (min-width:900px){
+    .hero{padding-top:28px}
+    .hero-grid{grid-template-columns:minmax(0,1fr) minmax(0,780px) minmax(0,1fr);align-items:end;column-gap:clamp(8px,1.5vw,24px)}
+    .hero-inner{grid-column:2;grid-row:1;padding-bottom:40px;padding-top:12px}
+    .portraits{display:contents}
+    .portrait{width:calc(100% + var(--gutter));max-width:340px}
+    .portrait-l{grid-column:1;grid-row:1;justify-self:start;margin-left:calc(-1 * var(--gutter))}
+    .portrait-r{grid-column:3;grid-row:1;justify-self:end;margin-right:calc(-1 * var(--gutter))}
+  }
+  @media (min-width:900px) and (max-width:1279px){
+    .hero-grid{grid-template-columns:minmax(0,1fr) minmax(0,560px) minmax(0,1fr)}
+    .hero h1{font-size:clamp(42px, 4.2vw, 52px)}
+    .hero-inner{padding-bottom:28px}
   }
   @media (min-width:1920px){
-    .hero{padding:80px 0 104px}
-    .hero h1{font-size:clamp(64px, 3.4vw, 76px)}
-    .hero-inner{max-width:900px}
+    .hero h1{font-size:clamp(66px, 3.4vw, 92px)}
+    .hero-grid{grid-template-columns:minmax(0,1fr) minmax(0,1000px) minmax(0,1fr)}
+    .hero-inner{max-width:1000px}
+    .portrait{max-width:420px}
   }
-  .hero .deco-branch-l{top:-18px;left:-36px;width:clamp(120px,15vw,260px)}
-  .hero .deco-branch-r{top:8px;right:-40px;width:clamp(130px,17vw,300px)}
-  .hero .deco-branch-r2{bottom:44px;right:3vw;width:clamp(90px,9vw,160px);transform:rotate(18deg)}
-  .hero .deco-books{left:clamp(8px,4vw,96px);bottom:22px}
-  @media (max-width:1023px){.hero .deco-branch-r2{display:none}}
 
   /* ── Curriculum strip ─────────────────────────────────────────────────── */
-  .trust{padding:36px 0 20px}
-  .trust-inner{display:flex;flex-direction:column;align-items:center;gap:22px}
-  .trust-label{display:flex;align-items:center;gap:16px;width:100%;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--heading);font-weight:600;text-align:center}
-  .trust-label::before,.trust-label::after{content:"";flex:1 1 24px;height:1px;background:var(--line)}
-  @media (max-width:639px){.trust-label{letter-spacing:.12em;font-size:11px;gap:10px}}
-  .trust-note{font-size:13.5px;color:var(--muted);text-align:center;max-width:560px}
-
-  .marquee{position:relative;width:100%;overflow:hidden;border-radius:12px;
-    mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);
-    -webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);}
-  .marquee-track{display:flex;width:max-content;animation:marq 44s linear infinite;will-change:transform}
-  .marquee:hover .marquee-track,
-  .marquee:focus-visible .marquee-track,
-  .marquee:active .marquee-track{animation-play-state:paused}
-  @keyframes marq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-  .crest{display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;min-width:150px;padding:4px 32px;
-    border-left:1px solid var(--line);color:var(--heading);text-align:center}
-  .crest svg{width:40px;height:40px;display:block;flex-shrink:0}
-  .crest .lbl{display:flex;flex-direction:column;align-items:center;line-height:1.2}
-  .crest .lbl b{font-family:var(--sans);font-size:14px;font-weight:600;color:var(--heading);white-space:nowrap}
-  .crest .lbl small{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:4px;white-space:nowrap}
-  @media (prefers-reduced-motion:reduce){
-    .marquee{overflow:visible;mask-image:none;-webkit-mask-image:none}
-    .marquee-track{animation:none;flex-wrap:wrap;justify-content:center;width:auto;row-gap:20px}
-    .crest.dup{display:none}
-  }
+  .trust{padding:22px 0 10px}
+  .trust-inner{display:flex;flex-direction:column;align-items:center;gap:14px}
+  .trust-label{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--eyebrow);font-weight:700;text-align:center}
+  @media (max-width:479px){.trust-label{font-size:11.5px;letter-spacing:.04em}}
+  .trust-note{font-size:13px;color:var(--text);text-align:center;max-width:620px}
+  .boards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));row-gap:12px;width:100%;margin:0;padding:0}
+  @media (min-width:900px){.boards{grid-template-columns:repeat(8,minmax(0,1fr))}}
+  .crest{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px 6px;text-align:center;min-width:0;border-left:1px solid var(--line)}
+  .boards .crest:first-child,.boards .crest:nth-child(4n+1){border-left:0}
+  @media (min-width:900px){.boards .crest:nth-child(4n+1){border-left:1px solid var(--line)}.boards .crest:first-child{border-left:0}}
+  .crest svg{display:none}
+  .crest .lbl{display:flex;flex-direction:column;align-items:center;line-height:1.2;min-width:0}
+  .crest .lbl b{font-family:var(--sans);font-size:16px;font-weight:700;color:var(--heading);overflow-wrap:normal;-webkit-hyphens:auto;hyphens:auto}
+  .crest .lbl small{font-size:11.5px;color:var(--text);margin-top:3px}
+  @media (max-width:479px){.crest{padding:2px 3px}.crest .lbl b{font-size:12px;overflow-wrap:normal;word-break:normal}.crest .lbl small{font-size:10px}}
+  @media (max-width:399px){.crest .lbl b{font-size:10.5px;letter-spacing:-.01em;-webkit-hyphens:auto;hyphens:auto}.crest .lbl small{font-size:9.5px}}
+  @media (min-width:1920px){.crest .lbl b{font-size:18px}.crest .lbl small{font-size:13px}}
 
   /* ── Tutor demo ───────────────────────────────────────────────────────── */
-  .demo{padding:28px 0 56px}
+  .demo{padding:26px 0 18px}
+  /* Shapes may peek past their cards, never past the page edge. */
+  .demo,.aud{overflow-x:hidden;overflow-x:clip}
+  .demo-stage{position:relative;max-width:760px;margin:0 auto}
+  .demo-stage .blob-yellow{top:-16px;left:-70px;width:40%;height:82%;border-radius:58% 42% 50% 50% / 46% 50% 50% 54%}
+  .demo-stage .blob-green{right:-70px;bottom:-14px;width:30%;height:66%;border-radius:50% 50% 44% 56% / 52% 46% 54% 48%}
+  @media (max-width:639px){.demo-stage .blob{display:none}}
   .sim{
-    position:relative;max-width:820px;margin:0 auto;padding:16px;border-radius:20px;
-    border:1px solid var(--line);background:var(--glass-strong);box-shadow:var(--shadow-lg);
+    position:relative;z-index:1;padding:14px 16px 16px;border-radius:20px;
+    border:1px solid var(--line-soft);background:var(--surface);box-shadow:var(--shadow-lg);
   }
-  @supports ((-webkit-backdrop-filter:blur(16px)) or (backdrop-filter:blur(16px))){
-    .sim{background:var(--glass);-webkit-backdrop-filter:blur(16px) saturate(1.2);backdrop-filter:blur(16px) saturate(1.2)}
-  }
-  @media (min-width:640px){.sim{padding:20px}}
-  @media (min-width:1024px){.sim{padding:24px}}
-  .sim-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;padding-bottom:14px;border-bottom:1px solid var(--line)}
-  .sim-head .who{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:600;color:var(--heading);letter-spacing:.14em;text-transform:uppercase}
-  .sim-head .who .pulse{width:8px;height:8px;border-radius:50%;background:var(--ok);animation:pulse 2.2s var(--ease) infinite}
-  @keyframes pulse{0%{box-shadow:0 0 0 0 var(--ok-soft)}80%{box-shadow:0 0 0 10px transparent}100%{box-shadow:0 0 0 0 transparent}}
-  .confidence{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--muted)}
-  .conf-bar{width:96px;height:6px;border-radius:999px;background:var(--surface-2);overflow:hidden}
-  .conf-fill{height:100%;width:25%;background:linear-gradient(90deg,var(--primary),var(--accent));transition:width 1s var(--ease);border-radius:999px}
-  .question{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:6px 16px;padding:14px 16px;border-radius:14px;border:1px solid var(--line);margin-top:16px;background:var(--surface)}
-  .question .q{font-family:var(--serif);font-size:20px;font-weight:500;color:var(--heading)}
-  .question .q em{color:var(--accent)}
-  .question .meta{font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
-  .turn{display:flex;align-items:flex-start;gap:12px;margin-top:16px;opacity:0;transform:translateY(8px);transition:opacity .5s var(--ease), transform .5s var(--ease)}
-  .turn.me{flex-direction:row-reverse}
-  .turn.show{opacity:1;transform:none}
-  .avatar{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;font-size:13px;font-weight:600;font-family:var(--serif)}
-  .av-ai{background:var(--ok-soft);color:var(--ok);border:1px solid var(--line)}
-  .av-st{background:var(--accent-soft);color:var(--accent);border:1px solid var(--line)}
-  .bubble{padding:11px 16px;border-radius:16px;font-size:14.5px;line-height:1.55;max-width:min(78%,560px);color:var(--text);overflow-wrap:anywhere}
-  .bubble.ai{background:var(--bubble-ai);border:1px solid var(--line)}
-  .bubble.st{background:var(--bubble-me);border:1px solid transparent}
-  .bubble.wrong{border-color:var(--warn)}
-  .bubble.right{border-color:var(--ok)}
-  @media (max-width:479px){.bubble{max-width:calc(100% - 46px)}}
-  .tag{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
-  .pizza{display:flex;gap:14px;align-items:center;margin-top:10px;padding:10px;border-radius:12px;background:var(--accent-soft);border:1px dashed var(--accent)}
-  .pizza svg{flex-shrink:0}
-  .pizza circle,.pizza line{stroke:var(--accent)}
-  .pizza path{fill:var(--accent)}
-  .pizza span{font-size:13px;color:var(--muted)}
-  .retry{margin-top:18px;padding-top:16px;border-top:1px solid var(--line);display:flex;justify-content:center}
+  @media (min-width:640px){.sim{padding:18px 22px 18px}}
+  .sim-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px}
+  .sim-head .who{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--eyebrow);letter-spacing:.04em;text-transform:uppercase}
+  .sim-head .who .pulse{display:none}
+  .confidence{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:var(--on-pill);padding:5px 14px;border-radius:999px;background:var(--pill)}
+  .conf-bar{display:none}
+  .conf-fill{transition:width .8s var(--ease)}
+  .question{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:4px 16px;padding:7px 16px;border-radius:999px;border:1.5px solid var(--line);margin-top:10px;background:var(--surface)}
+  .question .q{font-family:var(--sans);font-size:17px;font-weight:700;color:var(--heading)}
+  .question .q em{font-style:normal}
+  .question .meta{font-size:11.5px;font-weight:600;color:var(--heading);letter-spacing:.06em;text-transform:uppercase}
+  .turn{display:flex;flex-direction:column;align-items:flex-start;gap:2px;margin-top:8px}
+  .turn.me{align-items:flex-end}
+  .turn .tag{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--heading);margin:0}
+  .bubble{padding:6px 14px;border-radius:10px;font-size:14px;line-height:1.45;max-width:min(80%,560px);color:#302117;overflow-wrap:anywhere}
+  .bubble.ai{background:var(--bubble-ai)}
+  :root[data-theme="dark"] .bubble.ai{color:var(--text)}
+  .bubble.st{background:var(--bubble-me)}
+  .bubble b{font-weight:700}
+  @media (max-width:479px){.bubble{max-width:92%}}
+  .pizza{display:flex;gap:10px;align-items:center;margin:6px 0 2px;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,.5)}
+  :root[data-theme="dark"] .pizza{background:rgba(255,255,255,.06)}
+  .pizza svg{flex-shrink:0;width:34px;height:34px}
+  .pizza circle,.pizza line{stroke:var(--shape-orange)}
+  .pizza path{fill:var(--shape-orange)}
+  .pizza span{font-size:13px}
+  .retry{margin-top:12px;display:flex;justify-content:center}
   .retry button{
-    min-height:44px;padding:0 20px;border-radius:999px;cursor:pointer;
-    background:var(--surface);color:var(--heading);border:1.5px solid var(--line);
-    font-size:14px;font-weight:600;
-    transition:border-color var(--t) var(--ease), transform var(--t) var(--ease), background-color var(--t) var(--ease);
+    min-height:40px;padding:0 26px;border-radius:999px;cursor:pointer;
+    background:var(--surface);color:var(--heading);border:1.5px solid var(--heading);
+    font-size:15px;font-weight:700;
+    transition:background-color var(--t) var(--ease), transform var(--t) var(--ease);
   }
-  .retry button:hover{border-color:var(--primary)}
-  .retry button:active{transform:scale(.97)}
+  .retry button:hover{background:var(--accent-soft)}
+  .retry button:active{transform:translateY(1px) scale(.98)}
   .retry button:focus-visible{border-radius:999px}
 
   /* ── Audience rows ────────────────────────────────────────────────────── */
-  .block{position:relative;display:grid;grid-template-columns:minmax(0,1fr);gap:28px;align-items:center;padding:48px 0}
-  .aud + .aud .block{border-top:1px solid var(--line)}
-  .block > div:not(.visual){order:1}
-  .block > .visual{order:2;width:100%;max-width:640px}
-  @media (min-width:1024px){
-    .block{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:96px;padding:64px 0}
-    .block > div:not(.visual),.block > .visual{order:0}
-    .block > .visual{max-width:none}
-    .block.reverse{direction:rtl}
-    .block.reverse > *{direction:ltr}
-    .block::after{content:"";position:absolute;left:50%;top:18%;bottom:18%;width:1px;background:var(--line)}
+  .aud{padding:0}
+  .block{position:relative;display:grid;grid-template-columns:minmax(0,1fr);gap:12px;align-items:center;padding:16px 0}
+  .block > .copy{order:1}
+  .block > .stage{order:2}
+  /* Two columns once both sides have room; copy and dashboard alternate. */
+  @media (min-width:760px){
+    .block{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(32px,4vw,64px);padding:22px 0}
+    .block.reverse > .copy{order:2}
+    .block.reverse > .stage{order:1}
   }
-  @media (min-width:1920px){.block{padding:80px 0}}
-  .block h2{font-size:clamp(28px, 1.9vw + 18px, 44px);line-height:1.12;letter-spacing:-0.02em;margin-top:14px}
-  .block h2 em,.section-head h2 em,.closing h2 em{font-style:normal;color:var(--accent)}
-  .block .lead{margin-top:16px;font-size:17px;line-height:1.6;color:var(--text);max-width:520px}
-  .feature-list{margin:24px 0 0;padding:0;display:grid;gap:14px}
-  .feature-list li{list-style:none;display:flex;align-items:flex-start;gap:14px;font-size:15px;font-weight:500;color:var(--heading)}
-  .feature-list li .ck{flex-shrink:0;width:24px;height:24px;border-radius:8px;display:grid;place-items:center;background:var(--ok-soft);color:var(--ok);margin-top:1px}
-  .feature-list li .ck svg{width:13px;height:13px}
-  .feature-list li small{display:block;color:var(--muted);font-size:14px;font-weight:400;line-height:1.5;margin-top:2px}
-  .sprig{position:absolute;bottom:40px;width:84px;display:none}
-  .block:not(.reverse) > .sprig{left:-104px}
-  .block.reverse > .sprig{right:-104px}
-  .block.reverse > .sprig svg{transform:scaleX(-1)}
-  @media (min-width:1440px){.sprig{display:block}}
+  @media (min-width:1920px){.block{padding:36px 0}}
+  .block h2{font-size:clamp(26px, 1.6vw + 18px, 40px);line-height:1.08;letter-spacing:-0.02em;margin-top:4px}
+  .block .lead{margin-top:10px;font-size:16px;line-height:1.5;color:var(--heading);max-width:34em}
+  .feature-list{margin:12px 0 0;padding:0;display:grid;gap:6px;max-width:36em}
+  .feature-list li{list-style:none;display:flex;align-items:baseline;gap:12px;font-size:15px;font-weight:500;color:var(--heading);line-height:1.4}
+  .feature-list li .ck{flex-shrink:0;width:10px;height:10px;border-radius:50%;background:var(--shape-green);transform:translateY(-1px)}
+  .feature-list li .ck svg{display:none}
+  .feature-list li small{display:inline;color:var(--text);font-size:14px;font-weight:400;margin-left:4px}
+  .feature-list li small::before{content:"· ";color:var(--muted)}
+  .schools-cta{margin-top:16px}
 
-  /* Preview cards */
-  .visual{position:relative;border-radius:var(--radius);padding:20px;border:1px solid var(--line);background:var(--surface);box-shadow:var(--shadow-lg)}
-  @media (min-width:1024px){.visual{padding:24px}}
-  .v-student{display:flex;flex-direction:column;gap:18px}
-  .xp-card{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:var(--bg)}
-  .xp-card .l{font-size:11.5px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
-  .xp-card .v{font-family:var(--serif);font-size:28px;font-weight:500;color:var(--accent);letter-spacing:-0.02em}
-  .streak{display:flex;gap:6px;margin-top:14px}
-  .streak div{flex:1;height:34px;border-radius:8px;background:var(--bg);border:1px solid var(--line);display:grid;place-items:center;font-size:11px;color:var(--muted)}
-  .streak div.on{background:var(--ok-soft);color:var(--ok);border-color:transparent;font-weight:600}
-  .path-card{padding:16px;border-radius:12px;border:1px solid var(--line);background:var(--bg)}
-  .path-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px dashed var(--line)}
+  /* Dashboard previews: one asymmetric shape peeks out behind each card. */
+  .stage{position:relative;width:100%;max-width:560px;justify-self:center;padding:6px 0}
+  @media (min-width:760px){.stage{padding:18px 26px}}
+  .stage-student > .blob{inset:-4% -6% 4% 30%;border-radius:40% 60% 48% 52% / 56% 38% 62% 44%;background:var(--shape-orange)}
+  .stage-teacher > .blob{inset:22% 28% -6% -6%;border-radius:56% 44% 62% 38% / 42% 58% 42% 58%;background:var(--shape-blue)}
+  .stage-parent  > .blob{inset:0 -6% -6% 18%;border-radius:62% 38% 40% 60% / 46% 62% 38% 54%;background:var(--shape-yellow)}
+  .stage-school  > .blob{inset:18% 30% -6% -6%;border-radius:44% 56% 58% 42% / 60% 40% 60% 40%;background:var(--shape-green)}
+  @media (max-width:759px){.stage > .blob{display:none}}
+  .visual{position:relative;z-index:1;border-radius:var(--radius);padding:14px 18px;border:1px solid var(--line-soft);background:var(--surface);box-shadow:var(--shadow-lg)}
+  .pill{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:700;padding:4px 14px;border-radius:999px;background:var(--pill);color:var(--on-pill);white-space:nowrap}
+
+  .v-student{display:flex;flex-direction:column;gap:8px}
+  .xp-card{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+  .xp-card .l{font-size:12px;font-weight:600;color:var(--text);letter-spacing:.02em}
+  .xp-card .v{font-family:var(--sans);font-size:22px;font-weight:700;color:var(--heading);line-height:1.15}
+  .xp-card .streak-pill{display:flex;flex-direction:column;align-items:center;padding:4px 14px;border-radius:999px;background:var(--pill);color:var(--on-pill);text-align:center}
+  .xp-card .streak-pill .l{color:var(--on-pill);font-size:10.5px;text-transform:uppercase;letter-spacing:.08em}
+  .xp-card .streak-pill .v{color:var(--on-pill) !important;font-size:15px}
+  .streak{display:flex;gap:4px;margin-top:8px}
+  .streak div{flex:1;height:22px;border-radius:6px;background:var(--bg);display:grid;place-items:center;font-size:10.5px;font-weight:600;color:var(--muted)}
+  .streak div.on{background:var(--ok-soft);color:var(--good)}
+  .path-card .tag{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:2px 0 0}
+  .path-row{display:flex;align-items:center;gap:12px;padding:7px 0;border-bottom:1px solid var(--line-soft)}
   .path-row:last-child{border-bottom:0}
-  .path-row .ico{width:30px;height:30px;flex-shrink:0;border-radius:8px;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center}
-  .path-row .ico svg{width:15px;height:15px}
-  .path-row .t{flex:1;min-width:0;font-size:14px;font-weight:500;color:var(--heading)}
-  .path-row .t small{display:block;color:var(--muted);font-size:12px;font-weight:400;margin-top:2px}
-  .path-row .pct{font-family:var(--serif);font-size:18px;color:var(--heading)}
+  .path-row .ico{display:none}
+  .path-row .t{flex:1;min-width:0;font-size:15.5px;font-weight:700;color:var(--heading);line-height:1.25}
+  .path-row .t small{display:block;color:var(--text);font-size:12px;font-weight:400;margin-top:1px}
+  .path-row .pct{font-family:var(--sans);font-size:18px;font-weight:700;color:var(--good)}
 
-  .v-teacher{display:flex;flex-direction:column;gap:16px}
-  .upload{display:flex;align-items:center;gap:14px;padding:16px;border-radius:12px;border:1px dashed var(--accent);background:var(--accent-soft)}
-  .upload .ic{width:42px;height:42px;flex-shrink:0;border-radius:10px;background:var(--surface);color:var(--accent);display:grid;place-items:center}
+  .v-teacher{display:flex;flex-direction:column;gap:10px}
+  .upload{display:flex;align-items:center;gap:10px}
+  .upload .ic{display:none}
   .upload .tx{flex:1;min-width:0;overflow-wrap:anywhere}
-  .upload .tx b{font-family:var(--serif);font-size:16px;font-weight:500;color:var(--heading)}
-  .upload .tx small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
-  .upload .arrow{color:var(--muted)}
-  .quizgen{padding:16px;border-radius:12px;border:1px solid var(--line);background:var(--bg)}
-  .quizgen .h{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
-  .quizgen .h .label{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-  .quizgen .h .pill{font-size:11px;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--ok-soft);color:var(--ok)}
-  .qrow{padding:9px 0;border-top:1px dashed var(--line);font-size:13.5px;display:flex;justify-content:space-between;gap:12px;color:var(--heading)}
-  .qrow span{color:var(--muted);font-size:12px;text-align:right;flex-shrink:0}
+  .upload .tx b{font-family:var(--sans);font-size:15.5px;font-weight:700;color:var(--heading)}
+  .upload .tx small{display:block;color:var(--text);font-size:12px;margin-top:1px}
+  .upload .arrow{color:var(--heading)}
+  .quizgen{overflow:hidden}
+  .quizgen .h{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px}
+  .quizgen .h .label{font-size:15px;font-weight:700;color:var(--heading)}
+  .quizgen .h .pill{font-size:13px}
+  .qrow{position:relative;padding:5px 4px 5px 24px;margin:0 -4px;border-top:1px solid var(--line-soft);font-size:14px;display:flex;justify-content:space-between;gap:12px;color:var(--heading);border-radius:6px}
+  .qrow::before{content:"";position:absolute;left:5px;top:50%;width:9px;height:9px;margin-top:-6px;border-radius:50%;border:1.5px solid var(--heading);box-shadow:inset 0 0 0 2px var(--surface);background:var(--heading)}
+  .stage-school .qrow{padding-left:4px;font-weight:700}
+  .stage-school .qrow::before{display:none}
+  .qrow span{color:var(--good);font-weight:700;font-size:13.5px;text-align:right;flex-shrink:0}
   .analytics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-  .stat{padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg)}
-  .stat .n{font-family:var(--serif);font-size:22px;font-weight:500;letter-spacing:-0.02em;color:var(--heading)}
-  .stat .l{font-size:10.5px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px}
+  .stat{padding:5px 8px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);text-align:center}
+  .stat .n{font-family:var(--sans);font-size:20px;font-weight:700;line-height:1.1;color:var(--good) !important}
+  .stat .l{font-size:11.5px;font-weight:500;color:var(--heading);margin-top:1px}
   @media (max-width:419px){
-    .analytics{gap:8px;grid-template-columns:repeat(auto-fit,minmax(88px,1fr))}
-    .stat{padding:10px 8px}
-    .stat .n{font-size:18px}
-    .stat .l{font-size:9.5px;letter-spacing:.04em}
+    .analytics{gap:6px}
+    .stat{padding:4px 4px;border-radius:14px}
+    .stat .n{font-size:17px}
+    .stat .l{font-size:10px}
   }
 
-  .v-parent{display:flex;flex-direction:column;gap:14px}
-  .report{padding:18px;border-radius:12px;border:1px solid var(--line);background:var(--bg)}
-  .report .head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:8px;margin-bottom:14px}
-  .report .head h4{font-family:var(--serif);font-size:20px;font-weight:500}
-  .report .head small{color:var(--muted);font-size:12px}
-  .chart{display:flex;align-items:flex-end;gap:8px;height:120px;padding-top:8px;margin-bottom:20px;border-top:1px dashed var(--line)}
-  .chart div{flex:1;background:linear-gradient(180deg,var(--chart-1),var(--chart-2));border-radius:6px 6px 0 0;position:relative}
-  .chart div::after{content:attr(data-day);position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--muted);letter-spacing:.05em}
-  .goal{display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg)}
-  .goal .ring{width:38px;height:38px;flex-shrink:0}
-  .goal .ring circle:first-child{stroke:var(--line)}
-  .goal .ring circle:last-child{stroke:var(--ok)}
-  .goal + .goal .ring circle:last-child{stroke:var(--accent)}
-  .goal .t{flex:1;min-width:0;font-size:14px;font-weight:500;color:var(--heading)}
-  .goal .t small{display:block;color:var(--muted);font-size:12px;font-weight:400;margin-top:2px}
-  .goal .coins{display:flex;align-items:center;gap:6px;color:var(--accent);font-family:var(--serif);font-size:18px}
-  .goal .btn{min-height:36px}
+  .v-parent{display:flex;flex-direction:column;gap:6px}
+  .report .head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px}
+  .report .head h4{font-family:var(--sans);font-size:16px;font-weight:700}
+  .report .head small{color:var(--text);font-size:12px}
+  .report .head .trend{color:var(--on-pill)}
+  .report .head .trend b{color:var(--on-pill);font-weight:700}
+  .chart{display:flex;align-items:flex-end;gap:10px;height:84px;padding-top:4px;margin-bottom:22px}
+  .chart div{flex:1;background:var(--chart-bar);border-radius:6px;position:relative;transform-origin:bottom}
+  .chart div:nth-child(5){background:var(--chart-peak)}
+  .chart div::after{content:attr(data-day);position:absolute;bottom:-19px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:500;color:var(--heading)}
+  .goal{display:flex;align-items:center;gap:12px;padding:5px 0;border-top:1px solid var(--line-soft)}
+  .goal .ring{display:none}
+  .goal .t{flex:1;min-width:0;font-size:14.5px;font-weight:700;color:var(--heading);line-height:1.25}
+  .goal .t small{display:block;color:var(--text);font-size:12px;font-weight:400;margin-top:1px}
+  .goal .coins{display:flex;align-items:center;gap:5px;color:var(--good);font-family:var(--sans);font-weight:700;font-size:16px}
+  .goal .btn{min-height:32px}
 
   /* ── Section heads ────────────────────────────────────────────────────── */
-  .section-head{max-width:760px;margin:0 auto 32px;text-align:center}
-  .section-head h2{font-size:clamp(28px, 1.9vw + 18px, 44px);line-height:1.12;letter-spacing:-0.02em;margin-top:12px}
-  .section-head p{margin:14px auto 0;font-size:17px;line-height:1.6;max-width:640px;color:var(--text)}
+  .section-head{max-width:820px;margin:0 auto 16px;text-align:center}
+  .section-head h2{font-size:clamp(26px, 1.6vw + 18px, 40px);line-height:1.1;letter-spacing:-0.02em;margin-top:2px}
+  .section-head p{margin:8px auto 0;font-size:15px;line-height:1.5;max-width:46em;color:var(--heading)}
 
   /* ── Teaching loop ────────────────────────────────────────────────────── */
-  #how{padding:64px 0 28px}
-  .steps{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
-  @media (min-width:960px){.steps{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}}
-  .step{display:grid;grid-template-columns:44px minmax(0,1fr);column-gap:16px;align-content:start;padding:20px;border-radius:var(--radius-card);border:1px solid var(--line);background:var(--surface);box-shadow:var(--shadow)}
-  .step .corner{grid-row:1 / span 3;width:44px;height:44px;border-radius:12px;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center}
-  .step .corner svg{width:20px;height:20px}
-  .step .num{font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:.16em;color:var(--accent);line-height:1.4}
-  .step h3{font-family:var(--sans);font-size:17px;font-weight:600;letter-spacing:0;line-height:1.35;margin-top:2px}
-  .step p{margin-top:6px;font-size:14.5px;line-height:1.55;color:var(--muted)}
+  #how{padding:28px 0 14px}
+  .steps{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+  @media (min-width:720px){.steps{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}}
+  .step{position:relative;padding:12px 16px 14px;border-radius:var(--radius-card);border:3px solid transparent;
+    background:linear-gradient(var(--surface),var(--surface)) padding-box, linear-gradient(135deg,var(--c1),var(--c2)) border-box;box-shadow:var(--shadow)}
+  .step:nth-child(1){--c1:var(--shape-yellow);--c2:var(--shape-green)}
+  .step:nth-child(2){--c1:var(--shape-orange);--c2:var(--shape-yellow)}
+  .step:nth-child(3){--c1:var(--shape-blue);--c2:var(--shape-yellow)}
+  .step .num{font-family:var(--sans);font-size:22px;font-weight:700;color:var(--eyebrow);line-height:1.1}
+  .step h3{font-family:var(--sans);font-size:17px;font-weight:700;letter-spacing:0;line-height:1.3}
+  .step p{margin-top:3px;font-size:14px;line-height:1.45;color:var(--heading)}
 
   /* ── Platform features ────────────────────────────────────────────────── */
-  #features{padding:48px 0 28px}
-  .features{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
-  @media (min-width:640px){.features{grid-template-columns:repeat(2,minmax(0,1fr))}}
-  @media (min-width:1024px){.features{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}}
-  .f{display:grid;grid-template-columns:44px minmax(0,1fr);column-gap:16px;align-content:start;padding:20px;border-radius:var(--radius-card);border:1px solid var(--line);background:var(--surface);box-shadow:var(--shadow)}
-  .f .ic{grid-row:1 / span 2;width:44px;height:44px;border-radius:12px;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center}
-  .f h3{font-family:var(--sans);font-size:17px;font-weight:600;letter-spacing:0;line-height:1.35}
-  .f p{margin-top:6px;font-size:14.5px;line-height:1.55;color:var(--muted)}
+  #features{padding:22px 0 14px}
+  .features{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+  @media (min-width:560px){.features{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (min-width:900px){.features{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 18px}}
+  .f{display:grid;grid-template-columns:38px minmax(0,1fr);column-gap:14px;align-content:start;padding:12px 16px;border-radius:var(--radius-card);border:1px solid var(--line-soft);background:var(--surface);box-shadow:var(--shadow)}
+  .f .ic{grid-row:1 / span 2;width:38px;height:38px;border-radius:10px;align-self:center;background:var(--tint, var(--shape-green));color:#FFFFFF;display:grid;place-items:center;transition:transform var(--t) var(--ease)}
+  .f .ic svg{width:19px;height:19px}
+  :root[data-theme="dark"] .f .ic{background:transparent;border:1.5px solid var(--line);color:var(--heading)}
+  .f:hover .ic,.f:focus-within .ic{transform:translateY(-3px)}
+  .features .f:nth-child(3n+1){--tint:var(--shape-green)}
+  .features .f:nth-child(3n+2){--tint:var(--shape-yellow)}
+  .features .f:nth-child(3n+3){--tint:var(--shape-orange)}
+  .f h3{font-family:var(--sans);font-size:15.5px;font-weight:700;letter-spacing:0;line-height:1.3}
+  .f p{margin-top:2px;font-size:13.5px;line-height:1.45;color:var(--heading)}
 
   /* ── About ────────────────────────────────────────────────────────────── */
-  #about{padding:48px 0 16px}
-  #about .features{grid-template-columns:minmax(0,1fr);gap:0}
-  #about .f{background:none;border:0;border-radius:0;box-shadow:none;padding:22px 0;border-top:1px solid var(--line)}
-  #about .f:first-child{border-top:0}
-  @media (min-width:960px){
-    #about .features{grid-template-columns:repeat(3,minmax(0,1fr))}
-    #about .f{border-top:0;border-left:1px solid var(--line);padding:4px 28px}
-    #about .f:first-child{border-left:0;padding-left:0}
-    #about .f:last-child{padding-right:0}
+  #about{padding:22px 0 8px}
+  #about .features{grid-template-columns:minmax(0,1fr)}
+  @media (min-width:720px){#about .features{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  #about .f{position:relative;overflow:hidden;display:block;padding:12px 16px 14px 46px}
+  #about .f::before{content:"";position:absolute;left:-26px;top:50%;width:56px;height:84%;transform:translateY(-50%);border-radius:50%;background:var(--tint)}
+  #about .f:nth-child(1){--tint:var(--shape-yellow)}
+  #about .f:nth-child(2){--tint:var(--shape-green)}
+  #about .f:nth-child(3){--tint:#F2A08C}
+  :root[data-theme="dark"] #about .f:nth-child(3){--tint:var(--shape-orange)}
+
+  /* ── Closing CTA banner ───────────────────────────────────────────────── */
+  #cta{padding:30px 0 30px}
+  .banner{position:relative;max-width:980px;margin:0 auto;padding:22px 24px 26px;border-radius:22px;background:var(--banner);color:var(--on-banner);text-align:center;isolation:isolate}
+  @media (min-width:768px){.banner{padding:22px 150px 24px}}
+  @media (min-width:1920px){.banner{max-width:1200px}}
+  .closing{position:relative;z-index:1;max-width:680px;margin:0 auto}
+  .closing .eyebrow{color:var(--on-banner);opacity:.9;font-size:11.5px}
+  .closing h2{font-size:clamp(26px, 1.6vw + 18px, 40px);line-height:1.08;letter-spacing:-0.02em;margin-top:2px;color:var(--on-banner)}
+  .closing p{margin:6px auto 0;max-width:560px;font-size:15px;color:var(--on-banner);opacity:.95}
+  .closing .btn-row{margin-top:16px;display:flex;justify-content:center;gap:16px;flex-wrap:wrap}
+  .banner .btn{min-height:44px}
+  .banner .btn-sage{background:var(--banner-btn);color:var(--on-banner-btn);box-shadow:none}
+  .banner .btn-sage:hover{background:var(--banner-btn);box-shadow:var(--shadow-lg)}
+  .banner .btn-ghost{background:var(--banner-btn-2);color:var(--on-banner-btn-2);border-color:var(--banner-btn-2)}
+  .banner .btn-ghost:hover{box-shadow:var(--shadow-lg)}
+  .banner :where(a,button):focus-visible{outline-color:var(--on-banner)}
+  @media (max-width:479px){.closing .btn-row{flex-direction:column;align-items:stretch;max-width:340px;margin-left:auto;margin-right:auto;gap:10px}}
+  .banner .books{left:-60px;bottom:-14px;width:clamp(96px,13vw,170px)}
+  .banner .plant{right:-56px;bottom:-12px;width:clamp(70px,8vw,116px)}
+  @media (max-width:1099px){.banner .books{left:-14px}.banner .plant{right:-10px}}
+  @media (max-width:767px){
+    .banner{padding-bottom:84px}
+    .banner .books{width:104px;left:-4px}
+    .banner .plant{width:68px;right:0}
   }
 
-  /* ── Closing CTA ──────────────────────────────────────────────────────── */
-  #cta{padding:56px 0 80px;overflow:hidden;isolation:isolate}
-  .closing{position:relative;z-index:1;text-align:center;max-width:760px;margin:0 auto;padding:16px 0}
-  .closing h2{font-size:clamp(30px, 2.4vw + 18px, 48px);line-height:1.1;letter-spacing:-0.02em;margin-top:14px}
-  .closing p{margin:16px auto 0;max-width:520px;font-size:17px;color:var(--text)}
-  .closing .btn-row{margin-top:28px;display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
-  @media (max-width:479px){.closing .btn-row{flex-direction:column;align-items:stretch;max-width:360px;margin-left:auto;margin-right:auto}}
-  #cta .deco-branch-l{top:24px;left:-30px;width:clamp(110px,11vw,200px)}
-  #cta .deco-branch-r{top:16px;right:-36px;width:clamp(110px,12vw,210px)}
-  #cta .deco-books{left:clamp(8px,4vw,96px);bottom:18px}
-
   /* ── Footer ───────────────────────────────────────────────────────────── */
-  footer{padding:44px 0 28px;border-top:1px solid var(--line);background:var(--surface)}
-  .foot-top{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px}
+  footer{padding:22px 0 20px;border-top:1px solid var(--line)}
+  .foot-top{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
   .foot-top > div:first-child{grid-column:1 / -1}
-  @media (min-width:880px){
-    .foot-top{grid-template-columns:1.5fr repeat(4,minmax(0,1fr));gap:0}
+  @media (min-width:760px){
+    .foot-top{grid-template-columns:1.6fr repeat(4,minmax(0,1fr));gap:0}
     .foot-top > div:first-child{grid-column:auto;padding-right:24px}
     .foot-col{padding-left:24px;border-left:1px solid var(--line)}
   }
-  .foot-mission{font-family:var(--serif);font-size:17px;color:var(--heading);margin-top:12px;max-width:280px;line-height:1.4}
-  .foot-col h5{font-family:var(--sans);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--heading);font-weight:600;margin:0 0 10px}
-  .foot-col a{display:block;width:fit-content;font-size:14px;color:var(--muted);padding:5px 0;transition:color var(--t) var(--ease)}
-  .foot-col a:hover{color:var(--heading);text-decoration:underline;text-underline-offset:4px}
-  @media (pointer:coarse){.foot-col a{padding:10px 0}}
-  .foot-bot{margin-top:32px;padding-top:20px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;font-size:13px;color:var(--muted)}
+  .foot-mission{font-family:var(--sans);font-size:14px;color:var(--heading);margin-top:8px;max-width:260px;line-height:1.45}
+  .foot-col h5{font-family:var(--sans);font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--heading);font-weight:700;margin:0 0 6px}
+  .foot-col a{display:block;width:fit-content;font-size:13.5px;color:var(--heading);padding:2px 0}
+  .foot-col a:hover{text-decoration:underline;text-decoration-color:var(--shape-orange);text-underline-offset:4px}
+  @media (pointer:coarse){.foot-col a{padding:9px 0}}
+  .foot-bot{margin-top:20px;padding-top:14px;border-top:1px solid var(--line-soft);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;font-size:12.5px;color:var(--text)}
   .foot-bot a:hover{color:var(--heading);text-decoration:underline;text-underline-offset:4px}
+
+  /* ── Desktop scale: match the boards' larger type and fuller cards ─────── */
+  @media (min-width:1024px){
+    .portrait{max-width:410px;width:calc(100% + var(--gutter) + 24px)}
+    .trust-label{font-size:15px}
+    .crest .lbl b{font-size:clamp(16px, 0.9vw + 6px, 19px)}
+    .crest .lbl small{font-size:13px}
+    .trust-note{font-size:14.5px}
+    .demo-stage{max-width:900px}
+    .sim{padding:20px 28px 20px}
+    .sim-head .who{font-size:15px}
+    .confidence{font-size:16px;padding:6px 18px}
+    .question{padding:9px 20px}
+    .question .q{font-size:20px}
+    .question .meta{font-size:13px}
+    .turn .tag{font-size:12.5px}
+    .bubble{font-size:16px;padding:8px 16px}
+    .pizza span{font-size:14.5px}
+    .retry button{min-height:44px;font-size:16.5px}
+    .block h2{font-size:clamp(34px, 1.8vw + 18px, 46px)}
+    .block .lead{font-size:17.5px}
+    .feature-list li{font-size:16.5px}
+    .feature-list li small{font-size:15px}
+    .stage{max-width:none}
+    .visual{padding:18px 24px}
+    .pill{font-size:15px;padding:5px 16px}
+    .xp-card .v{font-size:27px}
+    .xp-card .l{font-size:13.5px}
+    .xp-card .streak-pill .v{font-size:17px}
+    .streak div{height:26px;font-size:12px}
+    .path-card .tag{font-size:12px}
+    .path-row{padding:9px 0}
+    .path-row .t{font-size:18.5px}
+    .path-row .t small{font-size:13px}
+    .path-row .pct{font-size:22px}
+    .upload .tx b{font-size:18px}
+    .upload .tx small{font-size:13px}
+    .quizgen .h .label{font-size:17.5px}
+    .qrow{font-size:16px;padding-top:7px;padding-bottom:7px}
+    .qrow span{font-size:15px}
+    .stat{padding:7px 8px}
+    .stat .n{font-size:25px}
+    .stat .l{font-size:13px}
+    .report .head h4{font-size:19px}
+    .report .head small{font-size:13.5px}
+    .chart{height:110px}
+    .chart div::after{font-size:12.5px}
+    .goal{padding:8px 0}
+    .goal .t{font-size:17px}
+    .goal .t small{font-size:13px}
+    .goal .coins{font-size:19px}
+    .section-head{margin-bottom:22px}
+    .section-head h2{font-size:clamp(34px, 1.8vw + 18px, 46px)}
+    .section-head p{font-size:17px}
+    .step{padding:14px 20px 16px}
+    .step .num{font-size:26px}
+    .step h3{font-size:19.5px}
+    .step p{font-size:15.5px}
+    .f{padding:14px 18px;grid-template-columns:44px minmax(0,1fr)}
+    .f .ic{width:44px;height:44px}
+    .f h3{font-size:17.5px}
+    .f p{font-size:15px}
+    #about .f{padding:14px 18px 16px 50px}
+    .banner{max-width:1100px;padding:26px 170px 30px}
+    .closing h2{font-size:clamp(34px, 1.8vw + 18px, 48px)}
+    .closing p{font-size:17px}
+    .closing .eyebrow{font-size:12.5px}
+    .banner .books{width:clamp(130px,14vw,200px)}
+    .banner .plant{width:clamp(90px,9vw,130px)}
+    .foot-mission{font-size:15px}
+    .foot-col h5{font-size:13.5px}
+    .foot-col a{font-size:15px}
+  }
+
+  /* ── Motion: each section plays its own effect once, on entry ─────────────
+     Hidden starting states apply only when JS turned motion on (html.motion),
+     so content is always visible without JS and with reduced motion. */
+  @keyframes rise{from{opacity:0;transform:translateY(var(--rise))}to{opacity:1;transform:none}}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes glide{0%{opacity:0;transform:translate(-28px,22px) rotate(-6deg)}100%{opacity:1;transform:none}}
+  @keyframes tilt{0%{transform:rotate(0)}40%{transform:rotate(-9deg)}70%{transform:rotate(3deg)}100%{transform:rotate(0)}}
+  @keyframes drift{from{opacity:0;transform:translate(-18px,14px) scale(.96)}to{opacity:1;transform:none}}
+  @keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+  @keyframes sweep{0%{background-position:-120% 0;opacity:1}85%{opacity:1}100%{background-position:220% 0;opacity:0}}
+  html.motion .hero .portrait{animation:rise .7s var(--ease) both}
+  html.motion .hero .portrait-r{animation-delay:.12s}
+  html.motion .hero .plane{animation:glide 1.1s .25s var(--ease) both}
+  html.motion .hero .pencil{animation:tilt 1s .35s var(--ease) both;transform-origin:70% 80%}
+  html.motion .boards .crest{opacity:0}
+  html.motion .boards.in .crest{animation:fadeIn .45s var(--ease) both}
+  html.motion .boards.in .crest:nth-child(2){animation-delay:.07s}
+  html.motion .boards.in .crest:nth-child(3){animation-delay:.14s}
+  html.motion .boards.in .crest:nth-child(4){animation-delay:.21s}
+  html.motion .boards.in .crest:nth-child(5){animation-delay:.28s}
+  html.motion .boards.in .crest:nth-child(6){animation-delay:.35s}
+  html.motion .boards.in .crest:nth-child(7){animation-delay:.42s}
+  html.motion .boards.in .crest:nth-child(8){animation-delay:.49s}
+  html.motion .turn:not(.show){opacity:0}
+  html.motion .turn.show{animation:rise .5s var(--ease) both;--rise:8px}
+  html.motion .stage-student > .blob{opacity:0}
+  html.motion .stage-student.in > .blob{animation:drift .9s var(--ease) both}
+  html.motion .stage-teacher.in .qrow.sweep::after{content:"";position:absolute;inset:0;border-radius:6px;pointer-events:none;
+    background:linear-gradient(90deg,transparent 0%,var(--sweep) 45%,var(--sweep) 55%,transparent 100%) no-repeat;background-size:60% 100%;
+    animation:sweep 1.3s .3s var(--ease) both}
+  html.motion .stage-parent .chart div{transform:scaleY(0)}
+  html.motion .stage-parent.in .chart div{animation:grow .6s var(--ease) both}
+  html.motion .stage-parent.in .chart div:nth-child(2){animation-delay:.06s}
+  html.motion .stage-parent.in .chart div:nth-child(3){animation-delay:.12s}
+  html.motion .stage-parent.in .chart div:nth-child(4){animation-delay:.18s}
+  html.motion .stage-parent.in .chart div:nth-child(5){animation-delay:.24s}
+  html.motion .stage-parent.in .chart div:nth-child(6){animation-delay:.3s}
+  html.motion .stage-parent.in .chart div:nth-child(7){animation-delay:.36s}
+  html.motion .stage-school .stat{opacity:0}
+  html.motion .stage-school.in .stat{animation:fadeIn .4s var(--ease) both}
+  html.motion .stage-school.in .stat:nth-child(2){animation-delay:.1s}
+  html.motion .stage-school.in .stat:nth-child(3){animation-delay:.2s}
+  html.motion .steps .step{opacity:0}
+  html.motion .steps.in .step{animation:rise .55s var(--ease) both}
+  html.motion .steps.in .step:nth-child(2){animation-delay:.12s}
+  html.motion .steps.in .step:nth-child(3){animation-delay:.24s}
+  html.motion .banner .deco{opacity:0}
+  html.motion .banner.in .deco{animation:rise .7s var(--ease) both;--rise:8px}
+  html.motion .banner.in .plant{animation-delay:.1s}
+  /* TV: keep movement restrained. */
+  @media (min-width:1920px){html.motion .hero .plane{animation-duration:.8s}}
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    *,*::before,*::after{animation:none !important;transition-duration:.001ms !important}
+    html.motion .boards .crest,html.motion .turn,html.motion .stage-student > .blob,
+    html.motion .stage-school .stat,html.motion .steps .step,html.motion .banner .deco{opacity:1}
+    html.motion .stage-parent .chart div{transform:none}
+  }
 </style>
 </head>
 <body>
 
-<!-- Decorative artwork, coloured by theme tokens (see --leaf, --book, --hill) -->
+<!-- Decorative artwork, coloured by theme tokens (see --book-*, --leaf, --pencil) -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
   <defs>
-    <path id="d-leaf" d="M0 0 C12 -13 34 -14 48 0 C34 14 12 13 0 0 Z"/>
-    <symbol id="d-branch" viewBox="0 0 160 300">
-      <path d="M80 298 C78 240 70 190 84 130 C94 86 104 50 120 8" fill="none" style="stroke:var(--stem)" stroke-width="2.5" stroke-linecap="round"/>
-      <g style="fill:var(--leaf)">
-        <use href="#d-leaf" transform="translate(81 268) rotate(-28)"/>
-        <use href="#d-leaf" transform="translate(84 150) rotate(-42)"/>
-        <use href="#d-leaf" transform="translate(106 58) rotate(-52) scale(.75)"/>
-        <use href="#d-leaf" transform="translate(78 186) rotate(-145) scale(1.05)"/>
-        <use href="#d-leaf" transform="translate(94 80) rotate(-132) scale(.8)"/>
-      </g>
-      <g style="fill:var(--leaf-2)">
-        <use href="#d-leaf" transform="translate(79 212) rotate(-36) scale(1.05)"/>
-        <use href="#d-leaf" transform="translate(95 102) rotate(-48) scale(.9)"/>
-        <use href="#d-leaf" transform="translate(80 246) rotate(-152)"/>
-        <use href="#d-leaf" transform="translate(84 128) rotate(-138) scale(.95)"/>
-        <use href="#d-leaf" transform="translate(118 12) rotate(-68) scale(.6)"/>
+    <symbol id="d-pencil" viewBox="0 0 120 120">
+      <g transform="rotate(-38 60 60)">
+        <rect x="18" y="50" width="70" height="20" rx="3" style="fill:var(--pencil)"/>
+        <rect x="18" y="50" width="70" height="6" style="fill:var(--pencil-2)" opacity=".55"/>
+        <rect x="8" y="50" width="12" height="20" rx="3" fill="#F2A3B9"/>
+        <rect x="18" y="49" width="6" height="22" fill="#B9BEC7"/>
+        <path d="M88 50 L108 60 L88 70 Z" fill="#F3D6A6"/>
+        <path d="M101 56.5 L108 60 L101 63.5 Z" style="fill:var(--plane)"/>
       </g>
     </symbol>
-    <symbol id="d-books" viewBox="0 0 240 150">
-      <ellipse cx="122" cy="144" rx="112" ry="6" style="fill:var(--stem)" opacity=".2"/>
-      <!-- bottom book -->
-      <rect x="16" y="96" width="206" height="38" rx="3" style="fill:var(--pages)"/>
-      <path d="M24 104H218M24 112H218M24 120H218M24 128H218" style="stroke:var(--pages-line)" stroke-width=".9"/>
-      <rect x="10" y="88" width="216" height="9" rx="4" style="fill:var(--book)"/>
-      <rect x="10" y="132" width="216" height="10" rx="4" style="fill:var(--book)"/>
-      <rect x="4" y="88" width="20" height="54" rx="7" style="fill:var(--book)"/>
-      <!-- middle book -->
-      <rect x="46" y="53" width="160" height="28" rx="3" style="fill:var(--pages)"/>
-      <path d="M54 60H202M54 67H202M54 74H202" style="stroke:var(--pages-line)" stroke-width=".9"/>
-      <rect x="40" y="46" width="170" height="8" rx="4" style="fill:var(--book-2)"/>
-      <rect x="40" y="79" width="170" height="9" rx="4" style="fill:var(--book-2)"/>
-      <rect x="34" y="46" width="16" height="42" rx="6" style="fill:var(--book-2)"/>
-      <!-- top book -->
-      <rect x="66" y="23" width="122" height="18" rx="2" style="fill:var(--pages)"/>
-      <path d="M72 29H184M72 35H184" style="stroke:var(--pages-line)" stroke-width=".9"/>
-      <rect x="60" y="18" width="130" height="6" rx="3" style="fill:var(--book)"/>
-      <rect x="60" y="40" width="130" height="7" rx="3" style="fill:var(--book)"/>
-      <rect x="55" y="18" width="13" height="29" rx="5" style="fill:var(--book)"/>
+    <symbol id="d-plane" viewBox="0 0 130 110">
+      <path d="M8 104 C26 92 34 84 44 70" fill="none" style="stroke:var(--plane)" stroke-width="2.2" stroke-dasharray="4 6" stroke-linecap="round" opacity=".55"/>
+      <path d="M50 58 L124 8 L94 92 L76 66 Z" fill="none" style="stroke:var(--plane)" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M50 58 L124 8 L76 66" fill="none" style="stroke:var(--plane)" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M76 66 L72 86 L84 74" fill="none" style="stroke:var(--plane)" stroke-width="3" stroke-linejoin="round"/>
     </symbol>
-    <symbol id="d-hill" viewBox="0 0 600 160" preserveAspectRatio="none">
-      <path d="M0 160V64C120 26 262 36 362 88C442 128 520 142 600 160Z" style="fill:var(--hill-2)"/>
-      <path d="M0 160V106C142 78 302 98 422 138C482 154 542 158 600 160Z" style="fill:var(--hill)"/>
+    <symbol id="d-books" viewBox="0 0 220 140">
+      <ellipse cx="112" cy="134" rx="100" ry="6" fill="#000" opacity=".12"/>
+      <rect x="14" y="94" width="190" height="36" rx="6" style="fill:var(--book-a)"/>
+      <rect x="26" y="100" width="172" height="24" rx="3" style="fill:var(--pages)"/>
+      <path d="M30 106H196M30 112H196M30 118H196" style="stroke:var(--pages-line)" stroke-width="1"/>
+      <rect x="30" y="60" width="160" height="34" rx="6" style="fill:var(--book-b)"/>
+      <rect x="40" y="66" width="144" height="22" rx="3" style="fill:var(--pages)"/>
+      <path d="M44 72H182M44 78H182" style="stroke:var(--pages-line)" stroke-width="1"/>
+      <rect x="44" y="30" width="134" height="30" rx="6" style="fill:var(--book-c)"/>
+      <rect x="54" y="36" width="118" height="18" rx="3" style="fill:var(--pages)"/>
+      <path d="M58 42H170M58 48H170" style="stroke:var(--pages-line)" stroke-width="1"/>
+    </symbol>
+    <symbol id="d-plant" viewBox="0 0 120 140">
+      <path d="M60 138 C60 110 58 80 60 50" fill="none" style="stroke:var(--leaf)" stroke-width="3" stroke-linecap="round"/>
+      <path d="M60 96 C40 92 22 74 18 50 C40 52 56 70 60 96 Z" style="fill:var(--leaf-2)"/>
+      <path d="M60 84 C80 80 98 62 104 38 C80 40 64 58 60 84 Z" style="fill:var(--leaf)"/>
+      <path d="M60 60 C46 50 40 30 46 8 C62 20 66 40 60 60 Z" style="fill:var(--leaf)"/>
+      <path d="M60 116 C78 116 96 104 106 86 C84 84 68 96 60 116 Z" style="fill:var(--leaf-2)"/>
+      <path d="M60 122 C44 122 26 112 16 94 C38 92 52 104 60 122 Z" style="fill:var(--leaf)"/>
     </symbol>
   </defs>
 </svg>
 
 <div class="nav-wrap" id="navWrap">
   <div class="container">
-    <nav>
-      <a href="#" class="logo"><span class="logo-mark">Æ</span> Aivorah</a>
+    <nav aria-label="Main">
+      <a href="#" class="logo">Aivorah</a>
       <div class="nav-links">
         <a href="#features">Features</a>
         <a href="#how">How It Works</a>
@@ -602,13 +778,13 @@
       <div class="nav-cta">
         <button class="theme-toggle" id="themeToggle" type="button" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode">
           <span class="tt-knob" aria-hidden="true"></span>
-          <svg class="tt-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
-          <svg class="tt-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+          <span class="tt-opt tt-light" aria-hidden="true"><svg class="tt-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><span class="tt-word">Light</span></span>
+          <span class="tt-opt tt-dark" aria-hidden="true"><svg class="tt-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg><span class="tt-word">Dark</span></span>
         </button>
         <button class="btn btn-ghost">Login</button>
         <button class="btn btn-primary">Join Early Access</button>
-        <button class="menu-btn" id="menuBtn" aria-label="Menu">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        <button class="menu-btn" id="menuBtn" type="button" aria-label="Menu" aria-expanded="false" aria-controls="mobileMenu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
         </button>
       </div>
     </nav>
@@ -625,26 +801,28 @@
 </div>
 
 <header class="hero">
-  <div class="deco deco-branch deco-branch-l" aria-hidden="true"><svg viewBox="0 0 160 300"><use href="#d-branch"/></svg></div>
-  <div class="deco deco-branch deco-branch-r deco-flip" aria-hidden="true"><svg viewBox="0 0 160 300"><use href="#d-branch"/></svg></div>
-  <div class="deco deco-branch deco-branch-r2 deco-flip" aria-hidden="true"><svg viewBox="0 0 160 300"><use href="#d-branch"/></svg></div>
-  <div class="deco deco-hill deco-hill-l" aria-hidden="true"><svg viewBox="0 0 600 160" preserveAspectRatio="none"><use href="#d-hill"/></svg></div>
-  <div class="deco deco-hill deco-hill-r deco-flip" aria-hidden="true"><svg viewBox="0 0 600 160" preserveAspectRatio="none"><use href="#d-hill"/></svg></div>
-  <div class="deco deco-books" aria-hidden="true"><svg viewBox="0 0 240 150"><use href="#d-books"/></svg></div>
+  <div class="deco pencil" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#d-pencil"/></svg></div>
+  <div class="deco plane" aria-hidden="true"><svg viewBox="0 0 130 110"><use href="#d-plane"/></svg></div>
 
   <div class="container">
-    <div class="hero-inner reveal">
-      <span class="eyebrow"><span class="dot"></span> Private Beta · India 2026</span>
-      <h1>AI-Powered Learning,<br/><span class="grad">for everyone.</span></h1>
-      <p class="sub">A patient, personalised AI tutor for every student, with real-time classroom insight for teachers and weekly progress for parents.</p>
-      <div class="hero-ctas">
-        <button class="btn btn-primary">Get Early Access for Free
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-        </button>
-        <button class="btn btn-ghost">Book a Demo</button>
+    <div class="hero-grid">
+      <div class="hero-inner">
+        <span class="eyebrow"><span class="dot"></span> Private Beta · India 2026</span>
+        <h1>AI-Powered Learning, <span class="grad">for everyone.</span></h1>
+        <p class="sub">A patient, personalised AI tutor for every student, with real-time classroom insight for teachers and weekly progress for parents.</p>
+        <div class="hero-ctas">
+          <button class="btn btn-primary">Get Early Access for Free
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </button>
+          <button class="btn btn-ghost">Book a Demo</button>
+        </div>
+        <div class="hero-trust">
+          <span>Aligned to <b>IB, CBSE, ICSE and Cambridge</b>. Content grounded in NCERT and official board textbooks.</span>
+        </div>
       </div>
-      <div class="hero-trust">
-        <span>Aligned to <b style="color:var(--text);font-weight:500">IB, CBSE, ICSE and Cambridge</b>. Content grounded in NCERT and official board textbooks.</span>
+      <div class="portraits" aria-hidden="true">
+        <div class="portrait portrait-l"><img src="/home/student-girl.webp" alt="" width="741" height="943" decoding="async"/></div>
+        <div class="portrait portrait-r"><img src="/home/student-boy.webp" alt="" width="734" height="957" decoding="async"/></div>
       </div>
     </div>
   </div>
@@ -654,101 +832,38 @@
   <div class="container trust-inner">
     <div class="trust-label">Aligned with the boards Indian families trust</div>
 
-    <div class="marquee" role="group" tabindex="0" aria-label="Curriculum boards: IB, CBSE, ICSE, Cambridge, NCERT">
-      <div class="marquee-track" id="curriculumTrack">
-        <!-- group 1 -->
+    <div class="boards" id="curriculumTrack" role="group" aria-label="Curriculum boards: IB, CBSE, ICSE, Cambridge, NCERT">
         <span class="crest" title="International Baccalaureate">
-          <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
-            <circle cx="32" cy="32" r="30" stroke="currentColor" stroke-width="1.4"/>
-            <circle cx="32" cy="32" r="22" stroke="currentColor" stroke-width="1" opacity=".5"/>
-            <path d="M14 32 Q32 18 50 32 Q32 46 14 32 Z" stroke="currentColor" stroke-width="1" opacity=".55" fill="none"/>
-            <path d="M32 8 Q24 32 32 56 M32 8 Q40 32 32 56" stroke="currentColor" stroke-width="1" opacity=".45" fill="none"/>
-            <text x="32" y="38" text-anchor="middle" font-family="Georgia,serif" font-size="16" font-weight="700" fill="currentColor" letter-spacing="1">IB</text>
-          </svg>
           <span class="lbl"><b>International Baccalaureate</b><small>PYP · MYP · DP</small></span>
         </span>
 
         <span class="crest" title="Central Board of Secondary Education">
-          <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
-            <path d="M32 4 L56 12 V32 C56 46 45 56 32 60 C19 56 8 46 8 32 V12 Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
-            <path d="M32 10 L50 16 V32 C50 43 41 51 32 54 C23 51 14 43 14 32 V16 Z" stroke="currentColor" stroke-width=".8" opacity=".4" fill="none"/>
-            <circle cx="32" cy="26" r="5" stroke="currentColor" stroke-width="1" opacity=".6"/>
-            <path d="M28 26 L32 22 L36 26 L32 30 Z" fill="currentColor" opacity=".55"/>
-            <text x="32" y="44" text-anchor="middle" font-family="Georgia,serif" font-size="9" font-weight="700" fill="currentColor" letter-spacing="1.4">CBSE</text>
-          </svg>
           <span class="lbl"><b>CBSE</b><small>Classes I to XII</small></span>
         </span>
 
         <span class="crest" title="Indian Certificate of Secondary Education">
-          <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
-            <path d="M10 10 H54 V36 C54 48 44 56 32 60 C20 56 10 48 10 36 Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
-            <path d="M10 18 H54 M10 30 H54" stroke="currentColor" stroke-width=".7" opacity=".35"/>
-            <path d="M22 44 Q18 50 22 56 M42 44 Q46 50 42 56" stroke="currentColor" stroke-width="1" opacity=".5" fill="none"/>
-            <text x="32" y="27" text-anchor="middle" font-family="Georgia,serif" font-size="7" font-weight="600" fill="currentColor" letter-spacing="2">CISCE</text>
-            <text x="32" y="42" text-anchor="middle" font-family="Georgia,serif" font-size="9" font-weight="700" fill="currentColor" letter-spacing="1.4">ICSE</text>
-          </svg>
           <span class="lbl"><b>ICSE / ISC</b><small>CISCE Council</small></span>
         </span>
 
         <span class="crest" title="Cambridge Assessment International Education">
-          <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
-            <path d="M12 8 H52 V34 C52 46 43 55 32 58 C21 55 12 46 12 34 Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
-            <path d="M32 8 V58 M12 24 H52" stroke="currentColor" stroke-width=".7" opacity=".35"/>
-            <path d="M20 14 L26 20 M44 14 L38 20 M20 44 L26 38 M44 44 L38 38" stroke="currentColor" stroke-width="1" opacity=".55"/>
-            <circle cx="32" cy="32" r="4.5" stroke="currentColor" stroke-width="1" fill="none"/>
-            <path d="M30 30 L32 32 L36 28" stroke="currentColor" stroke-width="1.2"/>
-          </svg>
           <span class="lbl"><b>Cambridge</b><small>IGCSE · A Level</small></span>
         </span>
 
         <span class="crest" title="National Council of Educational Research and Training">
-          <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
-            <circle cx="32" cy="32" r="28" stroke="currentColor" stroke-width="1.4"/>
-            <g stroke="currentColor" stroke-width="1" opacity=".7" fill="none">
-              <path d="M32 14 C28 22 28 30 32 36 C36 30 36 22 32 14 Z"/>
-              <path d="M18 26 C24 28 30 32 32 36 C30 32 26 26 18 26 Z"/>
-              <path d="M46 26 C40 28 34 32 32 36 C34 32 38 26 46 26 Z"/>
-              <path d="M22 18 C24 24 28 30 32 36 C30 30 28 22 22 18 Z"/>
-              <path d="M42 18 C40 24 36 30 32 36 C34 30 36 22 42 18 Z"/>
-            </g>
-            <path d="M18 42 H46" stroke="currentColor" stroke-width="1.4"/>
-            <path d="M20 44 H44 V50 H20 Z" stroke="currentColor" stroke-width=".8" fill="none" opacity=".6"/>
-          </svg>
           <span class="lbl"><b>NCERT</b><small>National Framework</small></span>
         </span>
 
         <span class="crest" title="Oxford University Press">
-          <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
-            <rect x="10" y="12" width="44" height="40" rx="4" stroke="currentColor" stroke-width="1.4"/>
-            <path d="M10 20 H54 M10 44 H54" stroke="currentColor" stroke-width=".8" opacity=".4"/>
-            <path d="M32 12 V52" stroke="currentColor" stroke-width=".8" opacity=".3"/>
-            <path d="M18 30 Q24 24 30 30 Q24 36 18 30 Z" fill="currentColor" opacity=".5"/>
-            <text x="40" y="36" text-anchor="middle" font-family="Georgia,serif" font-size="14" font-weight="700" fill="currentColor" letter-spacing=".5">OUP</text>
-          </svg>
           <span class="lbl"><b>Oxford</b><small>University Press</small></span>
         </span>
 
         <span class="crest" title="Pearson">
-          <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
-            <circle cx="32" cy="32" r="28" stroke="currentColor" stroke-width="1.4"/>
-            <path d="M32 12 V24" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
-            <circle cx="32" cy="32" r="5" stroke="currentColor" stroke-width="1.6"/>
-            <path d="M32 37 L32 44" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
-            <path d="M28 40 L36 40" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
-          </svg>
           <span class="lbl"><b>Pearson</b><small>Always Learning</small></span>
         </span>
 
         <span class="crest" title="Hodder Education">
-          <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
-            <path d="M14 10 H50 V54 H14 Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
-            <path d="M14 18 H50" stroke="currentColor" stroke-width=".8" opacity=".4"/>
-            <path d="M22 30 V46 M22 34 H30 M22 42 H30" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M38 30 V46 M34 34 H42 M34 42 H42" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
           <span class="lbl"><b>Hodder</b><small>Education</small></span>
         </span>
-      </div>
     </div>
 
     <div class="trust-note">Content grounded in NCERT and official board textbooks, taught the way each board expects.</div>
@@ -758,53 +873,53 @@
 <!-- TUTOR DEMO -->
 <section class="demo">
   <div class="container">
-    <div class="sim" id="sim">
-      <div class="sim-head">
-        <div class="who"><span class="pulse"></span> Aivorah Tutor · Grade 5 Maths</div>
-        <div class="confidence">Confidence <div class="conf-bar"><div class="conf-fill" id="confFill"></div></div> <span id="confPct">25%</span></div>
-      </div>
-      <div class="question">
-        <div class="q">What is <em>¾ + ½</em>?</div>
-        <div class="meta">Fractions · Q3 of 10</div>
-      </div>
-      <div class="turn me" id="t1">
-        <div class="avatar av-st">A</div>
-        <div class="bubble st wrong">
-          <div class="tag">Aarav's answer</div>
-          ¾ + ½ = <b>⅘</b>
+    <div class="demo-stage">
+      <span class="blob blob-yellow" aria-hidden="true"></span>
+      <span class="blob blob-green" aria-hidden="true"></span>
+      <div class="sim" id="sim">
+        <div class="sim-head">
+          <div class="who"><span class="pulse"></span> Aivorah Tutor · Grade 5 Maths</div>
+          <div class="confidence">Confidence <div class="conf-bar"><div class="conf-fill" id="confFill"></div></div> <span id="confPct">25%</span></div>
         </div>
-      </div>
-      <div class="turn" id="t2">
-        <div class="avatar av-ai">Æ</div>
-        <div class="bubble ai">
-          <div class="tag">Aivorah</div>
-          Not quite. Let's try a simpler way. Imagine a pizza cut into equal slices…
-          <div class="pizza" aria-hidden="true">
-            <svg width="44" height="44" viewBox="0 0 44 44">
-              <circle cx="22" cy="22" r="20" fill="none" stroke="#BAA467" stroke-width="1.4" opacity=".5"/>
-              <path d="M22 22 L22 2 A20 20 0 0 1 39.3 32 Z" fill="#BAA467" opacity=".55"/>
-              <line x1="22" y1="2" x2="22" y2="42" stroke="#BAA467" stroke-width="1" opacity=".4"/>
-              <line x1="2" y1="22" x2="42" y2="22" stroke="#BAA467" stroke-width="1" opacity=".4"/>
-            </svg>
-            <span>Make both fractions share the same slice size, quarters. Then count the shaded slices.</span>
+        <div class="question">
+          <div class="q">What is <em>¾ + ½</em>?</div>
+          <div class="meta">Fractions · Q3 of 10</div>
+        </div>
+        <div class="turn me" id="t1">
+          <div class="tag">Aarav's answer</div>
+          <div class="bubble st wrong">
+            ¾ + ½ = <b>⅘</b>
           </div>
         </div>
-      </div>
-      <div class="turn me" id="t3">
-        <div class="avatar av-st">A</div>
-        <div class="bubble st right">
-          <div class="tag">Aarav retries</div>
-          ¾ + 2/4 = <b>5/4</b>, that's one and a quarter pizzas.
-        </div>
-      </div>
-      <div class="turn" id="t4">
-        <div class="avatar av-ai">Æ</div>
-        <div class="bubble ai">
+        <div class="turn" id="t2">
           <div class="tag">Aivorah</div>
-          Beautifully done. You found a common denominator on your own. That's the real skill. Ready for the next one?
+          <div class="bubble ai">
+            Not quite. Let's try a simpler way. Imagine a pizza cut into equal slices…
+            <div class="pizza" aria-hidden="true">
+              <svg width="44" height="44" viewBox="0 0 44 44">
+                <circle cx="22" cy="22" r="20" fill="none" stroke-width="1.4" opacity=".6"/>
+                <path d="M22 22 L22 2 A20 20 0 0 1 39.3 32 Z" opacity=".75"/>
+                <line x1="22" y1="2" x2="22" y2="42" stroke-width="1" opacity=".5"/>
+                <line x1="2" y1="22" x2="42" y2="22" stroke-width="1" opacity=".5"/>
+              </svg>
+              <span>Make both fractions share the same slice size, quarters. Then count the shaded slices.</span>
+            </div>
+          </div>
         </div>
+        <div class="turn me" id="t3">
+          <div class="tag">Aarav retries</div>
+          <div class="bubble st right">
+            ¾ + 2/4 = <b>5/4</b>, that's one and a quarter pizzas.
+          </div>
+        </div>
+        <div class="turn" id="t4">
+          <div class="tag">Aivorah</div>
+          <div class="bubble ai">
+            Beautifully done. You found a common denominator on your own. That's the real skill. Ready for the next one?
+          </div>
+        </div>
+        <div class="retry"><button id="replay" type="button">↻ Replay</button></div>
       </div>
-      <div class="retry"><button id="replay">↻ Replay</button></div>
     </div>
   </div>
 </section>
@@ -812,44 +927,8 @@
 <!-- STUDENT -->
 <section id="platform" class="aud">
   <div class="container">
-    <div class="block reveal">
-      <div class="deco sprig" aria-hidden="true"><svg viewBox="0 0 160 300"><use href="#d-branch"/></svg></div>
-      <div class="visual v-student">
-        <div>
-          <div class="xp-card">
-            <div>
-              <div class="l">Today's XP</div>
-              <div class="v">+ 240</div>
-            </div>
-            <div style="text-align:right">
-              <div class="l">Streak</div>
-              <div class="v" style="color:var(--sage)">17 days</div>
-            </div>
-          </div>
-          <div class="streak" aria-hidden="true">
-            <div class="on">M</div><div class="on">T</div><div class="on">W</div><div class="on">T</div><div class="on">F</div><div>S</div><div>S</div>
-          </div>
-        </div>
-        <div class="path-card">
-          <div class="tag" style="margin-bottom:12px">Your learning path · Grade 5</div>
-          <div class="path-row">
-            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5a2 2 0 0 1 2-2h14v18H6a2 2 0 0 1-2-2z"/></svg></div>
-            <div class="t">Fractions & Decimals <small>Mastery building · 6 lessons left</small></div>
-            <div class="pct">82%</div>
-          </div>
-          <div class="path-row">
-            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a13 13 0 0 1 0 18M12 3a13 13 0 0 0 0 18"/></svg></div>
-            <div class="t">Earth & Space <small>NCERT EVS · Chapter 4</small></div>
-            <div class="pct">54%</div>
-          </div>
-          <div class="path-row">
-            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h14v16H5z"/><path d="M9 4v16M14 8h3M14 12h3"/></svg></div>
-            <div class="t">English Reading Fluency <small>Read-aloud · 12 stories</small></div>
-            <div class="pct">36%</div>
-          </div>
-        </div>
-      </div>
-      <div>
+    <div class="block">
+      <div class="copy">
         <span class="eyebrow"><span class="dot"></span> For Students · Nursery → Grade 12</span>
         <h2>Every child gets a <em>patient</em> AI coach.</h2>
         <p class="lead">No child should leave a lesson feeling defeated. Aivorah meets your child exactly where they are, explaining, re-explaining, and rebuilding confidence one small step at a time.</p>
@@ -860,6 +939,44 @@
           <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5 9-11"/></svg></span><div>XP, streaks &amp; Olympiad prep <small>Effort celebrated. Mastery earned. Competitions made approachable.</small></div></li>
         </ul>
       </div>
+      <div class="stage stage-student">
+        <span class="blob" aria-hidden="true"></span>
+        <div class="visual v-student">
+          <div>
+            <div class="xp-card">
+              <div>
+                <div class="l">Today's XP</div>
+                <div class="v">+ 240</div>
+              </div>
+              <div class="streak-pill">
+                <div class="l">Streak</div>
+                <div class="v">17 days</div>
+              </div>
+            </div>
+            <div class="streak" aria-hidden="true">
+              <div class="on">M</div><div class="on">T</div><div class="on">W</div><div class="on">T</div><div class="on">F</div><div>S</div><div>S</div>
+            </div>
+          </div>
+          <div class="path-card">
+            <div class="tag">Your learning path · Grade 5</div>
+            <div class="path-row">
+              <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5a2 2 0 0 1 2-2h14v18H6a2 2 0 0 1-2-2z"/></svg></div>
+              <div class="t">Fractions & Decimals <small>Mastery building · 6 lessons left</small></div>
+              <div class="pct">82%</div>
+            </div>
+            <div class="path-row">
+              <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a13 13 0 0 1 0 18M12 3a13 13 0 0 0 0 18"/></svg></div>
+              <div class="t">Earth & Space <small>NCERT EVS · Chapter 4</small></div>
+              <div class="pct">54%</div>
+            </div>
+            <div class="path-row">
+              <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h14v16H5z"/><path d="M9 4v16M14 8h3M14 12h3"/></svg></div>
+              <div class="t">English Reading Fluency <small>Read-aloud · 12 stories</small></div>
+              <div class="pct">36%</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -867,33 +984,8 @@
 <!-- TEACHER -->
 <section id="teachers" class="aud">
   <div class="container">
-    <div class="block reverse reveal">
-      <div class="deco sprig" aria-hidden="true"><svg viewBox="0 0 160 300"><use href="#d-branch"/></svg></div>
-      <div class="visual v-teacher">
-        <div class="upload">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15l3-3 3 3"/></svg></div>
-          <div class="tx"><b>Worksheet_Ch4_Fractions.pdf</b><small>Uploaded · Generating 12-question adaptive quiz…</small></div>
-          <div class="arrow">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-          </div>
-        </div>
-        <div class="quizgen">
-          <div class="h">
-            <span class="label">Generated quiz · 5B Maths</span>
-            <span class="pill">Auto-graded</span>
-          </div>
-          <div class="qrow">Q1 · Add unlike fractions <span>MCQ</span></div>
-          <div class="qrow">Q2 · Word problem: sharing rotis <span>Short answer</span></div>
-          <div class="qrow">Q3 · Equivalent fractions <span>Drag &amp; drop</span></div>
-          <div class="qrow">Q4 · Compare ¾ vs ⅔ <span>True / False</span></div>
-        </div>
-        <div class="analytics">
-          <div class="stat"><div class="n">28</div><div class="l">Students</div></div>
-          <div class="stat"><div class="n" style="color:var(--sage)">87%</div><div class="l">Avg mastery</div></div>
-          <div class="stat"><div class="n" style="color:var(--gold)">4</div><div class="l">Need support</div></div>
-        </div>
-      </div>
-      <div>
+    <div class="block reverse">
+      <div class="copy">
         <span class="eyebrow"><span class="dot"></span> For Teachers</span>
         <h2>Teach <em>smarter</em>, not harder.</h2>
         <p class="lead">Give your classroom hours back. Upload a worksheet, get an adaptive quiz. Watch mastery rise in real-time, and know exactly which student needs you next.</p>
@@ -904,6 +996,33 @@
           <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5 9-11"/></svg></span><div>Bulk student import &amp; progress tracking <small>Roll out across a section, grade or school in one click.</small></div></li>
         </ul>
       </div>
+      <div class="stage stage-teacher">
+        <span class="blob" aria-hidden="true"></span>
+        <div class="visual v-teacher">
+          <div class="upload">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15l3-3 3 3"/></svg></div>
+            <div class="tx"><b>Worksheet_Ch4_Fractions.pdf</b><small>Uploaded · Generating 12-question adaptive quiz…</small></div>
+            <div class="arrow">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+          <div class="quizgen">
+            <div class="h">
+              <span class="label">Generated quiz · 5B Maths</span>
+              <span class="pill">Auto-graded</span>
+            </div>
+            <div class="qrow">Q1 · Add unlike fractions <span>MCQ</span></div>
+            <div class="qrow sweep">Q2 · Word problem: sharing rotis <span>Short answer</span></div>
+            <div class="qrow">Q3 · Equivalent fractions <span>Drag &amp; drop</span></div>
+            <div class="qrow">Q4 · Compare ¾ vs ⅔ <span>True / False</span></div>
+          </div>
+          <div class="analytics">
+            <div class="stat"><div class="n">28</div><div class="l">Students</div></div>
+            <div class="stat"><div class="n">87%</div><div class="l">Avg mastery</div></div>
+            <div class="stat"><div class="n">4</div><div class="l">Need support</div></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -911,48 +1030,8 @@
 <!-- PARENT -->
 <section id="parents" class="aud">
   <div class="container">
-    <div class="block reveal">
-      <div class="deco sprig" aria-hidden="true"><svg viewBox="0 0 160 300"><use href="#d-branch"/></svg></div>
-      <div class="visual v-parent">
-        <div class="report">
-          <div class="head">
-            <div>
-              <h4>Aarav's week</h4>
-              <small>Nov 11 to 17 · Grade 5</small>
-            </div>
-            <small style="color:var(--sage)">Mastery <b style="color:var(--text);font-family:var(--serif);font-size:18px">↑ 12%</b></small>
-          </div>
-          <div class="chart" aria-hidden="true">
-            <div data-day="M" style="height:35%"></div>
-            <div data-day="T" style="height:55%"></div>
-            <div data-day="W" style="height:45%"></div>
-            <div data-day="T" style="height:72%"></div>
-            <div data-day="F" style="height:88%"></div>
-            <div data-day="S" style="height:60%"></div>
-            <div data-day="S" style="height:78%"></div>
-          </div>
-        </div>
-        <div class="goal">
-          <svg class="ring" viewBox="0 0 36 36">
-            <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(245,243,238,0.08)" stroke-width="3"/>
-            <circle cx="18" cy="18" r="15" fill="none" stroke="#9FB2A4" stroke-width="3" stroke-linecap="round" stroke-dasharray="94.2" stroke-dashoffset="22" transform="rotate(-90 18 18)"/>
-          </svg>
-          <div class="t">Today's learning goal <small>22 of 30 minutes complete</small></div>
-          <div class="coins">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M8 10h6a2 2 0 0 1 0 4H9a2 2 0 0 0 0 4h7"/></svg>
-            +85
-          </div>
-        </div>
-        <div class="goal">
-          <svg class="ring" viewBox="0 0 36 36">
-            <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(245,243,238,0.08)" stroke-width="3"/>
-            <circle cx="18" cy="18" r="15" fill="none" stroke="#BAA467" stroke-width="3" stroke-linecap="round" stroke-dasharray="94.2" stroke-dashoffset="0" transform="rotate(-90 18 18)"/>
-          </svg>
-          <div class="t">Weekly AI report <small>Ready to read · 2 min</small></div>
-          <a class="btn btn-ghost" style="padding:8px 14px;font-size:12px" href="#">Open</a>
-        </div>
-      </div>
-      <div>
+    <div class="block">
+      <div class="copy">
         <span class="eyebrow"><span class="dot"></span> For Parents</span>
         <h2>Never wonder <em>how your child is doing</em>.</h2>
         <p class="lead">A calm, honest window into your child's learning week. No guesswork, no jargon. Just real progress, written like a thoughtful teacher would.</p>
@@ -963,6 +1042,48 @@
           <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5 9-11"/></svg></span><div>Full progress visibility <small>Every quiz, every retry, every win, quietly and beautifully tracked.</small></div></li>
         </ul>
       </div>
+      <div class="stage stage-parent">
+        <span class="blob" aria-hidden="true"></span>
+        <div class="visual v-parent">
+          <div class="report">
+            <div class="head">
+              <div>
+                <h4>Aarav's week</h4>
+                <small>Nov 11 to 17 · Grade 5</small>
+              </div>
+              <small class="trend pill">Mastery <b>↑ 12%</b></small>
+            </div>
+            <div class="chart" aria-hidden="true">
+              <div data-day="M" style="height:35%"></div>
+              <div data-day="T" style="height:55%"></div>
+              <div data-day="W" style="height:45%"></div>
+              <div data-day="T" style="height:72%"></div>
+              <div data-day="F" style="height:88%"></div>
+              <div data-day="S" style="height:60%"></div>
+              <div data-day="S" style="height:78%"></div>
+            </div>
+          </div>
+          <div class="goal">
+            <svg class="ring" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="15" fill="none" stroke-width="3"/>
+              <circle cx="18" cy="18" r="15" fill="none" stroke-width="3" stroke-linecap="round" stroke-dasharray="94.2" stroke-dashoffset="22" transform="rotate(-90 18 18)"/>
+            </svg>
+            <div class="t">Today's learning goal <small>22 of 30 minutes complete</small></div>
+            <div class="coins">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M8 10h6a2 2 0 0 1 0 4H9a2 2 0 0 0 0 4h7"/></svg>
+              +85
+            </div>
+          </div>
+          <div class="goal">
+            <svg class="ring" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="15" fill="none" stroke-width="3"/>
+              <circle cx="18" cy="18" r="15" fill="none" stroke-width="3" stroke-linecap="round" stroke-dasharray="94.2" stroke-dashoffset="0" transform="rotate(-90 18 18)"/>
+            </svg>
+            <div class="t">Weekly AI report <small>Ready to read · 2 min</small></div>
+            <a class="btn btn-ghost" style="padding:8px 14px;font-size:12.5px" href="#">Open</a>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -970,25 +1091,8 @@
 <!-- SCHOOLS -->
 <section id="schools" class="aud">
   <div class="container">
-    <div class="block reverse reveal">
-      <div class="deco sprig" aria-hidden="true"><svg viewBox="0 0 160 300"><use href="#d-branch"/></svg></div>
-      <div class="visual v-teacher">
-        <div class="quizgen">
-          <div class="h">
-            <span class="label">Greenwood International · IB PYP</span>
-            <span class="pill">Live pilot</span>
-          </div>
-          <div class="qrow">Grade 3 · Mathematics <span>92% engaged</span></div>
-          <div class="qrow">Grade 4 · Science <span>88% engaged</span></div>
-          <div class="qrow">Grade 5 · English <span>90% engaged</span></div>
-        </div>
-        <div class="analytics">
-          <div class="stat"><div class="n">1,200</div><div class="l">Students</div></div>
-          <div class="stat"><div class="n" style="color:var(--sage)">48</div><div class="l">Classrooms</div></div>
-          <div class="stat"><div class="n" style="color:var(--gold)">+14%</div><div class="l">Avg mastery</div></div>
-        </div>
-      </div>
-      <div>
+    <div class="block reverse">
+      <div class="copy">
         <span class="eyebrow"><span class="dot"></span> For Schools</span>
         <h2>Personalised learning, <em>at every desk</em>.</h2>
         <p class="lead">Bring an adaptive AI tutor to every classroom: curriculum-aligned, teacher-led and measurable. Aivorah supports your educators, keeps parents engaged, and helps your institution raise outcomes at scale.</p>
@@ -998,10 +1102,29 @@
           <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5 9-11"/></svg></span><div>Institution-level analytics <small>Track mastery and engagement across classrooms and cohorts.</small></div></li>
           <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5 9-11"/></svg></span><div>Dedicated onboarding &amp; support <small>A guided pilot with hands-on help for your teachers.</small></div></li>
         </ul>
-        <div class="btn-row" style="margin-top:24px">
+        <div class="btn-row schools-cta">
           <button class="btn btn-sage" id="schoolsDemo">Book a Demo
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
           </button>
+        </div>
+      </div>
+      <div class="stage stage-school">
+        <span class="blob" aria-hidden="true"></span>
+        <div class="visual v-teacher">
+          <div class="quizgen">
+            <div class="h">
+              <span class="label">Greenwood International · IB PYP</span>
+              <span class="pill">Live pilot</span>
+            </div>
+            <div class="qrow">Grade 3 · Mathematics <span>92% engaged</span></div>
+            <div class="qrow">Grade 4 · Science <span>88% engaged</span></div>
+            <div class="qrow">Grade 5 · English <span>90% engaged</span></div>
+          </div>
+          <div class="analytics">
+            <div class="stat"><div class="n">1,200</div><div class="l">Students</div></div>
+            <div class="stat"><div class="n">48</div><div class="l">Classrooms</div></div>
+            <div class="stat"><div class="n">+14%</div><div class="l">Avg mastery</div></div>
+          </div>
         </div>
       </div>
     </div>
@@ -1011,26 +1134,23 @@
 <!-- HOW IT WORKS -->
 <section id="how">
   <div class="container">
-    <div class="section-head reveal">
+    <div class="section-head">
       <span class="eyebrow"><span class="dot"></span> How Adaptive Learning Works</span>
       <h2>A teaching loop that <em>never gives up</em>.</h2>
       <p>Three quiet, deliberate steps that turn every wrong answer into the start of real understanding.</p>
     </div>
     <div class="steps">
-      <div class="step reveal">
-        <div class="corner"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg></div>
+      <div class="step">
         <div class="num">01</div>
         <h3>Understand the learner</h3>
         <p>A gentle diagnostic reads how your child thinks, not just what they know. Pace, gaps, strengths, and confidence are all mapped.</p>
       </div>
-      <div class="step reveal">
-        <div class="corner"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V5a2 2 0 0 1 2-2h14v18H6a2 2 0 0 1-2-2z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></div>
+      <div class="step">
         <div class="num">02</div>
         <h3>Adapt and teach</h3>
         <p>When something doesn't land, Aivorah switches its approach with a simpler explanation, a real-world example or smaller steps, until it does.</p>
       </div>
-      <div class="step reveal">
-        <div class="corner"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg></div>
+      <div class="step">
         <div class="num">03</div>
         <h3>Measure real progress</h3>
         <p>Mastery is tracked at the concept level, not the chapter level, so growth is honest, visible and shared with parents and teachers.</p>
@@ -1042,18 +1162,18 @@
 <!-- FEATURES GRID -->
 <section id="features">
   <div class="container">
-    <div class="section-head reveal">
+    <div class="section-head">
       <span class="eyebrow"><span class="dot"></span> The Platform</span>
       <h2>Everything a modern <em>learner</em> needs.</h2>
       <p>Designed with educators. Aligned to your board. Built to grow with your child from nursery to Grade 12.</p>
     </div>
     <div class="features">
-      <div class="f reveal"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2a5 5 0 0 1 5 5v3a5 5 0 1 1-10 0V7a5 5 0 0 1 5-5z"/><path d="M5 21c1.5-3 4-5 7-5s5.5 2 7 5"/></svg></div><h3>Adaptive AI Coach</h3><p>A patient tutor that re-explains, simplifies and encourages, never moving on until your child is ready.</p></div>
-      <div class="f reveal"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg></div><h3>Curriculum-Aligned Paths</h3><p>Learning journeys built to IB, CBSE, ICSE and Cambridge, grounded in NCERT and official textbooks.</p></div>
-      <div class="f reveal"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12l2 2 4-4"/><path d="M4 7h16v13H4z"/><path d="M8 7V4h8v3"/></svg></div><h3>AI Auto-Graded Assignments</h3><p>From handwritten worksheets to typed responses, graded with rubric-level care in seconds.</p></div>
-      <div class="f reveal"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3 6 6 .9-4.5 4.2 1 6.4L12 16.8 6.5 19.5l1-6.4L3 8.9 9 8z"/></svg></div><h3>Olympiad &amp; Challenge Prep</h3><p>Stretch goals, past papers and Olympiad-grade problems, approachable and beautifully sequenced.</p></div>
-      <div class="f reveal"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 15l4-6 4 3 5-8"/></svg></div><h3>Scientific Progress Reports</h3><p>Honest, concept-level mastery with no inflated badges and no vanity scores. Just real growth, weekly.</p></div>
-      <div class="f reveal"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10v4M7 6v12M11 3v18M15 7v10M19 10v4"/></svg></div><h3>Read-Aloud Fluency</h3><p>Story-led reading practice with real-time pronunciation feedback in English and Indian languages.</p></div>
+      <div class="f"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2a5 5 0 0 1 5 5v3a5 5 0 1 1-10 0V7a5 5 0 0 1 5-5z"/><path d="M5 21c1.5-3 4-5 7-5s5.5 2 7 5"/></svg></div><h3>Adaptive AI Coach</h3><p>A patient tutor that re-explains, simplifies and encourages, never moving on until your child is ready.</p></div>
+      <div class="f"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg></div><h3>Curriculum-Aligned Paths</h3><p>Learning journeys built to IB, CBSE, ICSE and Cambridge, grounded in NCERT and official textbooks.</p></div>
+      <div class="f"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12l2 2 4-4"/><path d="M4 7h16v13H4z"/><path d="M8 7V4h8v3"/></svg></div><h3>AI Auto-Graded Assignments</h3><p>From handwritten worksheets to typed responses, graded with rubric-level care in seconds.</p></div>
+      <div class="f"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3 6 6 .9-4.5 4.2 1 6.4L12 16.8 6.5 19.5l1-6.4L3 8.9 9 8z"/></svg></div><h3>Olympiad &amp; Challenge Prep</h3><p>Stretch goals, past papers and Olympiad-grade problems, approachable and beautifully sequenced.</p></div>
+      <div class="f"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 15l4-6 4 3 5-8"/></svg></div><h3>Scientific Progress Reports</h3><p>Honest, concept-level mastery with no inflated badges and no vanity scores. Just real growth, weekly.</p></div>
+      <div class="f"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10v4M7 6v12M11 3v18M15 7v10M19 10v4"/></svg></div><h3>Read-Aloud Fluency</h3><p>Story-led reading practice with real-time pronunciation feedback in English and Indian languages.</p></div>
     </div>
   </div>
 </section>
@@ -1061,24 +1181,21 @@
 <!-- ABOUT -->
 <section id="about">
   <div class="container">
-    <div class="section-head reveal">
+    <div class="section-head">
       <span class="eyebrow"><span class="dot"></span> About Aivorah</span>
       <h2>Built so that <em>no child learns alone</em>.</h2>
       <p>Aivorah is an AI-powered adaptive learning platform on a simple mission: to give every child a patient, personalised tutor, while giving teachers and parents the insight to help them thrive. We believe every learner can flourish when taught at their own pace, in their own way.</p>
     </div>
     <div class="features">
-      <div class="f reveal">
-        <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3 6 6 .9-4.5 4.2 1 6.4L12 16.8 6.5 19.5l1-6.4L3 8.9 9 8z"/></svg></div>
+      <div class="f">
         <h3>Our mission</h3>
         <p>To make high-quality, personalised education accessible to every child, meeting them exactly where they are and building real confidence, one concept at a time.</p>
       </div>
-      <div class="f reveal">
-        <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2a5 5 0 0 1 5 5v3a5 5 0 1 1-10 0V7a5 5 0 0 1 5-5z"/><path d="M5 21c1.5-3 4-5 7-5s5.5 2 7 5"/></svg></div>
+      <div class="f">
         <h3>Our approach</h3>
         <p>We pair a compassionate AI tutor with curriculum-aligned content and honest, concept-level progress, augmenting great teaching rather than replacing it.</p>
       </div>
-      <div class="f reveal">
-        <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 6L9 17l-5-5"/></svg></div>
+      <div class="f">
         <h3>Our promise</h3>
         <p>No child should leave a lesson feeling defeated. We measure success by growth and confidence, not vanity scores or inflated badges.</p>
       </div>
@@ -1088,21 +1205,20 @@
 
 <!-- CLOSING -->
 <section id="cta">
-  <div class="deco deco-branch deco-branch-l" aria-hidden="true"><svg viewBox="0 0 160 300"><use href="#d-branch"/></svg></div>
-  <div class="deco deco-branch deco-branch-r deco-flip" aria-hidden="true"><svg viewBox="0 0 160 300"><use href="#d-branch"/></svg></div>
-  <div class="deco deco-hill deco-hill-l" aria-hidden="true"><svg viewBox="0 0 600 160" preserveAspectRatio="none"><use href="#d-hill"/></svg></div>
-  <div class="deco deco-hill deco-hill-r deco-flip" aria-hidden="true"><svg viewBox="0 0 600 160" preserveAspectRatio="none"><use href="#d-hill"/></svg></div>
-  <div class="deco deco-books" aria-hidden="true"><svg viewBox="0 0 240 150"><use href="#d-books"/></svg></div>
   <div class="container">
-    <div class="closing reveal">
-      <span class="eyebrow"><span class="dot"></span> Now in Private Beta</span>
-      <h2>Give every child <em>their own tutor</em>.</h2>
-      <p>Patient. Personalised. Powerful. Built for Indian classrooms, kitchens and quiet weekend mornings alike.</p>
-      <div class="btn-row">
-        <button class="btn btn-sage">Get Early Access for Free
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-        </button>
-        <button class="btn btn-ghost">Book a Demo</button>
+    <div class="banner">
+      <div class="deco books" aria-hidden="true"><svg viewBox="0 0 220 140"><use href="#d-books"/></svg></div>
+      <div class="deco plant" aria-hidden="true"><svg viewBox="0 0 120 140"><use href="#d-plant"/></svg></div>
+      <div class="closing">
+        <span class="eyebrow"><span class="dot"></span> Now in Private Beta</span>
+        <h2>Give every child <em>their own tutor</em>.</h2>
+        <p>Patient. Personalised. Powerful. Built for Indian classrooms, kitchens and quiet weekend mornings alike.</p>
+        <div class="btn-row">
+          <button class="btn btn-sage">Get Early Access for Free
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </button>
+          <button class="btn btn-ghost">Book a Demo</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1112,7 +1228,7 @@
   <div class="container">
     <div class="foot-top">
       <div>
-        <a href="#" class="logo"><span class="logo-mark">Æ</span> Aivorah</a>
+        <a href="#" class="logo">Aivorah</a>
         <p class="foot-mission">AI-powered adaptive learning for every child, teacher and parent.</p>
       </div>
       <div class="foot-col">
@@ -1605,63 +1721,71 @@
 
 <script>
 (function(){
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   // Nav scroll
-  const nav = document.getElementById('navWrap');
-  const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 8);
+  var nav = document.getElementById('navWrap');
+  var onScroll = function(){ nav.classList.toggle('scrolled', window.scrollY > 8); };
   document.addEventListener('scroll', onScroll, {passive:true}); onScroll();
 
-  // Mobile menu
-  const mb = document.getElementById('menuBtn'), mm = document.getElementById('mobileMenu');
-  mb?.addEventListener('click', () => mm.classList.toggle('open'));
-  mm?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => mm.classList.remove('open')));
+  // Mobile / tablet menu (toggle sits immediately to its left and stays visible)
+  var mb = document.getElementById('menuBtn'), mm = document.getElementById('mobileMenu');
+  function setMenu(open){
+    if(!mm || !mb) return;
+    mm.classList.toggle('open', open);
+    mb.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  if(mb) mb.addEventListener('click', function(){ setMenu(!mm.classList.contains('open')); });
+  if(mm) mm.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', function(){ setMenu(false); }); });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && mm && mm.classList.contains('open')){ setMenu(false); mb.focus(); }
+  });
 
-  // Reveal on scroll
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
-  }, {threshold:.12, rootMargin:'0px 0px -40px 0px'});
-  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+  // Section effects play once, when each section enters view.
+  function onceInView(el, fn){
+    if(!el) return;
+    if(!('IntersectionObserver' in window)){ fn(el); return; }
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ if(e.isIntersecting){ fn(e.target); io.unobserve(e.target); } });
+    }, {threshold:.2, rootMargin:'0px 0px -40px 0px'});
+    io.observe(el);
+  }
+  var addIn = function(el){ el.classList.add('in'); };
+  document.querySelectorAll('.boards, .stage, .steps, .banner').forEach(function(el){ onceInView(el, addIn); });
 
-  // Adaptive sim
-  const turns = ['t1','t2','t3','t4'].map(id => document.getElementById(id));
-  const conf = document.getElementById('confFill');
-  const confPct = document.getElementById('confPct');
-  const seq = [
+  // Adaptive tutor demo: the question shows at once; replies arrive in turn.
+  var turns = ['t1','t2','t3','t4'].map(function(id){ return document.getElementById(id); });
+  var conf = document.getElementById('confFill');
+  var confPct = document.getElementById('confPct');
+  var seq = [
     {delay:600, w:'25%'},
     {delay:1500, w:'18%'},
     {delay:1500, w:'62%'},
     {delay:1400, w:'92%'},
   ];
+  var timers = [];
+  function showAll(){
+    turns.forEach(function(t){ t.classList.add('show'); });
+    conf.style.width = '92%'; confPct.textContent = '92%';
+  }
   function play(){
-    turns.forEach(t => t.classList.remove('show'));
+    timers.forEach(clearTimeout); timers = [];
+    if(reduce){ showAll(); return; }
+    turns.forEach(function(t){ t.classList.remove('show'); });
     conf.style.width='25%'; confPct.textContent='25%';
-    let acc = 300;
-    turns.forEach((t,i) => {
+    var acc = 300;
+    turns.forEach(function(t,i){
       acc += seq[i].delay;
-      setTimeout(() => {
+      timers.push(setTimeout(function(){
         t.classList.add('show');
         conf.style.width = seq[i].w;
         confPct.textContent = seq[i].w;
-      }, acc);
+      }, acc));
     });
   }
-  setTimeout(play, 400);
+  if(reduce) showAll();
+  else onceInView(document.getElementById('sim'), play);
   document.getElementById('replay').addEventListener('click', play);
-
-})();
-
-
-/* Duplicate curriculum marquee for seamless loop. The copies are hidden from
-   screen readers (each board is announced once) and from the static
-   reduced-motion layout. */
-(function(){
-  var track = document.getElementById('curriculumTrack');
-  if(!track) return;
-  Array.prototype.slice.call(track.children).forEach(function(item){
-    var copy = item.cloneNode(true);
-    copy.setAttribute('aria-hidden', 'true');
-    copy.classList.add('dup');
-    track.appendChild(copy);
-  });
 })();
 
 /* Homepage light / dark switch. Only flips the theme tokens on <html>, so

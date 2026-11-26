@@ -15,15 +15,9 @@ export default function InsightsColumns({
   styles: any;
 }) {
   return (
-    <View style={[styles.insightsCard, { marginBottom: spacing.xl }]}>
-      <View style={styles.insightsHeader}>
-        <View style={styles.insightsHeaderLeft}>
-          <View style={styles.insightsIconWrap}>
-            <Feather name="cpu" size={14} color={gold} />
-          </View>
-          <Text style={styles.insightsTitle}>AI Teaching Insights</Text>
-        </View>
-      </View>
+    // Website Redesign, Phase 4: the "AI Teaching Insights" title now heads the
+    // summary card in the top row; these columns are its full detail.
+    <View testID="insight-columns" style={[styles.insightsCard, { marginBottom: spacing.xl }]}>
 
       <View style={styles.insightCols}>
         {/* Column 1: Learning Path */}
@@ -51,8 +45,8 @@ export default function InsightsColumns({
         {/* Column 2: Assignments */}
         <View style={[styles.insightCol, styles.insightColBorder]}>
           <View style={styles.colHeader}>
-            <Feather name="edit-3" size={11} color="#0E6E86" />
-            <Text style={[styles.colHeaderText, { color: '#0E6E86' }]}>Assignments</Text>
+            <Feather name="edit-3" size={11} color={gold} />
+            <Text style={[styles.colHeaderText, { color: gold }]}>Assignments</Text>
           </View>
           {assignmentTiles.map((tile, i) => {
             const idx = learningPathTiles.length + i;

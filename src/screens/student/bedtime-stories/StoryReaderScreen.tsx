@@ -182,7 +182,7 @@ const makeStyles = (c: any, isDark: boolean) => StyleSheet.create({
   sceneLabelText: { fontSize: 13, fontWeight: '700', color: '#fff', flex: 1 },
   pageChip:       { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 12 },
   pageChipText:   { fontSize: 11, fontWeight: '700', color: '#fff' },
-  doneBadge:      { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: '#24877B', paddingHorizontal: 7, paddingVertical: 3, borderRadius: 10 },
+  doneBadge:      { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: '#C8551C', paddingHorizontal: 7, paddingVertical: 3, borderRadius: 10 },
   doneBadgeText:  { fontSize: 10, fontWeight: '700', color: '#fff' },
   sceneBanner:    { height: 220, alignItems: 'center', justifyContent: 'center', gap: 16 },
   sceneIconOuter: { width: 90, height: 90, borderRadius: 45, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: 'rgba(255,255,255,0.25)' },

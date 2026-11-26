@@ -46,7 +46,7 @@ export function ProfileHero({
 }: ProfileHeroProps) {
   return (
     <View style={styles.heroCard}>
-      <LinearGradient colors={isDark ? ['#111111', '#1C2420', '#152220'] : ['#F5F1E6', '#E6DEBC', '#C3DCD8']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.heroBg} />
+      <LinearGradient colors={isDark ? ['#1C2A40', '#22324B', '#2B3A55'] : ['#FFFCF6', '#FBEBDC', '#F7DCC6']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.heroBg} />
 
       {/* Edit button top-right */}
       <TouchableOpacity style={styles.editCornerBtn} onPress={onEditPress}>
@@ -102,14 +102,14 @@ export function ProfileHero({
         {/* Plan badge */}
         <TouchableOpacity
           style={[styles.tag, (user as any)?.isPro
-            ? { backgroundColor: isDark ? '#24877B22' : '#FFFFFFB0', borderColor: '#24877B80' }
+            ? { backgroundColor: isDark ? '#C8551C22' : '#FFFFFFB0', borderColor: '#C8551C80' }
             : { backgroundColor: isDark ? 'rgba(147,176,172,0.18)' : '#FFFFFFB0', borderColor: heroGreen + '80' }
           ]}
           onPress={onNavigateSubscription}
           activeOpacity={0.7}
         >
-          <Feather name={(user as any)?.isPro ? 'sun' : 'feather'} size={10} color={(user as any)?.isPro ? '#24877B' : heroGold} />
-          <Text style={[styles.tagText, { color: (user as any)?.isPro ? '#24877B' : heroGold }]}>
+          <Feather name={(user as any)?.isPro ? 'sun' : 'feather'} size={10} color={(user as any)?.isPro ? '#C8551C' : heroGold} />
+          <Text style={[styles.tagText, { color: (user as any)?.isPro ? '#C8551C' : heroGold }]}>
             {(user as any)?.isPro ? 'Pro Plan' : 'Free Plan'}
           </Text>
         </TouchableOpacity>

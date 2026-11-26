@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
+import Icon from '../../../../components/common/Icon';
 import type { AppColors } from '../../../../theme';
 import type { ChildData } from '../types';
 import ChildCard from './ChildCard';
@@ -19,22 +20,24 @@ export default function ChildrenSection({
   return (
     <View style={[s.childSection, isWide && { flex: 1 }]}>
       <Text style={s.sectionTitle}>My Children</Text>
+      {!childrenLoading && childrenList.length === 0 ? (
+        // Website Redesign, Phase 5: a clear, compact card with the action easy to find.
+        <View testID="parent-no-children" style={{ marginTop: 12, alignItems: 'center', gap: 8, paddingVertical: 28, paddingHorizontal: 20, borderRadius: 22, borderWidth: 1, borderColor: colors.borderColor, backgroundColor: colors.cardDark }}>
+          <Icon name="book-open" size={36} color={colors.textHeading} />
+          <Text style={{ fontSize: 18, fontWeight: '700', color: colors.textHeading, textAlign: 'center' }}>No children linked yet</Text>
+          <Text style={{ fontSize: 14.5, lineHeight: 21, color: colors.textMuted, textAlign: 'center', maxWidth: 420 }}>
+            Add a child to track learning, tasks, attendance and progress.
+          </Text>
+          <TouchableOpacity onPress={onAddChild} activeOpacity={0.8} accessibilityRole="button"
+            style={{ marginTop: 8, minHeight: 46, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingHorizontal: 22, borderRadius: 999, backgroundColor: colors.primary }}>
+            <Icon name="plus" size={18} color={colors.onPrimary} />
+            <Text style={{ fontSize: 16, fontWeight: '700', color: colors.onPrimary }}>Add Child</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.childScroll}>
         {childrenLoading ? (
           <ActivityIndicator color={colors.accentYellow} style={{ marginTop: 40, marginLeft: 8 }} />
-        ) : childrenList.length === 0 ? (
-          <View testID="parent-no-children" style={{ minWidth: 260, maxWidth: 420, alignItems: 'center', gap: 8, paddingVertical: 20, paddingHorizontal: 16 }}>
-            <Feather name="book-open" size={34} color={colors.primary} />
-            <Text style={{ fontSize: 18, fontWeight: '700', color: colors.textHeading, textAlign: 'center' }}>No children linked yet</Text>
-            <Text style={{ fontSize: 14, lineHeight: 21, color: colors.textMuted, textAlign: 'center' }}>
-              Add a child to track learning, tasks, attendance and progress.
-            </Text>
-            <TouchableOpacity onPress={onAddChild} activeOpacity={0.8} accessibilityRole="button"
-              style={{ marginTop: 6, minHeight: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingHorizontal: 20, borderRadius: 12, backgroundColor: colors.primary }}>
-              <Feather name="plus" size={18} color={colors.onPrimary} />
-              <Text style={{ fontSize: 16, fontWeight: '700', color: colors.onPrimary }}>Add Child</Text>
-            </TouchableOpacity>
-          </View>
         ) : (
           <>
             {childrenList.map(ch => (
@@ -46,13 +49,14 @@ export default function ChildrenSection({
                 colors={colors} s={s}
               />
             ))}
-            <TouchableOpacity style={s.addChildBtn} onPress={onAddChild} activeOpacity={0.7}>
-              <Feather name="plus" size={20} color={colors.textDim} />
+            <TouchableOpacity style={s.addChildBtn} onPress={onAddChild} activeOpacity={0.7} accessibilityRole="button">
+              <Icon name="plus" size={20} color={colors.textDim} />
               <Text style={s.addChildText}>Add Child</Text>
             </TouchableOpacity>
           </>
         )}
       </ScrollView>
+      )}
 
       {/* ── Child interest insights ── */}
       {child.id ? (() => {

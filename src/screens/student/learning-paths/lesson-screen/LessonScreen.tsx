@@ -8,9 +8,10 @@
  * TopicLesson's existing scene-based viewer for anything not yet curated.
  */
 import React, { useMemo, useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
+import Icon from '../../../../components/common/Icon';
 import { useTheme } from '../../../../context/ThemeContext';
 import { useAuth } from '../../../../context/AuthContext';
 import Header from '../../../../components/common/Header';
@@ -261,9 +262,9 @@ export default function LessonScreen({ navigation, route, embedded = false, prac
 
   const tabs: { key: Mode; label: string; icon: any }[] = [
     { key: 'read', label: 'Learn', icon: 'book-open' },
-    { key: 'listen', label: isMath ? 'AI Tutor' : 'Listen', icon: isMath ? 'cpu' : 'headphones' },
-    { key: 'ask', label: 'Ask Aivorah', icon: 'message-circle' },
-    { key: 'practice', label: 'Practice', icon: practiceLocked ? 'lock' : 'check-square' },
+    { key: 'listen', label: isMath ? 'AI Tutor' : 'Listen', icon: isMath ? 'sparkles' : 'headphones' },
+    { key: 'ask', label: 'Ask Aivorah', icon: 'sparkles' },
+    { key: 'practice', label: 'Practice', icon: practiceLocked ? 'lock' : 'clipboard-check' },
   ].filter((t) => !(embedded && t.key === 'ask')) as { key: Mode; label: string; icon: any }[];
 
   return (
@@ -279,30 +280,36 @@ export default function LessonScreen({ navigation, route, embedded = false, prac
         )}
 
         <View style={styles.tabBarRow}>
-          <View style={[styles.tabBar, { backgroundColor: colors.bgDark, borderColor: colors.borderColor }]}>
+          <View style={styles.tabBar} accessibilityRole="tablist">
             {tabs.map(t => {
               const active = mode === t.key;
               return (
                 <TouchableOpacity
                   key={t.key}
-                  style={[styles.tab, active && { backgroundColor: colors.cardDark }]}
+                  style={[styles.tab, {
+                    backgroundColor: active ? colors.primary : colors.cardDark,
+                    borderColor: active ? colors.primary : colors.borderColor,
+                    ...(Platform.OS === 'web' ? { transitionProperty: 'background-color, border-color', transitionDuration: '180ms' } as any : null),
+                  }]}
                   onPress={() => setMode(t.key)}
                   activeOpacity={0.75}
+                  accessibilityRole="tab"
+                  accessibilityState={{ selected: active }}
                 >
-                  <Feather name={t.icon} size={14} color={active ? colors.primary : colors.textMuted} />
-                  <Text style={[styles.tabText, { color: active ? colors.primary : colors.textMuted }]}>{t.label}</Text>
+                  <Icon name={t.icon} size={17} color={active ? colors.onPrimary : colors.textMain} />
+                  <Text style={[styles.tabText, { color: active ? colors.onPrimary : colors.textMain }]}>{t.label}</Text>
                 </TouchableOpacity>
               );
             })}
           </View>
           {!!topic.pdfFile && (
             <TouchableOpacity
-              style={[styles.viewInBookBtn, { borderColor: colors.borderColor, backgroundColor: colors.cardDark }]}
+              style={[styles.viewInBookBtn, { borderColor: colors.primary, backgroundColor: colors.cardDark }]}
               onPress={() => setFullBookView(true)}
               activeOpacity={0.8}
             >
-              <Feather name="book" size={13} color={colors.textMain} />
-              <Text style={[styles.viewInBookText, { color: colors.textMain }]}>View in Book</Text>
+              <Icon name="book-open-text" size={17} color={colors.primary} />
+              <Text style={[styles.viewInBookText, { color: colors.primary }]}>View in Book</Text>
             </TouchableOpacity>
           )}
         </View>

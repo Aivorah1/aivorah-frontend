@@ -1,5 +1,9 @@
-export const TEAL = '#24877B';
-export const ROSE = '#24877B';
+import { followStudentAccent } from '../../../theme/studentAccent';
+
+// Website Redesign, Phase 3: accent follows Light / Dark (see theme/studentAccent).
+export let TEAL = '#C8551C';
+export let ROSE = '#C8551C';
+followStudentAccent((a) => { TEAL = a; ROSE = a; });
 
 export const CATEGORY_ICONS: Record<string, string> = {
   'Geography':                'globe',

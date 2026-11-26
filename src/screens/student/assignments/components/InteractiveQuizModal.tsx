@@ -33,7 +33,7 @@ export function InteractiveQuizModal({
           </TouchableOpacity>
           <View style={{ flex: 1 }}>
             <Text style={{ color: '#F0EEEC', fontSize: 16, fontWeight: '700' }}>{assignment.title}</Text>
-            <Text style={{ color: '#24877B', fontSize: 12, marginTop: 2 }}>Interactive Quiz</Text>
+            <Text style={{ color: '#C8551C', fontSize: 12, marginTop: 2 }}>Interactive Quiz</Text>
           </View>
           <TouchableOpacity onPress={onClose} style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: '#1C1C1C', borderWidth: 1, borderColor: 'rgba(195,220,216,0.25)', alignItems: 'center', justifyContent: 'center' }}>
             <Feather name="x" size={18} color="#F0EEEC" />
@@ -89,7 +89,7 @@ export function InteractiveQuizModal({
         )}
         {/* Submit Assignment footer — enabled once every question is answered */}
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 12, borderTopWidth: 1, borderTopColor: 'rgba(195,220,216,0.15)', backgroundColor: '#141414' }}>
-          <Text style={{ flex: 1, color: '#24877B', fontSize: 13 }}>
+          <Text style={{ flex: 1, color: '#C8551C', fontSize: 13 }}>
             {quizProgress ? `${quizProgress.attemptedCount}/${quizProgress.total} answered` : 'Answer every question to submit'}
           </Text>
           <TouchableOpacity
@@ -120,7 +120,7 @@ export function InteractiveQuizModal({
             }}
             style={{
               paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8,
-              backgroundColor: quizProgress?.completed ? '#24877B' : '#2A2A2A',
+              backgroundColor: quizProgress?.completed ? '#C8551C' : '#2A2A2A',
               opacity: submittingQuiz ? 0.6 : 1,
             }}
           >

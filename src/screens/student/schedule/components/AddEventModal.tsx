@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, Text, Modal, ScrollView, TouchableOpacity, TextInput } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, Modal, ScrollView, TouchableOpacity, TextInput, Animated, Easing, Platform } from 'react-native';
+import Icon from '../../../../components/common/Icon';
 import type { AppColors } from '../../../../theme';
 import TimePicker from '../../../../components/common/TimePicker';
 import { STUDENT_EVENT_TAGS } from '../constants';
@@ -32,15 +32,36 @@ export default function AddEventModal({
   isAllDay, newStartTime, newEndTime, setNewEndTime, saving,
   onToggleAllDay, onStartTimeChange, onClose, onConfirm, styles, colors,
 }: Props) {
+  // Website Redesign, Phase 3: the dialog fades in with a small lift, and on
+  // the web focus goes back to the control that opened it once it closes.
+  const [lift] = useState(() => new Animated.Value(0));
+  const opener = useRef<any>(null);
+  useEffect(() => {
+    const web = Platform.OS === 'web' && typeof document !== 'undefined';
+    if (visible) {
+      if (web) opener.current = document.activeElement;
+      const reduce = web && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      if (reduce) { lift.setValue(1); return; }
+      lift.setValue(0);
+      Animated.timing(lift, { toValue: 1, duration: 200, easing: Easing.out(Easing.quad), useNativeDriver: Platform.OS !== 'web' }).start();
+    } else if (web && opener.current && typeof opener.current.focus === 'function') {
+      const el = opener.current; opener.current = null;
+      setTimeout(() => { try { el.focus(); } catch { /* element gone */ } }, 0);
+    }
+  }, [visible, lift]);
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={onClose}>
+        <Animated.View style={{ width: '100%', alignItems: 'center', transform: [{ translateY: lift.interpolate({ inputRange: [0, 1], outputRange: [10, 0] }) }] }}>
         <TouchableOpacity activeOpacity={1} onPress={() => {}} style={[styles.modal, { display: 'flex', flexDirection: 'column' }]}>
           {/* Top Fixed Header */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderBottomWidth: 1, borderBottomColor: colors.borderColor, paddingBottom: 12, marginBottom: 12 }}>
-            <Text style={[styles.modalTitle, { marginBottom: 0 }]}>Add Event — {modalDate}</Text>
-            <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <Feather name="x" size={20} color={colors.textMuted} />
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderBottomWidth: 1, borderBottomColor: colors.borderColor, paddingBottom: 12, marginBottom: 12, gap: 10 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flexShrink: 1 }}>
+              <Icon name="calendar-plus" size={20} color={colors.primary} />
+              <Text style={[styles.modalTitle, { marginBottom: 0, flexShrink: 1 }]}>Add Event — {modalDate}</Text>
+            </View>
+            <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} accessibilityRole="button" accessibilityLabel="Close">
+              <Icon name="x" size={20} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
 
@@ -102,7 +123,7 @@ export default function AddEventModal({
                 backgroundColor: isAllDay ? colors.accentYellow : 'transparent',
                 alignItems: 'center', justifyContent: 'center'
               }}>
-                {isAllDay && <Feather name="check" size={13} color="white" />}
+                {isAllDay && <Icon name="check" size={13} color={colors.onPrimary} strokeWidth={3} />}
               </View>
               <Text style={{ fontSize: 13, fontWeight: '700', color: colors.textMain }}>
                 All-day event (Holiday / Vacation / Assembly / Timeline)
@@ -141,6 +162,7 @@ export default function AddEventModal({
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
+        </Animated.View>
       </TouchableOpacity>
     </Modal>
   );

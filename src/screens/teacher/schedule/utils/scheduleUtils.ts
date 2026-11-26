@@ -1,5 +1,6 @@
 import { ALL_TAGS, DURATION_MINS, DAYS_SHORT, HOUR_HEIGHT, TIMELINE_START_HOUR } from '../constants';
 import type { WeekDay } from '../types';
+import { followStudentAccent } from '../../../../theme/studentAccent';
 
 export function deriveTypeFromTag(tag: string): string {
   if (!tag) return 'study';
@@ -37,17 +38,21 @@ export function calcEndTime(startTime: string, duration: string): string {
   return `${String(nh).padStart(2, '0')}:${String(nm).padStart(2, '0')}`;
 }
 
+// Website Redesign, Phase 4: the accent follows Light / Dark (theme/studentAccent).
+let ACCENT = '#0E6E86';
+followStudentAccent((a) => { ACCENT = a; });
+
 // Returns [accentColor, pastelfill, textColor]
 export function typeColors(type: string): [string, string, string] {
   const map: Record<string, [string, string, string]> = {
-    lesson:     ['#0E6E86', '#E1F0F7', '#0B4255'],  // gold accent / warm cream fill / dark gold text
-    study:      ['#0E6E86', '#FBF3DA', '#7A5C1E'],  // amber-gold accent / pale gold fill / dark amber text (Aivorah theme)
+    lesson:     [ACCENT, '#FBE4D4', '#5C2A0B'],  // gold accent / warm cream fill / dark gold text
+    study:      [ACCENT, '#FBF3DA', '#7A5C1E'],  // amber-gold accent / pale gold fill / dark amber text (Aivorah theme)
     challenge:  ['#6B5BA8', '#E8E4F5', '#3F3270'],  // purple accent / lavender fill / dark purple text
     deadline:   ['#B84A3A', '#F5DDD9', '#7A2A1E'],  // red accent / rose fill / dark red text
     assignment: ['#3A8A6A', '#D9F0E8', '#1E5A40'],  // green accent / mint fill / dark green text
     break:      ['#7A7A7A', '#EBEBEB', '#4A4A4A'],  // grey accent / light grey fill / dark grey text
   };
-  return map[type] ?? ['#0E6E86', '#E1F0F7', '#0B4255'];
+  return map[type] ?? [ACCENT, '#FBE4D4', '#5C2A0B'];
 }
 
 // Prefer the event's own tag color (same swatch shown in Tag Filters and the

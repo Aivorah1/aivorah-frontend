@@ -18,8 +18,8 @@ interface Props {
 function scoreBand(s: number) {
   if (s === 100)    return { label: 'Perfect!',  emoji: '🌟', bg: '#bbf7d0', border: '#4ade80', labelColor: '#14532d', sub: 'Incredible! A flawless perfect score!' };
   if (s >= 80)      return { label: 'Top 1%',   emoji: '🥇', bg: '#bbf7d0', border: '#4ade80', labelColor: '#14532d', sub: 'Exceptional! You are among the best!' };
-  if (s >= 60)      return { label: 'Top 5%',   emoji: '🥈', bg: '#E6DEBC', border: '#24877B', labelColor: '#0F4C45', sub: 'Outstanding result! Keep it up!' };
-  if (s >= 40)      return { label: 'Top 10%',  emoji: '🥉', bg: '#E0D8B8', border: '#24877B', labelColor: '#0F4C45', sub: 'Great performance! Well done!' };
+  if (s >= 60)      return { label: 'Top 5%',   emoji: '🥈', bg: '#E6DEBC', border: '#C8551C', labelColor: '#0F4C45', sub: 'Outstanding result! Keep it up!' };
+  if (s >= 40)      return { label: 'Top 10%',  emoji: '🥉', bg: '#E0D8B8', border: '#C8551C', labelColor: '#0F4C45', sub: 'Great performance! Well done!' };
   if (s >= 20)      return { label: 'Top 25%',  emoji: '⭐', bg: '#D8E4DC', border: '#9FB2A4', labelColor: '#2A3530', sub: 'Good effort! Keep practising!' };
   return null;
 }
@@ -27,9 +27,9 @@ function scoreBand(s: number) {
 function rankBand(myRank: number, totalStudents: number) {
   if (!myRank || totalStudents <= 0) return null;
   const pct = (myRank / totalStudents) * 100;
-  if (pct <= 3)       return { label: 'Top 3%',  color: '#24877B', icon: 'award' as const };
-  if (pct <= 5)  return { label: 'Top 5%',  color: '#24877B', icon: 'trending-up' as const };
-  if (pct <= 10) return { label: 'Top 10%', color: '#24877B', icon: 'trending-up' as const };
+  if (pct <= 3)       return { label: 'Top 3%',  color: '#C8551C', icon: 'award' as const };
+  if (pct <= 5)  return { label: 'Top 5%',  color: '#C8551C', icon: 'trending-up' as const };
+  if (pct <= 10) return { label: 'Top 10%', color: '#C8551C', icon: 'trending-up' as const };
   if (pct <= 25) return { label: 'Top 25%', color: '#9FB2A4', icon: 'trending-up' as const };
   return null;
 }

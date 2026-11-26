@@ -1,21 +1,24 @@
 import React, { useMemo, useState } from 'react';
-import { View, StyleSheet, RefreshControl, ScrollView, Modal, Platform } from 'react-native';
+import { View, Text, StyleSheet, RefreshControl, ScrollView, Modal, Platform, Pressable } from 'react-native';
 import ActivityIndicator from '../../../components/common/AivorahLoader';
-import { spacing, radius } from '../../../theme';
+import { spacing, radius, fonts } from '../../../theme';
 import type { AppColors } from '../../../theme';
 import Header from '../../../components/common/Header';
 import ScreenLayout from '../../../components/common/ScreenLayout';
 import { useAuth } from '../../../context/AuthContext';
 import { useTheme } from '../../../context/ThemeContext';
+import { useResponsive } from '../../../hooks/useResponsive';
 
 import { useTeacherDashboardData } from './hooks/useTeacherDashboardData';
 import { buildDashboardStats } from './utils/buildDashboardStats';
 import { useTeacherTopicHelp } from './hooks/useTeacherTopicHelp';
-import { getGreeting } from './utils/dashboardHelpers';
+import Icon from '../../../components/common/Icon';
+import { WelcomeShapes } from '../../../components/common/WelcomeShapes';
 import AISuggestedActionCard from './components/AISuggestedActionCard';
 import StudentOverviewCard from './components/StudentOverviewCard';
 import ClassProgressCard from './components/ClassProgressCard';
 import InsightsColumns from './components/InsightsColumns';
+import TeachingInsightsSummaryCard from './components/TeachingInsightsSummaryCard';
 import { renderLearningPathModal } from './components/modals/LearningPathModals';
 import { renderAssignmentModal } from './components/modals/AssignmentModals';
 import { renderChallengeModal } from './components/modals/ChallengeModals';
@@ -26,14 +29,21 @@ import { renderChallengeModal } from './components/modals/ChallengeModals';
 export default function TeacherDashboardScreen({ navigation }: any) {
   const { user } = useAuth();
   const { colors, isDark } = useTheme();
+  const { isMobile } = useResponsive();
   const gold = colors.accentYellow;
   const styles = useMemo(() => makeStyles(colors), [colors]);
 
   const { students, loading, refreshing, setRefreshing, insights, activityFeed, fetchStudents } =
     useTeacherDashboardData(user?.email);
 
-  const firstName = user?.name?.split(' ')[0] || 'Teacher';
-  const ringTrack = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)';
+  // Classes this teacher teaches: distinct grade / section among their students,
+  // else the grades on their profile.
+  const classesCount = useMemo(() => {
+    const keys = new Set(students.map((s: any) => [s.grade, s.section].filter(Boolean).join(' ')).filter(Boolean));
+    return keys.size || (user as any)?.teaches?.length || 0;
+  }, [students, user]);
+  const scrollRef = React.useRef<ScrollView | null>(null);
+  const [columnsY, setColumnsY] = useState(0);
 
   const topicHelp = useTeacherTopicHelp();
   const stats = useMemo(
@@ -86,27 +96,93 @@ export default function TeacherDashboardScreen({ navigation }: any) {
   return (
     <ScreenLayout>
       <View style={styles.screen}>
+        {/* Website Redesign, Phase 4: the board's dashboard header. */}
         <Header
-          title={`${getGreeting()}, ${firstName}`}
-          subtitle={`Your Class · ${totalStudents} Student${totalStudents !== 1 ? 's' : ''}`}
+          title="Teacher Dashboard"
+          subtitle="Welcome back! Here's an overview of your classes, student progress, and AI teaching insights."
           searchPlaceholder="Search students, assignments..."
           onMenuPress={() => navigation.openDrawer()}
           notificationCount={allNeedsAttention.length || undefined}
+          actions={
+            <Pressable
+              testID="dashboard-new-assignment"
+              onPress={() => navigation.navigate('TeacherAssignments' as any, { openNew: Date.now() })}
+              accessibilityRole="button"
+              accessibilityLabel="New Assignment"
+              style={(state: any) => [styles.newAssignBtn, isMobile && styles.newAssignCompact, (state.hovered || state.focused) && { borderColor: colors.textHeading }]}
+            >
+              <Icon name="plus" size={isMobile ? 18 : 17} color={colors.textHeading} />
+              {/* On phones the header row is full, so the button shows its icon only. */}
+              {!isMobile && <Text style={styles.newAssignText}>New Assignment</Text>}
+            </Pressable>
+          }
         />
 
         <ScrollView
           testID="dashboard-scroll"
+          ref={scrollRef}
           style={styles.scroll}
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchStudents(); }} tintColor={colors.accentYellow} />}
         >
+          {/* ── Top row (the board): Student Overview · Class Progress · AI Teaching Insights ── */}
+          <View style={styles.topRowWrap}>
+            <View pointerEvents="none" style={styles.topShapes}>
+              <WelcomeShapes isDark={isDark} />
+            </View>
+            <View style={styles.topRow}>
+              <StudentOverviewCard
+                colors={colors}
+                gold={gold}
+                isDark={isDark}
+                totalStudents={totalStudents}
+                classesCount={classesCount}
+                activeToday={activeToday}
+                needsAttentionCount={allNeedsAttention.length}
+                recentStudents={recentStudents}
+                styles={styles}
+                navigation={navigation}
+              />
+
+              <ClassProgressCard
+                colors={colors}
+                isDark={isDark}
+                totalStudents={totalStudents}
+                classProgressPct={classProgressPct}
+                medianCombinedMins={medianCombinedMins}
+                minCombinedMins={minCombinedMins}
+                maxCombinedMins={maxCombinedMins}
+                avgProgress={avgProgress}
+                totalAssignmentsSubmitted={totalAssignmentsSubmitted}
+                totalAssignmentsAssigned={totalAssignmentsAssigned}
+                assignSubmitPct={assignSubmitPct}
+                totalChallengesCompleted={totalChallengesCompleted}
+                totalChallengesAssigned={totalChallengesAssigned}
+                challCompletePct={challCompletePct}
+                styles={styles}
+                onOpen={() => navigation.navigate('TeacherProgress' as any)}
+              />
+
+              <TeachingInsightsSummaryCard
+                colors={colors}
+                isDark={isDark}
+                suggestion={aiActionTitle}
+                learningPathTiles={learningPathTiles}
+                assignmentTiles={assignmentTiles}
+                challengeTiles={challengeTiles}
+                onTilePress={(tileIndex) => setInsightModal({ tileIndex })}
+                onSeeAll={() => scrollRef.current?.scrollTo({ y: columnsY, animated: true })}
+                styles={styles}
+              />
+            </View>
+          </View>
+
           {/* AI Suggested Action — web-only on Android/iOS. Contains the
               "Create First Assignment" call-to-action; native teacher flow
               starts from the Assignments screen instead. */}
           {Platform.OS === 'web' && (
             <AISuggestedActionCard
-              gold={gold}
               title={aiActionTitle}
               body={aiActionBody}
               hasNeedsAttention={allNeedsAttention.length > 0}
@@ -116,47 +192,16 @@ export default function TeacherDashboardScreen({ navigation }: any) {
             />
           )}
 
-          {/* ── ROW 1: Student Overview + Class Progress ─── */}
-          <View style={[styles.row, { marginBottom: spacing.xl }]}>
-            <StudentOverviewCard
-              colors={colors}
+          <View onLayout={(e) => setColumnsY(e.nativeEvent.layout.y)}>
+            <InsightsColumns
               gold={gold}
-              totalStudents={totalStudents}
-              activeToday={activeToday}
-              needsAttentionCount={allNeedsAttention.length}
-              recentStudents={recentStudents}
-              styles={styles}
-              navigation={navigation}
-            />
-
-            <ClassProgressCard
-              colors={colors}
-              gold={gold}
-              ringTrack={ringTrack}
-              totalStudents={totalStudents}
-              classProgressPct={classProgressPct}
-              medianCombinedMins={medianCombinedMins}
-              minCombinedMins={minCombinedMins}
-              maxCombinedMins={maxCombinedMins}
-              avgProgress={avgProgress}
-              totalAssignmentsSubmitted={totalAssignmentsSubmitted}
-              totalAssignmentsAssigned={totalAssignmentsAssigned}
-              assignSubmitPct={assignSubmitPct}
-              totalChallengesCompleted={totalChallengesCompleted}
-              totalChallengesAssigned={totalChallengesAssigned}
-              challCompletePct={challCompletePct}
+              learningPathTiles={learningPathTiles}
+              assignmentTiles={assignmentTiles}
+              challengeTiles={challengeTiles}
+              onTilePress={(tileIndex) => setInsightModal({ tileIndex })}
               styles={styles}
             />
           </View>
-
-          <InsightsColumns
-            gold={gold}
-            learningPathTiles={learningPathTiles}
-            assignmentTiles={assignmentTiles}
-            challengeTiles={challengeTiles}
-            onTilePress={(tileIndex) => setInsightModal({ tileIndex })}
-            styles={styles}
-          />
 
           {/* Recent Activity has been moved to the Student Overview card */}
 
@@ -183,52 +228,73 @@ export const makeStyles = (c: AppColors) => StyleSheet.create({
   scroll: { flex: 1 },
   content: { padding: spacing.xl, paddingBottom: 48 },
 
+  // Website Redesign, Phase 4: the suggested action is a calm card with the
+  // homepage shapes in its corner and a burnt-orange / pale-blue primary pill.
   aiCard: {
-    backgroundColor: c.accentYellow,
-    borderRadius: radius.xl,
+    backgroundColor: c.cardDark,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: c.borderColor,
     padding: spacing.xl,
     overflow: 'hidden',
     position: 'relative',
     gap: spacing.lg,
+    shadowColor: '#302117', shadowOpacity: 0.07, shadowRadius: 18, shadowOffset: { width: 0, height: 8 },
   },
   aiTop: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md, zIndex: 1 },
   aiIconWrap: {
-    width: 42, height: 42, borderRadius: radius.md,
-    backgroundColor: 'rgba(255,255,255,0.18)',
+    width: 44, height: 44, borderRadius: 14,
+    backgroundColor: c.tintPeach,
     alignItems: 'center', justifyContent: 'center', flexShrink: 0,
   },
-  aiTag: { fontSize: 10, fontWeight: '800', color: 'rgba(255,255,255,0.8)', letterSpacing: 0.9, marginBottom: 4 },
-  aiTitle: { fontSize: 16, fontWeight: '700', color: '#fff', marginBottom: 5, letterSpacing: -0.2 },
-  aiSub: { fontSize: 13, color: 'rgba(255,255,255,0.78)', lineHeight: 19 },
-  aiBtnRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.sm },
+  aiTag: { fontSize: 12, fontWeight: '700', color: c.textMuted, letterSpacing: 1, marginBottom: 4 },
+  aiTitle: { fontSize: 22, fontWeight: '600', color: c.textHeading, marginBottom: 6, letterSpacing: -0.3, fontFamily: fonts.serif },
+  aiSub: { fontSize: 14.5, color: c.textMuted, lineHeight: 21 },
+  aiBtnRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.xs },
   aiBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
-    backgroundColor: '#fff', alignSelf: 'flex-start',
-    paddingHorizontal: spacing.lg, paddingVertical: 11,
-    borderRadius: radius.md, zIndex: 1,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15, shadowRadius: 4,
+    backgroundColor: c.primary, alignSelf: 'flex-start',
+    minHeight: 46, paddingHorizontal: 20, paddingVertical: 11,
+    borderRadius: 999, zIndex: 1,
   },
-  aiBtnText: { fontSize: 13, fontWeight: '700', color: c.accentYellow },
+  aiBtnText: { fontSize: 15, fontWeight: '700', color: c.onPrimary },
+  aiBtnSecondary: { backgroundColor: c.cardDark, borderWidth: 1.5, borderColor: c.textHeading },
+  aiBtnSecondaryText: { color: c.textHeading },
 
   row: { flexDirection: 'row', gap: spacing.md },
+  // Website Redesign, Phase 4 — the board's top row of three cards; they wrap
+  // to two / one per row as the screen narrows.
+  topRowWrap: { position: 'relative', paddingTop: 30, marginBottom: spacing.xl },
+  topShapes: { position: 'absolute', top: -4, right: 0, width: 250, height: 110 },
+  topRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.lg, alignItems: 'stretch' },
+  topCard: { flexGrow: 1, flexBasis: 300, minWidth: 0, overflow: 'hidden', position: 'relative' },
+  bulletRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, minHeight: 24 },
+  bulletDot: { width: 7, height: 7, borderRadius: 4, marginTop: 7 },
+  bulletText: { flex: 1, fontSize: 14, lineHeight: 21, color: c.textMain },
+  newAssignBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 40, paddingHorizontal: 16,
+    borderRadius: 999, borderWidth: 1.5, borderColor: c.borderColor, backgroundColor: c.cardDark,
+  },
+  newAssignText: { fontSize: 14.5, fontWeight: '700', color: c.textHeading },
+  newAssignCompact: { width: 36, minHeight: 36, paddingHorizontal: 0, justifyContent: 'center' },
   flex1: { flex: 1 },
   card: {
     backgroundColor: c.cardDark, borderWidth: 1,
-    borderColor: c.borderColor, borderRadius: radius.xl, padding: spacing.lg,
+    borderColor: c.borderColor, borderRadius: 22, padding: 20,
+    shadowColor: '#302117', shadowOpacity: 0.07, shadowRadius: 18, shadowOffset: { width: 0, height: 8 },
   },
-  cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: spacing.md },
-  cardTitle: { fontSize: 13, fontWeight: '700', color: c.textMain, flex: 1 },
+  cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: spacing.lg, zIndex: 1 },
+  cardTitle: { fontSize: 20, fontWeight: '600', color: c.textHeading, flex: 1, fontFamily: fonts.serif, letterSpacing: -0.2 },
   cardSub: { fontSize: 11, color: c.textDim, marginBottom: spacing.md, fontWeight: '500' },
 
-  bigNumber: { fontSize: 36, fontWeight: '900', color: c.textMain, letterSpacing: -1.5 },
-  changeText: { fontSize: 11, fontWeight: '600', marginTop: 2, marginBottom: 2 },
-  overviewLabel: { fontSize: 11, color: c.textDim, marginBottom: spacing.md },
+  bigNumber: { fontSize: 40, fontWeight: '700', color: c.textHeading, letterSpacing: -1 },
+  changeText: { fontSize: 13.5, fontWeight: '600', marginTop: 2, marginBottom: 2 },
+  overviewLabel: { fontSize: 13, color: c.textMuted, marginBottom: spacing.md },
   overviewDivider: { height: 1, backgroundColor: c.borderColor, marginBottom: spacing.md },
   overviewRow: { flexDirection: 'row' },
   overviewStat: { flex: 1, alignItems: 'center', paddingHorizontal: spacing.sm },
   overviewVal: { fontSize: 22, fontWeight: '800', letterSpacing: -0.5 },
-  overviewKey: { fontSize: 10, color: c.textDim, textAlign: 'center', marginTop: 2 },
+  overviewKey: { fontSize: 12.5, color: c.textMuted, textAlign: 'center', marginTop: 2 },
 
   donutRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginBottom: spacing.md },
   donutWrap: { position: 'relative', alignItems: 'center', justifyContent: 'center' },
@@ -258,7 +324,7 @@ export const makeStyles = (c: AppColors) => StyleSheet.create({
   insightsCard: {
     backgroundColor: c.cardDark,
     borderWidth: 1, borderColor: c.borderColor,
-    borderRadius: radius.xl, overflow: 'hidden',
+    borderRadius: 22, overflow: 'hidden', paddingTop: 10,
   },
   insightsHeader: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',

@@ -21,6 +21,7 @@ import { useAnnouncements } from '../../screens/shared/announcements/context/Ann
 import { getAvatarGradient, getAvatarIcon } from '../../constants/avatarStyles';
 import { roleLabel } from '../../constants/roleLabels';
 import { SwitchProfile } from './SwitchProfile';
+import Icon from './Icon';
 import { useFocusEffect } from '@react-navigation/native';
 import SCHOOL_ADMIN_SERVER_URL from '../../config/schoolAdminServerUrl';
 import { isAdminEmail } from '../../constants/adminEmails';
@@ -32,8 +33,8 @@ function schoolInitials(name: string): string {
 }
 
 const STUDENT_NAV_ITEMS = [
-  { label: 'Dashboard', icon: 'grid', screen: 'Dashboard', group: 'MENU' },
-  { label: 'Profile', icon: 'user', screen: 'Profile', group: 'MENU' },
+  { label: 'Dashboard', icon: 'layout-grid', screen: 'Dashboard', group: 'MENU' },
+  { label: 'Profile', icon: 'circle-user-round', screen: 'Profile', group: 'MENU' },
   { label: 'My Learning Paths', icon: 'book-open', screen: 'LearningPaths', group: 'MENU',
     childScreens: [
       'SubjectTopics', 'SubjectSyllabus', 'LessonScreen', 'TopicLesson',
@@ -41,24 +42,24 @@ const STUDENT_NAV_ITEMS = [
       'WordWizard', 'DrawingBuddy', 'AIStoryteller', 'NCERTChapters',
     ] },
   { label: 'AI Coach', icon: 'message-circle', screen: 'AICoach', group: 'MENU' },
-  { label: 'AI Teacher', icon: 'user-check', screen: 'AITeacher', group: 'MENU' },
-  { label: 'Schedule', icon: 'calendar', screen: 'Schedule', group: 'MENU' },
-  { label: 'Attendance', icon: 'clipboard', screen: 'StudentAttendance', group: 'MENU' },
-  { label: 'Timetable', icon: 'columns', screen: 'Timetable', group: 'MENU' },
-  { label: 'Resources', icon: 'folder', screen: 'Resources', group: 'MENU' },
-  { label: 'Announcements', icon: 'volume-2', screen: 'Announcements', group: 'MENU' },
-  { label: 'The World & You', icon: 'globe', screen: 'WorldAndYou', group: 'MENU',
+  { label: 'AI Teacher', icon: 'mic-vocal', screen: 'AITeacher', group: 'MENU' },
+  { label: 'Schedule', icon: 'calendar-days', screen: 'Schedule', group: 'MENU' },
+  { label: 'Attendance', icon: 'calendar-check', screen: 'StudentAttendance', group: 'MENU' },
+  { label: 'Timetable', icon: 'clock', screen: 'Timetable', group: 'MENU' },
+  { label: 'Resources', icon: 'folder-open', screen: 'Resources', group: 'MENU' },
+  { label: 'Announcements', icon: 'megaphone', screen: 'Announcements', group: 'MENU' },
+  { label: 'The World & You', icon: 'earth', screen: 'WorldAndYou', group: 'MENU',
     childScreens: ['CurrentAffairs', 'CurrentAffairsStory', 'CurrentAffairsQuiz'] },
-  { label: 'Bedtime Stories', icon: 'book', screen: 'BhagavathaStories', group: 'MENU', premium: false },
-  { label: 'Daily Habits', icon: 'sun', screen: 'DailyHabits', group: 'MENU' },
-  { label: 'Read Aloud', icon: 'mic', screen: 'ReadAloud', group: 'MENU' },
-  { label: 'My Classes', icon: 'layers', screen: 'MyClasses', group: 'MENU' },
-  { label: 'Assignments', icon: 'check-square', screen: 'Assignments', group: 'FOCUS', premium: false },
+  { label: 'Bedtime Stories', icon: 'moon-star', screen: 'BhagavathaStories', group: 'MENU', premium: false },
+  { label: 'Daily Habits', icon: 'sunrise', screen: 'DailyHabits', group: 'MENU' },
+  { label: 'Read Aloud', icon: 'book-audio', screen: 'ReadAloud', group: 'MENU' },
+  { label: 'My Classes', icon: 'school', screen: 'MyClasses', group: 'MENU' },
+  { label: 'Assignments', icon: 'clipboard-check', screen: 'Assignments', group: 'FOCUS', premium: false },
   { label: 'Challenges', icon: 'target', screen: 'Challenges', group: 'FOCUS', premium: false },
-  { label: 'Leaderboard', icon: 'award', screen: 'Leaderboard', group: 'FOCUS' },
-  { label: 'Progress', icon: 'bar-chart-2', screen: 'Progress', group: 'FOCUS' },
+  { label: 'Leaderboard', icon: 'trophy', screen: 'Leaderboard', group: 'FOCUS' },
+  { label: 'Progress', icon: 'chart-no-axes-column', screen: 'Progress', group: 'FOCUS' },
   { label: 'Rewards', icon: 'gift', screen: 'Rewards', group: 'FOCUS' },
-  { label: 'Help Center', icon: 'help-circle', screen: 'HelpCenter', group: 'SYSTEM' },
+  { label: 'Help Center', icon: 'life-buoy', screen: 'HelpCenter', group: 'SYSTEM' },
   { label: 'Settings', icon: 'settings', screen: 'Settings', group: 'SYSTEM' },
 ];
 
@@ -118,10 +119,10 @@ const THEME_OPTIONS: { id: ThemeMode; icon: string; label: string }[] = [
 const ADMIN_NAV_ITEMS = [
   { label: 'Platform Overview', icon: 'bar-chart-2', screen: 'PlatformOverview', group: 'MENU' },
   { label: 'Users', icon: 'users', screen: 'AdminUsers', group: 'MENU' },
-  { label: 'Map to Teacher', icon: 'user-check', screen: 'MapToTeacher', group: 'MENU' },
+  { label: 'Map to Teacher', icon: 'user-round-check', screen: 'MapToTeacher', group: 'MENU' },
   { label: 'Bulk Import', icon: 'upload-cloud', screen: 'BulkImport', group: 'MENU' },
   { label: 'LLM Usage', icon: 'cpu', screen: 'LlmUsage', group: 'MENU' },
-  { label: 'Current Affairs', icon: 'globe', screen: 'CurrentAffairsAdmin', group: 'MENU' },
+  { label: 'Current Affairs', icon: 'newspaper', screen: 'CurrentAffairsAdmin', group: 'MENU' },
 ];
 
 const SUPER_ADMIN_NAV_ITEMS = [
@@ -166,7 +167,10 @@ export default function DrawerContent(props: any) {
   const { colors, themeMode, setThemeMode, portal } = useTheme();
   // Redesigned portals (student, teacher) share these nav/header styles.
   const isStudentPortal = !!portal; // student, teacher or parent
-  const styles = useMemo(() => makeStyles(colors, isStudentPortal), [colors, isStudentPortal]);
+  // Website Redesign, Phase 3: Student Portal wordmark, Lucide icons, close button;
+  // the theme switch sits in the header and Auto lives in Settings.
+  const isStudentRole = !!portal; // every signed-in portal is redesigned (Phases 3–7)
+  const styles = useMemo(() => makeStyles(colors, isStudentPortal, isStudentRole), [colors, isStudentPortal, isStudentRole]);
 
   const isAdmin = isAdminEmail(user?.email);
   const isSuperAdmin = user?.role === 'super_admin';
@@ -238,16 +242,29 @@ export default function DrawerContent(props: any) {
   return (
     <View style={styles.container}>
       {/* Logo */}
+      <View style={isStudentRole ? styles.logoRow : null}>
       <TouchableOpacity style={styles.logo} activeOpacity={0.7} onPress={goToDashboard} accessibilityRole="button" accessibilityLabel="Go to your dashboard" testID="logo-home">
-          {isStudentPortal ? (
+          {isStudentRole ? null : isStudentPortal ? (
           <Feather name="book-open" size={24} color={colors.textHeading} />
         ) : (
           <View style={styles.logoMark}>
             <Feather name="zap" size={18} color="white" />
           </View>
         )}
-        <Text style={styles.logoText}>Aivorah</Text>
+        <Text style={isStudentRole ? styles.wordmark : styles.logoText}>Aivorah</Text>
       </TouchableOpacity>
+      {isStudentRole && (
+        <TouchableOpacity
+          onPress={() => { try { (navigation as any).closeDrawer?.(); } catch (_) {} }}
+          style={styles.closeBtn}
+          accessibilityRole="button"
+          accessibilityLabel="Close menu"
+          testID="drawer-close"
+        >
+          <Icon name="x" size={22} color={colors.textHeading} />
+        </TouchableOpacity>
+      )}
+      </View>
 
       {isSchoolAdmin && schoolName && (
         <View style={styles.schoolCard}>
@@ -289,11 +306,15 @@ export default function DrawerContent(props: any) {
                     activeOpacity={0.7}
                   >
                     {isActive && !isStudentPortal && <View style={styles.activeBar} />}
-                    <Feather
-                      name={item.icon as any}
-                      size={17}
-                      color={isActive ? (isStudentPortal ? colors.navActiveText : colors.accentYellow) : colors.textMuted}
-                    />
+                    {isStudentRole ? (
+                      <Icon name={item.icon} size={20} color={isActive ? colors.navActiveText : colors.textMuted} />
+                    ) : (
+                      <Feather
+                        name={item.icon as any}
+                        size={17}
+                        color={isActive ? (isStudentPortal ? colors.navActiveText : colors.accentYellow) : colors.textMuted}
+                      />
+                    )}
                     <Text
                       style={[
                         styles.navItemText,
@@ -343,6 +364,7 @@ export default function DrawerContent(props: any) {
 
       {/* User + Logout */}
       <View style={styles.footer}>
+        {!isStudentRole && (
         <View style={styles.themeBlock}>
           <Text style={styles.themeLabel}>Theme</Text>
           <View style={styles.themeRow}>
@@ -362,6 +384,7 @@ export default function DrawerContent(props: any) {
             })}
           </View>
         </View>
+        )}
 
         <SwitchProfile testIDPrefix="drawer" onNavigate={(screen) => { try { navigation.navigate(screen); } catch (_) {} }} />
 
@@ -389,7 +412,9 @@ export default function DrawerContent(props: any) {
           </View>
         )}
         <TouchableOpacity style={styles.navItem} onPress={logout} activeOpacity={0.7}>
-          <Feather name="log-out" size={17} color={colors.accentRed} />
+          {isStudentRole
+            ? <Icon name="log-out" size={20} color={colors.accentRed} />
+            : <Feather name="log-out" size={17} color={colors.accentRed} />}
           <Text style={[styles.navItemText, { color: colors.accentRed }]}>Logout</Text>
         </TouchableOpacity>
       </View>
@@ -398,7 +423,13 @@ export default function DrawerContent(props: any) {
   );
 }
 
-const makeStyles = (c: AppColors, s = false) => StyleSheet.create({
+const makeStyles = (c: AppColors, s = false, st = false) => StyleSheet.create({
+  logoRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  closeBtn: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  wordmark: {
+    fontSize: 26, fontWeight: '600', color: c.textHeading, letterSpacing: -0.4,
+    fontFamily: Platform.OS === 'web' ? '"Fraunces", Georgia, serif' : undefined,
+  },
   container: {
     flex: 1,
     backgroundColor: c.sidebarDark,

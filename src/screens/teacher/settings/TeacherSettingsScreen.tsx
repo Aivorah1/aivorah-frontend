@@ -580,6 +580,7 @@ export default function TeacherSettingsScreen({ navigation }: any) {
 // ── Sub-components ──
 
 function FieldRow({ label, sub, btnLabel, onPress, styles, badgeOnly, testID }: { label: string; sub: string; btnLabel: string; onPress: () => void; styles: any; badgeOnly?: boolean; testID?: string }) {
+  const { colors: fc } = useTheme();
   return (
     <View style={styles.fieldRow}>
       <View style={{ flex: 1 }}>
@@ -587,7 +588,7 @@ function FieldRow({ label, sub, btnLabel, onPress, styles, badgeOnly, testID }: 
         <Text style={styles.fieldSub} numberOfLines={1} testID={testID ? `${testID}-value` : undefined}>{sub}</Text>
       </View>
       {badgeOnly ? (
-        <TouchableOpacity testID={testID} style={[styles.changeBtn, { borderColor: styles.comingSoonBadge?.borderColor || '#0E6E8640', backgroundColor: styles.comingSoonBadge?.backgroundColor || '#0E6E8618' }]} onPress={onPress} activeOpacity={0.7}>
+        <TouchableOpacity testID={testID} style={[styles.changeBtn, { borderColor: styles.comingSoonBadge?.borderColor || fc.primary + '40', backgroundColor: styles.comingSoonBadge?.backgroundColor || fc.primary + '18' }]} onPress={onPress} activeOpacity={0.7}>
           <Text style={styles.changeBtnText}>{btnLabel}</Text>
         </TouchableOpacity>
       ) : (

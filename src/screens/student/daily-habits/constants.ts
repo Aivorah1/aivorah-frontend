@@ -1,5 +1,8 @@
+import { followStudentAccent } from '../../../theme/studentAccent';
 export const TEAL = '#9FB2A4';  // sage
-export const GOLD = '#24877B';
+// Website Redesign, Phase 3: accent follows Light / Dark (see theme/studentAccent).
+export let GOLD = '#C8551C';
+followStudentAccent((a) => { GOLD = a; });
 export const SAGE = '#82A896';
 
 const ICON_MAP: Record<string, string> = {

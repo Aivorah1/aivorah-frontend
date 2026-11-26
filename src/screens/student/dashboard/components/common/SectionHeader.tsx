@@ -2,7 +2,6 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { fonts } from '../../../../../theme';
 import { useTheme } from '../../../../../context/ThemeContext';
-import { BRAND } from '../../constants';
 
 export function SectionHeader({ title, sub, onPress, linkLabel }: { title: string; sub?: string; onPress?: () => void; linkLabel?: string }) {
   const { colors } = useTheme();
@@ -14,7 +13,7 @@ export function SectionHeader({ title, sub, onPress, linkLabel }: { title: strin
       </View>
       {onPress && linkLabel ? (
         <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
-          <Text style={{ fontSize: 12, fontWeight: '700', color: BRAND.violet }}>{linkLabel}</Text>
+          <Text style={{ fontSize: 12, fontWeight: '700', color: colors.primary }}>{linkLabel}</Text>
         </TouchableOpacity>
       ) : null}
     </View>

@@ -15,7 +15,6 @@ import {
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import Svg, { Circle } from 'react-native-svg';
 import { useAuth } from '../../context/AuthContext';
 import PROFILE_SERVER_URL from '../../config/profileServerUrl';
 import { AVATAR_STYLES } from '../../constants/avatarStyles';
@@ -30,7 +29,8 @@ import { computeStudentCompletion } from './utils/studentCompletion';
 import { checkDobGradeConsistency } from './utils/dobGradeValidation';
 import { resolveOnboardingSaveResult } from './utils/resolveOnboardingSaveResult';
 import {
-  HomeThemeProvider, useHomeTheme, ThemeSwitch, SelectChip, HomeTokens, SERIF, SANS, PaperBackdrop, OpenBookArt, Decorative,
+  HomeThemeProvider, useHomeTheme, ThemeSwitch, SelectChip, HomeTokens, SERIF, SANS, Decorative,
+  FoldedPaperArt, PlaneArt, CornerShape, colorTransition,
 } from '../auth/authTheme';
 
 const GRADE_GROUPS = [
@@ -58,16 +58,17 @@ function getAge(dobStr: string): number | null {
 
 type Layout = 'mobile' | 'tablet' | 'wide';
 
-function CompletionRing({ pct, t }: { pct: number; t: HomeTokens }) {
-  const r = 18, c = 2 * Math.PI * r;
+function CompletionBar({ pct, t, width = 150 }: { pct: number; t: HomeTokens; width?: number }) {
+  const v = Math.max(0, Math.min(100, pct));
   return (
-    <View style={{ width: 46, height: 46, alignItems: 'center', justifyContent: 'center' }}>
-      <Svg width={46} height={46} viewBox="0 0 46 46" style={{ position: 'absolute' }}>
-        <Circle cx={23} cy={23} r={r} stroke={t.line} strokeWidth={4} fill="none" />
-        <Circle cx={23} cy={23} r={r} stroke={t.primary} strokeWidth={4} fill="none" strokeLinecap="round"
-          strokeDasharray={`${c}`} strokeDashoffset={c * (1 - Math.max(0, Math.min(100, pct)) / 100)} transform="rotate(-90 23 23)" />
-      </Svg>
-      <Text style={{ fontFamily: SANS, fontSize: 12, fontWeight: '700', color: t.heading }}>{pct}%</Text>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+      <View style={{ width, height: 10, borderRadius: 999, backgroundColor: t.line, overflow: 'hidden' }}>
+        <View style={{
+          width: `${v}%`, height: '100%', borderRadius: 999, backgroundColor: t.success,
+          ...(Platform.OS === 'web' ? { transitionProperty: 'width', transitionDuration: '450ms', transitionTimingFunction: 'ease' } as any : null),
+        }} />
+      </View>
+      <Text style={{ fontFamily: SANS, fontSize: 14, fontWeight: '700', color: t.heading, minWidth: 38 }}>{v}%</Text>
     </View>
   );
 }
@@ -286,7 +287,7 @@ function StudentOnboarding() {
 
   const brand = (
     <View style={styles.brand} pointerEvents="none">
-      <Text style={styles.logoTxt}>Aivorah <Text style={{ color: t.accent }}>Æ</Text></Text>
+      <Text style={styles.logoTxt}>Aivorah</Text>
       <View style={styles.roleBadge}>
         <Text style={styles.roleBadgeText}>Student</Text>
       </View>
@@ -295,15 +296,25 @@ function StudentOnboarding() {
 
   return (
     <View style={styles.screen}>
-      <PaperBackdrop />
-      {layout === 'wide' && (
-        <Decorative style={{ position: 'absolute', top: 6, left: 18, opacity: 0.95 }}><OpenBookArt width={130} /></Decorative>
+      {/* Coloured corner shapes and paper artwork, kept outside the form cards */}
+      {layout !== 'mobile' && (
+        <>
+          <Decorative style={{ position: 'absolute', top: 0, left: 0 }}><CornerShape color={t.yellow} size={layout === 'wide' ? 110 : 80} /></Decorative>
+          <Decorative style={{ position: 'absolute', top: 0, right: 0 }}><CornerShape color={t.orange} size={layout === 'wide' ? 96 : 70} flip /></Decorative>
+        </>
+      )}
+      {/* only where there is room beside the centred headline */}
+      {width >= 1360 && (
+        <>
+          <Decorative style={{ position: 'absolute', top: 96, left: 34 }}><FoldedPaperArt width={120} /></Decorative>
+          <Decorative style={{ position: 'absolute', top: 104, right: 52 }}><PlaneArt width={96} /></Decorative>
+        </>
       )}
       <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
 
         {/* ── Header ── */}
         <View style={styles.topbar}>
-          {layout !== 'mobile' && <View style={styles.brandCenter} pointerEvents="none">{brand}</View>}
+          {layout === 'wide' && <View style={styles.brandCenter} pointerEvents="none">{brand}</View>}
           <TouchableOpacity
             onPress={() => setShowLeaveConfirm(true)}
             style={styles.backBtn}
@@ -317,12 +328,12 @@ function StudentOnboarding() {
           <View style={styles.topRight}>
             <ThemeSwitch />
             <View style={styles.completionRow} accessibilityLabel={`Profile Completion ${completionPct}%`}>
-              <CompletionRing pct={completionPct} t={t} />
-              <Text style={styles.completionLbl}>Profile{'\n'}Completion</Text>
+              {width >= 1200 && <Text style={styles.completionLbl}>Profile Completion</Text>}
+              <CompletionBar pct={completionPct} t={t} width={layout === 'mobile' ? 64 : width >= 1200 ? 140 : 96} />
             </View>
           </View>
         </View>
-        {layout === 'mobile' && <View style={{ alignItems: 'center', marginBottom: 12 }}>{brand}</View>}
+        {layout !== 'wide' && <View style={{ alignItems: 'center', marginBottom: 12 }}>{brand}</View>}
 
         <View style={styles.greetWrap}>
           <View style={styles.eyebrowRow}>
@@ -568,7 +579,7 @@ function StudentOnboarding() {
             </TouchableOpacity>
           </View>
         </View>
-        <Text style={styles.footBrand} aria-hidden>Aivorah <Text style={{ color: t.accent }}>Æ</Text></Text>
+        <Text style={styles.footBrand} aria-hidden>Aivorah</Text>
       </ScrollView>
 
       {/* ── Leave-to-home confirmation ── */}
@@ -619,14 +630,14 @@ function makeStyles(t: HomeTokens, layout: Layout) {
   const mobile = layout === 'mobile';
   const gutter = mobile ? 16 : wide ? 32 : 24;
   return StyleSheet.create({
-    screen: { flex: 1, backgroundColor: t.paper },
+    screen: { flex: 1, backgroundColor: t.bg, ...colorTransition() },
     scrollContent: { paddingHorizontal: gutter, paddingTop: 16, paddingBottom: 40, maxWidth: 1200 + gutter * 2, width: '100%', alignSelf: 'center' },
 
     topbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: mobile ? 12 : 20, minHeight: 56 },
     brandCenter: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' },
     brand: { alignItems: 'center', gap: 4 },
     logoTxt: { fontFamily: SERIF, fontSize: 24, fontWeight: '600', color: t.heading, letterSpacing: -0.4 },
-    roleBadge: { paddingHorizontal: 10, paddingVertical: 2, borderRadius: 999, borderWidth: 1, borderColor: t.primary },
+    roleBadge: { paddingHorizontal: 10, paddingVertical: 2, borderRadius: 999, borderWidth: 1.5, borderColor: t.heading },
     roleBadgeText: { fontFamily: SANS, fontSize: 10, fontWeight: '700', letterSpacing: 1.2, textTransform: 'uppercase', color: t.heading },
     backBtn: {
       flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44,
@@ -634,21 +645,25 @@ function makeStyles(t: HomeTokens, layout: Layout) {
     },
     backTxt: { fontFamily: SANS, fontSize: 14, fontWeight: '600', color: t.heading },
     topRight: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-    completionRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    completionLbl: { fontFamily: SANS, fontSize: 12, lineHeight: 15, fontWeight: '600', color: t.muted, display: mobile ? 'none' : 'flex' },
+    completionRow: {
+      flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8, paddingHorizontal: mobile ? 10 : 14,
+      borderRadius: 999, backgroundColor: t.card, borderWidth: 1, borderColor: t.line,
+    },
+    completionLbl: { fontFamily: SANS, fontSize: 13, fontWeight: '700', color: t.heading },
 
     greetWrap: { alignItems: 'center', marginBottom: 24 },
     eyebrowRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 10 },
-    eyebrowLine: { width: mobile ? 24 : 56, height: 1, backgroundColor: t.accent, opacity: 0.6 },
-    eyebrow: { fontFamily: SANS, fontSize: 12, fontWeight: '700', letterSpacing: 2.4, textTransform: 'uppercase', color: t.heading },
+    eyebrowLine: { width: mobile ? 0 : 0, height: 1, backgroundColor: 'transparent' },
+    eyebrow: { fontFamily: SANS, fontSize: 12.5, fontWeight: '700', letterSpacing: 1.2, textTransform: 'uppercase', color: t.accent },
     greetMain: { fontFamily: SERIF, fontSize: mobile ? 28 : wide ? 38 : 32, lineHeight: (mobile ? 28 : wide ? 38 : 32) * 1.15, fontWeight: '600', color: t.heading, textAlign: 'center', letterSpacing: -0.5 },
     greetSub: { fontFamily: SANS, fontSize: 16, lineHeight: 23, color: t.muted, marginTop: 8, textAlign: 'center' },
 
     row: { flexDirection: mobile ? 'column' : 'row', flexWrap: layout === 'tablet' ? 'wrap' : 'nowrap', gap: 16, marginBottom: 16, alignItems: 'stretch' },
     card: {
       backgroundColor: t.card, borderWidth: 1, borderColor: t.line,
-      borderRadius: 18, padding: wide ? 22 : 18, gap: 16,
-      shadowColor: t.shadow, shadowOpacity: 1, shadowRadius: 18, shadowOffset: { width: 0, height: 8 }, elevation: 2,
+      borderRadius: 20, padding: wide ? 22 : 18, gap: 16,
+      shadowColor: t.shadow, shadowOpacity: 0.6, shadowRadius: 18, shadowOffset: { width: 0, height: 8 }, elevation: 2,
+      ...colorTransition(),
     },
     col3: wide ? { flex: 1, flexBasis: 0, minWidth: 0 } : mobile ? {} : { flexGrow: 1, flexBasis: '46%', minWidth: 280 },
     colAvatar: wide ? { flex: 1.55, flexBasis: 0, minWidth: 0 } : mobile ? {} : { flexGrow: 1, flexBasis: '100%' },
@@ -665,18 +680,18 @@ function makeStyles(t: HomeTokens, layout: Layout) {
 
     // CardHeader (shared component) reads these
     cardHeaderRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
-    cardIcon: { width: 38, height: 38, borderRadius: 10, backgroundColor: t.primarySoft, alignItems: 'center', justifyContent: 'center' },
+    cardIcon: { width: 38, height: 38, borderRadius: 12, backgroundColor: t.infoBg, alignItems: 'center', justifyContent: 'center' },
     cardTitle: { fontFamily: SERIF, fontSize: 21, fontWeight: '600', color: t.heading, letterSpacing: -0.2 },
     cardSub: { fontFamily: SANS, fontSize: 13.5, color: t.muted, marginTop: 2 },
-    cardCheck: { width: 20, height: 20, borderRadius: 10, backgroundColor: t.primary, alignItems: 'center', justifyContent: 'center' },
+    cardCheck: { width: 20, height: 20, borderRadius: 10, backgroundColor: t.success, alignItems: 'center', justifyContent: 'center' },
 
     fieldGroup: { gap: 7 },
     fieldRow: { flexDirection: mobile ? 'column' : 'row', gap: mobile ? 16 : 12 },
     lbl: { fontFamily: SANS, fontSize: 14, fontWeight: '600', color: t.heading },
     lblRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
     locateBtn: {
-      flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 44, borderRadius: 12,
-      borderWidth: 1.5, borderColor: t.primary, backgroundColor: t.primarySoft,
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 44, borderRadius: 999,
+      borderWidth: 1.5, borderColor: t.heading, backgroundColor: t.card,
     },
     locateTxt: { fontFamily: SANS, fontSize: 14, fontWeight: '600', color: t.heading },
     // Shared SelectField / AutocompleteField read these
@@ -702,7 +717,7 @@ function makeStyles(t: HomeTokens, layout: Layout) {
       paddingHorizontal: 14, minHeight: 48, borderRadius: 12,
       borderWidth: 1.5, borderColor: t.inputLine, backgroundColor: t.input,
     },
-    radioTileActive: { borderColor: t.primary, backgroundColor: t.primarySoft },
+    radioTileActive: { borderColor: t.primary, backgroundColor: t.primarySoft, borderWidth: 2 },
     radio: { width: 18, height: 18, borderRadius: 9, borderWidth: 2, borderColor: t.muted, alignItems: 'center', justifyContent: 'center' },
     radioDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: t.primary },
     tileTxt: { fontFamily: SANS, fontSize: 15, fontWeight: '600', color: t.text },
@@ -714,14 +729,15 @@ function makeStyles(t: HomeTokens, layout: Layout) {
     avatarGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
     avatarTile: {
       flexBasis: mobile ? '46%' : '22%', flexGrow: 1, minWidth: mobile ? 0 : 84, alignItems: 'center', gap: 6, paddingVertical: 12,
-      borderRadius: 14, borderWidth: 1.5, borderColor: 'transparent', position: 'relative',
+      borderRadius: 16, borderWidth: 2, borderColor: 'transparent', position: 'relative',
+      ...colorTransition(180),
     },
     avatarTileActive: { borderColor: t.primary, backgroundColor: t.primarySoft },
     avatarCircle: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
     avatarLbl: { fontFamily: SANS, fontSize: 13, fontWeight: '600', color: t.muted, textAlign: 'center' },
     tileCheck: {
       position: 'absolute', top: 6, right: 6, width: 18, height: 18, borderRadius: 9,
-      backgroundColor: t.primary, alignItems: 'center', justifyContent: 'center',
+      backgroundColor: t.success, alignItems: 'center', justifyContent: 'center',
     },
 
     lsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
@@ -729,10 +745,10 @@ function makeStyles(t: HomeTokens, layout: Layout) {
       flexBasis: '46%', flexGrow: 1, minHeight: 112, padding: 14, borderRadius: 14, alignItems: 'center', justifyContent: 'center',
       borderWidth: 1.5, borderColor: t.inputLine, backgroundColor: t.input, gap: 6, position: 'relative',
     },
-    lsTileActive: { borderColor: t.primary, backgroundColor: t.primarySoft },
+    lsTileActive: { borderColor: t.primary, backgroundColor: t.primarySoft, borderWidth: 2 },
     lsCheck: {
       position: 'absolute', top: 8, right: 8, width: 20, height: 20, borderRadius: 10,
-      backgroundColor: t.primary, alignItems: 'center', justifyContent: 'center',
+      backgroundColor: t.success, alignItems: 'center', justifyContent: 'center',
     },
     lsLabel: { fontFamily: SANS, fontSize: 15, fontWeight: '700', color: t.heading, textAlign: 'center' },
     lsDesc: { fontFamily: SANS, fontSize: 12, color: t.muted, lineHeight: 16, textAlign: 'center' },
@@ -755,24 +771,24 @@ function makeStyles(t: HomeTokens, layout: Layout) {
     requiredHint: { fontFamily: SANS, fontSize: 13, color: t.muted, maxWidth: mobile ? undefined : 260, textAlign: mobile ? 'left' : 'right' },
     completeBtn: {
       flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 50,
-      backgroundColor: t.primary, paddingHorizontal: 24, borderRadius: 12,
+      backgroundColor: t.primary, paddingHorizontal: 28, borderRadius: 999,
     },
     completeTxt: { fontFamily: SANS, fontSize: 16, fontWeight: '700', color: t.onPrimary },
 
-    confirmOverlay: { flex: 1, backgroundColor: 'rgba(8,12,22,0.6)', justifyContent: 'center', alignItems: 'center', padding: 24 },
+    confirmOverlay: { flex: 1, backgroundColor: 'rgba(16,24,39,0.6)', justifyContent: 'center', alignItems: 'center', padding: 24 },
     confirmBox: {
-      width: 380, maxWidth: '95%', borderRadius: 20, padding: 28, alignItems: 'center',
+      width: 380, maxWidth: '95%', borderRadius: 22, padding: 28, alignItems: 'center',
       backgroundColor: t.card, borderWidth: 1, borderColor: t.line,
     },
     confirmIcon: {
       width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center',
-      backgroundColor: t.primarySoft, marginBottom: 16,
+      backgroundColor: t.infoBg, marginBottom: 16,
     },
     confirmTitle: { fontFamily: SERIF, fontSize: 22, fontWeight: '600', color: t.heading, marginBottom: 10, textAlign: 'center' },
     confirmBody: { fontFamily: SANS, fontSize: 14.5, color: t.muted, lineHeight: 21, textAlign: 'center', marginBottom: 22 },
-    confirmPrimary: { width: '100%', minHeight: 48, justifyContent: 'center', backgroundColor: t.primary, borderRadius: 12, alignItems: 'center', marginBottom: 10 },
+    confirmPrimary: { width: '100%', minHeight: 48, justifyContent: 'center', backgroundColor: t.primary, borderRadius: 999, alignItems: 'center', marginBottom: 10 },
     confirmPrimaryTxt: { fontFamily: SANS, fontSize: 15, fontWeight: '700', color: t.onPrimary },
-    confirmSecondary: { width: '100%', minHeight: 48, justifyContent: 'center', alignItems: 'center', borderRadius: 12, borderWidth: 1.5, borderColor: t.inputLine },
+    confirmSecondary: { width: '100%', minHeight: 48, justifyContent: 'center', alignItems: 'center', borderRadius: 999, borderWidth: 1.5, borderColor: t.heading },
     confirmSecondaryTxt: { fontFamily: SANS, fontSize: 14, fontWeight: '600', color: t.heading },
   });
 }

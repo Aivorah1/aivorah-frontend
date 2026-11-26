@@ -104,7 +104,7 @@ export default function StudentCard({
       {/* Stats row */}
       <View style={styles.cardStats}>
         <View style={styles.cardStat}>
-          <Feather name="zap" size={12} color="#0E6E86" />
+          <Feather name="zap" size={12} color={colors.primary} />
           <Text style={styles.cardStatVal}>{s.xpPoints} XP</Text>
         </View>
         <View style={styles.cardStat}>

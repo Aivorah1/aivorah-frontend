@@ -117,7 +117,7 @@ export function AssignmentCommonFields({
         </>
       )}
 
-      <Text style={styles.fieldLabel}>Grade {isIBPYP && <Text style={{ color: '#0E6E86', fontSize: 10, fontWeight: '600' }}> · IB PYP (3–5)</Text>}</Text>
+      <Text style={styles.fieldLabel}>Grade {isIBPYP && <Text style={{ color: colors.primary, fontSize: 10, fontWeight: '600' }}> · IB PYP (3–5)</Text>}</Text>
       <View style={styles.chipRow}>
         {gradeOptions.map((g: string) => (
           <TouchableOpacity

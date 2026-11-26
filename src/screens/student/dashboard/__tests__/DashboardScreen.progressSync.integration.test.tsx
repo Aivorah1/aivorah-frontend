@@ -191,12 +191,12 @@ describe('DashboardScreen — Learning Path progress sync', () => {
     expect(screen.getAllByText('90%').length).toBeGreaterThan(0);
   });
 
-  test('opened but unfinished topic: Continue Learning offers to resume that same topic', async () => {
+  test('opened but unfinished topic: My Learning Paths offers to continue that same topic', async () => {
     mockActivity = { 'A Tiger in the Zoo: Part 1': { lastOpenedAt: '2026-10-13T12:00:00.000Z' } };
     await render(<DashboardScreen navigation={makeNavigation()} route={{}} />);
     await screen.findByText('2 / 5');
     expect(screen.getByTestId('continue-learning-status')).toHaveTextContent('In progress');
-    expect(screen.getByText('Resume')).toBeTruthy();
+    expect(screen.getByTestId('continue-learning-cta')).toHaveTextContent('Continue');
     expect(screen.getByText('A Tiger in the Zoo: Part 1')).toBeTruthy();
   });
 });

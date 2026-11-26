@@ -107,7 +107,7 @@ export function renderAssignmentModal(tileIndex: number, ctx: ModalRenderCtx) {
                 <Text style={styles.modalEmptyText}>No assignment scores yet</Text>
               </View>
             ) : ranked.map((s: any, i: number) => {
-              const scoreColor = s.avgScore >= 70 ? '#5A8A70' : s.avgScore >= 40 ? '#0E6E86' : '#B8797E';
+              const scoreColor = s.avgScore >= 70 ? '#5A8A70' : s.avgScore >= 40 ? colors.primary : '#B8797E';
               return (
                 <View key={s.id || i} style={[styles.tableRow, i % 2 === 0 && styles.tableRowAlt]}>
                   <Text style={[styles.tableCell, { width: 32, textAlign: 'center', fontWeight: '800', color: i < 3 ? tile.color : colors.textDim, fontSize: 14 }]}>{i + 1}</Text>

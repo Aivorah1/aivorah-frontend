@@ -11,8 +11,8 @@ import { spacing, radius, fonts } from '../../theme';
 
 // ── Palette ──────────────────────────────────────────────────
 const TEAL   = '#9FB2A4';  // sage
-const GOLD   = '#24877B';  // gold
-const ROSE   = '#24877B';  // deep gold
+const GOLD   = '#C8551C';  // gold
+const ROSE   = '#C8551C';  // deep gold
 const GREEN  = '#7E9A86';  // deep sage
 
 // ── Merchandise catalogue ─────────────────────────────────────

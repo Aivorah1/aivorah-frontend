@@ -82,186 +82,104 @@ export const lightColors = {
   tintPeach: '#EDE8E2',
 };
 
-// ── Shared redesign palette (Parent reference; also Student + Teacher) ──
-// Warm ivory / white cards in light, deep slate / storm slate in dark. Ocean
-// blue primary (pale cyan in dark); powder blue = info/selected, mint =
-// success, apricot = reminders, soft rose = errors. No gold, no violet.
-// Only the role navigators provide these (PortalThemeProvider).
-const sharedLight: typeof darkColors = {
-  bgDark: '#FAF8F3',
-  cardDark: '#FFFFFF',
-  cardHover: '#F1F6F8',
-  sidebarDark: '#FFFFFF',
-  borderColor: '#DCE5EA',
-  textMain: '#182B36',
-  textHeading: '#182B36',
-  textMuted: '#4A5E6A',
-  textDim: '#54687A',
-  primary: '#075D75',
-  primaryHover: '#064E63',
-  primaryGlow: 'rgba(7,93,117,0.10)',
-  accentBlue: '#1F6FA3',
-  accentPurple: '#075D75',
-  accentGreen: '#1E7F55',
-  accentYellow: '#075D75',
-  accentYellowGlow: 'rgba(7,93,117,0.10)',
-  accentRed: '#B4443C',
-  accentCyan: '#075D75',
-  accentOrange: '#A85520',
-  accentPink: '#B4443C',
-  onPrimary: '#FFFFFF',
-  accent: '#075D75',
-  surfaceSubtle: '#F6F8F9',
-  navActiveBg: '#DDEFF6',
-  navActiveText: '#0B4255',
-  tintLilac: '#E1F0F7',
-  tintMint: '#E0F4EA',
-  tintBlue: '#E1F0F7',
-  tintPeach: '#FCE9DA',
-};
+// Parent (Website Redesign, Phase 5): the same Aivorah palette as Student and
+// Teacher — defined below with them (the Student palette), so declared later.
 
-const sharedDark: typeof darkColors = {
-  bgDark: '#101B25',
-  cardDark: '#1C2B37',
-  cardHover: '#243746',
-  sidebarDark: '#14222E',
-  borderColor: '#2F4352',
-  textMain: '#F2F7FA',
-  textHeading: '#F2F7FA',
-  textMuted: '#B6C6D1',
-  textDim: '#A3B4C0',
-  primary: '#9ADBE9',
-  primaryHover: '#B3E6F0',
-  primaryGlow: 'rgba(154,219,233,0.14)',
-  accentBlue: '#A6D4F2',
-  accentPurple: '#9ADBE9',
-  accentGreen: '#93DDB5',
-  accentYellow: '#9ADBE9',
-  accentYellowGlow: 'rgba(154,219,233,0.14)',
-  accentRed: '#F4A9A3',
-  accentCyan: '#9ADBE9',
-  accentOrange: '#F6C29A',
-  accentPink: '#F4A9A3',
-  onPrimary: '#182B36',
-  accent: '#9ADBE9',
-  surfaceSubtle: '#14222E',
-  navActiveBg: '#2B4757',
-  navActiveText: '#F2F7FA',
-  tintLilac: '#20394A',
-  tintMint: '#1E3A33',
-  tintBlue: '#20394A',
-  tintPeach: '#3E3029',
-};
-
-// Parent: the reference palette, as is.
-export const parentLightColors: typeof darkColors = { ...sharedLight };
-export const parentDarkColors: typeof darkColors = { ...sharedDark };
-
-// Student: same palette, slightly stronger blue + mint accents.
+// Student (Website Redesign, Phase 3): the homepage palette.
+// Light = warm ivory page, soft-ivory sidebar, warm-white cards, espresso
+// headings, cocoa body, burnt-orange primary, peach active nav, deep-blue focus.
+// Dark = ink navy, deep-slate sidebar, slate-blue cards, warm-cream headings,
+// cool-white body, pale-blue primary, blue-slate active nav, sky-blue focus.
 export const studentLightColors: typeof darkColors = {
-  ...sharedLight,
-  accentGreen: '#177A4F',
-  navActiveBg: '#D3EBF4',
-  tintBlue: '#D9EDF6',
-  tintMint: '#D8F1E4',
+  bgDark: '#F7F3E9',
+  cardDark: '#FFFCF6',
+  cardHover: '#F3ECDF',
+  sidebarDark: '#FBF6ED',
+  borderColor: '#D5C6B3',
+  textMain: '#302117',
+  textHeading: '#302117',
+  textMuted: '#4F4035',
+  textDim: '#6A584A',
+  primary: '#B84312',
+  primaryHover: '#9F390E',
+  primaryGlow: 'rgba(184,67,18,0.10)',
+  accentBlue: '#1D5DB5',
+  accentPurple: '#B84312',
+  accentGreen: '#23803A',
+  accentYellow: '#B84312',
+  accentYellowGlow: 'rgba(184,67,18,0.10)',
+  accentRed: '#B3261E',
+  accentCyan: '#1D5DB5',
+  accentOrange: '#B84312',
+  accentPink: '#B3261E',
+  onPrimary: '#FFFFFF',
+  accent: '#B84312',
+  surfaceSubtle: '#F3ECDF',
+  navActiveBg: '#FBE4D4',
+  navActiveText: '#8F350D',
+  tintLilac: '#E6EEF8',
+  tintMint: '#E5F1DA',
+  tintBlue: '#E1EDF7',
+  tintPeach: '#FBE4D4',
 };
 export const studentDarkColors: typeof darkColors = {
-  ...sharedDark,
-  accentGreen: '#9BE5BE',
-  navActiveBg: '#2E5263',
+  bgDark: '#101827',
+  cardDark: '#1C2A40',
+  cardHover: '#22324B',
+  sidebarDark: '#162238',
+  borderColor: '#425775',
+  textMain: '#FFF3DC',
+  textHeading: '#FFF3DC',
+  textMuted: '#DCE6F4',
+  textDim: '#B4C3D8',
+  primary: '#A9D5FF',
+  primaryHover: '#C3E4FF',
+  primaryGlow: 'rgba(169,213,255,0.14)',
+  accentBlue: '#8DD1FF',
+  accentPurple: '#A9D5FF',
+  accentGreen: '#7BD389',
+  accentYellow: '#A9D5FF',
+  accentYellowGlow: 'rgba(169,213,255,0.14)',
+  accentRed: '#FF9C8A',
+  accentCyan: '#8DD1FF',
+  accentOrange: '#FFB27A',
+  accentPink: '#FF9C8A',
+  onPrimary: '#101827',
+  accent: '#A9D5FF',
+  surfaceSubtle: '#162238',
+  navActiveBg: '#2B4663',
+  navActiveText: '#C3E4FF',
+  tintLilac: '#22324B',
+  tintMint: '#1E3A30',
+  tintBlue: '#1E3550',
+  tintPeach: '#3A2C24',
 };
 
-// Teacher: same palette, quieter borders for denser tables.
-export const teacherLightColors: typeof darkColors = {
-  ...sharedLight,
-  borderColor: '#E1E7EB',
+/** Decorative shapes used sparingly in the Student Portal (welcome panel). */
+export const studentShapeColors = {
+  light: { green: '#77B742', yellow: '#F6C931', orange: '#F58B3A', blue: '#61ABD7' },
+  dark: { green: '#6A9F3E', yellow: '#DCA928', orange: '#C85F24', blue: '#477EAB' },
 };
-export const teacherDarkColors: typeof darkColors = {
-  ...sharedDark,
-  borderColor: '#2A3D4B',
-};
+
+// Teacher (Website Redesign, Phase 4): the same Aivorah palette as the
+// Student Portal — warm ivory / warm white / espresso / burnt orange in light,
+// ink navy / slate / warm cream / pale blue in dark, sand / blue-slate borders.
+export const teacherLightColors: typeof darkColors = { ...studentLightColors };
+export const teacherDarkColors: typeof darkColors = { ...studentDarkColors };
+// Parent (Website Redesign, Phase 5): the same palette.
+export const parentLightColors: typeof darkColors = { ...studentLightColors };
+export const parentDarkColors: typeof darkColors = { ...studentDarkColors };
 
 // ── School Admin palette (berry / fern / denim / clay / rose / eucalyptus) ──
 // Calm cream + white (light) and deep navy + blue-slate (dark) surfaces; the
 // multicolour accents go on buttons, links, tabs, icons and badges only.
-export const schoolAdminLightColors: typeof darkColors = {
-  bgDark: '#FAF6F0',
-  cardDark: '#FFFFFF',
-  cardHover: '#F7F2EE',
-  sidebarDark: '#FFFFFF',
-  borderColor: '#E6DFDA',
-  textMain: '#1F2A37',
-  textHeading: '#1F2A37',
-  textMuted: '#55606E',
-  textDim: '#5E6977',
-  primary: '#9B2550',          // berry: primary actions + selected nav
-  primaryHover: '#841F44',
-  primaryGlow: 'rgba(155,37,80,0.10)',
-  accentBlue: '#2F5E9E',       // denim: links + focus
-  accentPurple: '#9B2550',
-  accentGreen: '#2F7D4F',      // fern: secondary actions + positive
-  accentYellow: '#9B2550',
-  accentYellowGlow: 'rgba(155,37,80,0.10)',
-  accentRed: '#B03A3A',
-  accentCyan: '#2F5E9E',
-  accentOrange: '#B8613A',     // soft clay: attention + invitations
-  accentPink: '#B5536D',       // muted rose
-  onPrimary: '#FFFFFF',
-  accent: '#9B2550',
-  surfaceSubtle: '#FBF8F5',
-  navActiveBg: '#F6DDE6',
-  navActiveText: '#7E1D41',
-  tintLilac: '#F8E3EA',
-  tintMint: '#E2F1E6',
-  tintBlue: '#E3ECF7',
-  tintPeach: '#F8E6DA',
-};
+export const schoolAdminLightColors: typeof darkColors = { ...studentLightColors }; // Website Redesign, Phases 6–7: Aivorah palette
 
-export const schoolAdminDarkColors: typeof darkColors = {
-  bgDark: '#101B25',
-  cardDark: '#1C2B37',
-  cardHover: '#243746',
-  sidebarDark: '#14222E',
-  borderColor: '#2F4352',
-  textMain: '#F2F7FA',
-  textHeading: '#F2F7FA',
-  textMuted: '#B6C6D1',
-  textDim: '#A3B4C0',
-  primary: '#C2416B',
-  primaryHover: '#D2557D',
-  primaryGlow: 'rgba(194,65,107,0.16)',
-  accentBlue: '#8FB6EA',
-  accentPurple: '#E58AA6',
-  accentGreen: '#7FCF9A',
-  accentYellow: '#C2416B',     // berry fill (white labels); links use denim
-  accentYellowGlow: 'rgba(194,65,107,0.16)',
-  accentRed: '#F2A0A0',
-  accentCyan: '#8FB6EA',
-  accentOrange: '#E9A47F',
-  accentPink: '#E79AB0',
-  onPrimary: '#FFFFFF',
-  accent: '#C2416B',
-  surfaceSubtle: '#14222E',
-  navActiveBg: '#5A2540',
-  navActiveText: '#FFE6EE',
-  tintLilac: '#3A2433',
-  tintMint: '#1E3A2C',
-  tintBlue: '#1F3150',
-  tintPeach: '#3E2D25',
-};
+export const schoolAdminDarkColors: typeof darkColors = { ...studentDarkColors }; // Website Redesign, Phases 6–7: Aivorah palette
 
 // ── Company Admin palette: School Admin system with Company Admin surfaces ──
-export const companyAdminLightColors: typeof darkColors = {
-  ...schoolAdminLightColors,
-  bgDark: '#FAF8F4',
-  cardHover: '#F6F2EE',
-  borderColor: '#E3DCD6',
-  navActiveBg: '#F4D9E3',
-};
-export const companyAdminDarkColors: typeof darkColors = {
-  ...schoolAdminDarkColors,
-  borderColor: '#34495A',
-};
+export const companyAdminLightColors: typeof darkColors = { ...studentLightColors }; // Website Redesign, Phases 6–7: Aivorah palette
+export const companyAdminDarkColors: typeof darkColors = { ...studentDarkColors }; // Website Redesign, Phases 6–7: Aivorah palette
 
 // Default export keeps backward compat — ThemeContext overrides at runtime
 export const colors = darkColors;

@@ -9,7 +9,7 @@ export class AssignmentErrorBoundary extends Component<{ children: React.ReactNo
       return (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 12 }}>
           <Text style={{ fontSize: 16, fontWeight: '700', color: this.props.colors?.textMain || '#fff', textAlign: 'center' }}>Something went wrong</Text>
-          <TouchableOpacity onPress={() => this.setState({ hasError: false })} style={{ backgroundColor: '#24877B', borderRadius: 10, paddingHorizontal: 24, paddingVertical: 10 }}>
+          <TouchableOpacity onPress={() => this.setState({ hasError: false })} style={{ backgroundColor: '#C8551C', borderRadius: 10, paddingHorizontal: 24, paddingVertical: 10 }}>
             <Text style={{ color: '#fff', fontWeight: '700' }}>Try again</Text>
           </TouchableOpacity>
         </View>

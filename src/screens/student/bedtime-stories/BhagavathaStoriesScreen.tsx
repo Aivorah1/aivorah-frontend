@@ -76,7 +76,7 @@ export default function BhagavathaStoriesScreen({ navigation }: any) {
 
                 <View style={isWide ? styles.grid : styles.list}>
                 {items.map(story => {
-                  const grad = PASTEL_GRAD[story.coverColor] ?? ['#9FB2A4', '#24877B'];
+                  const grad = PASTEL_GRAD[story.coverColor] ?? ['#9FB2A4', '#C8551C'];
                   return (
                     <TouchableOpacity
                       key={story.id}

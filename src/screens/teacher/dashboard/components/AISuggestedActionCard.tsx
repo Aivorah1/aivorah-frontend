@@ -1,14 +1,12 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import Icon from '../../../../components/common/Icon';
 import { spacing } from '../../../../theme';
 import { useTheme } from '../../../../context/ThemeContext';
-import AICardDecoration from './common/AICardDecoration';
 
 export default function AISuggestedActionCard({
-  gold, title, body, hasNeedsAttention, avgProgress, styles, navigation,
+  title, body, hasNeedsAttention, avgProgress, styles, navigation,
 }: {
-  gold: string;
   title: string;
   body: string;
   hasNeedsAttention: boolean;
@@ -19,10 +17,9 @@ export default function AISuggestedActionCard({
   const { colors } = useTheme();
   return (
     <View style={[styles.aiCard, { marginBottom: spacing.xl }]}>
-      <AICardDecoration />
       <View style={styles.aiTop}>
         <View style={styles.aiIconWrap}>
-          <Feather name="cpu" size={20} color={colors.onPrimary} />
+          <Icon name="sparkles" size={22} color={colors.primary} />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.aiTag}>AI SUGGESTED ACTION</Text>
@@ -33,22 +30,23 @@ export default function AISuggestedActionCard({
       <View style={styles.aiBtnRow}>
         {hasNeedsAttention ? (
           <>
-            <TouchableOpacity style={styles.aiBtn} activeOpacity={0.85} onPress={() => navigation.navigate('TeacherSchedule' as any)}>
-              <Feather name="calendar" size={14} color={gold} />
+            <TouchableOpacity style={styles.aiBtn} activeOpacity={0.85} accessibilityRole="button" onPress={() => navigation.navigate('TeacherSchedule' as any)}>
+              <Icon name="calendar-plus" size={17} color={colors.onPrimary} />
               <Text style={styles.aiBtnText}>Schedule Study Hour</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.aiBtn, { backgroundColor: 'rgba(255,255,255,0.18)', borderWidth: 1, borderColor: '#fff' }]}
+              style={[styles.aiBtn, styles.aiBtnSecondary]}
               activeOpacity={0.85}
+              accessibilityRole="button"
               onPress={() => navigation.navigate('TeacherAssignments' as any)}
             >
-              <Feather name="plus-circle" size={14} color={colors.onPrimary} />
-              <Text style={[styles.aiBtnText, { color: colors.onPrimary }]}>Assign Practice Task</Text>
+              <Icon name="circle-plus" size={17} color={colors.textHeading} />
+              <Text style={[styles.aiBtnText, styles.aiBtnSecondaryText]}>Assign Practice Task</Text>
             </TouchableOpacity>
           </>
         ) : (
-          <TouchableOpacity style={styles.aiBtn} activeOpacity={0.85} onPress={() => navigation.navigate('TeacherAssignments' as any)}>
-            <Feather name="plus-circle" size={14} color={gold} />
+          <TouchableOpacity style={styles.aiBtn} activeOpacity={0.85} accessibilityRole="button" onPress={() => navigation.navigate('TeacherAssignments' as any)}>
+            <Icon name="circle-plus" size={17} color={colors.onPrimary} />
             <Text style={styles.aiBtnText}>
               {avgProgress > 0 ? 'Assign Task / Quiz' : 'Create First Assignment'}
             </Text>

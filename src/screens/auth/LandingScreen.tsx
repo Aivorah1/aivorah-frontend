@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Platform, Alert, Modal, BackHandler, Pressable } from 'react-native';
 import ActivityIndicator from '../../components/common/AivorahLoader';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import Svg, { Path } from 'react-native-svg';
 import { useAuth, UserRole } from '../../context/AuthContext';
-import { useTheme } from '../../context/ThemeContext';
 import { validateLoginForm, validateSignupForm } from './utils/validation';
 import PROFILE_SERVER_URL from '../../config/profileServerUrl';
 import AUTH_SERVER_URL from '../../config/authServerUrl';
@@ -13,8 +12,19 @@ import { AUTH_PAGE_PATHS, AuthPage, authPageFromPath } from './authRoutes';
 import {
   HomeThemeProvider, useHomeTheme, useAuthLayout, AuthShell, AuthCard, AuthHeading, AuthField, FieldLabel,
   PasswordEye, PrimaryButton, OutlineButton, OrDivider, Notice, TextLink, SelectChip, RoleTile, Checkbox,
-  FramedPanel, SignInArt, CreateBookArt, Decorative, SANS, SERIF,
+  ShapeFrame, PencilArt, GlidingPlane, RulerArt, Sparks, FadeIn, Decorative, focusRing, SANS, SERIF,
 } from './authTheme';
+
+// Cards switch to two columns when the page is wide enough (desktop / TV boards).
+const SplitContext = createContext(false);
+const useSplit = () => useContext(SplitContext);
+
+// Page headings (shown beside the card on wide screens, inside it on phones).
+const PAGE_COPY = {
+  signin: { title: 'Welcome back', subtitle: 'Sign in to your Aivorah account' },
+  signup: { title: 'Create your account', subtitle: undefined as string | undefined },
+  forgot: { title: 'Reset your password', subtitle: "Enter your email and we'll send you a reset link" },
+};
 
 const IS_WEB = Platform.OS === 'web';
 
@@ -53,10 +63,18 @@ function FooterLine({ text, link, onPress, tone = 'accent' }: { text: string; li
   );
 }
 
+/** Whether this device can do face login (passkeys); resolved asynchronously. */
+function useFaceAvailable() {
+  const [ok, setOk] = useState(false);
+  useEffect(() => { faceLoginAvailable().then(setOk); }, []);
+  return ok;
+}
+
 // ─────────────────────────────────────────────────────────
 // Roles: sign-up offers all three (students 14+ may self-register)
 // ─────────────────────────────────────────────────────────
 const ROLE_LABELS: UserRole[] = ['student', 'teacher', 'parent'];
+const ROLE_ICONS: Record<string, string> = { student: 'account-outline', teacher: 'school-outline', parent: 'account-group-outline' };
 
 // ─────────────────────────────────────────────────────────
 // Date of birth picker (themed calendar; outputs DD/MM/YYYY)
@@ -197,9 +215,8 @@ function LoginForm({ onDone, onSwitchSignup, onSwitchForgot, signInEmail, signIn
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   // Face login (passkeys): only offered where this device can do it.
-  const [faceAvailable, setFaceAvailable] = useState(false);
+  const faceAvailable = useFaceAvailable();
   const [faceLoading, setFaceLoading] = useState(false);
-  useEffect(() => { faceLoginAvailable().then(setFaceAvailable); }, []);
   async function faceSignIn() {
     setError(''); setFaceLoading(true);
     try { await signInWithFace(); onDone(); }
@@ -266,10 +283,21 @@ function LoginForm({ onDone, onSwitchSignup, onSwitchForgot, signInEmail, signIn
     finally { setGoogleLoading(false); }
   }
 
-  return (
-    <>
-      <AuthHeading title="Welcome back" subtitle="Sign in to your Aivorah account" />
+  const split = useSplit();
+  const faceButton = faceAvailable && (
+    <OutlineButton
+      testID="login-face"
+      label="Use face authentication"
+      leading={<MaterialCommunityIcons name="face-recognition" size={split ? 26 : 20} color={t.heading} />}
+      onPress={faceSignIn}
+      loading={faceLoading}
+      style={split ? { minHeight: 96, flexDirection: 'column', borderRadius: 20, gap: 8 } : { marginTop: 12 }}
+    />
+  );
+  const footer = <FooterLine text="Don't have an account?" link="Sign up free" onPress={onSwitchSignup} />;
 
+  const main = (
+    <>
       <GoogleButton label="Sign in with Google" loading={googleLoading} onPress={googleSignIn} />
 
       <OrDivider />
@@ -293,17 +321,26 @@ function LoginForm({ onDone, onSwitchSignup, onSwitchForgot, signInEmail, signIn
       {!!error && <Notice kind="error">{error}</Notice>}
 
       <PrimaryButton label="Sign In" onPress={submit} loading={loading} />
-      {faceAvailable && (
-        <OutlineButton
-          testID="login-face"
-          label="Use face authentication"
-          leading={<MaterialCommunityIcons name="face-recognition" size={20} color={t.heading} />}
-          onPress={faceSignIn}
-          loading={faceLoading}
-          style={{ marginTop: 12 }}
-        />
-      )}
-      <FooterLine text="Don't have an account?" link="Sign up free" onPress={onSwitchSignup} />
+    </>
+  );
+
+  if (split) {
+    return (
+      <View style={{ flexDirection: 'row', gap: 28 }}>
+        <View style={{ flex: 1.45, minWidth: 0 }}>{main}</View>
+        <View style={{ width: 1, backgroundColor: t.line }} />
+        <View style={{ flex: 1, minWidth: 0, justifyContent: 'center' }}>
+          {faceButton}
+          {footer}
+        </View>
+      </View>
+    );
+  }
+  return (
+    <>
+      {main}
+      {faceButton}
+      {footer}
     </>
   );
 }
@@ -323,7 +360,8 @@ function SignupForm({ onDone, onSwitchLogin, signUpEmail, signInGoogle, addParen
 }) {
   const { t } = useHomeTheme();
   const { width } = useAuthLayout();
-  const twoCol = width >= 760;
+  const split = useSplit();
+  const twoCol = !split && width >= 760;
   const [role, setRole]             = useState<UserRole>('student');
   const [curriculum, setCurriculum] = useState('CBSE');
   const [name, setName]             = useState('');
@@ -444,16 +482,14 @@ function SignupForm({ onDone, onSwitchLogin, signUpEmail, signInGoogle, addParen
     />
   );
 
-  return (
+  const roleGroup = (
     <>
-      <AuthHeading title="Create your account" align="left" ornament={false} />
-      <View style={{ width: 48, height: 2, backgroundColor: t.accent, marginTop: -12, marginBottom: 20, borderRadius: 1 }} />
-
       {/* Role FIRST — chosen before Google SSO (and used for email signup too) */}
       <FieldLabel>I&apos;m creating an account as</FieldLabel>
-      <View accessibilityRole="radiogroup" style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 14 }}>
+      <View accessibilityRole="radiogroup" style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 14, marginTop: 4 }}>
         {ROLE_LABELS.map(r => (
           <RoleTile key={r} label={r.charAt(0).toUpperCase() + r.slice(1)} selected={role === r}
+            icon={(c) => <MaterialCommunityIcons name={ROLE_ICONS[r] as any} size={22} color={c} />}
             onPress={() => { setRole(r); setError(''); setDob(''); }} />
         ))}
       </View>
@@ -470,16 +506,20 @@ function SignupForm({ onDone, onSwitchLogin, signUpEmail, signInGoogle, addParen
       <OrDivider />
 
       {showCurriculum && (
-        <View style={{ marginBottom: 18 }}>
+        <FadeIn style={{ marginBottom: 18 }}>
           <FieldLabel>Curriculum</FieldLabel>
           <View accessibilityRole="radiogroup" style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
             {CURRICULA.map(c => (
               <SelectChip key={c} label={c} selected={curriculum === c} onPress={() => setCurriculum(c)} />
             ))}
           </View>
-        </View>
+        </FadeIn>
       )}
+    </>
+  );
 
+  const detailsGroup = (
+    <>
       <View style={row}>
         <AuthField label="Full name" value={name} onChangeText={setName} placeholder="Jane Smith"
           autoCapitalize="words" autoComplete="name" textContentType="name" style={cell}
@@ -492,7 +532,7 @@ function SignupForm({ onDone, onSwitchLogin, signUpEmail, signInGoogle, addParen
       {/* DOB — only for students; shares a row with the password when it fits */}
       {role === 'student' ? (
         <View style={row}>
-          <View style={cell}><DobPicker label="Date of birth" value={dob} onChange={setDob} /></View>
+          <FadeIn style={cell}><DobPicker label="Date of birth" value={dob} onChange={setDob} /></FadeIn>
           {passwordField}
         </View>
       ) : passwordField}
@@ -511,8 +551,24 @@ function SignupForm({ onDone, onSwitchLogin, signUpEmail, signInGoogle, addParen
 
       {!!error && <Notice kind="error">{error}</Notice>}
 
-      <PrimaryButton label="Create Free Account" onPress={submit} loading={loading} tone="accent" style={{ marginTop: 6 }} />
+      <PrimaryButton label="Create Free Account" onPress={submit} loading={loading} style={{ marginTop: 6 }} />
       <FooterLine text="Already have an account?" link="Sign in" onPress={onSwitchLogin} tone="primary" />
+    </>
+  );
+
+  if (split) {
+    return (
+      <View style={{ flexDirection: 'row', gap: 28 }}>
+        <View style={{ flex: 1, minWidth: 0 }}>{roleGroup}</View>
+        <View style={{ width: 1, backgroundColor: t.line }} />
+        <View style={{ flex: 1, minWidth: 0 }}>{detailsGroup}</View>
+      </View>
+    );
+  }
+  return (
+    <>
+      {roleGroup}
+      {detailsGroup}
     </>
   );
 }
@@ -544,7 +600,6 @@ function ForgotForm({ onSwitchLogin }: { onSwitchLogin: () => void }) {
 
   return (
     <>
-      <AuthHeading title="Reset your password" subtitle="Enter your email and we'll send you a reset link" />
       {sent ? (
         <Notice kind="success">{`Reset link sent to ${email}. Check your inbox.`}</Notice>
       ) : (
@@ -561,47 +616,81 @@ function ForgotForm({ onSwitchLogin }: { onSwitchLogin: () => void }) {
 }
 
 // ─────────────────────────────────────────────────────────
-// Page layouts
+// Page layouts: heading + artwork beside the card on wide screens,
+// heading inside the card on phones and tablets.
 // ─────────────────────────────────────────────────────────
-function SignInLayout({ children, onBack }: { children: React.ReactNode; onBack: () => void }) {
-  const { isWide, width, height, gutter } = useAuthLayout();
-  // Wider card (same height) and a book sized from the screen so the page
-  // fits without scrolling: the art is 1.27× its width tall, the header and
-  // padding take ~210px, and the lying book reaches ~0.25× further left.
-  const cardWidth = width >= 1600 ? 580 : width >= 1280 ? 540 : 500;
-  const gap = Math.round(Math.min(150, width * 0.075));
-  const contentWidth = Math.min(width, 1440 + gutter * 2) - (gutter + 12) * 2;
-  const artWidth = Math.round(Math.max(260, Math.min((height - 210) / 1.27, (contentWidth - cardWidth - gap) / 1.32, 540)));
+type Copy = { title: string; subtitle?: string };
+
+function IntroPanel({ copy, art, width: w }: { copy: Copy; art: React.ReactNode; width: number }) {
+  const { headingSize } = useAuthLayout();
   return (
-    <AuthShell onBack={onBack} contentMaxWidth={1440}>
-      <View style={{ flexDirection: isWide ? 'row' : 'column', alignItems: 'center', justifyContent: 'center', gap: isWide ? gap : 16 }}>
-        {isWide && <View style={{ marginLeft: artWidth * 0.25 }}><SignInArt width={artWidth} /></View>}
-        <AuthCard maxWidth={cardWidth}>{children}</AuthCard>
-      </View>
+    <View style={{ width: w, flexShrink: 0 }}>
+      <AuthHeading title={copy.title} subtitle={copy.subtitle} align="left" size={Math.round(headingSize * 1.15)} />
+      <Decorative style={{ marginTop: 8 }}>{art}</Decorative>
+    </View>
+  );
+}
+
+function AuthPageLayout({ copy, onBack, children, cardMax, splitMax, art, cornerArt, canSplit = true }: {
+  copy: Copy; onBack: () => void; children: React.ReactNode; canSplit?: boolean;
+  /** card width in one column / in two columns */
+  cardMax: number; splitMax: number;
+  art: React.ReactNode; cornerArt: React.ReactNode;
+}) {
+  const { width, isWide, isTV } = useAuthLayout();
+  const introW = isTV ? 420 : width >= 1280 ? 330 : 280;
+  // Two columns inside the card once the card itself has room for both.
+  const split = canSplit && isWide && width - introW - 160 >= splitMax;
+  const cardW = split ? splitMax : cardMax;
+  return (
+    <AuthShell onBack={onBack} contentMaxWidth={isWide ? introW + cardW + 120 : undefined}>
+      <SplitContext.Provider value={split}>
+        <View style={{ flexDirection: isWide ? 'row' : 'column', alignItems: 'center', justifyContent: 'center', gap: isWide ? 64 : 0, paddingVertical: isWide ? 24 : 16 }}>
+          {isWide && <IntroPanel copy={copy} art={art} width={introW} />}
+          <ShapeFrame style={{ maxWidth: cardW, flexShrink: 1 }}>
+            <AuthCard maxWidth={cardW}>
+              {!isWide && (
+                <View>
+                  <Decorative style={{ position: 'absolute', top: -38, left: -14 }}>{cornerArt}</Decorative>
+                  <AuthHeading title={copy.title} subtitle={copy.subtitle} />
+                </View>
+              )}
+              {children}
+            </AuthCard>
+          </ShapeFrame>
+        </View>
+      </SplitContext.Provider>
     </AuthShell>
   );
 }
 
-function SignUpLayout({ children, onBack }: { children: React.ReactNode; onBack: () => void }) {
-  const { width } = useAuthLayout();
-  const showArt = width >= 1100;
-  // Panel spans 80% of the page on wide screens; the book grows with it and
-  // leans 15° clockwise.
-  const panelWidth = showArt ? Math.round(width * 0.8) : 720;
-  const artWidth = Math.round(Math.min(400, Math.max(260, width * 0.19)));
+function SignInLayout({ children, onBack, copy = PAGE_COPY.signin, canSplit = false }: { children: React.ReactNode; onBack: () => void; copy?: Copy; canSplit?: boolean }) {
+  const { isTV } = useAuthLayout();
+  const art = (
+    <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 4, marginTop: 8 }}>
+      <GlidingPlane width={isTV ? 150 : 120} />
+      <View style={{ marginLeft: -20, marginBottom: -18 }}><PencilArt width={isTV ? 120 : 96} /></View>
+    </View>
+  );
   return (
-    <AuthShell onBack={onBack} contentMaxWidth={showArt ? panelWidth : undefined}>
-      <FramedPanel maxWidth={panelWidth}>
-        <View style={{ flexDirection: showArt ? 'row' : 'column', alignItems: 'center', gap: 48 }}>
-          <View style={{ flex: showArt ? 1.3 : undefined, width: showArt ? undefined : '100%', maxWidth: showArt ? 780 : 620 }}>{children}</View>
-          {showArt && (
-            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-              <Decorative style={{ transform: [{ rotate: '15deg' }] }}><CreateBookArt width={artWidth} /></Decorative>
-            </View>
-          )}
-        </View>
-      </FramedPanel>
-    </AuthShell>
+    <AuthPageLayout copy={copy} onBack={onBack} cardMax={480} splitMax={isTV ? 900 : 760} art={art} cornerArt={<PencilArt width={46} />} canSplit={canSplit}>
+      {children}
+    </AuthPageLayout>
+  );
+}
+
+function SignUpLayout({ children, onBack }: { children: React.ReactNode; onBack: () => void }) {
+  const { isTV } = useAuthLayout();
+  const art = (
+    <View style={{ marginTop: 10 }}>
+      <RulerArt width={isTV ? 220 : 180} />
+      <View style={{ position: 'absolute', right: 30, top: -26 }}><Sparks size={34} /></View>
+    </View>
+  );
+  return (
+    <AuthPageLayout copy={PAGE_COPY.signup} onBack={onBack} cardMax={720} splitMax={isTV ? 1120 : 920} art={art} cornerArt={<RulerArt width={70} />}>
+      {children}
+    </AuthPageLayout>
   );
 }
 
@@ -624,10 +713,10 @@ function initialPage(): AuthPage {
 }
 
 function LandingRoutes() {
-  const { colors: c } = useTheme();
   const { t } = useHomeTheme();
   const { signInWithEmail, signUpWithEmail, signInWithGoogle, demoLogin, addParentRoleToTeacher, addParentRoleToTeacherSSO, authError, clearAuthError, logout } = useAuth();
   const [page, setPage] = useState<AuthPage>(initialPage);
+  const faceAvailable = useFaceAvailable();
   const [teacherAddParentEmail, setTeacherAddParentEmail] = useState<string | null>(null);
   const [addingParentRole, setAddingParentRole] = useState(false);
 
@@ -726,7 +815,7 @@ function LandingRoutes() {
   let content: React.ReactNode;
   if (page === 'signin') {
     content = (
-      <SignInLayout onBack={toHome}>
+      <SignInLayout onBack={toHome} canSplit={faceAvailable}>
         <LoginForm
           onDone={clearAuthError}
           onSwitchSignup={() => go('signup')}
@@ -753,7 +842,7 @@ function LandingRoutes() {
     );
   } else if (page === 'forgot') {
     content = (
-      <SignInLayout onBack={toHome}>
+      <SignInLayout onBack={toHome} copy={PAGE_COPY.forgot}>
         <ForgotForm onSwitchLogin={() => go('signin')} />
       </SignInLayout>
     );
@@ -790,30 +879,30 @@ function LandingRoutes() {
 
       {/* ── TEACHER → PARENT CLUB MODAL ──────────────────── */}
       <Modal visible={!!teacherAddParentEmail} transparent animationType="fade" onRequestClose={() => { setTeacherAddParentEmail(null); logout(); }}>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
-          <View style={{ backgroundColor: c.cardDark, borderRadius: 20, borderWidth: 1, borderColor: c.borderColor, padding: 32, width: '100%', maxWidth: 420, alignItems: 'center', gap: 16 }}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(16,24,39,0.6)', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+          <View style={{ backgroundColor: t.card, borderRadius: 22, borderWidth: 1, borderColor: t.line, padding: 30, width: '100%', maxWidth: 420, alignItems: 'center', gap: 16 }}>
             {/* Icon */}
-            <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: c.accentYellow + '20', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: c.accentYellow + '40' }}>
-              <Feather name="users" size={26} color={c.accentYellow} />
+            <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: t.infoBg, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: t.infoLine }}>
+              <Feather name="users" size={26} color={t.heading} />
             </View>
             {/* Title */}
-            <Text style={{ fontSize: 22, fontWeight: '800', color: c.textMain, textAlign: 'center', letterSpacing: 0 }}>
+            <Text style={{ fontFamily: SERIF, fontSize: 24, fontWeight: '600', color: t.heading, textAlign: 'center' }}>
               Teacher Account Found
             </Text>
             {/* Body */}
-            <Text style={{ fontSize: 14, color: c.textMuted, textAlign: 'center', lineHeight: 22 }}>
+            <Text style={{ fontFamily: SANS, fontSize: 15, color: t.text, textAlign: 'center', lineHeight: 22 }}>
               This email is already registered as a{' '}
-              <Text style={{ color: c.accentYellow, fontWeight: '700' }}>Teacher</Text>.
+              <Text style={{ color: t.heading, fontWeight: '700' }}>Teacher</Text>.
               {'\n\n'}
               Would you like to add a{' '}
-              <Text style={{ color: c.accentGreen, fontWeight: '700' }}>Parent</Text>
+              <Text style={{ color: t.heading, fontWeight: '700' }}>Parent</Text>
               {' '}profile? Both profiles will be linked and you can switch between them anytime.
             </Text>
             {/* Yes button */}
-            <TouchableOpacity
-              style={{ backgroundColor: c.accentYellow, borderRadius: 12, paddingVertical: 15, width: '100%', alignItems: 'center', opacity: addingParentRole ? 0.6 : 1, marginTop: 4 }}
+            <PrimaryButton
+              label={addingParentRole ? 'Setting up...' : 'Yes, Add Parent Profile'}
               disabled={addingParentRole}
-              activeOpacity={0.85}
+              style={{ alignSelf: 'stretch', marginTop: 4 }}
               onPress={async () => {
                 if (!teacherAddParentEmail) return;
                 setAddingParentRole(true);
@@ -826,15 +915,11 @@ function LandingRoutes() {
                   setAddingParentRole(false);
                 }
               }}
-            >
-              <Text style={{ color: '#fff', fontWeight: '700', fontSize: 15 }}>
-                {addingParentRole ? 'Setting up...' : 'Yes, Add Parent Profile'}
-              </Text>
-            </TouchableOpacity>
+            />
             {/* No button */}
-            <TouchableOpacity style={{ paddingVertical: 8 }} onPress={() => { setTeacherAddParentEmail(null); logout(); }}>
-              <Text style={{ color: c.textDim, fontSize: 13 }}>No, sign out</Text>
-            </TouchableOpacity>
+            <Pressable accessibilityRole="button" style={(st: any) => [{ paddingVertical: 8, paddingHorizontal: 12, borderRadius: 8 }, focusRing(t, st.focused)]} onPress={() => { setTeacherAddParentEmail(null); logout(); }}>
+              <Text style={{ fontFamily: SANS, color: t.text, fontSize: 14, fontWeight: '600', textDecorationLine: 'underline' }}>No, sign out</Text>
+            </Pressable>
           </View>
         </View>
       </Modal>

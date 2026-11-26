@@ -22,6 +22,9 @@
     "transformIgnorePatterns": [
       "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|@simplewebauthn/.*)"
     ],
+    "moduleNameMapper": {
+      "^lucide-react-native/icons/(.*)$": "<rootDir>/node_modules/lucide-react-native/dist/cjs/icons/$1.js"
+    },
     "setupFiles": [
       "<rootDir>/jest.setup.js"
     ],
@@ -57,6 +60,7 @@
     "firebase": "^12.11.0",
     "jodit": "4.18.12",
     "jspdf": "^4.2.1",
+    "lucide-react-native": "1.66.0",
     "pdfjs-dist": "^3.11.174",
     "react": "19.2.0",
     "react-dom": "19.2.0",

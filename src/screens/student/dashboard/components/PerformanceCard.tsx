@@ -134,12 +134,12 @@ export function PerformanceCard({
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.barScroll} contentContainerStyle={{ gap: 16, paddingVertical: 4, paddingRight: 6 }}>
         {barTopics.map((t, i) => {
           const barColors = [
-            ['#24877B', '#24877B'],
-            ['#24877B', '#24877B'],
-            ['#24877B', '#24877B'],
-            ['#24877B', '#24877B'],
-            ['#24877B', '#24877B'],
-            ['#24877B', '#24877B'],
+            ['#C8551C', '#C8551C'],
+            ['#C8551C', '#C8551C'],
+            ['#C8551C', '#C8551C'],
+            ['#C8551C', '#C8551C'],
+            ['#C8551C', '#C8551C'],
+            ['#C8551C', '#C8551C'],
           ];
           const [c1, c2] = barColors[i % barColors.length];
           // In-progress (started via Learn/Listen, no score/mastery yet) gets

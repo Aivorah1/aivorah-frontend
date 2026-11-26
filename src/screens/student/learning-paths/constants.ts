@@ -7,8 +7,8 @@ import type { CurriculumTopic, SubjectData, SubjectMeta } from './types';
 // Progress screen's Subject Performance grid). Only the icon still varies
 // per subject.
 const GOLD_META = {
-  accentDark: '#24877B', bgFromDark: '#DCEFEB', bgToDark: '#DCEFEB',
-  accentLight: '#24877B', bgFromLight: '#DCEFEB', bgToLight: '#DCEFEB',
+  accentDark: '#C8551C', bgFromDark: '#DCEFEB', bgToDark: '#DCEFEB',
+  accentLight: '#C8551C', bgFromLight: '#DCEFEB', bgToLight: '#DCEFEB',
 };
 
 export const SUBJECT_META: Record<string, SubjectMeta> = {

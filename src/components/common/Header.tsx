@@ -19,6 +19,8 @@ import { getAvatarGradient, getAvatarIcon } from '../../constants/avatarStyles';
 import { isAdminEmail } from '../../constants/adminEmails';
 import { roleLabel } from '../../constants/roleLabels';
 import FontPresetMenu from './FontPresetMenu';
+import Icon from './Icon';
+import PortalThemeSwitch from './PortalThemeSwitch';
 
 function formatNotifTime(iso: string): string {
   try {
@@ -45,6 +47,8 @@ interface HeaderProps {
   onSearchChange?: (text: string) => void;
   onNotificationPress?: () => void;
   notificationCount?: number;
+  /** Extra header actions, shown before the notification bell (Website Redesign, Phase 4). */
+  actions?: React.ReactNode;
 }
 
 export default function Header({
@@ -58,14 +62,20 @@ export default function Header({
   onSearchChange,
   onNotificationPress,
   notificationCount = 0,
+  actions,
 }: HeaderProps) {
   const { isMobile } = useResponsive();
   const { colors, portal } = useTheme();
   // Redesigned portals (student, teacher) share these nav/header styles.
   const isStudentPortal = !!portal; // student, teacher or parent
+  // Website Redesign, Phase 3 (Student Portal only): sun/moon switch in the
+  // header; on phones the top row reads Aivorah → actions → switch → menu and
+  // the page title sits on its own row below.
+  const isStudentRole = !!portal; // every signed-in portal is redesigned (Phases 3–7)
+  const studentMobile = isStudentRole && isMobile;
   const { user, updateUser, logout } = useAuth();
   const navigation = useNavigation<any>();
-  const styles = useMemo(() => makeStyles(colors, isStudentPortal), [colors, isStudentPortal]);
+  const styles = useMemo(() => makeStyles(colors, isStudentPortal, isStudentRole, studentMobile), [colors, isStudentPortal, isStudentRole, studentMobile]);
 
   function handleBack() {
     if (onBack) {
@@ -224,481 +234,525 @@ const [editingName, setEditingName] = useState(false);
     return <Feather name="user" size={iconSize} color={colors.textMuted} />;
   }
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.left}>
-        {showBack ? (
-          <TouchableOpacity style={styles.menuBtn} onPress={handleBack} accessibilityRole="button" accessibilityLabel="Go back">
-            <Feather name="arrow-left" size={20} color={colors.textMuted} />
-          </TouchableOpacity>
-        ) : isMobile && (
-          <TouchableOpacity style={styles.menuBtn} onPress={onMenuPress} testID="header-menu-button">
-            <Feather name="menu" size={20} color={colors.textMuted} />
-          </TouchableOpacity>
-        )}
-        <View style={{ flexDirection: 'column' }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-            <Text style={styles.title}>{title}</Text>
-            {user?.role && (
-              <View style={[
-                styles.roleBadge,
-                user.role === 'teacher' && styles.roleBadgeTeacher,
-                user.role === 'parent' && styles.roleBadgeParent,
-                user.role === 'student' && styles.roleBadgeStudent,
-                (user.role === 'school_admin' || user.role === 'super_admin') && styles.roleBadgeAdmin,
-              ]}>
-                <Text style={[
-                  styles.roleBadgeText,
-                  user.role === 'teacher' && styles.roleBadgeTextTeacher,
-                  user.role === 'parent' && styles.roleBadgeTextParent,
-                  user.role === 'student' && styles.roleBadgeTextStudent,
-                  (user.role === 'school_admin' || user.role === 'super_admin') && styles.roleBadgeTextAdmin,
+  const leftEl = (
+        <View style={styles.left}>
+          {showBack ? (
+            <TouchableOpacity style={styles.menuBtn} onPress={handleBack} accessibilityRole="button" accessibilityLabel="Go back">
+              {isStudentRole
+                ? <Icon name="arrow-left" size={20} color={colors.textHeading} />
+                : <Feather name="arrow-left" size={20} color={colors.textMuted} />}
+            </TouchableOpacity>
+          ) : isMobile && !isStudentRole && (
+            <TouchableOpacity style={styles.menuBtn} onPress={onMenuPress} testID="header-menu-button">
+              <Feather name="menu" size={20} color={colors.textMuted} />
+            </TouchableOpacity>
+          )}
+          <View style={[{ flexDirection: 'column' }, isStudentRole && { flexShrink: 1, minWidth: 0 }]}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+              <Text style={styles.title}>{title}</Text>
+              {user?.role && (
+                <View style={[
+                  styles.roleBadge,
+                  user.role === 'teacher' && styles.roleBadgeTeacher,
+                  user.role === 'parent' && styles.roleBadgeParent,
+                  user.role === 'student' && styles.roleBadgeStudent,
+                  (user.role === 'school_admin' || user.role === 'super_admin') && styles.roleBadgeAdmin,
                 ]}>
-                  {isAdminEmail(user.email) ? 'Admin' : roleLabel(user.role)}
-                </Text>
-              </View>
-            )}
+                  <Text style={[
+                    styles.roleBadgeText,
+                    user.role === 'teacher' && styles.roleBadgeTextTeacher,
+                    user.role === 'parent' && styles.roleBadgeTextParent,
+                    user.role === 'student' && styles.roleBadgeTextStudent,
+                    (user.role === 'school_admin' || user.role === 'super_admin') && styles.roleBadgeTextAdmin,
+                  ]}>
+                    {isAdminEmail(user.email) ? 'Admin' : roleLabel(user.role)}
+                  </Text>
+                </View>
+              )}
+            </View>
+            {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
           </View>
-          {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
         </View>
-      </View>
-
-      <View style={styles.right}>
-        {showSearch && (
-          <View style={styles.searchWrapper}>
-            <Feather name="search" size={14} color={colors.textMuted} style={styles.searchIcon} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder={searchPlaceholder}
-              placeholderTextColor={colors.textDim}
-              onChangeText={onSearchChange}
-              returnKeyType="search"
-            />
-          </View>
-        )}
-
-        {/* Font style (Aa) — immediately left of the bell, same button shape */}
-        <FontPresetMenu
-          colors={colors}
-          account={(user as any)?.email || (user as any)?.id}
-          buttonStyle={[styles.iconBtn, { borderColor: colors.accentYellow + '50', backgroundColor: colors.accentYellow + '12' }]}
-        />
-
-        {/* Bell */}
-        <TouchableOpacity
-          style={[styles.iconBtn, { borderColor: colors.accentYellow + '50', backgroundColor: colors.accentYellow + '12' }]}
-          onPress={() => {
-            setBellVisible(prev => !prev);
-            onNotificationPress?.();
-          }}
-          activeOpacity={0.7}
-          testID="header-bell-button"
-        >
-          <Feather name="bell" size={18} color={count > 0 ? colors.accentYellow : colors.accentYellow + 'AA'} />
-          {count > 0 && (
-            <View style={styles.notifBadge} testID="header-bell-badge">
-              <Text style={styles.notifCount}>{count > 9 ? '9+' : count}</Text>
+  );
+  const rightEl = (
+        <View style={styles.right}>
+          {!studentMobile && actions}
+          {showSearch && (
+            <View style={styles.searchWrapper}>
+              <Feather name="search" size={14} color={colors.textMuted} style={styles.searchIcon} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder={searchPlaceholder}
+                placeholderTextColor={colors.textDim}
+                onChangeText={onSearchChange}
+                returnKeyType="search"
+              />
             </View>
           )}
-        </TouchableOpacity>
 
-        {/* Bell dropdown — Google Classroom style notification center */}
-        <Modal visible={bellVisible} transparent animationType="none" onRequestClose={() => setBellVisible(false)}>
-          <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPress={() => setBellVisible(false)}>
-            <TouchableOpacity activeOpacity={1} onPress={() => {}}>
-              <View style={[styles.dropdown, styles.notifPanel]}>
-                {/* Header */}
-                <View style={[styles.dropdownHeader, { borderBottomColor: colors.accentYellow + '30' }]}>
-                  <Text style={[styles.dropdownTitle, { color: colors.accentYellow }]}>Notifications</Text>
-                  {count > 0 && (
-                    <TouchableOpacity
-                      onPress={() => {
-                        setBellVisible(false);
-                        void markAllRead();
-                      }}
-                      activeOpacity={0.7}
-                      style={styles.markAllBtn}
-                    >
-                      <Text style={[styles.markAllText, { color: colors.accentYellow }]}>Mark all read</Text>
-                    </TouchableOpacity>
-                  )}
-                  <TouchableOpacity onPress={() => setBellVisible(false)} activeOpacity={0.7}>
-                    <Feather name="x" size={14} color={colors.textMuted} />
-                  </TouchableOpacity>
-                </View>
+          {/* Font style (Aa) — immediately left of the bell, same button shape */}
+          <FontPresetMenu
+            colors={colors}
+            account={(user as any)?.email || (user as any)?.id}
+            buttonStyle={[styles.iconBtn, { borderColor: colors.accentYellow + '50', backgroundColor: colors.accentYellow + '12' }]}
+          />
 
-                {feedStatus === 'error' && (
-                  <Text style={[styles.notifPreview, { paddingHorizontal: 16, paddingVertical: 6 }]} testID="notif-feed-error">
-                    Couldn&apos;t refresh notifications. Showing the latest we have.
-                  </Text>
-                )}
-                {feedStatus === 'loading' && count === 0 && notificationItems.length === 0 ? (
-                  <View style={styles.noNotifState} testID="notif-loading">
-                    <ActivityIndicator size="small" color={colors.accentYellow} />
-                  </View>
-                ) : (count > 0 || notificationItems.length > 0) ? (
-                  <View style={{ overflowY: 'auto', maxHeight: 400 } as any}>
-
-                    {/* School join requests (school admin) — jump to the review panel */}
-                    {unreadJoinRequests > 0 && (
-                      <TouchableOpacity
-                        style={styles.notifItem}
-                        activeOpacity={0.75}
-                        onPress={() => {
-                          setBellVisible(false);
-                          navigation.navigate('SchoolAdminDashboard');
-                        }}
-                      >
-                        <View style={[styles.notifIconWrap, { backgroundColor: colors.accentYellow + '22' }]}>
-                          <Feather name="user-plus" size={16} color={colors.accentYellow} />
-                        </View>
-                        <View style={{ flex: 1 }}>
-                          <Text style={styles.notifItemTitle} numberOfLines={1}>
-                            {unreadJoinRequests === 1 ? '1 school join request' : `${unreadJoinRequests} school join requests`}
-                          </Text>
-                          <Text style={styles.notifPreview} numberOfLines={1}>Tap to review and approve</Text>
-                        </View>
-                        <View style={styles.notifUnreadDot} />
-                      </TouchableOpacity>
-                    )}
-
-                    {/* Single newest-first feed: assignments, challenges, events, messages… */}
-                    {notificationItems.map(item => {
-                      const isChallenge = item.type === 'challenge';
-                      const isEvent = item.type === 'event';
-                      const isPortfolio = item.type === 'portfolio';
-                      const isTask = item.type === 'task';
-                      const isMessage = item.type === 'message';
-                      const accent = colors.accentYellow;
-                      const iconName = item.type === 'account' ? 'user-check' : item.type === 'announcement' ? 'volume-2' : isMessage ? 'message-square' : isChallenge ? 'award' : isEvent ? 'calendar' : (isPortfolio ? 'image' : isTask ? 'check-circle' : (item.type === 'quiz' ? 'help-circle' : 'check-square'));
-                      return (
-                      <TouchableOpacity
-                        key={item.id}
-                        style={[styles.notifItem, item.readAt ? { opacity: 0.6 } : null]}
-                        activeOpacity={0.75}
-                        testID={`notif-item-${item.id}`}
-                        onPress={() => {
-                          setBellVisible(false);
-                          openNotification(item, {
-                            role,
-                            navigate: (screen, params) => navigation.navigate(screen, params),
-                            actions: { markNotificationRead, clearUnread, clearUnreadAssignments, clearUnreadChallenges, clearUnreadEvents },
-                          });
-                          if (item.type === 'account') setDetailItem(item);
-                        }}
-                      >
-                        <View style={[styles.notifIconWrap, { backgroundColor: accent + '22' }]}>
-                          <Feather
-                            name={iconName as any}
-                            size={16}
-                            color={accent}
-                          />
-                        </View>
-                        <View style={{ flex: 1 }}>
-                          <Text style={styles.notifItemTitle} numberOfLines={1}>{item.title}</Text>
-                          <Text style={styles.notifPreview} numberOfLines={1}>{item.subtitle}</Text>
-                          <Text style={styles.notifTime}>{formatNotifTime(item.createdAt)}</Text>
-                        </View>
-                        {!item.readAt && <View style={styles.notifUnreadDot} testID="notif-unread-dot" />}
-                      </TouchableOpacity>
-                      );
-                    })}
-
-                    {hasMore && (
-                      <TouchableOpacity
-                        style={[styles.notifItem, { justifyContent: 'center' }]}
-                        activeOpacity={0.75}
-                        onPress={() => { void loadMore(); }}
-                        disabled={loadingMore}
-                        testID="notif-load-more"
-                      >
-                        {loadingMore
-                          ? <ActivityIndicator size="small" color={colors.accentYellow} />
-                          : <Text style={[styles.notifPreview, { color: colors.accentYellow }]}>Load older notifications</Text>}
-                      </TouchableOpacity>
-                    )}
-
-                    {/* Fallback when unread messages exist but no preview is available */}
-                    {unreadCount > 0 && !notificationItems.some(i => i.type === 'message') && (
-                      <TouchableOpacity
-                        style={styles.notifItem}
-                        activeOpacity={0.75}
-                        onPress={() => {
-                          setBellVisible(false);
-                          void clearUnread();
-                          // Deep-link straight into the sender's conversation —
-                          // previously just opened the Messages screen's default
-                          // (New/conversation-list) view, so tapping a "message
-                          // from X" notification never actually landed on X's chat.
-                          navigation.navigate(screenNames.messages, latestNotif?.senderEmail ? { openWith: latestNotif.senderEmail } : undefined);
-                        }}
-                      >
-                        <View style={[styles.notifIconWrap, { backgroundColor: colors.accentYellow + '22' }]}>
-                          <Feather name="message-square" size={16} color={colors.accentYellow} />
-                        </View>
-                        <View style={{ flex: 1 }}>
-                          {latestNotif ? (
-                            <>
-                              <Text style={styles.notifItemTitle} numberOfLines={1}>
-                                Message from {latestNotif.senderName}
-                              </Text>
-                              <Text style={styles.notifPreview} numberOfLines={1}>{latestNotif.preview}</Text>
-                              <Text style={styles.notifTime}>{formatNotifTime(latestNotif.createdAt)}</Text>
-                            </>
-                          ) : (
-                            <>
-                              <Text style={styles.notifItemTitle}>
-                                {unreadCount === 1 ? '1 unread message' : `${unreadCount} unread messages`}
-                              </Text>
-                              <Text style={styles.notifPreview}>Tap to open messages</Text>
-                            </>
-                          )}
-                        </View>
-                        <View style={styles.notifUnreadDot} />
-                      </TouchableOpacity>
-                    )}
-
-                    {/* Challenges summary — legacy only, when no per-challenge items are shown above */}
-                    {!notificationsV2Active && unreadChallenges > 0 && !notificationItems.some(i => i.type === 'challenge') && (
-                      <TouchableOpacity
-                        style={styles.notifItem}
-                        activeOpacity={0.75}
-                        onPress={() => {
-                          setBellVisible(false);
-                          void clearUnreadChallenges();
-                          navigation.navigate(screenNames.challenges, { tab: 'assigned' });
-                        }}
-                      >
-                        <View style={[styles.notifIconWrap, { backgroundColor: colors.accentYellow + '22' }]}>
-                          <Feather name="award" size={16} color={colors.accentYellow} />
-                        </View>
-                        <View style={{ flex: 1 }}>
-                          <Text style={styles.notifItemTitle}>
-                            {unreadChallenges === 1 ? 'New challenge assigned' : `${unreadChallenges} new challenges`}
-                          </Text>
-                          <Text style={styles.notifPreview}>Tap to view your challenges</Text>
-                        </View>
-                        <View style={styles.notifUnreadDot} />
-                      </TouchableOpacity>
-                    )}
-
-                    {/* Assignments count summary (if no individual items) */}
-                    {!notificationsV2Active && unreadAssignments > 0 && !notificationItems.some(i => i.type === 'assignment' || i.type === 'quiz') && (
-                      <TouchableOpacity
-                        style={styles.notifItem}
-                        activeOpacity={0.75}
-                        onPress={() => {
-                          setBellVisible(false);
-                          void clearUnreadAssignments();
-                          navigation.navigate(screenNames.assignments);
-                        }}
-                      >
-                        <View style={[styles.notifIconWrap, { backgroundColor: colors.accentYellow + '22' }]}>
-                          <Feather name="check-square" size={16} color={colors.accentYellow} />
-                        </View>
-                        <View style={{ flex: 1 }}>
-                          <Text style={styles.notifItemTitle}>
-                            {unreadAssignments === 1 ? 'New assignment' : `${unreadAssignments} new assignments`}
-                          </Text>
-                          <Text style={styles.notifPreview}>Tap to view your assignments</Text>
-                        </View>
-                        <View style={styles.notifUnreadDot} />
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                ) : (
-                  <View style={styles.noNotifState}>
-                    <View style={{ width: 52, height: 52, borderRadius: 26, backgroundColor: colors.accentYellow + '15', borderWidth: 1, borderColor: colors.accentYellow + '30', alignItems: 'center', justifyContent: 'center' }}>
-                      <Feather name="bell-off" size={24} color={colors.accentYellow} />
-                    </View>
-                    <Text style={styles.noNotifText}>You&apos;re all caught up!</Text>
-                    <Text style={[styles.notifPreview, { textAlign: 'center', paddingHorizontal: 16 }]}>
-                      New assignments and messages will appear here
-                    </Text>
-                  </View>
-                )}
+          {/* Bell */}
+          <TouchableOpacity
+            style={[styles.iconBtn, { borderColor: colors.accentYellow + '50', backgroundColor: colors.accentYellow + '12' }]}
+            onPress={() => {
+              setBellVisible(prev => !prev);
+              onNotificationPress?.();
+            }}
+            activeOpacity={0.7}
+            testID="header-bell-button"
+          >
+            {isStudentRole
+              ? <Icon name="bell" size={19} color={count > 0 ? colors.accentYellow : colors.textHeading} />
+              : <Feather name="bell" size={18} color={count > 0 ? colors.accentYellow : colors.accentYellow + 'AA'} />}
+            {count > 0 && (
+              <View style={styles.notifBadge} testID="header-bell-badge">
+                <Text style={styles.notifCount}>{count > 9 ? '9+' : count}</Text>
               </View>
-            </TouchableOpacity>
+            )}
           </TouchableOpacity>
-        </Modal>
 
-        {/* Profile avatar button */}
-        <TouchableOpacity
-          style={[styles.avatar, (photoUrl || avatarStyle) && { backgroundColor: 'transparent', borderColor: 'transparent' }]}
-          onPress={() => setProfileVisible(true)}
-          activeOpacity={0.7}
-          testID="header-profile-button"
-        >
-          {renderAvatarCircle(36)}
-        </TouchableOpacity>
+          {/* Bell dropdown — Google Classroom style notification center */}
+          <Modal visible={bellVisible} transparent animationType="none" onRequestClose={() => setBellVisible(false)}>
+            <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPress={() => setBellVisible(false)}>
+              <TouchableOpacity activeOpacity={1} onPress={() => {}}>
+                <View style={[styles.dropdown, styles.notifPanel]}>
+                  {/* Header */}
+                  <View style={[styles.dropdownHeader, { borderBottomColor: colors.accentYellow + '30' }]}>
+                    <Text style={[styles.dropdownTitle, { color: colors.accentYellow }]}>Notifications</Text>
+                    {count > 0 && (
+                      <TouchableOpacity
+                        onPress={() => {
+                          setBellVisible(false);
+                          void markAllRead();
+                        }}
+                        activeOpacity={0.7}
+                        style={styles.markAllBtn}
+                      >
+                        <Text style={[styles.markAllText, { color: colors.accentYellow }]}>Mark all read</Text>
+                      </TouchableOpacity>
+                    )}
+                    <TouchableOpacity onPress={() => setBellVisible(false)} activeOpacity={0.7}>
+                      <Feather name="x" size={14} color={colors.textMuted} />
+                    </TouchableOpacity>
+                  </View>
 
-        <Modal visible={!!detailItem} transparent animationType="fade" onRequestClose={() => setDetailItem(null)}>
-          <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPress={() => setDetailItem(null)} testID="notif-detail-backdrop">
-            <TouchableOpacity activeOpacity={1} style={styles.notifDetailCard} testID="notif-detail">
-              <View style={styles.notifDetailHead}>
-                <View style={[styles.notifIconWrap, { backgroundColor: colors.accentYellow + '22' }]}>
-                  <Feather name="user-check" size={16} color={colors.accentYellow} />
+                  {feedStatus === 'error' && (
+                    <Text style={[styles.notifPreview, { paddingHorizontal: 16, paddingVertical: 6 }]} testID="notif-feed-error">
+                      Couldn&apos;t refresh notifications. Showing the latest we have.
+                    </Text>
+                  )}
+                  {feedStatus === 'loading' && count === 0 && notificationItems.length === 0 ? (
+                    <View style={styles.noNotifState} testID="notif-loading">
+                      <ActivityIndicator size="small" color={colors.accentYellow} />
+                    </View>
+                  ) : (count > 0 || notificationItems.length > 0) ? (
+                    <View style={{ overflowY: 'auto', maxHeight: 400 } as any}>
+
+                      {/* School join requests (school admin) — jump to the review panel */}
+                      {unreadJoinRequests > 0 && (
+                        <TouchableOpacity
+                          style={styles.notifItem}
+                          activeOpacity={0.75}
+                          onPress={() => {
+                            setBellVisible(false);
+                            navigation.navigate('SchoolAdminDashboard');
+                          }}
+                        >
+                          <View style={[styles.notifIconWrap, { backgroundColor: colors.accentYellow + '22' }]}>
+                            <Feather name="user-plus" size={16} color={colors.accentYellow} />
+                          </View>
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.notifItemTitle} numberOfLines={1}>
+                              {unreadJoinRequests === 1 ? '1 school join request' : `${unreadJoinRequests} school join requests`}
+                            </Text>
+                            <Text style={styles.notifPreview} numberOfLines={1}>Tap to review and approve</Text>
+                          </View>
+                          <View style={styles.notifUnreadDot} />
+                        </TouchableOpacity>
+                      )}
+
+                      {/* Single newest-first feed: assignments, challenges, events, messages… */}
+                      {notificationItems.map(item => {
+                        const isChallenge = item.type === 'challenge';
+                        const isEvent = item.type === 'event';
+                        const isPortfolio = item.type === 'portfolio';
+                        const isTask = item.type === 'task';
+                        const isMessage = item.type === 'message';
+                        const accent = colors.accentYellow;
+                        const iconName = item.type === 'account' ? 'user-check' : item.type === 'announcement' ? 'volume-2' : isMessage ? 'message-square' : isChallenge ? 'award' : isEvent ? 'calendar' : (isPortfolio ? 'image' : isTask ? 'check-circle' : (item.type === 'quiz' ? 'help-circle' : 'check-square'));
+                        return (
+                        <TouchableOpacity
+                          key={item.id}
+                          style={[styles.notifItem, item.readAt ? { opacity: 0.6 } : null]}
+                          activeOpacity={0.75}
+                          testID={`notif-item-${item.id}`}
+                          onPress={() => {
+                            setBellVisible(false);
+                            openNotification(item, {
+                              role,
+                              navigate: (screen, params) => navigation.navigate(screen, params),
+                              actions: { markNotificationRead, clearUnread, clearUnreadAssignments, clearUnreadChallenges, clearUnreadEvents },
+                            });
+                            if (item.type === 'account') setDetailItem(item);
+                          }}
+                        >
+                          <View style={[styles.notifIconWrap, { backgroundColor: accent + '22' }]}>
+                            <Feather
+                              name={iconName as any}
+                              size={16}
+                              color={accent}
+                            />
+                          </View>
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.notifItemTitle} numberOfLines={1}>{item.title}</Text>
+                            <Text style={styles.notifPreview} numberOfLines={1}>{item.subtitle}</Text>
+                            <Text style={styles.notifTime}>{formatNotifTime(item.createdAt)}</Text>
+                          </View>
+                          {!item.readAt && <View style={styles.notifUnreadDot} testID="notif-unread-dot" />}
+                        </TouchableOpacity>
+                        );
+                      })}
+
+                      {hasMore && (
+                        <TouchableOpacity
+                          style={[styles.notifItem, { justifyContent: 'center' }]}
+                          activeOpacity={0.75}
+                          onPress={() => { void loadMore(); }}
+                          disabled={loadingMore}
+                          testID="notif-load-more"
+                        >
+                          {loadingMore
+                            ? <ActivityIndicator size="small" color={colors.accentYellow} />
+                            : <Text style={[styles.notifPreview, { color: colors.accentYellow }]}>Load older notifications</Text>}
+                        </TouchableOpacity>
+                      )}
+
+                      {/* Fallback when unread messages exist but no preview is available */}
+                      {unreadCount > 0 && !notificationItems.some(i => i.type === 'message') && (
+                        <TouchableOpacity
+                          style={styles.notifItem}
+                          activeOpacity={0.75}
+                          onPress={() => {
+                            setBellVisible(false);
+                            void clearUnread();
+                            // Deep-link straight into the sender's conversation —
+                            // previously just opened the Messages screen's default
+                            // (New/conversation-list) view, so tapping a "message
+                            // from X" notification never actually landed on X's chat.
+                            navigation.navigate(screenNames.messages, latestNotif?.senderEmail ? { openWith: latestNotif.senderEmail } : undefined);
+                          }}
+                        >
+                          <View style={[styles.notifIconWrap, { backgroundColor: colors.accentYellow + '22' }]}>
+                            <Feather name="message-square" size={16} color={colors.accentYellow} />
+                          </View>
+                          <View style={{ flex: 1 }}>
+                            {latestNotif ? (
+                              <>
+                                <Text style={styles.notifItemTitle} numberOfLines={1}>
+                                  Message from {latestNotif.senderName}
+                                </Text>
+                                <Text style={styles.notifPreview} numberOfLines={1}>{latestNotif.preview}</Text>
+                                <Text style={styles.notifTime}>{formatNotifTime(latestNotif.createdAt)}</Text>
+                              </>
+                            ) : (
+                              <>
+                                <Text style={styles.notifItemTitle}>
+                                  {unreadCount === 1 ? '1 unread message' : `${unreadCount} unread messages`}
+                                </Text>
+                                <Text style={styles.notifPreview}>Tap to open messages</Text>
+                              </>
+                            )}
+                          </View>
+                          <View style={styles.notifUnreadDot} />
+                        </TouchableOpacity>
+                      )}
+
+                      {/* Challenges summary — legacy only, when no per-challenge items are shown above */}
+                      {!notificationsV2Active && unreadChallenges > 0 && !notificationItems.some(i => i.type === 'challenge') && (
+                        <TouchableOpacity
+                          style={styles.notifItem}
+                          activeOpacity={0.75}
+                          onPress={() => {
+                            setBellVisible(false);
+                            void clearUnreadChallenges();
+                            navigation.navigate(screenNames.challenges, { tab: 'assigned' });
+                          }}
+                        >
+                          <View style={[styles.notifIconWrap, { backgroundColor: colors.accentYellow + '22' }]}>
+                            <Feather name="award" size={16} color={colors.accentYellow} />
+                          </View>
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.notifItemTitle}>
+                              {unreadChallenges === 1 ? 'New challenge assigned' : `${unreadChallenges} new challenges`}
+                            </Text>
+                            <Text style={styles.notifPreview}>Tap to view your challenges</Text>
+                          </View>
+                          <View style={styles.notifUnreadDot} />
+                        </TouchableOpacity>
+                      )}
+
+                      {/* Assignments count summary (if no individual items) */}
+                      {!notificationsV2Active && unreadAssignments > 0 && !notificationItems.some(i => i.type === 'assignment' || i.type === 'quiz') && (
+                        <TouchableOpacity
+                          style={styles.notifItem}
+                          activeOpacity={0.75}
+                          onPress={() => {
+                            setBellVisible(false);
+                            void clearUnreadAssignments();
+                            navigation.navigate(screenNames.assignments);
+                          }}
+                        >
+                          <View style={[styles.notifIconWrap, { backgroundColor: colors.accentYellow + '22' }]}>
+                            <Feather name="check-square" size={16} color={colors.accentYellow} />
+                          </View>
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.notifItemTitle}>
+                              {unreadAssignments === 1 ? 'New assignment' : `${unreadAssignments} new assignments`}
+                            </Text>
+                            <Text style={styles.notifPreview}>Tap to view your assignments</Text>
+                          </View>
+                          <View style={styles.notifUnreadDot} />
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  ) : (
+                    <View style={styles.noNotifState}>
+                      <View style={{ width: 52, height: 52, borderRadius: 26, backgroundColor: colors.accentYellow + '15', borderWidth: 1, borderColor: colors.accentYellow + '30', alignItems: 'center', justifyContent: 'center' }}>
+                        <Feather name="bell-off" size={24} color={colors.accentYellow} />
+                      </View>
+                      <Text style={styles.noNotifText}>You&apos;re all caught up!</Text>
+                      <Text style={[styles.notifPreview, { textAlign: 'center', paddingHorizontal: 16 }]}>
+                        New assignments and messages will appear here
+                      </Text>
+                    </View>
+                  )}
                 </View>
-                <Text style={styles.notifDetailTitle}>{detailItem?.title}</Text>
-              </View>
-              <Text style={styles.notifDetailBody}>{detailItem?.subtitle}</Text>
-              {!!detailItem && <Text style={styles.notifTime}>{formatNotifTime(detailItem.createdAt)}</Text>}
-              <TouchableOpacity style={[styles.notifDetailClose, { backgroundColor: colors.accentYellow }]} onPress={() => setDetailItem(null)} testID="notif-detail-close">
-                <Text style={[styles.notifDetailCloseText, { color: colors.cardDark }]}>Close</Text>
               </TouchableOpacity>
             </TouchableOpacity>
+          </Modal>
+
+          {/* Profile avatar button */}
+          <TouchableOpacity
+            style={[styles.avatar, (photoUrl || avatarStyle) && { backgroundColor: 'transparent', borderColor: 'transparent' }]}
+            onPress={() => setProfileVisible(true)}
+            activeOpacity={0.7}
+            testID="header-profile-button"
+          >
+            {renderAvatarCircle(studentMobile ? 32 : 36)}
           </TouchableOpacity>
-        </Modal>
 
-        {/* Profile modal — redesigned */}
-        <Modal visible={profileVisible} transparent animationType="fade" onRequestClose={() => { setProfileVisible(false); setEditingName(false); }}>
-          <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPress={() => { setProfileVisible(false); setEditingName(false); }}>
-            <TouchableOpacity activeOpacity={1} onPress={() => {}}>
-              <View style={styles.profileModal}>
+          {isStudentRole && <PortalThemeSwitch />}
+          {studentMobile && (
+            <TouchableOpacity style={styles.menuBtn} onPress={onMenuPress} testID="header-menu-button" accessibilityRole="button" accessibilityLabel="Open menu">
+              <Icon name="menu" size={24} color={colors.textHeading} />
+            </TouchableOpacity>
+          )}
 
-                {/* Title row */}
-                <View style={styles.profileModalHeader}>
-                  <View>
-                    <Text style={styles.profileModalTitle}>
-                      <Text style={{ color: colors.textMain }}>My </Text>
-                      <Text style={{ color: colors.accentYellow }}>Profile</Text>
-                    </Text>
-                    <Text style={styles.profileModalSub}>Manage your account and preferences</Text>
+          <Modal visible={!!detailItem} transparent animationType="fade" onRequestClose={() => setDetailItem(null)}>
+            <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPress={() => setDetailItem(null)} testID="notif-detail-backdrop">
+              <TouchableOpacity activeOpacity={1} style={styles.notifDetailCard} testID="notif-detail">
+                <View style={styles.notifDetailHead}>
+                  <View style={[styles.notifIconWrap, { backgroundColor: colors.accentYellow + '22' }]}>
+                    <Feather name="user-check" size={16} color={colors.accentYellow} />
                   </View>
-                  <TouchableOpacity style={styles.profileCloseBtn} onPress={() => { setProfileVisible(false); setEditingName(false); }} activeOpacity={0.7}>
-                    <Feather name="x" size={16} color={colors.textMuted} />
-                  </TouchableOpacity>
+                  <Text style={styles.notifDetailTitle}>{detailItem?.title}</Text>
                 </View>
+                <Text style={styles.notifDetailBody}>{detailItem?.subtitle}</Text>
+                {!!detailItem && <Text style={styles.notifTime}>{formatNotifTime(detailItem.createdAt)}</Text>}
+                <TouchableOpacity style={[styles.notifDetailClose, { backgroundColor: colors.accentYellow }]} onPress={() => setDetailItem(null)} testID="notif-detail-close">
+                  <Text style={[styles.notifDetailCloseText, { color: colors.cardDark }]}>Close</Text>
+                </TouchableOpacity>
+              </TouchableOpacity>
+            </TouchableOpacity>
+          </Modal>
 
-                {/* Avatar + name row */}
-                <View style={styles.profileAvatarRow}>
-                  <TouchableOpacity style={styles.profileAvatarWrap} onPress={handlePickPhoto} activeOpacity={0.85} disabled={uploadingPhoto} testID="profile-avatar-upload">
-                    <View style={styles.profileAvatarRing}>
-                      {renderAvatarCircle(80)}
+          {/* Profile modal — redesigned */}
+          <Modal visible={profileVisible} transparent animationType="fade" onRequestClose={() => { setProfileVisible(false); setEditingName(false); }}>
+            <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPress={() => { setProfileVisible(false); setEditingName(false); }}>
+              <TouchableOpacity activeOpacity={1} onPress={() => {}}>
+                <View style={styles.profileModal}>
+
+                  {/* Title row */}
+                  <View style={styles.profileModalHeader}>
+                    <View>
+                      <Text style={styles.profileModalTitle}>
+                        <Text style={{ color: colors.textMain }}>My </Text>
+                        <Text style={{ color: colors.accentYellow }}>Profile</Text>
+                      </Text>
+                      <Text style={styles.profileModalSub}>Manage your account and preferences</Text>
                     </View>
-                    <View style={styles.profileCameraBtn}>
-                      {uploadingPhoto
-                        ? <ActivityIndicator size={12} color={colors.accentYellow} />
-                        : <Feather name="camera" size={12} color={colors.accentYellow} />
-                      }
-                    </View>
-                  </TouchableOpacity>
-                  <View style={{ gap: 4, flex: 1 }}>
-                    {editingName ? (
-                      <View style={styles.nameEditRow}>
-                        <TextInput
-                          style={styles.nameInput}
-                          value={nameInput}
-                          onChangeText={setNameInput}
-                          placeholder="Enter name..."
-                          placeholderTextColor={colors.textDim}
-                          autoFocus
-                          autoCapitalize="words"
-                        />
-                        <TouchableOpacity onPress={handleSaveName} activeOpacity={0.8} style={styles.nameSaveBtn} testID="header-name-save-button" disabled={savingName}>
-                          {savingName ? <ActivityIndicator size="small" color="#0B0B0B" /> : <Feather name="check" size={14} color="#0B0B0B" />}
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => setEditingName(false)} activeOpacity={0.8} disabled={savingName}>
-                          <Feather name="x" size={14} color={colors.textMuted} />
-                        </TouchableOpacity>
+                    <TouchableOpacity style={styles.profileCloseBtn} onPress={() => { setProfileVisible(false); setEditingName(false); }} activeOpacity={0.7}>
+                      <Feather name="x" size={16} color={colors.textMuted} />
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* Avatar + name row */}
+                  <View style={styles.profileAvatarRow}>
+                    <TouchableOpacity style={styles.profileAvatarWrap} onPress={handlePickPhoto} activeOpacity={0.85} disabled={uploadingPhoto} testID="profile-avatar-upload">
+                      <View style={styles.profileAvatarRing}>
+                        {renderAvatarCircle(80)}
                       </View>
-                    ) : (
-                      <View style={styles.profileNameRow}>
-                        <Text style={styles.profileName} numberOfLines={1}>{user?.name}</Text>
-                        <TouchableOpacity
-                          onPress={() => { setNameInput(user?.name || ''); setEditingName(true); }}
-                          activeOpacity={0.7}
-                          style={styles.nameEditBtn}
-                          accessibilityRole="button"
-                          accessibilityLabel="Edit display name"
-                          testID="header-name-edit-button"
-                        >
-                          <Feather name="edit-2" size={13} color={colors.accentYellow} />
-                        </TouchableOpacity>
+                      <View style={styles.profileCameraBtn}>
+                        {uploadingPhoto
+                          ? <ActivityIndicator size={12} color={colors.accentYellow} />
+                          : <Feather name="camera" size={12} color={colors.accentYellow} />
+                        }
+                      </View>
+                    </TouchableOpacity>
+                    <View style={{ gap: 4, flex: 1 }}>
+                      {editingName ? (
+                        <View style={styles.nameEditRow}>
+                          <TextInput
+                            style={styles.nameInput}
+                            value={nameInput}
+                            onChangeText={setNameInput}
+                            placeholder="Enter name..."
+                            placeholderTextColor={colors.textDim}
+                            autoFocus
+                            autoCapitalize="words"
+                          />
+                          <TouchableOpacity onPress={handleSaveName} activeOpacity={0.8} style={styles.nameSaveBtn} testID="header-name-save-button" disabled={savingName}>
+                            {savingName ? <ActivityIndicator size="small" color={isStudentRole ? colors.onPrimary : '#0B0B0B'} /> : <Feather name="check" size={14} color={isStudentRole ? colors.onPrimary : '#0B0B0B'} />}
+                          </TouchableOpacity>
+                          <TouchableOpacity onPress={() => setEditingName(false)} activeOpacity={0.8} disabled={savingName}>
+                            <Feather name="x" size={14} color={colors.textMuted} />
+                          </TouchableOpacity>
+                        </View>
+                      ) : (
+                        <View style={styles.profileNameRow}>
+                          <Text style={styles.profileName} numberOfLines={1}>{user?.name}</Text>
+                          <TouchableOpacity
+                            onPress={() => { setNameInput(user?.name || ''); setEditingName(true); }}
+                            activeOpacity={0.7}
+                            style={styles.nameEditBtn}
+                            accessibilityRole="button"
+                            accessibilityLabel="Edit display name"
+                            testID="header-name-edit-button"
+                          >
+                            <Feather name="edit-2" size={13} color={colors.accentYellow} />
+                          </TouchableOpacity>
+                        </View>
+                      )}
+                      <Text style={styles.profileRole}>{user?.role}</Text>
+                      <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap' }}>
+                        {user?.role === 'student' && user?.grade && (
+                          <View style={styles.premiumBadge}>
+                            <Text style={styles.premiumBadgeText}>{user.grade}</Text>
+                          </View>
+                        )}
+                        {user?.curriculum && (
+                          <View style={styles.premiumBadge}>
+                            <Text style={styles.premiumBadgeText}>{user.curriculum}</Text>
+                          </View>
+                        )}
+                      </View>
+                    </View>
+                  </View>
+
+                  {/* Info rows */}
+                  <View style={styles.profileInfoCards}>
+                    <View style={styles.profileInfoCard}>
+                      <Feather name="mail" size={15} color={colors.accentYellow} />
+                      <Text style={styles.profileInfoCardText} numberOfLines={1}>{user?.email}</Text>
+                    </View>
+                    {user?.location && (
+                      <View style={styles.profileInfoCard}>
+                        <Feather name="map-pin" size={15} color={colors.accentYellow} />
+                        <Text style={styles.profileInfoCardText} numberOfLines={1}>{user.location}</Text>
                       </View>
                     )}
-                    <Text style={styles.profileRole}>{user?.role}</Text>
-                    <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap' }}>
-                      {user?.role === 'student' && user?.grade && (
-                        <View style={styles.premiumBadge}>
-                          <Text style={styles.premiumBadgeText}>{user.grade}</Text>
-                        </View>
-                      )}
-                      {user?.curriculum && (
-                        <View style={styles.premiumBadge}>
-                          <Text style={styles.premiumBadgeText}>{user.curriculum}</Text>
-                        </View>
-                      )}
-                    </View>
+                    {user?.school && (
+                      <View style={styles.profileInfoCard}>
+                        <Feather name="home" size={15} color={colors.accentYellow} />
+                        <Text style={styles.profileInfoCardText} numberOfLines={1}>{user.school}</Text>
+                      </View>
+                    )}
                   </View>
-                </View>
 
-                {/* Info rows */}
-                <View style={styles.profileInfoCards}>
-                  <View style={styles.profileInfoCard}>
-                    <Feather name="mail" size={15} color={colors.accentYellow} />
-                    <Text style={styles.profileInfoCardText} numberOfLines={1}>{user?.email}</Text>
-                  </View>
-                  {user?.location && (
-                    <View style={styles.profileInfoCard}>
-                      <Feather name="map-pin" size={15} color={colors.accentYellow} />
-                      <Text style={styles.profileInfoCardText} numberOfLines={1}>{user.location}</Text>
+                  {/* Teaching assignments — grades + subjects (teacher only) */}
+                  {user?.role === 'teacher' && Array.isArray(user?.teaches) && user.teaches.length > 0 && (
+                    <View style={styles.profileTeachSection}>
+                      <Text style={styles.profileTeachHeading}>Teaching</Text>
+                      <View style={styles.profileTeachCards}>
+                        {user.teaches.map((t: any, i: number) => (
+                          <View key={i} style={styles.profileTeachCard}>
+                            <Text style={styles.profileTeachGrade}>{t.grade}{t.curriculum ? ` · ${t.curriculum}` : ''}</Text>
+                            {Array.isArray(t.subjects) && t.subjects.length > 0 ? (
+                              <View style={styles.profileTeachChipRow}>
+                                {t.subjects.map((sub: string, si: number) => (
+                                  <View key={si} style={styles.profileTeachChip}>
+                                    <Text style={styles.profileTeachChipText}>{sub}</Text>
+                                  </View>
+                                ))}
+                              </View>
+                            ) : (
+                              <Text style={styles.profileTeachNoSubjects}>No subjects assigned yet</Text>
+                            )}
+                          </View>
+                        ))}
+                      </View>
                     </View>
                   )}
-                  {user?.school && (
-                    <View style={styles.profileInfoCard}>
-                      <Feather name="home" size={15} color={colors.accentYellow} />
-                      <Text style={styles.profileInfoCardText} numberOfLines={1}>{user.school}</Text>
-                    </View>
-                  )}
+
+
+                  {/* Logout */}
+                  <TouchableOpacity
+                    style={styles.logoutBtn}
+                    onPress={() => { setProfileVisible(false); logout(); }}
+                    activeOpacity={0.85}
+                  >
+                    {isStudentRole
+                      ? <Icon name="log-out" size={17} color={colors.onPrimary} />
+                      : <Feather name="log-out" size={16} color="#0B0B0B" />}
+                    <Text style={[styles.logoutBtnText, { color: isStudentRole ? colors.onPrimary : '#0B0B0B' }]}>Log Out</Text>
+                  </TouchableOpacity>
+
                 </View>
-
-                {/* Teaching assignments — grades + subjects (teacher only) */}
-                {user?.role === 'teacher' && Array.isArray(user?.teaches) && user.teaches.length > 0 && (
-                  <View style={styles.profileTeachSection}>
-                    <Text style={styles.profileTeachHeading}>Teaching</Text>
-                    <View style={styles.profileTeachCards}>
-                      {user.teaches.map((t: any, i: number) => (
-                        <View key={i} style={styles.profileTeachCard}>
-                          <Text style={styles.profileTeachGrade}>{t.grade}{t.curriculum ? ` · ${t.curriculum}` : ''}</Text>
-                          {Array.isArray(t.subjects) && t.subjects.length > 0 ? (
-                            <View style={styles.profileTeachChipRow}>
-                              {t.subjects.map((sub: string, si: number) => (
-                                <View key={si} style={styles.profileTeachChip}>
-                                  <Text style={styles.profileTeachChipText}>{sub}</Text>
-                                </View>
-                              ))}
-                            </View>
-                          ) : (
-                            <Text style={styles.profileTeachNoSubjects}>No subjects assigned yet</Text>
-                          )}
-                        </View>
-                      ))}
-                    </View>
-                  </View>
-                )}
-
-
-                {/* Logout */}
-                <TouchableOpacity
-                  style={styles.logoutBtn}
-                  onPress={() => { setProfileVisible(false); logout(); }}
-                  activeOpacity={0.85}
-                >
-                  <Feather name="log-out" size={16} color="#0B0B0B" />
-                  <Text style={[styles.logoutBtnText, { color: '#0B0B0B' }]}>Log Out</Text>
-                </TouchableOpacity>
-
-              </View>
+              </TouchableOpacity>
             </TouchableOpacity>
-          </TouchableOpacity>
-        </Modal>
+          </Modal>
+        </View>
+  );
+
+  if (studentMobile) {
+    return (
+      <View style={styles.mobileWrap}>
+        <View style={styles.mobileTop}>
+          <Text style={styles.wordmark} accessibilityRole="header">Aivorah</Text>
+          {rightEl}
+        </View>
+        {/* Page actions sit beside the title on phones, so the top row keeps
+            its menu button (Website Redesign, Phase 4). */}
+        {actions ? (
+          <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10 }}>
+            <View style={{ flex: 1, minWidth: 0 }}>{leftEl}</View>
+            {actions}
+          </View>
+        ) : leftEl}
       </View>
+    );
+  }
+  return (
+    <View style={styles.container}>
+      {leftEl}
+      {rightEl}
     </View>
   );
 }
 
-const makeStyles = (c: AppColors, s = false) => StyleSheet.create({
+const makeStyles = (c: AppColors, s = false, st = false, sm = false) => StyleSheet.create({
+  mobileWrap: { backgroundColor: c.bgDark, borderBottomWidth: 1, borderBottomColor: c.borderColor, paddingHorizontal: 16, paddingTop: 10, paddingBottom: 12, gap: 10 },
+  mobileTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
+  wordmark: {
+    fontSize: 25, fontWeight: '600', color: c.textHeading, letterSpacing: -0.4, flexShrink: 0,
+    fontFamily: Platform.OS === 'web' ? '"Fraunces", Georgia, serif' : undefined,
+  },
   container: {
     ...(s ? { minHeight: 76, paddingVertical: 12 } : { height: 64 }),
     flexDirection: 'row',
@@ -708,14 +762,18 @@ const makeStyles = (c: AppColors, s = false) => StyleSheet.create({
     backgroundColor: c.bgDark,
     borderBottomWidth: 1,
     borderBottomColor: c.borderColor,
+    // Redesigned portals: controls wrap below the title instead of crushing it.
+    ...(st ? { flexWrap: 'wrap', rowGap: 10, columnGap: 16 } : null),
   },
-  left: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  left: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, ...(st ? { flexShrink: 1, flexGrow: 1, flexBasis: 360, minWidth: 0 } : null) },
   menuBtn: {
     width: s ? 44 : 36, height: s ? 44 : 36, borderRadius: s ? 12 : radius.sm,
-    backgroundColor: c.cardDark, alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1, borderColor: c.borderColor,
+    backgroundColor: sm ? 'transparent' : c.cardDark, alignItems: 'center', justifyContent: 'center',
+    borderWidth: sm ? 0 : 1, borderColor: c.borderColor,
   },
-  title: s
+  title: st
+    ? { fontSize: sm ? 26 : 30, lineHeight: sm ? 31 : 36, fontWeight: '600', color: c.textHeading, letterSpacing: -0.4, fontFamily: fonts.title }
+    : s
     ? { fontSize: 28, lineHeight: 34, fontWeight: '700', color: c.textHeading, letterSpacing: -0.2, fontFamily: fonts.title }
     : { fontSize: 18, fontWeight: '700', color: c.textMain, letterSpacing: -0.3 },
   subtitle: s
@@ -762,7 +820,7 @@ const makeStyles = (c: AppColors, s = false) => StyleSheet.create({
   roleBadgeTextAdmin: {
     color: c.accentYellow,
   },
-  right: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  right: { flexDirection: 'row', alignItems: 'center', gap: sm ? 6 : spacing.md, ...(st ? { flexShrink: 0, gap: sm ? 6 : 10 } : null) },
   searchWrapper: {
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: c.cardDark, borderWidth: 1, borderColor: c.borderColor,
@@ -771,7 +829,7 @@ const makeStyles = (c: AppColors, s = false) => StyleSheet.create({
   searchIcon: { marginRight: 6 },
   searchInput: { flex: 1, color: c.textMain, fontSize: 13 },
   iconBtn: {
-    width: 36, height: 36, borderRadius: 18,
+    width: st ? 40 : 36, height: st ? 40 : 36, borderRadius: st ? 20 : 18,
     backgroundColor: c.cardDark, borderWidth: 1, borderColor: c.borderColor,
     alignItems: 'center', justifyContent: 'center',
   },
@@ -925,8 +983,8 @@ const makeStyles = (c: AppColors, s = false) => StyleSheet.create({
   },
   logoutBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    paddingVertical: 12, borderRadius: 12,
+    paddingVertical: 12, borderRadius: st ? 999 : 12, ...(st ? { minHeight: 46 } : null),
     backgroundColor: c.accentYellow,
   },
-  logoutBtnText: { fontSize: 13, fontWeight: '700' },
+  logoutBtnText: { fontSize: st ? 15 : 13, fontWeight: '700' },
 });

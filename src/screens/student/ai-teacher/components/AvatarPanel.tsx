@@ -8,8 +8,8 @@
  * thinking.
  */
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, Animated, Easing, StyleSheet } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { View, Text, TouchableOpacity, Animated, Easing, StyleSheet, Platform, AccessibilityInfo } from 'react-native';
+import Icon from '../../../../components/common/Icon';
 import type { AppColors } from '../../../../theme';
 import type { VoiceStatus } from '../voice/VoiceSession';
 import TalkingFace from '../avatar/TalkingFace';
@@ -54,19 +54,37 @@ export default function AvatarPanel({ source, name, status, caption, active, onT
     return () => loop.stop();
   }, [status, tilt, bars]);
 
+  // Website Redesign, Phase 3: a restrained pulse around the mic only while
+  // listening; it stops as soon as listening ends (and never runs with reduced motion).
+  const [pulse] = useState(() => new Animated.Value(0));
+  const webMotionQuery = Platform.OS === 'web' && typeof window !== 'undefined' && window.matchMedia;
+  const [reduceMotion, setReduceMotion] = useState(() =>
+    webMotionQuery ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false);
+  useEffect(() => {
+    if (webMotionQuery) return;
+    AccessibilityInfo.isReduceMotionEnabled?.().then((v) => setReduceMotion(!!v)).catch(() => {});
+  }, [webMotionQuery]);
+  const listening = status === 'listening';
+  useEffect(() => {
+    if (!listening || reduceMotion) { pulse.stopAnimation(); pulse.setValue(0); return undefined; }
+    const loop = Animated.loop(Animated.timing(pulse, { toValue: 1, duration: 1400, easing: Easing.out(Easing.quad), useNativeDriver: true }));
+    loop.start();
+    return () => { loop.stop(); pulse.setValue(0); };
+  }, [listening, reduceMotion, pulse]);
+
   const scale = breathe.interpolate({ inputRange: [0, 1], outputRange: [1, 1.012] });
   const rotate = tilt.interpolate({ inputRange: [0, 1], outputRange: ['-1.5deg', '1.5deg'] });
-  const mint = '#D9F0E4';
+  const stageBg = colors.surfaceSubtle;
 
   return (
     <View style={[styles.wrap, { backgroundColor: colors.cardDark, borderColor: colors.borderColor }]} testID="ai-teacher-avatar">
-      <View style={[styles.stage, { backgroundColor: mint, height: compact ? 260 : 400 }]}>
+      <View style={[styles.stage, { backgroundColor: stageBg, height: compact ? 260 : 400 }]}>
         {!!STATUS_LABEL[status] && (
-          <View style={styles.chip} testID="ai-teacher-status" accessibilityLiveRegion="polite">
-            <Feather name={status === 'listening' ? 'mic' : status === 'speaking' ? 'volume-2' : 'loader'} size={14} color="#2E7D4F" />
-            <Text style={styles.chipText}>{STATUS_LABEL[status]}</Text>
+          <View style={[styles.chip, { backgroundColor: colors.cardDark, borderColor: colors.borderColor }]} testID="ai-teacher-status" accessibilityLiveRegion="polite">
+            <Icon name={status === 'listening' ? 'mic' : status === 'speaking' ? 'megaphone' : 'sparkles'} size={15} color={colors.accentGreen} />
+            <Text style={[styles.chipText, { color: colors.textMain }]}>{STATUS_LABEL[status]}</Text>
             {status === 'listening' && [0.5, 1, 0.7, 1, 0.6].map((h, i) => (
-              <Animated.View key={i} style={[styles.bar, { transform: [{ scaleY: bars.interpolate({ inputRange: [0, 1], outputRange: [h * 0.5, i % 2 ? h : h * 0.8] }) }] }]} />
+              <Animated.View key={i} style={[styles.bar, { backgroundColor: colors.accentGreen, transform: [{ scaleY: bars.interpolate({ inputRange: [0, 1], outputRange: [h * 0.5, i % 2 ? h : h * 0.8] }) }] }]} />
             ))}
           </View>
         )}
@@ -80,11 +98,20 @@ export default function AvatarPanel({ source, name, status, caption, active, onT
         )}
       </View>
       <View style={styles.controls}>
-        <TouchableOpacity onPress={onToggle} style={[styles.button, { backgroundColor: colors.accentYellow }]} accessibilityRole="button"
-          accessibilityLabel={active ? 'Stop voice' : 'Start voice'} testID="ai-teacher-voice">
-          <Feather name={active ? 'mic' : 'mic-off'} size={20} color={colors.onPrimary} />
-          <Text style={styles.buttonText}>{active ? 'Stop' : 'Start'}</Text>
-        </TouchableOpacity>
+        <View style={styles.buttonWrap}>
+          {listening && !reduceMotion && (
+            <Animated.View pointerEvents="none" testID="ai-teacher-mic-pulse" style={[styles.pulse, {
+              borderColor: colors.primary,
+              opacity: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.55, 0] }),
+              transform: [{ scaleX: pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.12] }) }, { scaleY: pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.35] }) }],
+            }]} />
+          )}
+          <TouchableOpacity onPress={onToggle} style={[styles.button, { backgroundColor: colors.primary }]} accessibilityRole="button"
+            accessibilityLabel={active ? 'Stop voice' : 'Start voice'} testID="ai-teacher-voice">
+            <Icon name={active ? 'mic' : 'mic-off'} size={20} color={colors.onPrimary} />
+            <Text style={[styles.buttonText, { color: colors.onPrimary }]}>{active ? 'Stop' : 'Start'}</Text>
+          </TouchableOpacity>
+        </View>
         <Text style={[styles.micState, { color: colors.textMuted }]} testID="ai-teacher-mic-state">{active ? 'Microphone on' : 'Microphone off'}</Text>
       </View>
     </View>
@@ -95,14 +122,16 @@ const styles = StyleSheet.create({
   wrap: { borderWidth: 1, borderRadius: 20, padding: 10, gap: 12 },
   stage: { borderRadius: 16, overflow: 'hidden', alignItems: 'center', justifyContent: 'flex-end' },
   avatar: { width: '88%', height: '92%' },
-  chip: { position: 'absolute', top: 12, left: 12, zIndex: 2, flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#FFFFFFEE', borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
-  chipText: { fontSize: 14, fontWeight: '800', color: '#1E3A2B' },
-  bar: { width: 3, height: 14, borderRadius: 2, backgroundColor: '#2E9E5B' },
+  chip: { position: 'absolute', top: 12, left: 12, zIndex: 2, flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 1, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
+  chipText: { fontSize: 14, fontWeight: '700' },
+  bar: { width: 3, height: 14, borderRadius: 2 },
   caption: { position: 'absolute', left: 10, right: 10, bottom: 10, backgroundColor: '#1F1F1FE6', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 10 },
   captionText: { color: '#FFFFFF', fontSize: 17, fontWeight: '700', textAlign: 'center', lineHeight: 24 },
   controls: { alignItems: 'center', gap: 6, paddingBottom: 6 },
-  button: { flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: 999, paddingVertical: 14, paddingHorizontal: 44 },
-  buttonText: { color: '#FFFFFF', fontSize: 19, fontWeight: '800' },
+  buttonWrap: { alignItems: 'center', justifyContent: 'center' },
+  pulse: { position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, borderRadius: 999, borderWidth: 3 },
+  button: { flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: 999, paddingVertical: 14, paddingHorizontal: 44, minHeight: 54 },
+  buttonText: { fontSize: 19, fontWeight: '700' },
   micState: { fontSize: 13, fontStyle: 'italic' },
 });
 

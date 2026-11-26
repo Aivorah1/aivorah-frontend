@@ -1,8 +1,9 @@
 import type { VoiceOption, AmbientProfile } from './types';
+import { followStudentAccent } from '../../../theme/studentAccent';
 
 export const TEAL   = '#9FB2A4';  // sage
 export const FOREST = '#7E9A86';  // deep sage
-export const PASTEL_GOLD = '#24877B'; // Aivorah warm pastel gold — Auto toggle + completion badges
+export let PASTEL_GOLD = '#C8551C'; // Aivorah warm pastel gold — Auto toggle + completion badges
 
 export const VOICE_CONFIG: Record<VoiceOption, { label: string; icon: string; color: string }> = {
   grandmother: { label: 'Grandmother', icon: 'heart',  color: '#C08898' },  // Aivorah pastel rose
@@ -10,21 +11,21 @@ export const VOICE_CONFIG: Record<VoiceOption, { label: string; icon: string; co
 };
 
 export const PASTEL_GRAD: Record<string, [string, string]> = {
-  '#7c3aed': ['#24877B', '#9FB2A4'],
-  '#4f46e5': ['#24877B', '#9FB2A4'],
-  '#0ea5e9': ['#9FB2A4', '#24877B'],
-  '#6366f1': ['#24877B', '#24877B'],
-  '#ea580c': ['#24877B', '#9FB2A4'],
-  '#dc2626': ['#24877B', '#24877B'],
-  '#16a34a': ['#9FB2A4', '#24877B'],
-  '#0891b2': ['#9FB2A4', '#24877B'],
-  '#10b981': ['#9FB2A4', '#24877B'],
-  '#f59e0b': ['#24877B', '#9FB2A4'],
+  '#7c3aed': ['#C8551C', '#9FB2A4'],
+  '#4f46e5': ['#C8551C', '#9FB2A4'],
+  '#0ea5e9': ['#9FB2A4', '#C8551C'],
+  '#6366f1': ['#C8551C', '#C8551C'],
+  '#ea580c': ['#C8551C', '#9FB2A4'],
+  '#dc2626': ['#C8551C', '#C8551C'],
+  '#16a34a': ['#9FB2A4', '#C8551C'],
+  '#0891b2': ['#9FB2A4', '#C8551C'],
+  '#10b981': ['#9FB2A4', '#C8551C'],
+  '#f59e0b': ['#C8551C', '#9FB2A4'],
 };
 
 export const COLLECTION_PASTEL: Record<string, string> = {
   'Srimad Bhagavatam': '#9B8FC0',
-  'Ramayana':          '#24877B',
+  'Ramayana':          '#C8551C',
   'Bhagavad Gita':     '#82A896',
 };
 
@@ -105,5 +106,8 @@ export const STORY_MOOD: Record<string, keyof typeof MOOD_TRACK> = {
 };
 
 export function getPastelGradient(c: string): [string, string] {
-  return PASTEL_GRAD[c] ?? ['#9FB2A4', '#24877B'];
+  return PASTEL_GRAD[c] ?? ['#9FB2A4', '#C8551C'];
 }
+
+// Website Redesign, Phase 3: text accents follow Light / Dark (cover gradients stay as they are).
+followStudentAccent(COLLECTION_PASTEL, (a) => { PASTEL_GOLD = a; });

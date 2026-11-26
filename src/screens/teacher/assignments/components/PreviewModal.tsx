@@ -159,7 +159,7 @@ export function PreviewModal({
             {/* Task steps preview (AI assignment) */}
             {type === 'assignment' && taskSteps.length > 0 && (
               <View style={{ gap: 10 }}>
-                <Text style={{ fontSize: 14, fontWeight: '800', color: '#0E6E86' }}>
+                <Text style={{ fontSize: 14, fontWeight: '800', color: colors.primary }}>
                   Task Steps ({taskSteps.length})
                 </Text>
                 {taskSteps.map((step, idx) => (
