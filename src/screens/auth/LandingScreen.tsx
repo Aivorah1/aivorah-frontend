@@ -7,11 +7,10 @@ import { useAuth, UserRole } from '../../context/AuthContext';
 import { validateLoginForm, validateSignupForm } from './utils/validation';
 import PROFILE_SERVER_URL from '../../config/profileServerUrl';
 import AUTH_SERVER_URL from '../../config/authServerUrl';
-import { faceLoginAvailable, signInWithFace, faceLoginErrorMessage, rememberFaceLoginOffer } from '../../services/faceLogin';
 import { AUTH_PAGE_PATHS, AuthPage, authPageFromPath } from './authRoutes';
 import {
   HomeThemeProvider, useHomeTheme, useAuthLayout, AuthShell, AuthCard, AuthHeading, AuthField, FieldLabel,
-  PasswordEye, PrimaryButton, OutlineButton, OrDivider, Notice, TextLink, SelectChip, RoleTile, Checkbox,
+  PasswordEye, PrimaryButton, OutlineButton, OrDivider, Notice, TextLink, SelectChip, RoleTile,
   ShapeFrame, PencilArt, GlidingPlane, RulerArt, Sparks, FadeIn, Decorative, focusRing, SANS, SERIF,
 } from './authTheme';
 
@@ -61,13 +60,6 @@ function FooterLine({ text, link, onPress, tone = 'accent' }: { text: string; li
       <TextLink label={link} onPress={onPress} tone={tone} />
     </View>
   );
-}
-
-/** Whether this device can do face login (passkeys); resolved asynchronously. */
-function useFaceAvailable() {
-  const [ok, setOk] = useState(false);
-  useEffect(() => { faceLoginAvailable().then(setOk); }, []);
-  return ok;
 }
 
 // ─────────────────────────────────────────────────────────
@@ -206,7 +198,6 @@ function LoginForm({ onDone, onSwitchSignup, onSwitchForgot, signInEmail, signIn
   addParentRoleSSO: (email: string) => Promise<void>;
   externalError?: string | null;
 }) {
-  const { t } = useHomeTheme();
   // Sign-in needs NO role — returning users' role comes from their account.
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
@@ -214,16 +205,6 @@ function LoginForm({ onDone, onSwitchSignup, onSwitchForgot, signInEmail, signIn
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  // Face login (passkeys): only offered where this device can do it.
-  const faceAvailable = useFaceAvailable();
-  const [faceLoading, setFaceLoading] = useState(false);
-  async function faceSignIn() {
-    setError(''); setFaceLoading(true);
-    try { await signInWithFace(); onDone(); }
-    catch (e: any) { setError(faceLoginErrorMessage(e)); }
-    finally { setFaceLoading(false); }
-  }
-
   // Show external error (e.g. role mismatch from Google SSO)
   useEffect(() => {
     // Don't show internal signals as error text — LandingScreen handles these via Alert
@@ -283,20 +264,7 @@ function LoginForm({ onDone, onSwitchSignup, onSwitchForgot, signInEmail, signIn
     finally { setGoogleLoading(false); }
   }
 
-  const split = useSplit();
-  const faceButton = faceAvailable && (
-    <OutlineButton
-      testID="login-face"
-      label="Use face authentication"
-      leading={<MaterialCommunityIcons name="face-recognition" size={split ? 26 : 20} color={t.heading} />}
-      onPress={faceSignIn}
-      loading={faceLoading}
-      style={split ? { minHeight: 96, flexDirection: 'column', borderRadius: 20, gap: 8 } : { marginTop: 12 }}
-    />
-  );
-  const footer = <FooterLine text="Don't have an account?" link="Sign up free" onPress={onSwitchSignup} />;
-
-  const main = (
+  return (
     <>
       <GoogleButton label="Sign in with Google" loading={googleLoading} onPress={googleSignIn} />
 
@@ -321,26 +289,7 @@ function LoginForm({ onDone, onSwitchSignup, onSwitchForgot, signInEmail, signIn
       {!!error && <Notice kind="error">{error}</Notice>}
 
       <PrimaryButton label="Sign In" onPress={submit} loading={loading} />
-    </>
-  );
-
-  if (split) {
-    return (
-      <View style={{ flexDirection: 'row', gap: 28 }}>
-        <View style={{ flex: 1.45, minWidth: 0 }}>{main}</View>
-        <View style={{ width: 1, backgroundColor: t.line }} />
-        <View style={{ flex: 1, minWidth: 0, justifyContent: 'center' }}>
-          {faceButton}
-          {footer}
-        </View>
-      </View>
-    );
-  }
-  return (
-    <>
-      {main}
-      {faceButton}
-      {footer}
+      <FooterLine text="Don't have an account?" link="Sign up free" onPress={onSwitchSignup} />
     </>
   );
 }
@@ -374,12 +323,6 @@ function SignupForm({ onDone, onSwitchLogin, signUpEmail, signInGoogle, addParen
   const [googleLoading, setGoogleLoading] = useState(false);
 
   const showCurriculum = role === 'student' || role === 'teacher';
-  // Optional: set up face login right after the account is created
-  // (on the Verify Email screen, where the user is signed in).
-  const [faceAvailable, setFaceAvailable] = useState(false);
-  const [addFace, setAddFace] = useState(false);
-  useEffect(() => { faceLoginAvailable().then(setFaceAvailable); }, []);
-
   async function submit() {
     setError('');
     const emailTrim = email.trim();
@@ -390,7 +333,6 @@ function SignupForm({ onDone, onSwitchLogin, signUpEmail, signInGoogle, addParen
 
     setLoading(true);
     try {
-      rememberFaceLoginOffer(faceAvailable && addFace);
       await signUpEmail(nameTrim, emailTrim, pass, role, showCurriculum ? curriculum : undefined);
       // Persist the student's date of birth (collected here, not in onboarding).
       if (role === 'student' && dob.trim()) {
@@ -537,18 +479,6 @@ function SignupForm({ onDone, onSwitchLogin, signUpEmail, signInGoogle, addParen
         </View>
       ) : passwordField}
 
-      {faceAvailable && (
-        <View style={{ marginBottom: 8 }}>
-          <Checkbox
-            testID="signup-add-face"
-            label="Add face login (optional)"
-            help="Next time, sign in with this device's face unlock (Face ID / Windows Hello) instead of your password. Your face never leaves your device."
-            checked={addFace}
-            onToggle={() => setAddFace((v) => !v)}
-          />
-        </View>
-      )}
-
       {!!error && <Notice kind="error">{error}</Notice>}
 
       <PrimaryButton label="Create Free Account" onPress={submit} loading={loading} style={{ marginTop: 6 }} />
@@ -664,7 +594,7 @@ function AuthPageLayout({ copy, onBack, children, cardMax, splitMax, art, corner
   );
 }
 
-function SignInLayout({ children, onBack, copy = PAGE_COPY.signin, canSplit = false }: { children: React.ReactNode; onBack: () => void; copy?: Copy; canSplit?: boolean }) {
+function SignInLayout({ children, onBack, copy = PAGE_COPY.signin }: { children: React.ReactNode; onBack: () => void; copy?: Copy }) {
   const { isTV } = useAuthLayout();
   const art = (
     <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 4, marginTop: 8 }}>
@@ -673,7 +603,7 @@ function SignInLayout({ children, onBack, copy = PAGE_COPY.signin, canSplit = fa
     </View>
   );
   return (
-    <AuthPageLayout copy={copy} onBack={onBack} cardMax={480} splitMax={isTV ? 900 : 760} art={art} cornerArt={<PencilArt width={46} />} canSplit={canSplit}>
+    <AuthPageLayout copy={copy} onBack={onBack} cardMax={480} splitMax={isTV ? 900 : 760} art={art} cornerArt={<PencilArt width={46} />} canSplit={false}>
       {children}
     </AuthPageLayout>
   );
@@ -716,7 +646,6 @@ function LandingRoutes() {
   const { t } = useHomeTheme();
   const { signInWithEmail, signUpWithEmail, signInWithGoogle, demoLogin, addParentRoleToTeacher, addParentRoleToTeacherSSO, authError, clearAuthError, logout } = useAuth();
   const [page, setPage] = useState<AuthPage>(initialPage);
-  const faceAvailable = useFaceAvailable();
   const [teacherAddParentEmail, setTeacherAddParentEmail] = useState<string | null>(null);
   const [addingParentRole, setAddingParentRole] = useState(false);
 
@@ -815,7 +744,7 @@ function LandingRoutes() {
   let content: React.ReactNode;
   if (page === 'signin') {
     content = (
-      <SignInLayout onBack={toHome} canSplit={faceAvailable}>
+      <SignInLayout onBack={toHome}>
         <LoginForm
           onDone={clearAuthError}
           onSwitchSignup={() => go('signup')}

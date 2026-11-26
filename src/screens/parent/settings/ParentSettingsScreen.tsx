@@ -8,7 +8,6 @@ import type { AppColors } from '../../../theme';
 import Header from '../../../components/common/Header';
 import ScreenLayout from '../../../components/common/ScreenLayout';
 import ConnectSchoolBanner from '../../../features/classes/components/ConnectSchoolBanner';
-import FaceLoginCard from '../../../components/common/FaceLoginCard';
 import { getAvatarGradient, getAvatarIcon } from '../../../constants/avatarStyles';
 import { useTheme } from '../../../context/ThemeContext';
 import { useNotification } from '../../../context/NotificationContext';
@@ -54,7 +53,6 @@ export default function ParentSettingsScreen({ navigation }: any) {
         <Header title="Settings" subtitle="Manage your preferences and account" onMenuPress={() => navigation.openDrawer()} />
         <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <ConnectSchoolBanner />
-          <FaceLoginCard colors={colors} />
           <View style={styles.columns}>
             <View style={styles.col}>
               <SectionHeader icon="user" label="Profile & Account" color={colors.accentYellow} styles={styles} />

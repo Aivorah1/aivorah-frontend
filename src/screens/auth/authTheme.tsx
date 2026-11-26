@@ -531,30 +531,6 @@ export function RoleTile({ label, selected, onPress, icon }: { label: string; se
   );
 }
 
-export function Checkbox({ label, help, checked, onToggle, testID }: { label: string; help?: string; checked: boolean; onToggle: () => void; testID?: string }) {
-  const { t } = useHomeTheme();
-  return (
-    <Pressable
-      testID={testID}
-      onPress={onToggle}
-      accessibilityRole="checkbox"
-      accessibilityState={{ checked }}
-      style={(s: any) => [{ flexDirection: 'row', alignItems: 'flex-start', gap: 12, paddingVertical: 6, borderRadius: 8 }, focusRing(t, s.focused)]}
-    >
-      <View style={{
-        width: 22, height: 22, borderRadius: 6, borderWidth: 1.5, marginTop: 1, borderColor: checked ? t.primary : t.muted,
-        backgroundColor: checked ? t.primary : t.card, alignItems: 'center', justifyContent: 'center', ...colorTransition(),
-      }}>
-        {checked && <Feather name="check" size={13} color={t.onPrimary} />}
-      </View>
-      <View style={{ flex: 1 }}>
-        <Text style={{ fontFamily: SANS, fontSize: 15, fontWeight: '600', color: t.heading }}>{label}</Text>
-        {!!help && <Text style={{ fontFamily: SANS, fontSize: 13, lineHeight: 19, color: t.muted, marginTop: 2 }}>{help}</Text>}
-      </View>
-    </Pressable>
-  );
-}
-
 /** Fades a group in when it first appears (e.g. role-specific fields). */
 export function FadeIn({ children, style }: { children: React.ReactNode; style?: StyleProp<ViewStyle> }) {
   const reduce = useReducedMotion();
