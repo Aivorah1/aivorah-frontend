@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, Platform } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
-import FaceLoginCard from '../../components/common/FaceLoginCard';
-import { faceLoginOffered } from '../../services/faceLogin';
 import AUTH_SERVER_URL from '../../config/authServerUrl';
 import {
   HomeThemeProvider, useHomeTheme, AuthShell, AuthCard, AuthHeading, Notice, PrimaryButton, OutlineButton, TextLink, EnvelopeArt, Decorative, ShapeFrame, Sparks, SANS,
@@ -20,7 +18,6 @@ export default function VerifyEmailScreen() {
 function VerifyEmailContent() {
   const { user, updateUser, logout } = useAuth();
   const { t } = useHomeTheme();
-  const [showFaceOffer, setShowFaceOffer] = useState(faceLoginOffered);
 
   const [cooldown, setCooldown] = useState(0);
   const [verifyError, setVerifyError] = useState('');
@@ -170,17 +167,6 @@ function VerifyEmailContent() {
           <Text style={{ fontFamily: SANS, fontSize: 15, lineHeight: 22, color: t.muted, textAlign: 'center', marginBottom: 18 }}>
             Open the email and click the link to verify your account, then come back here.
           </Text>
-
-          {/* Face login chosen at sign-up: set it up now, while signed in */}
-          {showFaceOffer && (
-            <View style={{ width: '100%', marginBottom: 16 }}>
-              <FaceLoginCard
-                variant="setup"
-                colors={{ cardDark: t.input, borderColor: t.line, textMain: t.heading, textMuted: t.muted, accentYellow: t.accent, accentRed: t.danger }}
-                onDone={() => setShowFaceOffer(false)}
-              />
-            </View>
-          )}
 
           <View style={{ width: '100%' }}>
             {/* Spam folder warning */}

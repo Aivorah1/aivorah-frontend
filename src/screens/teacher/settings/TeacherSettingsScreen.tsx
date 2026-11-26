@@ -8,7 +8,6 @@ import type { AppColors } from '../../../theme';
 import Header from '../../../components/common/Header';
 import ScreenLayout from '../../../components/common/ScreenLayout';
 import ConnectSchoolBanner from '../../../features/classes/components/ConnectSchoolBanner';
-import FaceLoginCard from '../../../components/common/FaceLoginCard';
 import { useAuth } from '../../../context/AuthContext';
 import { getAvatarGradient, getAvatarIcon } from '../../../constants/avatarStyles';
 import { useTheme } from '../../../context/ThemeContext';
@@ -211,7 +210,6 @@ export default function TeacherSettingsScreen({ navigation }: any) {
         />
         <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <ConnectSchoolBanner />
-          <FaceLoginCard colors={colors} />
           <View style={styles.columns}>
 
             {/* ── Left column ── */}
