@@ -80,11 +80,11 @@ export default function ProgressScreen({ navigation }: any) {
               activeOpacity={0.8}
               testID="stats-load-error-banner"
             >
-              <Feather name="wifi-off" size={16} color="#24877B" />
+              <Feather name="wifi-off" size={16} color="#C8551C" />
               <Text style={styles.loadErrorText}>
                 Couldn&apos;t load your latest progress. Tap to retry.
               </Text>
-              <Feather name="refresh-cw" size={14} color="#24877B" />
+              <Feather name="refresh-cw" size={14} color="#C8551C" />
             </TouchableOpacity>
           )}
 

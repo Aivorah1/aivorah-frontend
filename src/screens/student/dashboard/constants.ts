@@ -4,26 +4,26 @@ import { Feather } from '@expo/vector-icons';
 // Slightly darkened for use as text/icon on white backgrounds
 // Exact landing.html palette: SAGE (#9FB2A4) + GOLD (#BAA467) on #0B0B0B. No purple.
 export const BRAND = {
-  teal:   '#24877B',   // landing --sage (primary)
-  mint:   '#24877B',   // sage
+  teal:   '#C8551C',   // landing --sage (primary)
+  mint:   '#C8551C',   // sage
   rose:   '#C98A8A',   // muted rose (kept for "wrong answer" semantics)
   blush:  '#C99A9A',   // mid-rose
-  gold:   '#24877B',   // landing --gold
-  slate:  '#24877B',   // sage
+  gold:   '#C8551C',   // landing --gold
+  slate:  '#C8551C',   // sage
   silver: '#A9B0AC',   // landing --muted
   // Accents — sage/gold family (no purples/corals)
-  violet: '#24877B',   // → gold
-  coral:  '#24877B',   // deep gold
-  forest: '#24877B',   // sage
+  violet: '#C8551C',   // → gold
+  coral:  '#C8551C',   // deep gold
+  forest: '#C8551C',   // sage
   // Aliases used elsewhere in code
-  indigo: '#24877B',
-  violet2: '#24877B',  // gold
-  purple: '#24877B',   // → gold
-  orange: '#24877B',   // deep gold
-  amber:  '#24877B',   // landing GOLD
-  green:  '#24877B',   // sage
-  cyan:   '#24877B',   // sage
-  blue:   '#24877B',
+  indigo: '#C8551C',
+  violet2: '#C8551C',  // gold
+  purple: '#C8551C',   // → gold
+  orange: '#C8551C',   // deep gold
+  amber:  '#C8551C',   // landing GOLD
+  green:  '#C8551C',   // sage
+  cyan:   '#C8551C',   // sage
+  blue:   '#C8551C',
   red:    '#C98A8A',   // muted rose
   pink:   '#C98A8A',
 };
@@ -44,9 +44,9 @@ export const PASTEL = {
 };
 
 export const SUBJECT_COLORS: Record<string, string> = {
-  Mathematics: '#24877B',   // gold
-  Science: '#24877B',       // gold
-  'Social Studies': '#24877B', // gold
+  Mathematics: '#C8551C',   // gold
+  Science: '#C8551C',       // gold
+  'Social Studies': '#C8551C', // gold
 };
 
 export const SUBJECT_ICONS: Record<string, React.ComponentProps<typeof Feather>['name']> = {
@@ -75,11 +75,13 @@ const PASTEL_GROUP: Record<string, 'green' | 'gold' | 'rose' | 'muted'> = {
   blue: 'green', teal: 'green', green: 'green', cyan: 'green', indigo: 'green',
   orange: 'gold', yellow: 'gold', purple: 'gold', red: 'rose', pink: 'rose', silver: 'muted',
 };
+// Website Redesign, Phase 3: "green" = primary accent (burnt orange / pale blue),
+// "gold" = success green, "rose" = error red, "muted" = cocoa / cool white.
 const TONES = {
-  light: { brand: { green: '#075D75', gold: '#177A4F', rose: '#B4443C', muted: '#4A5E6A' },
-           pastel: { green: '#E1F0F7', gold: '#E0F4EA', rose: '#FCE9DA', muted: '#F1F6F8' } },
-  dark:  { brand: { green: '#9ADBE9', gold: '#9BE5BE', rose: '#F4A9A3', muted: '#B6C6D1' },
-           pastel: { green: '#243746', gold: '#243746', rose: '#243746', muted: '#243746' } },
+  light: { brand: { green: '#B84312', gold: '#23803A', rose: '#B3261E', muted: '#4F4035' },
+           pastel: { green: '#FBE4D4', gold: '#E5F1DA', rose: '#FBE1DC', muted: '#F3ECDF' } },
+  dark:  { brand: { green: '#A9D5FF', gold: '#7BD389', rose: '#FF9C8A', muted: '#B4C3D8' },
+           pastel: { green: '#2B4663', gold: '#1E3A30', rose: '#3A2626', muted: '#22324B' } },
 };
 const QUICK_NAV_KEYS = [['teal', 'teal'], ['rose', 'pink'], ['gold', 'yellow'], ['blush', 'red'], ['silver', 'silver'], ['violet', 'purple']] as const;
 let appliedDark: boolean | null = null;

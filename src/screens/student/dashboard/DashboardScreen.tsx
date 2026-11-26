@@ -38,11 +38,11 @@ import { isCbseCurriculum } from '../../../utils/curriculum';
 import { isPassingScore, isMasteryScore } from '../utils/masteryRules';
 import { useDashboardData } from './hooks/useDashboardData';
 import type { CurriculumTopic, CurriculumData } from './types';
-import { BRAND, PASTEL, SUBJECT_COLORS, SUBJECT_ICONS } from './constants';
+import { BRAND, PASTEL, SUBJECT_COLORS, SUBJECT_ICONS, applyStudentBrand } from './constants';
 import { getGreeting, normalizeSearchText } from './utils/dashboardHelpers';
 import { RingChart } from './components/common/icons';
 import { SectionHeader } from './components/common/SectionHeader';
-import { HeroCard } from './components/HeroCard';
+import { DashboardOverview } from './components/DashboardOverview';
 import { GoalsCard } from './components/GoalsCard';
 import { PerformanceCard } from './components/PerformanceCard';
 import { QuickActionsGrid } from './components/QuickActionsGrid';
@@ -62,6 +62,8 @@ export default function DashboardScreen({ navigation, route }: any) {
   useFocusEffect(useCallback(() => { refreshProfile(); }, []));
   const { stats: ctxStats, studentId, learningActivity: ctxActivity } = useStudentData();
   const { colors, isDark } = useTheme();
+  // Refresh the dashboard's accent table for the active theme before styles are built.
+  applyStudentBrand(isDark);
   const { unreadAssignments, unreadCount } = useNotification();
   const { isMobile, isTablet } = useResponsive();
   const styles = useMemo(() => makeStyles(colors, isMobile, isDark), [colors, isMobile, isDark]);
@@ -158,13 +160,12 @@ export default function DashboardScreen({ navigation, route }: any) {
   const cardBg     = colors.cardDark;
   const cardBorder  = colors.borderColor;
   const subtleBg   = colors.cardHover;
-  const ringTrack  = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(139,92,246,0.08)';
-  // "Today's Goals" cards always use a light pastel gradient (even in dark theme),
-  // so their text/track use fixed light-card values regardless of the app theme.
-  const goalText      = '#16241B';
-  const goalMutedText = '#5C6F62';
-  const goalDimText   = '#9FB0A4';
-  const goalRingTrack = 'rgba(0,0,0,0.07)';
+  // "Today's Goals" cards sit on the theme's pastel tones (Website Redesign,
+  // Phase 3: dark pastels in dark mode), so their text follows the theme.
+  const goalText      = colors.textHeading;
+  const goalMutedText = colors.textMuted;
+  const goalDimText   = colors.textDim;
+  const goalRingTrack = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(48,33,23,0.08)';
   const contentMax = isMobile ? undefined : isTablet ? 920 : 1080;
 
   // ── Derived ──────────────────────────────────────────────
@@ -377,6 +378,30 @@ export default function DashboardScreen({ navigation, route }: any) {
       ]},
   ];
 
+  // Website Redesign, Phase 3 — inputs for the top card row.
+  const masteryLine = (() => {
+    const done = topicsMastered, total = topicsGoal;
+    if (noContentGrade) return `Content for ${studentGrade} is on the way — we're adding it now!`;
+    // Tiered so every badge threshold (Explorer 25% / Deep Diver 50% / Scholar 100%) gets its own call-out.
+    if (done === 0)   return `${total} chapters ready for your first sprint.`;
+    if (done >= total) return `🏆 You've nailed it! All ${total} chapters mastered — you're a true Scholar!`;
+    if (Math.round((done / total) * 100) >= 80) return `So close! ${total - done} chapter${total - done === 1 ? '' : 's'} left to become a Scholar.`;
+    if (done >= t50)  return `Deep Diver unlocked! ${done} of ${total} chapters mastered — past the halfway mark!`;
+    if (done >= t25)  return `Explorer unlocked! ${done} of ${total} chapters mastered — keep exploring!`;
+    return `${done} of ${total} chapters mastered. Keep going!`;
+  })();
+  // XP per day for the last 7 days (student_daily_log), today from local stats.
+  const weekXP = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(); d.setDate(d.getDate() - (6 - i));
+    const iso = d.toISOString().split('T')[0];
+    const logged = (weeklyDays ?? []).find(w => w.date === iso)?.xp ?? 0;
+    return { label: d.toLocaleDateString('en-US', { weekday: 'short' }), xp: i === 6 ? Math.max(logged, stats.todayXP) : logged };
+  });
+  const pathComplete = topicsMastered >= topicsGoal && topicsGoal > 0;
+  const resumeRef = continueLearning
+    ? (continueLearning.status === 'completed' && continueLearning.next ? continueLearning.next : continueLearning.current)
+    : null;
+
   const STAT_TILES = [
     { icon: 'clock'       as const, val: formatStudyTime(stats.studyTimeMinutes), label: 'Study Time',  color: BRAND.teal,   pastel: PASTEL.teal,   sub: 'this week',     pct: Math.min(stats.studyTimeMinutes / (7 * 60), 1) },
     { icon: 'zap'         as const, val: String(stats.currentStreak),             label: 'Day Streak',  color: BRAND.rose,   pastel: PASTEL.pink,   sub: 'days in a row', pct: Math.min(stats.currentStreak / 14, 1) },
@@ -415,8 +440,8 @@ export default function DashboardScreen({ navigation, route }: any) {
         <View style={styles.blobBR} pointerEvents="none" />
 
      <Header
-  title={childOverride ? `${firstName}'s Dashboard` : `${getGreeting()}, ${firstName}`}
-  subtitle={`${curriculumName} · ${studentGrade}`}
+  title={childOverride ? `${firstName}'s Dashboard` : `${getGreeting()}, ${firstName}! 👋`}
+  subtitle={childOverride ? `${curriculumName} · ${studentGrade}` : `${studentGrade} • Keep going, you're making great progress!`}
   showSearch={false}
   // On mobile the hamburger menu already doubled as "back" here, but on web/
   // desktop onMenuPress is never wired to a visible button at all (it only
@@ -455,28 +480,50 @@ export default function DashboardScreen({ navigation, route }: any) {
           <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollPad} showsVerticalScrollIndicator={false}>
             <View style={[styles.pageWrap, contentMax ? { maxWidth: contentMax } : undefined]}>
 
-              <HeroCard
-                styles={styles}
-                heroAnim={heroAnim}
-                stats={stats}
-                firstName={firstName}
-                noContentGrade={noContentGrade}
-                studentGrade={studentGrade}
-                topicsGoal={topicsGoal}
-                topicsMastered={topicsMastered}
-                t25={t25}
-                t50={t50}
-                maxLevel={maxLevel}
-                levelProgress={levelProgress}
-                xpGoal={xpGoal}
-                navigation={navigation}
-              />
+              <Animated.View style={{
+                opacity: heroAnim,
+                transform: [{ translateY: heroAnim.interpolate({ inputRange: [0, 1], outputRange: [20, 0] }) }],
+              }}>
+                <DashboardOverview
+                  colors={colors}
+                  isDark={isDark}
+                  goals={GOALS}
+                  masteryLine={masteryLine}
+                  stats={stats}
+                  levelProgress={levelProgress}
+                  maxLevel={maxLevel}
+                  weekXP={weekXP}
+                  resume={resumeRef ? { ref: resumeRef, onOpen: () => openLesson(resumeRef) } : null}
+                  cta={pathComplete
+                    ? { label: 'Explore Challenges', icon: 'trophy', onPress: () => navigation.navigate('Challenges') }
+                    : !resumeRef
+                      ? { label: 'Start Learning', icon: 'play', onPress: () => navigation.navigate('LearningPaths') }
+                      : null}
+                />
+              </Animated.View>
 
               {/* ══ BODY ══════════════════════════════════════ */}
               <Animated.View style={[styles.body, {
                 opacity: bodyAnim,
                 transform: [{ translateY: bodyAnim.interpolate({ inputRange: [0, 1], outputRange: [28, 0] }) }],
               }]}>
+
+                {/* ── MY LEARNING PATHS ─────────────────────────
+                    Web-only widget (native builds resume from the Resume card
+                    in the overview row above). Website Redesign, Phase 3: sits
+                    right under the overview row, as on the board. */}
+                {Platform.OS === 'web' && continueLearning && (
+                  <ContinueLearningCard
+                    colors={colors}
+                    isDark={isDark}
+                    continueLearning={continueLearning}
+                    chapterDone={chapterProgress.find(c => c.subject === continueLearning.current.subject && c.chapterIndex === continueLearning.current.chapter.chapterIndex)?.doneCount ?? 0}
+                    quizScore={perfForTopic(mergedPerf, continueLearning.current.topic.name, continueLearning.current.subject)?.avgScore ?? null}
+                    studentGrade={studentGrade}
+                    onOpen={openLesson}
+                    onViewAll={() => navigation.navigate('LearningPaths')}
+                  />
+                )}
 
                 <GoalsCard
                   styles={styles}
@@ -521,25 +568,6 @@ export default function DashboardScreen({ navigation, route }: any) {
                   <QuickActionsGrid styles={styles} colors={colors} isDark={isDark} cardBg={cardBg} navigation={navigation} />
                 )}
 
-                {/* ── CONTINUE LEARNING ─────────────────────────
-                    Mobile-only scope (Android/iOS native): Continue Learning is
-                    a web-only widget. The HeroCard's "Resume Learning Path" CTA
-                    (always shown) already provides the resume entry point on
-                    native builds, so this separate card is hidden there. Web
-                    behavior is preserved unchanged at every viewport size. */}
-                {Platform.OS === 'web' && continueLearning && (
-                  <ContinueLearningCard
-                    styles={styles}
-                    colors={colors}
-                    cardBg={cardBg}
-                    continueLearning={continueLearning}
-                    chapterDone={chapterProgress.find(c => c.subject === continueLearning.current.subject && c.chapterIndex === continueLearning.current.chapter.chapterIndex)?.doneCount ?? 0}
-                    quizScore={perfForTopic(mergedPerf, continueLearning.current.topic.name, continueLearning.current.subject)?.avgScore ?? null}
-                    studentGrade={studentGrade}
-                    ringTrack={ringTrack}
-                    onOpen={openLesson}
-                  />
-                )}
 
                 {/* ── AI COACH BANNER ─────────────────────────── */}
                 <AICoachBanner styles={styles} pulseAnim={pulseAnim} navigation={navigation} />
@@ -600,35 +628,37 @@ export const makeStyles = (c: AppColors, isMobile: boolean, isDark: boolean) => 
   retryText:     { fontSize: 14, fontWeight: '700', color: '#fff' },
 
   // ── Hero ──────────────────────────────────────────────
+  // Website Redesign, Phase 3: welcome panel on the card surface, shapes in the corner.
   heroCard: {
-    borderRadius: 22, padding: 20, paddingBottom: 18, overflow: 'hidden', position: 'relative', minHeight: 165,
-    borderWidth: 1, borderColor: 'rgba(245,243,238,0.16)',
-    shadowColor: '#000', shadowOpacity: 0.45, shadowRadius: 24, shadowOffset: { width: 0, height: 12 },
+    borderRadius: 22, padding: isMobile ? 18 : 24, paddingBottom: 20, overflow: 'hidden', position: 'relative', minHeight: 165,
+    borderWidth: 1, borderColor: c.borderColor,
+    shadowColor: '#302117', shadowOpacity: isDark ? 0.35 : 0.08, shadowRadius: 22, shadowOffset: { width: 0, height: 10 },
   },
   heroGlowLeft:  { display: 'none' },
   heroGlowRight: { display: 'none' },
 
   heroBadgeRow: { flexDirection: 'row', gap: 8, marginBottom: 14, zIndex: 2 },
-  levelBadge:   { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: 'rgba(11,11,11,0.12)', borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4, borderWidth: 1, borderColor: 'rgba(11,11,11,0.18)' },
-  levelTxt:     { fontSize: 10, fontWeight: '800', color: '#0B0B0B', letterSpacing: 0.2 },
-  streakBadge:  { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: 'rgba(11,11,11,0.12)', borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4, borderWidth: 1, borderColor: 'rgba(11,11,11,0.18)' },
-  streakTxt:    { fontSize: 10, fontWeight: '700', color: '#0B0B0B' },
+  levelBadge:   { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: c.surfaceSubtle, borderRadius: 20, paddingHorizontal: 11, paddingVertical: 5, borderWidth: 1, borderColor: c.borderColor },
+  levelTxt:     { fontSize: 12, fontWeight: '700', color: c.textMain, letterSpacing: 0.2 },
+  streakBadge:  { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: c.surfaceSubtle, borderRadius: 20, paddingHorizontal: 11, paddingVertical: 5, borderWidth: 1, borderColor: c.borderColor },
+  streakTxt:    { fontSize: 12, fontWeight: '700', color: c.textMain },
 
-  heroGreeting: { fontSize: 12, fontWeight: '700', color: 'rgba(11,11,11,0.6)', zIndex: 1, textTransform: 'uppercase', letterSpacing: 0.5 },
-  heroName:     { fontFamily: fonts.serif, fontSize: isMobile ? 30 : 38, fontWeight: '500', color: '#0B0B0B', letterSpacing: -0.5, lineHeight: isMobile ? 34 : 44, marginBottom: 4, zIndex: 1 },
-  heroSub:      { fontSize: 12, color: 'rgba(11,11,11,0.78)', fontWeight: '500', lineHeight: 18, marginBottom: 14, zIndex: 1, maxWidth: '90%' },
+  heroGreeting: { fontSize: 12.5, fontWeight: '700', color: c.accent, zIndex: 1, textTransform: 'uppercase', letterSpacing: 0.8 },
+  heroName:     { fontFamily: fonts.serif, fontSize: isMobile ? 32 : 42, fontWeight: '600', color: c.textHeading, letterSpacing: -0.6, lineHeight: isMobile ? 37 : 48, marginBottom: 4, zIndex: 1 },
+  heroSub:      { fontSize: 14.5, color: c.textMuted, fontWeight: '500', lineHeight: 21, marginBottom: 16, zIndex: 1, maxWidth: '90%' },
 
   xpBlock:    { zIndex: 1, marginBottom: 14 },
   xpLabelRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
-  xpLbl:      { fontSize: 10, fontWeight: '800', color: 'rgba(11,11,11,0.7)' },
-  xpNum:      { fontSize: 10, fontWeight: '800', color: 'rgba(11,11,11,0.7)' },
-  xpTrack:    { height: 8, backgroundColor: 'rgba(11,11,11,0.18)', borderRadius: 4, overflow: 'hidden' },
-  xpFill:     { height: '100%', backgroundColor: '#0B0B0B', borderRadius: 4 },
-  xpTotal:    { fontSize: 10, fontWeight: '700', color: 'rgba(11,11,11,0.62)', marginTop: 6 },
+  xpLbl:      { fontSize: 12, fontWeight: '700', color: c.textMain },
+  xpNum:      { fontSize: 12, fontWeight: '700', color: c.textMain },
+  xpTrack:    { height: 10, backgroundColor: c.borderColor, borderRadius: 999, overflow: 'hidden' },
+  // The bar slides to its real value whenever that value changes (web).
+  xpFill:     { height: '100%', backgroundColor: c.primary, borderRadius: 999, ...(Platform.OS === 'web' ? { transitionProperty: 'width', transitionDuration: '500ms', transitionTimingFunction: 'ease' } as any : null) },
+  xpTotal:    { fontSize: 12, fontWeight: '600', color: c.textMuted, marginTop: 6 },
 
-  heroCta:      { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#0B0B0B', borderRadius: 14, paddingVertical: 10, paddingHorizontal: 16, alignSelf: 'flex-start', zIndex: 1 },
-  heroCtaPlay:  { width: 22, height: 22, borderRadius: 11, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },
-  heroCtaTxt:   { fontSize: 13, fontWeight: '800', color: '#fff', flex: 1 },
+  heroCta:      { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: c.primary, borderRadius: 999, minHeight: 48, paddingVertical: 12, paddingHorizontal: 22, alignSelf: 'flex-start', zIndex: 1 },
+  heroCtaPlay:  { width: 24, height: 24, borderRadius: 12, backgroundColor: isDark ? 'rgba(16,24,39,0.12)' : 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
+  heroCtaTxt:   { fontSize: 15.5, fontWeight: '700', color: c.onPrimary },
 
   heroChipOutside: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: 18, paddingVertical: 12, paddingHorizontal: 12, borderWidth: 1, shadowColor: '#000', shadowOpacity: isDark ? 0.2 : 0.04, shadowRadius: 8, shadowOffset: { width: 0, height: 3 } },
   heroChipDot: { width: 6, height: 6, borderRadius: 3 },
@@ -774,19 +804,20 @@ export const makeStyles = (c: AppColors, isMobile: boolean, isDark: boolean) => 
   // ── AI banner ─────────────────────────────────────────
   aiBanner: {
     flexDirection: 'row', alignItems: 'center', gap: 14, padding: 18, borderRadius: 22, overflow: 'hidden', position: 'relative',
-    shadowColor: '#BAA467', shadowOpacity: isDark ? 0.5 : 0.3, shadowRadius: 24, shadowOffset: { width: 0, height: 8 },
+    borderWidth: 1, borderColor: c.borderColor,
+    shadowColor: '#302117', shadowOpacity: isDark ? 0.3 : 0.07, shadowRadius: 18, shadowOffset: { width: 0, height: 8 },
   },
-  aiGlow:       { position: 'absolute', right: -50, top: -50, width: 170, height: 170, borderRadius: 85, backgroundColor: 'rgba(11,11,11,0.04)' },
+  aiGlow:       { position: 'absolute', right: -50, top: -50, width: 170, height: 170, borderRadius: 85, backgroundColor: c.surfaceSubtle, opacity: 0.6 },
   aiAvatarWrap: { position: 'relative', flexShrink: 0 },
-  aiAvatarOuter:{ width: 54, height: 54, borderRadius: 27, backgroundColor: 'rgba(11,11,11,0.10)', alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: 'rgba(11,11,11,0.18)' },
-  aiAvatarInner:{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(11,11,11,0.08)', alignItems: 'center', justifyContent: 'center' },
-  aiOnline:     { position: 'absolute', bottom: 2, right: 2, width: 12, height: 12, borderRadius: 6, backgroundColor: '#2E7D52', borderWidth: 2, borderColor: 'rgba(255,255,255,0.6)' },
+  aiAvatarOuter:{ width: 54, height: 54, borderRadius: 27, backgroundColor: c.surfaceSubtle, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: c.borderColor },
+  aiAvatarInner:{ width: 40, height: 40, borderRadius: 20, backgroundColor: c.cardDark, alignItems: 'center', justifyContent: 'center' },
+  aiOnline:     { position: 'absolute', bottom: 2, right: 2, width: 12, height: 12, borderRadius: 6, backgroundColor: c.accentGreen, borderWidth: 2, borderColor: c.cardDark },
   aiBannerBody: { flex: 1, gap: 2 },
-  aiTag:        { fontSize: 9, fontWeight: '800', color: 'rgba(11,11,11,0.55)', letterSpacing: 1 },
-  aiTitle:      { fontSize: 17, fontWeight: '900', color: '#0B0B0B', letterSpacing: -0.3, fontFamily: fonts.serif },
-  aiSub:        { fontSize: 12, color: 'rgba(11,11,11,0.72)', lineHeight: 17 },
+  aiTag:        { fontSize: 11, fontWeight: '700', color: c.textMuted, letterSpacing: 1 },
+  aiTitle:      { fontSize: 19, fontWeight: '600', color: c.textHeading, letterSpacing: -0.3, fontFamily: fonts.serif },
+  aiSub:        { fontSize: 13.5, color: c.textMuted, lineHeight: 19 },
   aiBannerCta:  { alignItems: 'center', gap: 4, flexShrink: 0 },
-  aiBannerCtaTxt:{ fontSize: 11, fontWeight: '800', color: 'rgba(11,11,11,0.85)' },
+  aiBannerCtaTxt:{ fontSize: 12.5, fontWeight: '700', color: c.textHeading },
 
   // ── Stats grid ────────────────────────────────────────
   statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },

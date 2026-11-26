@@ -11,11 +11,12 @@ export const makeStyles = (c: AppColors) => StyleSheet.create({
   listenModeWrap: { flex: 1, minHeight: 0 },
 
   tabBarRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginHorizontal: spacing.xl },
-  tabBar: { flex: 1, flexDirection: 'row', gap: 4, padding: 4, borderRadius: radius.lg, borderWidth: 1 },
-  tab: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 9, borderRadius: 9 },
-  tabText: { fontSize: 12.5, fontWeight: '700' },
-  viewInBookBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 1, borderRadius: radius.md, paddingVertical: 9, paddingHorizontal: 14 },
-  viewInBookText: { fontSize: 12.5, fontWeight: '700' },
+  // Website Redesign, Phase 3: pill tabs; the active one is filled with the primary colour.
+  tabBar: { flex: 1, flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  tab: { flexGrow: 1, flexBasis: 120, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 44, paddingHorizontal: 14, borderRadius: 999, borderWidth: 1.5 },
+  tabText: { fontSize: 14.5, fontWeight: '700' },
+  viewInBookBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1.5, borderRadius: 999, minHeight: 44, paddingHorizontal: 16 },
+  viewInBookText: { fontSize: 14.5, fontWeight: '700' },
 
   dualPane: { flex: 1, flexDirection: 'row', minHeight: 0 },
   leftPane: { flex: 0.6, minHeight: 0 },

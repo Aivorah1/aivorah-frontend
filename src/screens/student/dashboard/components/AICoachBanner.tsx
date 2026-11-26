@@ -14,12 +14,12 @@ interface AICoachBannerProps {
 // Pulsing banner that routes to AI Coach — pure presentation, animation
 // value (pulseAnim) is owned and looped by the parent screen.
 export function AICoachBanner({ styles, pulseAnim, navigation }: AICoachBannerProps) {
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   return (
     <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
       <TouchableOpacity onPress={() => navigation.navigate('AICoach')} activeOpacity={0.88}>
         <LinearGradient
-          colors={isDark ? ['#1C2B37', '#1C2B37'] : ['#FFFFFF', '#FFFFFF']}
+          colors={[colors.cardDark, colors.cardDark]}
           start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
           style={styles.aiBanner}
         >
@@ -39,7 +39,7 @@ export function AICoachBanner({ styles, pulseAnim, navigation }: AICoachBannerPr
             <Text style={styles.aiSub}>Maths, Science, any topic — patient & always here.</Text>
           </View>
           <View style={styles.aiBannerCta}>
-            <Feather name="message-circle" size={20} color={colors.accent} />
+            <Feather name="message-circle" size={20} color={colors.primary} />
             <Text style={styles.aiBannerCtaTxt}>Chat now</Text>
           </View>
         </LinearGradient>

@@ -27,7 +27,7 @@ export function QuizModal({ assignment, colors, onClose, onSubmitted }: {
   const { isDark } = useTheme();
   const styles = useMemo(() => makeModalStyles(colors), [colors]);
   const { studentId } = useStudentData();
-  const color = SUBJECT_COLOR[assignment.subject] ?? '#24877B';
+  const color = SUBJECT_COLOR[assignment.subject] ?? '#C8551C';
   const questions = assignment.quizQuestions || [];
 
   const [currentQ,       setCurrentQ]      = useState(0);
@@ -375,10 +375,10 @@ export function QuizModal({ assignment, colors, onClose, onSubmitted }: {
               {result.perQuestion.filter((q: any) => !q?.correct).length > 0 && (
                 <View style={{ gap: 8 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                    <View style={{ width: 28, height: 28, borderRadius: 9, backgroundColor: '#24877B20', alignItems: 'center', justifyContent: 'center' }}>
-                      <Feather name="x-circle" size={15} color="#24877B" />
+                    <View style={{ width: 28, height: 28, borderRadius: 9, backgroundColor: '#C8551C20', alignItems: 'center', justifyContent: 'center' }}>
+                      <Feather name="x-circle" size={15} color="#C8551C" />
                     </View>
-                    <Text style={{ fontSize: 14, fontWeight: '800', color: '#24877B' }}>
+                    <Text style={{ fontSize: 14, fontWeight: '800', color: '#C8551C' }}>
                       Questions You Got Wrong ({result.perQuestion.filter((q: any) => !q?.correct).length})
                     </Text>
                   </View>
@@ -386,38 +386,38 @@ export function QuizModal({ assignment, colors, onClose, onSubmitted }: {
                     const origIdx = result.perQuestion.indexOf(q);
                     const aiExp = aiExplanations[origIdx];
                     return (
-                      <View key={idx} style={[styles.qRow, { borderColor: '#24877B30', backgroundColor: colors.cardDark, borderLeftWidth: 3, borderLeftColor: '#24877B' }]}>
+                      <View key={idx} style={[styles.qRow, { borderColor: '#C8551C30', backgroundColor: colors.cardDark, borderLeftWidth: 3, borderLeftColor: '#C8551C' }]}>
                         <View style={styles.qLeft}>
-                          <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: '#24877B20', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            <Feather name="x" size={13} color="#24877B" />
+                          <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: '#C8551C20', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <Feather name="x" size={13} color="#C8551C" />
                           </View>
                           <View style={{ flex: 1, gap: 7 }}>
                             <Text style={styles.qText}>{q.question}</Text>
                             {q.studentAnswer ? (
                               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, padding: 8, borderRadius: 8, backgroundColor: colors.bgDark }}>
-                                <Text style={{ fontSize: 11, fontWeight: '800', color: '#24877B', width: 100, letterSpacing: 0.3 }}>Your answer</Text>
-                                <Text style={{ flex: 1, fontSize: 14, fontWeight: '600', color: '#24877B' }}>{q.studentAnswer}</Text>
+                                <Text style={{ fontSize: 11, fontWeight: '800', color: '#C8551C', width: 100, letterSpacing: 0.3 }}>Your answer</Text>
+                                <Text style={{ flex: 1, fontSize: 14, fontWeight: '600', color: '#C8551C' }}>{q.studentAnswer}</Text>
                               </View>
                             ) : null}
                             {q.correctAnswer ? (
                               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, padding: 8, borderRadius: 8, backgroundColor: colors.bgDark }}>
-                                <Text style={{ fontSize: 11, fontWeight: '800', color: '#24877B', width: 100, letterSpacing: 0.3 }}>Correct answer</Text>
-                                <Text style={{ flex: 1, fontSize: 14, fontWeight: '700', color: '#24877B' }}>{q.correctAnswer}</Text>
+                                <Text style={{ fontSize: 11, fontWeight: '800', color: '#C8551C', width: 100, letterSpacing: 0.3 }}>Correct answer</Text>
+                                <Text style={{ flex: 1, fontSize: 14, fontWeight: '700', color: '#C8551C' }}>{q.correctAnswer}</Text>
                               </View>
                             ) : null}
-                            <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10, padding: 12, borderRadius: 10, backgroundColor: isDark ? '#171612' : '#F8F6ED', borderWidth: 1, borderColor: '#24877B25' }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10, padding: 12, borderRadius: 10, backgroundColor: isDark ? '#171612' : '#F8F6ED', borderWidth: 1, borderColor: '#C8551C25' }}>
                               {aiExp ? (
                                 <>
-                                  <View style={{ width: 24, height: 24, borderRadius: 7, backgroundColor: '#24877B20', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                    <Feather name="book-open" size={12} color="#24877B" />
+                                  <View style={{ width: 24, height: 24, borderRadius: 7, backgroundColor: '#C8551C20', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                    <Feather name="book-open" size={12} color="#C8551C" />
                                   </View>
                                   <Text style={{ flex: 1, fontSize: 13, color: colors.textMain, lineHeight: 21 }}>
-                                    <Text style={{ fontWeight: '800', color: '#24877B' }}>Aivorah: </Text>{aiExp}
+                                    <Text style={{ fontWeight: '800', color: '#C8551C' }}>Aivorah: </Text>{aiExp}
                                   </Text>
                                 </>
                               ) : (
                                 <>
-                                  <ActivityIndicator size="small" color="#24877B" />
+                                  <ActivityIndicator size="small" color="#C8551C" />
                                   <Text style={{ fontSize: 12, color: colors.textMuted, fontStyle: 'italic' }}>Aivorah is preparing your explanation…</Text>
                                 </>
                               )}

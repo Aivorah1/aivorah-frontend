@@ -15,8 +15,8 @@ interface Props {
 
 function rankBadgeConfig(score: number) {
   if (score >= 80)      return { label: 'Top 1%',  emoji: '🥇', bg: '#3FB8A8', border: '#3FB8A8', text: '#0F4C45' };
-  if (score >= 60)      return { label: 'Top 5%',  emoji: '🥈', bg: '#DCEFEB', border: '#24877B', text: '#0F4C45' };
-  if (score >= 40)      return { label: 'Top 10%', emoji: '🥉', bg: '#24877B', border: '#24877B', text: '#0F4C45' };
+  if (score >= 60)      return { label: 'Top 5%',  emoji: '🥈', bg: '#DCEFEB', border: '#C8551C', text: '#0F4C45' };
+  if (score >= 40)      return { label: 'Top 10%', emoji: '🥉', bg: '#C8551C', border: '#C8551C', text: '#0F4C45' };
   if (score >= 20)      return { label: 'Top 25%', emoji: '⭐', bg: '#C8DCCC', border: '#9FB2A4', text: '#2A3530' };
   return null;
 }

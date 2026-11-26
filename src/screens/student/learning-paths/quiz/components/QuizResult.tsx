@@ -256,8 +256,8 @@ export default function QuizResult({
           {wrongQs.length > 0 && (
             <View style={styles.reviewSection}>
               <View style={styles.reviewSectionHeader}>
-                <View style={[styles.reviewSectionIcon, { backgroundColor: '#24877B20' }]}>
-                  <Feather name="x-circle" size={16} color="#24877B" />
+                <View style={[styles.reviewSectionIcon, { backgroundColor: '#C8551C20' }]}>
+                  <Feather name="x-circle" size={16} color="#C8551C" />
                 </View>
                 <Text style={[styles.reviewSectionTitle, { color: colors.textHeading }]}>
                   Questions You Got Wrong ({wrongQs.length})
@@ -269,7 +269,7 @@ export default function QuizResult({
                 return (
                   <View key={r.idx} testID="quiz-review-card" style={[styles.reviewCard, { width: cardWidth }, {
                     backgroundColor: colors.cardDark,
-                    borderColor: '#24877B30',
+                    borderColor: '#C8551C30',
                     borderLeftColor: colors.accentRed,
                   }]}>
                     {!!wrongLabel?.(r.idx) && (
@@ -279,8 +279,8 @@ export default function QuizResult({
                     )}
                     {/* question */}
                     <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 12 }}>
-                      <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: '#24877B20', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
-                        <Feather name="x" size={13} color="#24877B" />
+                      <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: '#C8551C20', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                        <Feather name="x" size={13} color="#C8551C" />
                       </View>
                       <Text style={{ flex: 1, fontSize: 14, fontWeight: '600', color: colors.textMain, lineHeight: 22 }}>{r.question}</Text>
                     </View>
@@ -310,7 +310,7 @@ export default function QuizResult({
                         </>
                       ) : (
                         <>
-                          <ActivityIndicator size="small" color="#24877B" />
+                          <ActivityIndicator size="small" color="#C8551C" />
                           <Text style={{ fontSize: 12, color: colors.textMuted, fontStyle: 'italic' }}>Aivorah is preparing your explanation…</Text>
                         </>
                       )}

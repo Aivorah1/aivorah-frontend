@@ -27,7 +27,7 @@ export function ProgressHero({
     <View style={styles.heroBanner}>
       <View style={{ alignItems: 'center', marginBottom: spacing.lg }}>
         <View style={{ position: 'relative', alignItems: 'center', justifyContent: 'center' }}>
-          <RingProgress progress={overallPct / 100} color="#24877B" size={100} strokeWidth={9} />
+          <RingProgress progress={overallPct / 100} color="#C8551C" size={100} strokeWidth={9} />
           <View style={StyleSheet.absoluteFill as any} pointerEvents="none">
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
               <Text style={styles.heroPct}>{overallPct}%</Text>

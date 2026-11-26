@@ -157,18 +157,80 @@ const sharedDark: typeof darkColors = {
 export const parentLightColors: typeof darkColors = { ...sharedLight };
 export const parentDarkColors: typeof darkColors = { ...sharedDark };
 
-// Student: same palette, slightly stronger blue + mint accents.
+// Student (Website Redesign, Phase 3): the homepage palette.
+// Light = warm ivory page, soft-ivory sidebar, warm-white cards, espresso
+// headings, cocoa body, burnt-orange primary, peach active nav, deep-blue focus.
+// Dark = ink navy, deep-slate sidebar, slate-blue cards, warm-cream headings,
+// cool-white body, pale-blue primary, blue-slate active nav, sky-blue focus.
 export const studentLightColors: typeof darkColors = {
-  ...sharedLight,
-  accentGreen: '#177A4F',
-  navActiveBg: '#D3EBF4',
-  tintBlue: '#D9EDF6',
-  tintMint: '#D8F1E4',
+  bgDark: '#F7F3E9',
+  cardDark: '#FFFCF6',
+  cardHover: '#F3ECDF',
+  sidebarDark: '#FBF6ED',
+  borderColor: '#D5C6B3',
+  textMain: '#302117',
+  textHeading: '#302117',
+  textMuted: '#4F4035',
+  textDim: '#6A584A',
+  primary: '#B84312',
+  primaryHover: '#9F390E',
+  primaryGlow: 'rgba(184,67,18,0.10)',
+  accentBlue: '#1D5DB5',
+  accentPurple: '#B84312',
+  accentGreen: '#23803A',
+  accentYellow: '#B84312',
+  accentYellowGlow: 'rgba(184,67,18,0.10)',
+  accentRed: '#B3261E',
+  accentCyan: '#1D5DB5',
+  accentOrange: '#B84312',
+  accentPink: '#B3261E',
+  onPrimary: '#FFFFFF',
+  accent: '#B84312',
+  surfaceSubtle: '#F3ECDF',
+  navActiveBg: '#FBE4D4',
+  navActiveText: '#8F350D',
+  tintLilac: '#E6EEF8',
+  tintMint: '#E5F1DA',
+  tintBlue: '#E1EDF7',
+  tintPeach: '#FBE4D4',
 };
 export const studentDarkColors: typeof darkColors = {
-  ...sharedDark,
-  accentGreen: '#9BE5BE',
-  navActiveBg: '#2E5263',
+  bgDark: '#101827',
+  cardDark: '#1C2A40',
+  cardHover: '#22324B',
+  sidebarDark: '#162238',
+  borderColor: '#425775',
+  textMain: '#FFF3DC',
+  textHeading: '#FFF3DC',
+  textMuted: '#DCE6F4',
+  textDim: '#B4C3D8',
+  primary: '#A9D5FF',
+  primaryHover: '#C3E4FF',
+  primaryGlow: 'rgba(169,213,255,0.14)',
+  accentBlue: '#8DD1FF',
+  accentPurple: '#A9D5FF',
+  accentGreen: '#7BD389',
+  accentYellow: '#A9D5FF',
+  accentYellowGlow: 'rgba(169,213,255,0.14)',
+  accentRed: '#FF9C8A',
+  accentCyan: '#8DD1FF',
+  accentOrange: '#FFB27A',
+  accentPink: '#FF9C8A',
+  onPrimary: '#101827',
+  accent: '#A9D5FF',
+  surfaceSubtle: '#162238',
+  navActiveBg: '#2B4663',
+  navActiveText: '#C3E4FF',
+  tintLilac: '#22324B',
+  tintMint: '#1E3A30',
+  tintBlue: '#1E3550',
+  tintPeach: '#3A2C24',
+};
+
+/** Decorative shapes used sparingly in the Student Portal (welcome panel). */
+export const studentShapeColors = {
+  light: { green: '#77B742', yellow: '#F6C931', orange: '#F58B3A', blue: '#61ABD7' },
+  dark: { green: '#6A9F3E', yellow: '#DCA928', orange: '#C85F24', blue: '#477EAB' },
 };
 
 // Teacher: same palette, quieter borders for denser tables.

@@ -11,8 +11,8 @@ import SERVER_URL from '../../config/serverUrl';
 
 const TEAL   = '#9FB2A4';  // sage
 const FOREST = '#7E9A86';  // deep sage
-const AMBER  = '#24877B';
-const ROSE   = '#075D75';  // indigo (Max plan)
+const AMBER  = '#C8551C';
+const ROSE   = '#C8551C';  // indigo (Max plan)
 const SAGE   = '#B2C2B7';
 
 /* ── Plan definitions ───────────────────────────────────────────── */
@@ -175,7 +175,7 @@ export default function SubscriptionScreen({ navigation }: any) {
           contact: '9876543210',
         },
         theme: {
-          color: '#24877B', // Aivorah gold
+          color: '#C8551C', // Aivorah gold
         },
         handler: async (response: any) => {
           // 3. Verify payment on backend
@@ -229,8 +229,8 @@ export default function SubscriptionScreen({ navigation }: any) {
 
           {/* ── Aivorah brand header ─────────────────────────── */}
           <View style={styles.brandHeader}>
-            <View style={styles.brandLogoMark}>
-              <Feather name="zap" size={20} color="#fff" />
+            <View style={[styles.brandLogoMark, { backgroundColor: colors.primary }]}>
+              <Feather name="zap" size={20} color={colors.onPrimary} />
             </View>
             <View>
               <Text style={[styles.brandTitle, { color: colors.textMain }]}>Aivorah Plans</Text>
@@ -245,6 +245,10 @@ export default function SubscriptionScreen({ navigation }: any) {
             {PLANS.map((plan) => {
               const isCurrent = plan.id === currentPlanId;
               const isUpgrade = PLANS.findIndex(p => p.id === plan.id) > PLANS.findIndex(p => p.id === currentPlanId);
+              // Website Redesign, Phase 3: the accent plans use the theme's primary
+              // (burnt orange / pale blue) with matching text on filled buttons.
+              const pc = plan.color === AMBER || plan.color === ROSE ? colors.primary : plan.color;
+              const onPc = pc === colors.primary ? colors.onPrimary : '#fff';
 
               return (
                 <View
@@ -253,19 +257,19 @@ export default function SubscriptionScreen({ navigation }: any) {
                     styles.card,
                     {
                       backgroundColor: colors.cardDark,
-                      borderColor: isCurrent ? plan.color + '50' : colors.borderColor,
+                      borderColor: isCurrent ? pc + '50' : colors.borderColor,
                     },
                   ]}
                 >
                   {/* Badge */}
                   {plan.badge && (
-                    <View style={[styles.badge, { backgroundColor: plan.color }]}>
-                      <Text style={styles.badgeText}>{plan.badge}</Text>
+                    <View style={[styles.badge, { backgroundColor: pc }]}>
+                      <Text style={[styles.badgeText, { color: onPc }]}>{plan.badge}</Text>
                     </View>
                   )}
 
                   {/* Tier icon */}
-                  <TierIcon color={plan.color} plan={plan} />
+                  <TierIcon color={pc} plan={plan} />
 
                   {/* Name & tagline */}
                   <Text style={[styles.planName, { color: colors.textMain }]}>{plan.name}</Text>
@@ -277,20 +281,20 @@ export default function SubscriptionScreen({ navigation }: any) {
 
                   {/* CTA */}
                   {isCurrent ? (
-                    <View style={[styles.ctaOutline, { borderColor: plan.color + '50' }]}>
-                      <Feather name="check-circle" size={14} color={plan.color} />
-                      <Text style={[styles.ctaOutlineText, { color: plan.color, marginLeft: 6 }]}>Current Plan</Text>
+                    <View style={[styles.ctaOutline, { borderColor: pc + '50' }]}>
+                      <Feather name="check-circle" size={14} color={pc} />
+                      <Text style={[styles.ctaOutlineText, { color: pc, marginLeft: 6 }]}>Current Plan</Text>
                     </View>
                   ) : isUpgrade ? (
                     <TouchableOpacity
-                      style={[styles.ctaFilled, { backgroundColor: plan.color, opacity: processing ? 0.7 : 1 }]}
+                      style={[styles.ctaFilled, { backgroundColor: pc, opacity: processing ? 0.7 : 1 }]}
                       onPress={() => handleUpgrade(plan.id)}
                       disabled={!!processing}
                     >
                       {processing === plan.id ? (
-                        <ActivityIndicator size="small" color="#fff" />
+                        <ActivityIndicator size="small" color={onPc} />
                       ) : (
-                        <Text style={styles.ctaFilledText}>{plan.ctaLabel}</Text>
+                        <Text style={[styles.ctaFilledText, { color: onPc }]}>{plan.ctaLabel}</Text>
                       )}
                     </TouchableOpacity>
                   ) : (
@@ -313,7 +317,7 @@ export default function SubscriptionScreen({ navigation }: any) {
                   <View style={styles.featureList}>
                     {plan.features.map((f, i) => (
                       <View key={i} style={styles.featureRow}>
-                        <Feather name="check" size={14} color={plan.color} />
+                        <Feather name="check" size={14} color={pc} />
                         <Text style={[styles.featureText, { color: colors.textMain }]}>{f}</Text>
                       </View>
                     ))}
@@ -350,7 +354,7 @@ const makeStyles = (c: any, isWide: boolean) => StyleSheet.create({
   },
   brandLogoMark: {
     width: 44, height: 44, borderRadius: 12,
-    backgroundColor: '#24877B',
+    backgroundColor: '#C8551C',
     alignItems: 'center', justifyContent: 'center',
   },
   brandTitle: { fontSize: 20, fontWeight: '800', letterSpacing: -0.3 },

@@ -1,3 +1,5 @@
+import { followStudentAccent } from '../../../theme/studentAccent';
+
 export const DAYS_SHORT = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 // Full-day axis (12 AM – 11 PM) like Toddle; the grid auto-scrolls to the
 // current hour on load (see scrollToCurrentTime) so it opens on relevant hours.
@@ -8,7 +10,7 @@ export const DURATIONS = ['30 min', '45 min', '1 hr', '1.5 hrs', '2 hrs', '2.5 h
 // ── Canonical tag definitions (mirrors Toddle's tag sidebar) ──────────────
 export const ASSIGNMENT_TAGS = [
   { key: 'Live Class / Lesson', color: '#7FC29B' },
-  { key: 'Study Session',       color: '#24877B' },
+  { key: 'Study Session',       color: '#C8551C' },
   { key: 'Learning experience', color: '#7FC29B' },
   { key: 'Quick task',          color: '#7FB2D6' },
   { key: 'Worksheet / Assignment', color: '#E3B24C' },
@@ -50,3 +52,6 @@ export const DURATION_MINS: Record<string, number> = {
   '1.5 hrs': 90, '2 hrs': 120, '2.5 hrs': 150, '3 hrs': 180,
 };
 export const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+// Website Redesign, Phase 3: accent follows Light / Dark (see theme/studentAccent).
+followStudentAccent(ASSIGNMENT_TAGS, EVENT_TAGS, STUDENT_EVENT_TAGS);

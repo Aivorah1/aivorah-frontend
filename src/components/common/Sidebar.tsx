@@ -24,10 +24,11 @@ import { useFocusEffect } from '@react-navigation/native';
 import SCHOOL_ADMIN_SERVER_URL from '../../config/schoolAdminServerUrl';
 import { isAdminEmail } from '../../constants/adminEmails';
 import { SwitchProfile } from './SwitchProfile';
+import Icon from './Icon';
 
 const STUDENT_NAV_ITEMS = [
-  { label: 'Dashboard',        icon: 'grid',         screen: 'Dashboard',          group: 'MENU',    premium: false },
-  { label: 'Profile',          icon: 'user',         screen: 'Profile',            group: 'MENU',    premium: false },
+  { label: 'Dashboard',        icon: 'layout-grid',         screen: 'Dashboard',          group: 'MENU',    premium: false },
+  { label: 'Profile',          icon: 'circle-user-round',         screen: 'Profile',            group: 'MENU',    premium: false },
   { label: 'My Learning Paths',icon: 'book-open',    screen: 'LearningPaths',      group: 'MENU',    premium: false,
     // Screens reached FROM "My Learning Paths" (choose a subject → choose a
     // topic/chapter → open a lesson/quiz/tool) so the sidebar item stays
@@ -43,26 +44,26 @@ const STUDENT_NAV_ITEMS = [
       'WordWizard', 'DrawingBuddy', 'AIStoryteller', 'NCERTChapters',
     ] },
   { label: 'AI Coach',         icon: 'message-circle',screen: 'AICoach',           group: 'MENU',    premium: false },
-  { label: 'AI Teacher',       icon: 'user-check',   screen: 'AITeacher',          group: 'MENU',    premium: false },
-  { label: 'Schedule',         icon: 'calendar',     screen: 'Schedule',           group: 'MENU',    premium: false },
-  { label: 'Attendance',       icon: 'clipboard',    screen: 'StudentAttendance',  group: 'MENU',    premium: false },
-  { label: 'Timetable', icon: 'columns', screen: 'Timetable', group: 'MENU', premium: false },
-  { label: 'Resources', icon: 'folder', screen: 'Resources', group: 'MENU', premium: false },
-  { label: 'Announcements',    icon: 'volume-2',     screen: 'Announcements',      group: 'MENU',    premium: false },
+  { label: 'AI Teacher',       icon: 'mic-vocal',   screen: 'AITeacher',          group: 'MENU',    premium: false },
+  { label: 'Schedule',         icon: 'calendar-days',     screen: 'Schedule',           group: 'MENU',    premium: false },
+  { label: 'Attendance',       icon: 'calendar-check',    screen: 'StudentAttendance',  group: 'MENU',    premium: false },
+  { label: 'Timetable', icon: 'clock', screen: 'Timetable', group: 'MENU', premium: false },
+  { label: 'Resources', icon: 'folder-open', screen: 'Resources', group: 'MENU', premium: false },
+  { label: 'Announcements',    icon: 'megaphone',     screen: 'Announcements',      group: 'MENU',    premium: false },
   // Current Affairs lives inside The World & You (its "Current Affairs" tab).
-  { label: 'The World & You',  icon: 'globe',        screen: 'WorldAndYou',        group: 'MENU',    premium: false,
+  { label: 'The World & You',  icon: 'earth',        screen: 'WorldAndYou',        group: 'MENU',    premium: false,
     childScreens: ['CurrentAffairs', 'CurrentAffairsStory', 'CurrentAffairsQuiz'] },
-  { label: 'My Classes',       icon: 'layers',       screen: 'MyClasses',          group: 'MENU',    premium: false },
-  { label: 'Bedtime Stories',  icon: 'book',         screen: 'BhagavathaStories',  group: 'MENU',    premium: false },
-  { label: 'Daily Habits',     icon: 'sun',          screen: 'DailyHabits',        group: 'MENU',    premium: false },
-  { label: 'Read Aloud',       icon: 'mic',          screen: 'ReadAloud',          group: 'MENU',    premium: false },
-  { label: 'Assignments',      icon: 'check-square', screen: 'Assignments',        group: 'FOCUS',   premium: false },
+  { label: 'My Classes',       icon: 'school',       screen: 'MyClasses',          group: 'MENU',    premium: false },
+  { label: 'Bedtime Stories',  icon: 'moon-star',         screen: 'BhagavathaStories',  group: 'MENU',    premium: false },
+  { label: 'Daily Habits',     icon: 'sunrise',          screen: 'DailyHabits',        group: 'MENU',    premium: false },
+  { label: 'Read Aloud',       icon: 'book-audio',          screen: 'ReadAloud',          group: 'MENU',    premium: false },
+  { label: 'Assignments',      icon: 'clipboard-check', screen: 'Assignments',        group: 'FOCUS',   premium: false },
   { label: 'Challenges',       icon: 'target',       screen: 'Challenges',         group: 'FOCUS',   premium: false },
-  { label: 'Leaderboard',      icon: 'award',        screen: 'Leaderboard',        group: 'FOCUS',   premium: false },
-  { label: 'Progress',         icon: 'bar-chart-2',  screen: 'Progress',           group: 'FOCUS',   premium: false },
+  { label: 'Leaderboard',      icon: 'trophy',        screen: 'Leaderboard',        group: 'FOCUS',   premium: false },
+  { label: 'Progress',         icon: 'chart-no-axes-column',  screen: 'Progress',           group: 'FOCUS',   premium: false },
   { label: 'Rewards',          icon: 'gift',         screen: 'Rewards',            group: 'FOCUS',   premium: false },
   { label: 'Plans & Billing',  icon: 'credit-card',  screen: 'Subscription',       group: 'SYSTEM',  premium: false },
-  { label: 'Help Center',      icon: 'help-circle',  screen: 'HelpCenter',         group: 'SYSTEM',  premium: false },
+  { label: 'Help Center',      icon: 'life-buoy',  screen: 'HelpCenter',         group: 'SYSTEM',  premium: false },
   { label: 'Settings',         icon: 'settings',     screen: 'Settings',           group: 'SYSTEM',  premium: false },
 ];
 
@@ -262,10 +263,13 @@ export default function Sidebar({ currentScreen, onNavigate }: SidebarProps) {
   const { colors, themeMode, setThemeMode, portal } = useTheme();
   // Redesigned portals (student, teacher) share these nav/header styles.
   const isStudentPortal = !!portal; // student, teacher or parent
+  // Website Redesign, Phase 3: the Student Portal uses the text wordmark, Lucide
+  // icons and keeps its theme switch in the header (Auto lives in Settings).
+  const isStudentRole = portal === 'student';
   const { unreadCount, unreadAssignments, unreadChallenges } = useNotification();
   const { bannerAnnouncements } = useAnnouncements();
   const unreadAnnouncements = bannerAnnouncements.length;
-  const styles = useMemo(() => makeStyles(colors, isStudentPortal), [colors, isStudentPortal]);
+  const styles = useMemo(() => makeStyles(colors, isStudentPortal, isStudentRole), [colors, isStudentPortal, isStudentRole]);
   const MESSAGE_SCREENS      = ['TeacherMessages', 'ParentMessages', 'Messages'];
   const ASSIGNMENT_SCREENS   = ['Assignments', 'ParentAssignments'];
   const CHALLENGE_SCREENS    = ['Challenges', 'ParentChallenges'];
@@ -276,14 +280,14 @@ export default function Sidebar({ currentScreen, onNavigate }: SidebarProps) {
       {/* Logo */}
       <View style={[styles.logoRow, collapsed && styles.logoRowCollapsed]}>
         <TouchableOpacity style={[styles.logo, collapsed && { paddingLeft: 0 }]} activeOpacity={0.7} onPress={goToDashboard} accessibilityRole="button" accessibilityLabel="Go to your dashboard" testID="logo-home">
-          {isStudentPortal ? (
+          {isStudentRole ? null : isStudentPortal ? (
             <Feather name="book-open" size={24} color={colors.textHeading} />
           ) : (
             <View style={styles.logoMark}>
               <Feather name="zap" size={18} color="white" />
             </View>
           )}
-          {!collapsed && <Text style={styles.logoText}>Aivorah</Text>}
+          {!collapsed && <Text style={isStudentRole ? styles.wordmark : styles.logoText}>Aivorah</Text>}
         </TouchableOpacity>
         {canCollapse && (
           <TouchableOpacity
@@ -345,11 +349,15 @@ export default function Sidebar({ currentScreen, onNavigate }: SidebarProps) {
                     accessibilityLabel={collapsed ? item.label : undefined}
                   >
                     {isActive && !isStudentPortal && <View style={styles.activeBar} />}
-                    <Feather
-                      name={item.icon as any}
-                      size={17}
-                      color={isActive ? (isStudentPortal ? colors.navActiveText : colors.accentYellow) : colors.textMuted}
-                    />
+                    {isStudentRole ? (
+                      <Icon name={item.icon} size={20} color={isActive ? colors.navActiveText : colors.textMuted} />
+                    ) : (
+                      <Feather
+                        name={item.icon as any}
+                        size={17}
+                        color={isActive ? (isStudentPortal ? colors.navActiveText : colors.accentYellow) : colors.textMuted}
+                      />
+                    )}
                     {!collapsed && (
                       <Text style={[styles.navItemText, isActive && styles.navItemTextActive]}>
                         {item.label}
@@ -399,7 +407,7 @@ export default function Sidebar({ currentScreen, onNavigate }: SidebarProps) {
           remaining sidebar height regardless of content), while a long nav
           list still scrolls the whole sidebar together as one unit. */}
       <View style={styles.footer}>
-        {!collapsed && (
+        {!collapsed && !isStudentRole && (
         <View style={styles.themeBlock}>
           <Text style={styles.themeLabel}>Theme</Text>
           <View style={styles.themeRow}>
@@ -484,7 +492,9 @@ export default function Sidebar({ currentScreen, onNavigate }: SidebarProps) {
           activeOpacity={0.7}
           accessibilityLabel={collapsed ? 'Logout' : undefined}
         >
-          <Feather name="log-out" size={17} color={colors.accentRed} />
+          {isStudentRole
+            ? <Icon name="log-out" size={20} color={colors.accentRed} />
+            : <Feather name="log-out" size={17} color={colors.accentRed} />}
           {!collapsed && <Text style={[styles.navItemText, { color: colors.accentRed }]}>Logout</Text>}
         </TouchableOpacity>
       </View>
@@ -494,7 +504,7 @@ export default function Sidebar({ currentScreen, onNavigate }: SidebarProps) {
   );
 }
 
-const makeStyles = (c: AppColors, s = false) => StyleSheet.create({
+const makeStyles = (c: AppColors, s = false, st = false) => StyleSheet.create({
   container: {
     width: 260,
     backgroundColor: c.sidebarDark,
@@ -530,6 +540,10 @@ const makeStyles = (c: AppColors, s = false) => StyleSheet.create({
     backgroundColor: c.accentYellow,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  wordmark: {
+    fontSize: 27, fontWeight: '600', color: c.textHeading, letterSpacing: -0.4, paddingLeft: 4,
+    fontFamily: Platform.OS === 'web' ? '"Fraunces", Georgia, serif' : undefined,
   },
   logoText: {
     fontSize: s ? 20 : 18,
@@ -590,9 +604,10 @@ const makeStyles = (c: AppColors, s = false) => StyleSheet.create({
     gap: spacing.md,
     paddingVertical: 10,
     paddingHorizontal: spacing.md,
-    borderRadius: radius.sm,
+    borderRadius: st ? 12 : radius.sm,
     marginBottom: 2,
     position: 'relative',
+    ...(st ? { minHeight: 42 } : null),
   },
   navItemCollapsed: {
     justifyContent: 'center',
@@ -610,7 +625,7 @@ const makeStyles = (c: AppColors, s = false) => StyleSheet.create({
     borderTopRightRadius: 4,
     borderBottomRightRadius: 4,
   },
-  navItemText: { fontSize: 14, fontWeight: '500', color: s ? c.textMain : c.textMuted, flex: 1, ...(s ? { fontFamily: fonts.nav } : null) },
+  navItemText: { fontSize: st ? 15 : 14, fontWeight: '500', color: s ? c.textMain : c.textMuted, flex: 1, ...(s ? { fontFamily: fonts.nav } : null) },
   navItemTextActive: { color: s ? c.navActiveText : c.accentYellow, ...(s ? { fontWeight: '700' as const } : null) },
   navBadge: {
     minWidth: 18, height: 18, borderRadius: 9,

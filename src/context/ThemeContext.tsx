@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useMemo, ReactNo
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 import { darkColors, lightColors, studentDarkColors, studentLightColors, teacherDarkColors, teacherLightColors, parentDarkColors, parentLightColors, schoolAdminDarkColors, schoolAdminLightColors, companyAdminDarkColors, companyAdminLightColors, AppColors } from '../theme';
+import { applyStudentAccent } from '../theme/studentAccent';
 import { applyDocumentChrome } from '../utils/documentChrome';
 
 export type ThemeMode = 'dark' | 'light' | 'auto';
@@ -104,11 +105,13 @@ export function useTheme() {
 // and screen state.
 const STUDENT_FONTS_ID = 'aivorah-student-fonts';
 const STUDENT_CSS_ID = 'aivorah-student-css';
-const STUDENT_FONTS_HREF = 'https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Karla:wght@400;500;600;700&family=Lora:wght@400;500;600&family=Quicksand:wght@500;600;700&family=Sora:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap';
+// Student Portal: Fraunces headings + DM Sans UI (Website Redesign, Phase 3). The
+// other portals' families stay in the list until their own phases.
+const STUDENT_FONTS_HREF = 'https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Baloo+2:wght@500;600;700;800&family=Karla:wght@400;500;600;700&family=Lora:wght@400;500;600&family=Quicksand:wght@500;600;700&family=Sora:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap';
 const STUDENT_CSS = [
-  'body[data-av-portal="student"]{--av-heading:"Baloo 2";--av-body:"Karla";--av-nav:"Sora";--av-card:"Quicksand";--av-reading:"Lora";font-variant-numeric:tabular-nums}',
-  'body[data-av-portal="student"] :focus-visible{outline:2px solid var(--av-focus,#075D75)!important;outline-offset:2px}',
-  'body[data-av-portal="student"][data-av-theme="dark"]{--av-focus:#9ADBE9}',
+  'body[data-av-portal="student"]{--av-heading:"Fraunces";--av-body:"DM Sans";--av-nav:"DM Sans";--av-card:"DM Sans";--av-reading:"Lora";font-variant-numeric:tabular-nums}',
+  'body[data-av-portal="student"] :focus-visible{outline:3px solid var(--av-focus,#1D5DB5)!important;outline-offset:2px}',
+  'body[data-av-portal="student"][data-av-theme="dark"]{--av-focus:#8DD1FF}',
   'body[data-av-portal="student"] input::placeholder,body[data-av-portal="student"] textarea::placeholder{opacity:.75}',
   // Teacher Portal: Sora throughout, indigo / periwinkle focus ring.
   'body[data-av-portal="teacher"]{--av-heading:"Sora";--av-body:"Sora";--av-nav:"Sora";--av-card:"Sora";--av-reading:"Lora";font-variant-numeric:tabular-nums}',
@@ -178,6 +181,8 @@ const PORTAL_COLORS = {
 function PortalThemeProvider({ portal, children }: { portal: 'student' | 'teacher' | 'parent' | 'schoolAdmin' | 'companyAdmin'; children: ReactNode }) {
   const parent = useContext(ThemeContext);
   const colors = parent.isDark ? PORTAL_COLORS[portal].dark : PORTAL_COLORS[portal].light;
+  // Student screens' accent constants follow Light / Dark; set before children render.
+  if (portal === 'student') applyStudentAccent(parent.isDark);
 
   useEffect(() => {
     if (Platform.OS !== 'web' || typeof document === 'undefined') return;
