@@ -1,20 +1,24 @@
 import React from 'react';
-import { View, Text } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { View, Text, TouchableOpacity, Platform } from 'react-native';
+import Icon from '../../../../components/common/Icon';
 import type { AppColors } from '../../../../theme';
+import { studentShapeColors } from '../../../../theme';
 import { formatStudyTime } from '../utils/dashboardHelpers';
-import DonutChart from './common/DonutChart';
 
+// Class Progress (Website Redesign, Phase 4): three coloured bars — Learning
+// Path, Assignments, Challenges — with their real percentages first, then the
+// class's study time (overall, lowest / typical / highest) underneath.
 export default function ClassProgressCard({
-  colors, gold, ringTrack, totalStudents,
+  colors, isDark = false, totalStudents,
   classProgressPct, medianCombinedMins, minCombinedMins, maxCombinedMins,
   avgProgress, totalAssignmentsSubmitted, totalAssignmentsAssigned, assignSubmitPct,
   totalChallengesCompleted, totalChallengesAssigned, challCompletePct,
-  styles,
+  styles, onOpen,
 }: {
   colors: AppColors;
-  gold: string;
-  ringTrack: string;
+  isDark?: boolean;
+  gold?: string;
+  ringTrack?: string;
   totalStudents: number;
   classProgressPct: number;
   medianCombinedMins: number;
@@ -28,86 +32,65 @@ export default function ClassProgressCard({
   totalChallengesAssigned: number;
   challCompletePct: number;
   styles: any;
+  /** Opens Student Progress (the chevron in the card header). */
+  onOpen?: () => void;
 }) {
+  const shapes = isDark ? studentShapeColors.dark : studentShapeColors.light;
+  const bars = [
+    { icon: 'map', label: 'Learning Path', value: `${avgProgress}%`, pct: avgProgress, color: shapes.green },
+    { icon: 'clipboard-check', label: 'Assignments', value: `${totalAssignmentsSubmitted}/${totalAssignmentsAssigned} · ${assignSubmitPct}%`, pct: assignSubmitPct, color: shapes.blue },
+    { icon: 'target', label: 'Challenges', value: `${totalChallengesCompleted}/${totalChallengesAssigned} · ${challCompletePct}%`, pct: challCompletePct, color: shapes.orange },
+  ];
+  const motion = Platform.OS === 'web' ? ({ transitionProperty: 'width', transitionDuration: '500ms' } as any) : null;
+
   return (
-    <View style={[styles.card, styles.flex1]}>
-      <View style={styles.cardHeader}>
-        <Feather name="activity" size={15} color={colors.accentCyan} />
+    <View style={[styles.card, styles.topCard ?? styles.flex1]}>
+      <TouchableOpacity style={styles.cardHeader} onPress={onOpen} disabled={!onOpen} activeOpacity={0.75}
+        accessibilityRole={onOpen ? 'button' : undefined} accessibilityLabel={onOpen ? 'Class Progress, open Student Progress' : undefined}>
+        <Icon name="chart-no-axes-column" size={20} color={colors.accentOrange} />
         <Text style={styles.cardTitle}>Class Progress</Text>
+        {onOpen && <Icon name="chevron-right" size={20} color={colors.textMuted} />}
+      </TouchableOpacity>
+
+      <View style={{ gap: 14 }}>
+        {bars.map((b) => (
+          <View key={b.label} style={{ gap: 6 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Icon name={b.icon} size={15} color={colors.textMuted} />
+              <Text style={{ flex: 1, fontSize: 14, fontWeight: '600', color: colors.textMain }}>{b.label}</Text>
+              <Text style={{ fontSize: 13.5, fontWeight: '700', color: colors.textHeading }}>{b.value}</Text>
+            </View>
+            <View style={{ height: 10, borderRadius: 999, backgroundColor: colors.borderColor, overflow: 'hidden' }}
+              accessibilityRole="progressbar" accessibilityValue={{ min: 0, max: 100, now: b.pct }}>
+              <View style={[{ height: '100%', borderRadius: 999, width: `${Math.max(b.pct, 2)}%` as any, backgroundColor: b.color }, motion]} />
+            </View>
+          </View>
+        ))}
       </View>
 
-      {/* Donut + study time */}
-      <View style={styles.donutRow}>
-        <View style={styles.donutWrap}>
-          <DonutChart progress={classProgressPct / 100} size={72} color={gold} trackColor={ringTrack} />
-          <View style={styles.donutCenter}>
-            <Text style={[styles.donutPct, { color: gold }]}>{classProgressPct}%</Text>
-          </View>
+      <View style={{ marginTop: 16, paddingTop: 12, borderTopWidth: 1, borderTopColor: colors.borderColor, gap: 8 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+          <Text style={{ fontSize: 20, fontWeight: '700', color: colors.textHeading }}>{classProgressPct}%</Text>
+          <Text style={{ fontSize: 12.5, color: colors.textMuted }}>overall</Text>
+          <Text style={{ fontSize: 20, fontWeight: '700', color: colors.textHeading, marginLeft: 10 }}>{formatStudyTime(medianCombinedMins)}</Text>
+          <Text style={{ fontSize: 12.5, color: colors.textMuted }}>Typical Study Time</Text>
         </View>
-        <View style={styles.donutStats}>
-          <Text style={styles.donutStatVal}>{formatStudyTime(medianCombinedMins)}</Text>
-          <Text style={styles.donutStatLabel}>Typical Study Time</Text>
-        </View>
-      </View>
-
-      {totalStudents > 1 && (
-        <View style={{ flexDirection: 'row', marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: colors.borderColor }}>
-          <View style={{ flex: 1, alignItems: 'center' }}>
-            <Text style={{ fontSize: 13, fontWeight: '800', color: colors.accentRed }}>{formatStudyTime(minCombinedMins)}</Text>
-            <Text style={{ fontSize: 9, color: colors.textDim, fontWeight: '600', marginTop: 1 }}>Lowest</Text>
+        {totalStudents > 1 && (
+          <View style={{ flexDirection: 'row' }}>
+            <View style={{ flex: 1, alignItems: 'center' }}>
+              <Text style={{ fontSize: 13, fontWeight: '800', color: colors.accentRed }}>{formatStudyTime(minCombinedMins)}</Text>
+              <Text style={{ fontSize: 11, color: colors.textDim, fontWeight: '600', marginTop: 1 }}>Lowest</Text>
+            </View>
+            <View style={{ flex: 1, alignItems: 'center', borderLeftWidth: 1, borderRightWidth: 1, borderColor: colors.borderColor }}>
+              <Text style={{ fontSize: 13, fontWeight: '800', color: colors.textHeading }}>{formatStudyTime(medianCombinedMins)}</Text>
+              <Text style={{ fontSize: 11, color: colors.textDim, fontWeight: '600', marginTop: 1 }}>Typical</Text>
+            </View>
+            <View style={{ flex: 1, alignItems: 'center' }}>
+              <Text style={{ fontSize: 13, fontWeight: '800', color: colors.accentGreen }}>{formatStudyTime(maxCombinedMins)}</Text>
+              <Text style={{ fontSize: 11, color: colors.textDim, fontWeight: '600', marginTop: 1 }}>Highest</Text>
+            </View>
           </View>
-          <View style={{ flex: 1, alignItems: 'center', borderLeftWidth: 1, borderRightWidth: 1, borderColor: colors.borderColor }}>
-            <Text style={{ fontSize: 13, fontWeight: '800', color: gold }}>{formatStudyTime(medianCombinedMins)}</Text>
-            <Text style={{ fontSize: 9, color: colors.textDim, fontWeight: '600', marginTop: 1 }}>Typical</Text>
-          </View>
-          <View style={{ flex: 1, alignItems: 'center' }}>
-            <Text style={{ fontSize: 13, fontWeight: '800', color: colors.accentGreen }}>{formatStudyTime(maxCombinedMins)}</Text>
-            <Text style={{ fontSize: 9, color: colors.textDim, fontWeight: '600', marginTop: 1 }}>Highest</Text>
-          </View>
-        </View>
-      )}
-
-      {/* 3 progress bars */}
-      <View style={styles.progressBars}>
-        {/* Learning Path */}
-        <View style={styles.progressItem}>
-          <View style={styles.progressLabelRow}>
-            <Feather name="map" size={11} color={gold} />
-            <Text style={styles.progressLabel}>Learning Path</Text>
-            <Text style={[styles.progressPct, { color: gold }]}>{avgProgress}%</Text>
-          </View>
-          <View style={[styles.progressTrack, { backgroundColor: colors.borderColor }]}>
-            <View style={[styles.progressFill, { width: `${avgProgress}%` as any, backgroundColor: gold }]} />
-          </View>
-        </View>
-
-        {/* Assignments */}
-        <View style={styles.progressItem}>
-          <View style={styles.progressLabelRow}>
-            <Feather name="edit-3" size={11} color="#0E6E86" />
-            <Text style={styles.progressLabel}>Assignments</Text>
-            <Text style={[styles.progressPct, { color: '#0E6E86' }]}>
-              {totalAssignmentsSubmitted}/{totalAssignmentsAssigned} · {assignSubmitPct}%
-            </Text>
-          </View>
-          <View style={[styles.progressTrack, { backgroundColor: colors.borderColor }]}>
-            <View style={[styles.progressFill, { width: `${assignSubmitPct}%` as any, backgroundColor: '#0E6E86' }]} />
-          </View>
-        </View>
-
-        {/* Challenges */}
-        <View style={styles.progressItem}>
-          <View style={styles.progressLabelRow}>
-            <Feather name="target" size={11} color={gold} />
-            <Text style={styles.progressLabel}>Challenges</Text>
-            <Text style={[styles.progressPct, { color: gold }]}>
-              {totalChallengesCompleted}/{totalChallengesAssigned} · {challCompletePct}%
-            </Text>
-          </View>
-          <View style={[styles.progressTrack, { backgroundColor: colors.borderColor }]}>
-            <View style={[styles.progressFill, { width: `${challCompletePct}%` as any, backgroundColor: gold }]} />
-          </View>
-        </View>
+        )}
       </View>
     </View>
   );

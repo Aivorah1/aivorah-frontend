@@ -1,13 +1,19 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import Icon from '../../../../components/common/Icon';
 import { spacing } from '../../../../theme';
+import { CardShape } from './common/CardShape';
 import type { AppColors } from '../../../../theme';
 import type { RecentActivityItem } from '../types';
 
 export default function StudentOverviewCard({
   colors, gold, totalStudents, activeToday, needsAttentionCount, recentStudents, styles, navigation,
+  classesCount, isDark = false,
 }: {
+  /** Classes this teacher teaches (Website Redesign, Phase 4: shown beside Total Students). */
+  classesCount?: number;
+  isDark?: boolean;
   colors: AppColors;
   gold: string;
   totalStudents: number;
@@ -18,13 +24,25 @@ export default function StudentOverviewCard({
   navigation: any;
 }) {
   return (
-    <TouchableOpacity style={[styles.card, styles.flex1]} activeOpacity={0.85} onPress={() => navigation.navigate('TeacherStudents' as any)}>
+    <TouchableOpacity style={[styles.card, styles.topCard ?? styles.flex1]} activeOpacity={0.85} onPress={() => navigation.navigate('TeacherStudents' as any)}>
+      <CardShape tone="yellow" corner="bottom-right" isDark={isDark} />
       <View style={styles.cardHeader}>
-        <Feather name="users" size={15} color={gold} />
+        <Icon name="users" size={20} color={colors.accentOrange} />
         <Text style={styles.cardTitle}>Student Overview</Text>
+        <Icon name="chevron-right" size={20} color={colors.textMuted} />
       </View>
-      <Text style={styles.bigNumber}>{totalStudents}</Text>
-      <Text style={[styles.changeText, { color: colors.accentGreen }]}>Total Students</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 28 }}>
+        <View>
+          <Text style={styles.bigNumber}>{totalStudents}</Text>
+          <Text style={[styles.changeText, { color: colors.accentGreen }]}>Total Students</Text>
+        </View>
+        {classesCount != null && (
+          <View>
+            <Text style={styles.bigNumber}>{classesCount}</Text>
+            <Text style={[styles.changeText, { color: colors.textMuted }]}>{classesCount === 1 ? 'Class' : 'Classes'}</Text>
+          </View>
+        )}
+      </View>
       <Text style={styles.overviewLabel}>Enrolled in your class</Text>
       <View style={styles.overviewDivider} />
       <View style={styles.overviewRow}>

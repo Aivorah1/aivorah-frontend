@@ -47,6 +47,8 @@ interface HeaderProps {
   onSearchChange?: (text: string) => void;
   onNotificationPress?: () => void;
   notificationCount?: number;
+  /** Extra header actions, shown before the notification bell (Website Redesign, Phase 4). */
+  actions?: React.ReactNode;
 }
 
 export default function Header({
@@ -60,6 +62,7 @@ export default function Header({
   onSearchChange,
   onNotificationPress,
   notificationCount = 0,
+  actions,
 }: HeaderProps) {
   const { isMobile } = useResponsive();
   const { colors, portal } = useTheme();
@@ -68,7 +71,7 @@ export default function Header({
   // Website Redesign, Phase 3 (Student Portal only): sun/moon switch in the
   // header; on phones the top row reads Aivorah → actions → switch → menu and
   // the page title sits on its own row below.
-  const isStudentRole = portal === 'student';
+  const isStudentRole = portal === 'student' || portal === 'teacher'; // redesigned portals (Phase 3 student, Phase 4 teacher)
   const studentMobile = isStudentRole && isMobile;
   const { user, updateUser, logout } = useAuth();
   const navigation = useNavigation<any>();
@@ -273,6 +276,7 @@ const [editingName, setEditingName] = useState(false);
   );
   const rightEl = (
         <View style={styles.right}>
+          {!studentMobile && actions}
           {showSearch && (
             <View style={styles.searchWrapper}>
               <Feather name="search" size={14} color={colors.textMuted} style={styles.searchIcon} />
@@ -723,7 +727,14 @@ const [editingName, setEditingName] = useState(false);
           <Text style={styles.wordmark} accessibilityRole="header">Aivorah</Text>
           {rightEl}
         </View>
-        {leftEl}
+        {/* Page actions sit beside the title on phones, so the top row keeps
+            its menu button (Website Redesign, Phase 4). */}
+        {actions ? (
+          <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10 }}>
+            <View style={{ flex: 1, minWidth: 0 }}>{leftEl}</View>
+            {actions}
+          </View>
+        ) : leftEl}
       </View>
     );
   }
@@ -751,8 +762,10 @@ const makeStyles = (c: AppColors, s = false, st = false, sm = false) => StyleShe
     backgroundColor: c.bgDark,
     borderBottomWidth: 1,
     borderBottomColor: c.borderColor,
+    // Redesigned portals: controls wrap below the title instead of crushing it.
+    ...(st ? { flexWrap: 'wrap', rowGap: 10, columnGap: 16 } : null),
   },
-  left: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  left: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, ...(st ? { flexShrink: 1, flexGrow: 1, flexBasis: 360, minWidth: 0 } : null) },
   menuBtn: {
     width: s ? 44 : 36, height: s ? 44 : 36, borderRadius: s ? 12 : radius.sm,
     backgroundColor: sm ? 'transparent' : c.cardDark, alignItems: 'center', justifyContent: 'center',
@@ -807,7 +820,7 @@ const makeStyles = (c: AppColors, s = false, st = false, sm = false) => StyleShe
   roleBadgeTextAdmin: {
     color: c.accentYellow,
   },
-  right: { flexDirection: 'row', alignItems: 'center', gap: sm ? 6 : spacing.md },
+  right: { flexDirection: 'row', alignItems: 'center', gap: sm ? 6 : spacing.md, ...(st ? { flexShrink: 0, gap: sm ? 6 : 10 } : null) },
   searchWrapper: {
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: c.cardDark, borderWidth: 1, borderColor: c.borderColor,

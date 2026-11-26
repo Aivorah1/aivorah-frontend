@@ -5,8 +5,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import type { AppColors } from '../../../../theme';
 import type { Challenge } from '../services/teacherChallengesService';
 import type { makeStyles } from '../styles';
+import { followStudentAccent } from '../../../../theme/studentAccent';
 
-const GOLD = '#0E6E86';
+// Website Redesign, Phase 4: the accent follows Light / Dark (theme/studentAccent).
+let GOLD = '#0E6E86';
+followStudentAccent((a) => { GOLD = a; });
 
 const DIFF_COLOR = (d: string, c: AppColors) =>
   d === 'Easy' ? c.accentGreen : d === 'Hard' ? c.accentRed : c.accentYellow;
@@ -18,8 +21,8 @@ const DIFF_COLOR = (d: string, c: AppColors) =>
 // so a stable fallback color works for any value, present or future.
 function categoryColor(category: string): string {
   const known: Record<string, string> = {
-    'Chapter Quiz':     '#0E6E86',
-    'School Challenge': '#0E6E86',
+    'Chapter Quiz':     GOLD,
+    'School Challenge': GOLD,
   };
   return known[category] ?? GOLD;
 }
@@ -40,7 +43,7 @@ export default function ChallengeCard({ ch, colors, isDark, styles, onAssign, as
   const titleColor = isDark ? colors.textMain  : '#16241B';
   const descColor  = isDark ? colors.textMuted : '#5C6F62';
   const dimColor   = isDark ? colors.textDim   : '#7C8A82';
-  const xpColor    = isDark ? colors.accentYellow : '#0E6E86';
+  const xpColor    = isDark ? colors.accentYellow : colors.primary;
   const assignBg   = isDark ? 'transparent' : '#FFFFFF';
   const allAssigned = eligibleCount > 0 && assignedCount >= eligibleCount;
 

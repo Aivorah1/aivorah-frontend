@@ -12,6 +12,7 @@
  * An unknown name falls back to Feather so nothing disappears.
  */
 import React from 'react';
+import { Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import type { LucideIcon } from 'lucide-react-native';
 import ArrowLeft from 'lucide-react-native/icons/arrow-left';
@@ -79,6 +80,30 @@ import User from 'lucide-react-native/icons/user';
 import Users from 'lucide-react-native/icons/users';
 import X from 'lucide-react-native/icons/x';
 import Zap from 'lucide-react-native/icons/zap';
+// Website Redesign, Phase 4 (Teacher Portal)
+import FileText from 'lucide-react-native/icons/file-text';
+import ImageIcon from 'lucide-react-native/icons/image';
+import CloudUpload from 'lucide-react-native/icons/cloud-upload';
+import MapIcon from 'lucide-react-native/icons/map';
+import Briefcase from 'lucide-react-native/icons/briefcase';
+import Eye from 'lucide-react-native/icons/eye';
+import ImagePlus from 'lucide-react-native/icons/image-plus';
+import Replace from 'lucide-react-native/icons/replace';
+import Trash from 'lucide-react-native/icons/trash';
+import Move from 'lucide-react-native/icons/move';
+import Upload from 'lucide-react-native/icons/upload';
+import Cpu from 'lucide-react-native/icons/cpu';
+import CirclePlus from 'lucide-react-native/icons/circle-plus';
+import FileUp from 'lucide-react-native/icons/file-up';
+import FileStack from 'lucide-react-native/icons/file-stack';
+import SquarePen from 'lucide-react-native/icons/square-pen';
+import Library from 'lucide-react-native/icons/library';
+import UserPlus from 'lucide-react-native/icons/user-plus';
+import LinkIcon from 'lucide-react-native/icons/link';
+import ClipboardList from 'lucide-react-native/icons/clipboard-list';
+import Printer from 'lucide-react-native/icons/printer';
+import Copy from 'lucide-react-native/icons/copy';
+import EyeOff from 'lucide-react-native/icons/eye-off';
 
 const LUCIDE: Record<string, LucideIcon> = {
   // Student Portal destinations
@@ -148,6 +173,29 @@ const LUCIDE: Record<string, LucideIcon> = {
   zap: Zap,
   'message-square': MessageSquare,
   'timer-reset': TimerReset,
+  'file-text': FileText,
+  'image': ImageIcon,
+  'cloud-upload': CloudUpload,
+  'map': MapIcon,
+  'briefcase': Briefcase,
+  'eye': Eye,
+  'image-plus': ImagePlus,
+  'replace': Replace,
+  'trash': Trash,
+  'move': Move,
+  'upload': Upload,
+  'cpu': Cpu,
+  'circle-plus': CirclePlus,
+  'file-up': FileUp,
+  'file-stack': FileStack,
+  'square-pen': SquarePen,
+  'library': Library,
+  'user-plus': UserPlus,
+  'link': LinkIcon,
+  'clipboard-list': ClipboardList,
+  'printer': Printer,
+  'copy': Copy,
+  'eye-off': EyeOff,
 };
 
 /** Feather names used in the app → their Lucide equivalent. */
@@ -170,6 +218,13 @@ const FEATHER_TO_LUCIDE: Record<string, string> = {
   'refresh-cw': 'rotate-ccw',
   'check-circle': 'circle-check',
   'x-circle': 'circle-x',
+  // Teacher Portal (Phase 4)
+  'upload-cloud': 'cloud-upload',
+  'trash-2': 'trash',
+  'plus-circle': 'circle-plus',
+  'edit': 'square-pen',
+  'external-link': 'external-link',
+  'log-out': 'log-out',
 };
 
 export type IconProps = {
@@ -188,7 +243,11 @@ export default function Icon({ name, size = 20, color = '#302117', strokeWidth =
     ? { accessible: true, accessibilityRole: 'image' as const, accessibilityLabel }
     : { accessibilityElementsHidden: true, importantForAccessibility: 'no-hide-descendants' as const };
   if (!Glyph) return <Feather name={name as any} size={size} color={color} style={style} {...a11y} />;
-  return <Glyph size={size} color={color} strokeWidth={strokeWidth} style={style} {...(a11y as any)} />;
+  // Lucide draws a plain <svg> on web, which only understands ARIA attributes.
+  const svgA11y = Platform.OS === 'web'
+    ? (accessibilityLabel ? { role: 'img', 'aria-label': accessibilityLabel } : { 'aria-hidden': true })
+    : a11y;
+  return <Glyph size={size} color={color} strokeWidth={strokeWidth} style={style} {...(svgA11y as any)} />;
 }
 
 /** Whether `name` renders through Lucide (mainly for tests). */

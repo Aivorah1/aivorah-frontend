@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { View, Animated, Easing, Platform, AccessibilityInfo } from 'react-native';
-import { studentShapeColors } from '../../../../../theme';
+import { studentShapeColors } from '../../theme';
 
-// The homepage's coloured shapes, peeking out behind the dashboard's top cards
-// (Website Redesign, Phase 3). They drift into place once; with reduced
+// The homepage's coloured shapes, peeking out behind dashboard cards
+// (Website Redesign: Student Phase 3, Teacher Phase 4). They drift into place once; with reduced
 // motion they are simply there. Decorative only — hidden from screen readers.
 export function WelcomeShapes({ isDark }: { isDark: boolean }) {
   const sh = isDark ? studentShapeColors.dark : studentShapeColors.light;

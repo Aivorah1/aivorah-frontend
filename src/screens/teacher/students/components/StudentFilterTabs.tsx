@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import type { StudentStats } from '../types';
+import { useTheme } from '../../../../context/ThemeContext';
 
 interface Props {
   gradeTabs: string[];
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function StudentFilterTabs({ gradeTabs, activeTab, setActiveTab, stats, styles }: Props) {
+  const { colors } = useTheme();
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabsScroll} contentContainerStyle={styles.tabs}>
       {gradeTabs.map((tab) => (
@@ -29,7 +31,7 @@ export default function StudentFilterTabs({ gradeTabs, activeTab, setActiveTab, 
             <View style={[styles.tabBadge, { backgroundColor: '#5A8A70' }]}><Text style={styles.tabBadgeText}>{stats.activeToday}</Text></View>
           )}
           {tab === 'Inactive' && stats.inactive > 0 && (
-            <View style={[styles.tabBadge, { backgroundColor: '#0E6E86' }]}><Text style={styles.tabBadgeText}>{stats.inactive}</Text></View>
+            <View style={[styles.tabBadge, { backgroundColor: colors.primary }]}><Text style={styles.tabBadgeText}>{stats.inactive}</Text></View>
           )}
           {tab === 'Streak Risk' && stats.streakRisk > 0 && (
             <View style={[styles.tabBadge, { backgroundColor: '#C4836A' }]}><Text style={styles.tabBadgeText}>{stats.streakRisk}</Text></View>

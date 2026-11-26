@@ -1,4 +1,5 @@
 import type { StepType, TaskStep } from './types';
+import { followStudentAccent } from '../../../theme/studentAccent';
 
 export const TABS = ['All', 'Active', 'Completed'];
 // Library filter: Prepare Worksheet documents shared by other teachers of the school.
@@ -103,7 +104,9 @@ export function subjectLabel(subject: string, curriculum?: string | null, grade?
 
 export const TYPES = ['assignment', 'quiz'];
 // Aivorah gold — matches the gold theme applied across teacher/parent/student screens
-export const AIVORAH_GOLD = '#0E6E86';
+// Website Redesign, Phase 4: the accent follows Light / Dark (theme/studentAccent).
+export let AIVORAH_GOLD = '#0E6E86';
+followStudentAccent((a) => { AIVORAH_GOLD = a; });
 export const SUBJECT_COLORS: Record<string, string> = {
   Mathematics:    AIVORAH_GOLD,
   Science:        AIVORAH_GOLD,
@@ -162,3 +165,5 @@ export const STEP_COLORS: Record<StepType, string> = {
   digital_awareness: AIVORAH_GOLD, tech_skill_practice: AIVORAH_GOLD, digital_citizenship: AIVORAH_GOLD,
   movement_exploration: AIVORAH_GOLD, skill_practice: AIVORAH_GOLD, physical_reflection: AIVORAH_GOLD,
 };
+
+followStudentAccent(SUBJECT_COLORS);

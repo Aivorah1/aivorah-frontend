@@ -265,7 +265,7 @@ export default function Sidebar({ currentScreen, onNavigate }: SidebarProps) {
   const isStudentPortal = !!portal; // student, teacher or parent
   // Website Redesign, Phase 3: the Student Portal uses the text wordmark, Lucide
   // icons and keeps its theme switch in the header (Auto lives in Settings).
-  const isStudentRole = portal === 'student';
+  const isStudentRole = portal === 'student' || portal === 'teacher'; // redesigned portals (Phase 3 student, Phase 4 teacher)
   const { unreadCount, unreadAssignments, unreadChallenges } = useNotification();
   const { bannerAnnouncements } = useAnnouncements();
   const unreadAnnouncements = bannerAnnouncements.length;

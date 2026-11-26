@@ -204,6 +204,14 @@ export default function TeacherAssignmentsScreen({ navigation, route }: any) {
     setShowModal(true);
     addPreparedWorksheet(() => preparedWorksheetFile(doc.id));
   }
+  // Arriving from the dashboard's "+ New Assignment" (route param, once per click).
+  const openNew = route?.params?.openNew;
+  useFocusEffect(useCallback(() => {
+    if (!openNew) return;
+    navigation.setParams({ openNew: undefined });
+    setShowModal(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per click (nonce)
+  }, [openNew]));
   // Arriving from Prepare Worksheet > Assign (route param, once per click).
   const assignWorksheet = route?.params?.assignWorksheet;
   useFocusEffect(useCallback(() => {
@@ -781,6 +789,7 @@ export default function TeacherAssignmentsScreen({ navigation, route }: any) {
             quiz={interactiveQuiz}
             setQuiz={setInteractiveQuiz}
             onClose={closeInteractivePreviewModal}
+            trail={['Assignments', 'New', ...(editingBulkItemId ? ['Bulk Upload'] : createMode === 'upload' ? ['Upload Worksheet'] : [])]}
           />
         )}
 
@@ -803,7 +812,7 @@ export default function TeacherAssignmentsScreen({ navigation, route }: any) {
         <Modal visible={showModal && !showInteractivePreview && !studentPreviewHtml} animationType="slide" transparent onRequestClose={() => { setShowModal(false); resetForm(); }}>
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
             <View style={[styles.modalOverlay, createMode === 'choose' && { justifyContent: 'center' }]}>
-              <View style={[styles.modalSheet, createMode === 'choose' && { maxHeight: undefined, borderRadius: 20 }]}>
+              <View style={[styles.modalSheet, createMode === 'choose' && { maxHeight: undefined, borderRadius: 22, maxWidth: 920 }]}>
                 <View style={styles.modalHeader}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 }}>
                     {createMode !== 'choose' && (

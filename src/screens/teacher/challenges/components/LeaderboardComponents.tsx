@@ -6,8 +6,11 @@ import Svg, { Polyline, Circle } from 'react-native-svg';
 import type { AppColors } from '../../../../theme';
 import type { LeaderEntry } from '../services/teacherChallengesService';
 import type { makeStyles } from '../styles';
+import { followStudentAccent } from '../../../../theme/studentAccent';
 
-const GOLD = '#0E6E86';
+// Website Redesign, Phase 4: the accent follows Light / Dark (theme/studentAccent).
+let GOLD = '#0E6E86';
+followStudentAccent((a) => { GOLD = a; });
 const MEDAL_COLORS = ['#9ADBE9', '#94a3b8', '#cd7c2c'];
 const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 

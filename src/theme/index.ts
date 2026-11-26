@@ -233,15 +233,11 @@ export const studentShapeColors = {
   dark: { green: '#6A9F3E', yellow: '#DCA928', orange: '#C85F24', blue: '#477EAB' },
 };
 
-// Teacher: same palette, quieter borders for denser tables.
-export const teacherLightColors: typeof darkColors = {
-  ...sharedLight,
-  borderColor: '#E1E7EB',
-};
-export const teacherDarkColors: typeof darkColors = {
-  ...sharedDark,
-  borderColor: '#2A3D4B',
-};
+// Teacher (Website Redesign, Phase 4): the same Aivorah palette as the
+// Student Portal — warm ivory / warm white / espresso / burnt orange in light,
+// ink navy / slate / warm cream / pale blue in dark, sand / blue-slate borders.
+export const teacherLightColors: typeof darkColors = { ...studentLightColors };
+export const teacherDarkColors: typeof darkColors = { ...studentDarkColors };
 
 // ── School Admin palette (berry / fern / denim / clay / rose / eucalyptus) ──
 // Calm cream + white (light) and deep navy + blue-slate (dark) surfaces; the

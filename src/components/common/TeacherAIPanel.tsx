@@ -14,7 +14,9 @@ import { spacing, radius } from '../../theme';
 import SERVER_URL from '../../config/serverUrl';
 import { resolveStudentStatus, STATUS_META } from '../../utils/studentStatus';
 import { normalizeCurriculum } from '../../utils/curriculum';
+import { followStudentAccent } from '../../theme/studentAccent';
 
+// Website Redesign, Phase 4: the accent follows Light / Dark (theme/studentAccent).
 const P = {
   rose:  '#0E6E86',
   green: '#0E6E86',
@@ -23,6 +25,7 @@ const P = {
   teal:  '#0E6E86',
   slate: '#0E6E86',
 };
+followStudentAccent(P);
 
 const PANEL_WIDTH = 340;
 

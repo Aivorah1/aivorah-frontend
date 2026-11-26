@@ -4,7 +4,7 @@
 // OnboardingStudentBoxes.integration.test.tsx).
 
 import React from 'react';
-import { render, screen, waitFor, userEvent, act } from '@testing-library/react-native';
+import { render, screen, waitFor, userEvent, act, fireEvent } from '@testing-library/react-native';
 import TeacherDashboardScreen from '../../TeacherDashboardScreen';
 
 jest.mock('@react-navigation/native', () => ({
@@ -76,11 +76,21 @@ beforeEach(() => {
 });
 
 describe('TeacherDashboardScreen', () => {
-  test('shows a loading spinner before data arrives, then the real greeting and class size', async () => {
+  test('shows a loading spinner before data arrives, then the dashboard header and real class size', async () => {
     await render(<TeacherDashboardScreen navigation={navigation} />);
 
-    await waitFor(() => expect(screen.getAllByText(/Priya/).length).toBeGreaterThan(0), { timeout: 10000 });
-    expect(screen.getByText(/Your Class · 2 Students/)).toBeTruthy();
+    // Website Redesign, Phase 4: the board's header and the real counts in Student Overview.
+    await waitFor(() => expect(screen.getByText('Teacher Dashboard')).toBeTruthy(), { timeout: 10000 });
+    expect(screen.getByText("Welcome back! Here's an overview of your classes, student progress, and AI teaching insights.")).toBeTruthy();
+    expect(screen.getByText('Total Students')).toBeTruthy();
+    expect(screen.getAllByText('2').length).toBeGreaterThan(0);
+  }, 15000);
+
+  test('+ New Assignment opens the New Assignment chooser on Assignments', async () => {
+    await render(<TeacherDashboardScreen navigation={navigation} />);
+    await waitFor(() => expect(screen.getByText('Teacher Dashboard')).toBeTruthy(), { timeout: 10000 });
+    await fireEvent.press(screen.getByTestId('dashboard-new-assignment'));
+    expect(navigation.navigate).toHaveBeenCalledWith('TeacherAssignments', expect.objectContaining({ openNew: expect.any(Number) }));
   }, 15000);
 
   test('Student Overview card shows the real total/active/needs-attention counts', async () => {
@@ -101,14 +111,16 @@ describe('TeacherDashboardScreen', () => {
     global.fetch = jest.fn().mockResolvedValue({ json: async () => [] }) as any;
     await render(<TeacherDashboardScreen navigation={navigation} />);
 
-    await waitFor(() => expect(screen.getByText(/Your Class · 0 Students/)).toBeTruthy());
+    await waitFor(() => expect(screen.getByText('Total Students')).toBeTruthy());
+    expect(screen.getAllByText('0').length).toBeGreaterThan(0);
   });
 
   test('a failed fetch (all 3 endpoints reject) does not crash — shows empty state instead', async () => {
     global.fetch = jest.fn().mockRejectedValue(new Error('down')) as any;
     await render(<TeacherDashboardScreen navigation={navigation} />);
 
-    await waitFor(() => expect(screen.getByText(/Your Class · 0 Students/)).toBeTruthy());
+    await waitFor(() => expect(screen.getByText('Total Students')).toBeTruthy());
+    expect(screen.getAllByText('0').length).toBeGreaterThan(0);
   });
 
   test('tapping an insight tile opens its detail modal with real content, and the close button dismisses it', async () => {

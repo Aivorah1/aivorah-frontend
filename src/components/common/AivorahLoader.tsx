@@ -45,13 +45,18 @@ function useReducedMotion(): boolean {
 }
 
 export function LoadingDots({ color, dot = 7, style }: { color?: string; dot?: number; style?: StyleProp<ViewStyle> }) {
-  const { isDark } = useTheme();
+  const { isDark, portal } = useTheme();
   const reduced = useReducedMotion();
   const [anims] = useState(() => [0, 1, 2].map(() => new Animated.Value(0)));
-  // Brand trio (ocean / mint / apricot) unless a single colour is given (e.g. a button label colour).
+  // Brand trio unless a single colour is given (e.g. a button label colour).
+  // Website Redesign (Student Phase 3, Teacher Phase 4): the homepage trio —
+  // burnt orange / green / blue in light, pale blue / mint / apricot in dark.
+  const redesigned = portal === 'student' || portal === 'teacher';
   const trio = color
     ? [color, color, color]
-    : isDark ? ['#9ADBE9', '#93DDB5', '#F6C29A'] : ['#075D75', '#3E9E72', '#D9784A'];
+    : redesigned
+      ? (isDark ? ['#A9D5FF', '#7BD389', '#FFB27A'] : ['#B84312', '#23803A', '#1D5DB5'])
+      : isDark ? ['#9ADBE9', '#93DDB5', '#F6C29A'] : ['#075D75', '#3E9E72', '#D9784A'];
 
   useEffect(() => {
     if (reduced || IS_TEST) return;

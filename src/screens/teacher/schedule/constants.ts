@@ -1,3 +1,5 @@
+import { followStudentAccent } from '../../../theme/studentAccent';
+
 export const TIMES = Array.from({ length: 24 }, (_, h) => `${String(h).padStart(2, '0')}:00`);
 // Bug #19: the week grid used to start on Monday — changed to Sunday-first
 // per explicit user request.
@@ -35,3 +37,6 @@ export const EVENT_TAGS = [
 ];
 
 export const ALL_TAGS = [...ASSIGNMENT_TAGS, ...EVENT_TAGS];
+
+// Website Redesign, Phase 4: the accent follows Light / Dark (theme/studentAccent).
+followStudentAccent(ASSIGNMENT_TAGS);

@@ -253,8 +253,8 @@ export function BulkUploadFlow({
                       <Text style={{ fontSize: 11, fontWeight: '700', color: colors.textDim }}>Language</Text>
                       <View style={styles.chipRow}>
                         {(item.language && !languagesForCurriculum(curriculum).includes(item.language) ? [...languagesForCurriculum(curriculum), item.language] : languagesForCurriculum(curriculum)).map(lang => (
-                          <TouchableOpacity key={lang} style={[styles.chip, item.language === lang && { backgroundColor: '#0E6E8620', borderColor: '#0E6E86' }]} onPress={() => updateBulkItem(item.id, { language: lang })} activeOpacity={0.75}>
-                            <Text style={[styles.chipText, item.language === lang && { color: '#0E6E86' }]}>{lang}</Text>
+                          <TouchableOpacity key={lang} style={[styles.chip, item.language === lang && { backgroundColor: colors.primary + '20', borderColor: colors.primary }]} onPress={() => updateBulkItem(item.id, { language: lang })} activeOpacity={0.75}>
+                            <Text style={[styles.chipText, item.language === lang && { color: colors.primary }]}>{lang}</Text>
                           </TouchableOpacity>
                         ))}
                       </View>

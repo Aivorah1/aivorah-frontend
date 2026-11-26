@@ -11,7 +11,9 @@ export const STUDENT_ACCENT = { light: '#B84312', dark: '#A9D5FF' } as const;
 // The single legacy accent the constants were written with.
 export const LEGACY_STUDENT_ACCENT = '#C8551C';
 
-const KNOWN = [LEGACY_STUDENT_ACCENT, STUDENT_ACCENT.light, STUDENT_ACCENT.dark].map((h) => h.toUpperCase());
+// Legacy Teacher Portal teal (Phase 4) — the Teacher Portal shares this accent.
+export const LEGACY_TEACHER_ACCENTS = ['#0E6E86', '#075D75'];
+const KNOWN = [LEGACY_STUDENT_ACCENT, ...LEGACY_TEACHER_ACCENTS, STUDENT_ACCENT.light, STUDENT_ACCENT.dark].map((h) => h.toUpperCase());
 
 type Setter = (accent: string) => void;
 const tables: object[] = [];

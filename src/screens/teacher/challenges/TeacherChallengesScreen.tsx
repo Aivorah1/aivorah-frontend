@@ -20,8 +20,11 @@ import {
   LeaderboardPeriod, PERIOD_OPTIONS, DEFAULT_PERIOD,
   localDateKey, topPerformersTitle, xpStatLabel,
 } from './utils/leaderboardPeriod';
+import { followStudentAccent } from '../../../theme/studentAccent';
 
-const GOLD = '#0E6E86';
+// Website Redesign, Phase 4: the accent follows Light / Dark (theme/studentAccent).
+let GOLD = '#0E6E86';
+followStudentAccent((a) => { GOLD = a; });
 
 export default function TeacherChallengesScreen({ navigation }: any) {
   const { colors, isDark } = useTheme();

@@ -91,7 +91,7 @@ describe('typeColors', () => {
     expect(typeColors('deadline')).toEqual(['#B84A3A', '#F5DDD9', '#7A2A1E']);
   });
   test('unknown type falls back to the lesson/default triple', () => {
-    expect(typeColors('not-a-real-type')).toEqual(['#0E6E86', '#E1F0F7', '#0B4255']);
+    expect(typeColors('not-a-real-type')).toEqual(['#0E6E86', '#FBE4D4', '#5C2A0B']);
   });
 });
 

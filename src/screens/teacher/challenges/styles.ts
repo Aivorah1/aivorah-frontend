@@ -1,8 +1,11 @@
 import { StyleSheet } from 'react-native';
 import { spacing, radius, fonts } from '../../../theme';
 import type { AppColors } from '../../../theme';
+import { followStudentAccent } from '../../../theme/studentAccent';
 
-const GOLD = '#0E6E86'; // Aivorah brand gold for leaderboard accents
+// Website Redesign, Phase 4: the accent follows Light / Dark (theme/studentAccent).
+let GOLD = '#0E6E86'; // leaderboard accents
+followStudentAccent((a) => { GOLD = a; });
 
 export const makeStyles = (c: AppColors) => StyleSheet.create({
   screen:   { flex: 1, backgroundColor: c.bgDark },

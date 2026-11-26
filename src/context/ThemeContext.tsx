@@ -114,9 +114,11 @@ const STUDENT_CSS = [
   'body[data-av-portal="student"][data-av-theme="dark"]{--av-focus:#8DD1FF}',
   'body[data-av-portal="student"] input::placeholder,body[data-av-portal="student"] textarea::placeholder{opacity:.75}',
   // Teacher Portal: Sora throughout, indigo / periwinkle focus ring.
-  'body[data-av-portal="teacher"]{--av-heading:"Sora";--av-body:"Sora";--av-nav:"Sora";--av-card:"Sora";--av-reading:"Lora";font-variant-numeric:tabular-nums}',
-  'body[data-av-portal="teacher"] :focus-visible{outline:2px solid var(--av-focus,#075D75)!important;outline-offset:2px}',
-  'body[data-av-portal="teacher"][data-av-theme="dark"]{--av-focus:#9ADBE9}',
+  // Website Redesign, Phase 4: Teacher Portal uses the Aivorah type and focus colours.
+  'body[data-av-portal="teacher"]{--av-heading:"Fraunces";--av-body:"DM Sans";--av-nav:"DM Sans";--av-card:"DM Sans";--av-reading:"Lora";font-variant-numeric:tabular-nums}',
+  'body[data-av-portal="teacher"] :focus-visible{outline:3px solid var(--av-focus,#1D5DB5)!important;outline-offset:2px}',
+  'body[data-av-portal="teacher"][data-av-theme="dark"]{--av-focus:#8DD1FF}',
+  'body[data-av-portal="teacher"] input::placeholder,body[data-av-portal="teacher"] textarea::placeholder{opacity:.75}',
   // Parent Portal: Sora headings, Inter body, ocean / pale-cyan focus ring.
   'body[data-av-portal="parent"]{--av-heading:"Sora";--av-body:"Inter";--av-nav:"Inter";--av-card:"Inter";--av-reading:"Lora";font-variant-numeric:tabular-nums}',
   'body[data-av-portal="parent"] :focus-visible{outline:2px solid var(--av-focus,#075D75)!important;outline-offset:2px}',
@@ -181,8 +183,8 @@ const PORTAL_COLORS = {
 function PortalThemeProvider({ portal, children }: { portal: 'student' | 'teacher' | 'parent' | 'schoolAdmin' | 'companyAdmin'; children: ReactNode }) {
   const parent = useContext(ThemeContext);
   const colors = parent.isDark ? PORTAL_COLORS[portal].dark : PORTAL_COLORS[portal].light;
-  // Student screens' accent constants follow Light / Dark; set before children render.
-  if (portal === 'student') applyStudentAccent(parent.isDark);
+  // Student / Teacher accent constants follow Light / Dark; set before children render.
+  if (portal === 'student' || portal === 'teacher') applyStudentAccent(parent.isDark);
 
   useEffect(() => {
     if (Platform.OS !== 'web' || typeof document === 'undefined') return;

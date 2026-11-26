@@ -11,7 +11,7 @@ import Icon from '../../../../components/common/Icon';
 import type { AppColors } from '../../../../theme';
 import { fonts } from '../../../../theme';
 import { formatLevel } from '../../../../context/StudentDataContext';
-import { WelcomeShapes } from './common/WelcomeShapes';
+import { WelcomeShapes } from '../../../../components/common/WelcomeShapes';
 
 type Goal = { label: string; val: string; target: string; pct: number };
 type ResumeRef = { subject: string; chapter: { chapterNo: number | string; title: string }; topic: { name: string } };

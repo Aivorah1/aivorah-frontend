@@ -169,7 +169,7 @@ export default function DrawerContent(props: any) {
   const isStudentPortal = !!portal; // student, teacher or parent
   // Website Redesign, Phase 3: Student Portal wordmark, Lucide icons, close button;
   // the theme switch sits in the header and Auto lives in Settings.
-  const isStudentRole = portal === 'student';
+  const isStudentRole = portal === 'student' || portal === 'teacher'; // redesigned portals (Phase 3 student, Phase 4 teacher)
   const styles = useMemo(() => makeStyles(colors, isStudentPortal, isStudentRole), [colors, isStudentPortal, isStudentRole]);
 
   const isAdmin = isAdminEmail(user?.email);
