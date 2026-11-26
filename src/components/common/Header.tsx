@@ -71,7 +71,7 @@ export default function Header({
   // Website Redesign, Phase 3 (Student Portal only): sun/moon switch in the
   // header; on phones the top row reads Aivorah → actions → switch → menu and
   // the page title sits on its own row below.
-  const isStudentRole = portal === 'student' || portal === 'teacher'; // redesigned portals (Phase 3 student, Phase 4 teacher)
+  const isStudentRole = !!portal; // every signed-in portal is redesigned (Phases 3–7)
   const studentMobile = isStudentRole && isMobile;
   const { user, updateUser, logout } = useAuth();
   const navigation = useNavigation<any>();

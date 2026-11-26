@@ -51,7 +51,7 @@ export function LoadingDots({ color, dot = 7, style }: { color?: string; dot?: n
   // Brand trio unless a single colour is given (e.g. a button label colour).
   // Website Redesign (Student Phase 3, Teacher Phase 4): the homepage trio —
   // burnt orange / green / blue in light, pale blue / mint / apricot in dark.
-  const redesigned = portal === 'student' || portal === 'teacher';
+  const redesigned = !!portal;
   const trio = color
     ? [color, color, color]
     : redesigned

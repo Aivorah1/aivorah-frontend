@@ -120,17 +120,21 @@ const STUDENT_CSS = [
   'body[data-av-portal="teacher"][data-av-theme="dark"]{--av-focus:#8DD1FF}',
   'body[data-av-portal="teacher"] input::placeholder,body[data-av-portal="teacher"] textarea::placeholder{opacity:.75}',
   // Parent Portal: Sora headings, Inter body, ocean / pale-cyan focus ring.
-  'body[data-av-portal="parent"]{--av-heading:"Sora";--av-body:"Inter";--av-nav:"Inter";--av-card:"Inter";--av-reading:"Lora";font-variant-numeric:tabular-nums}',
-  'body[data-av-portal="parent"] :focus-visible{outline:2px solid var(--av-focus,#075D75)!important;outline-offset:2px}',
-  'body[data-av-portal="parent"][data-av-theme="dark"]{--av-focus:#9ADBE9}',
+  // Website Redesign, Phase 5: Parent Portal uses the Aivorah type and focus colours.
+  'body[data-av-portal="parent"]{--av-heading:"Fraunces";--av-body:"DM Sans";--av-nav:"DM Sans";--av-card:"DM Sans";--av-reading:"Lora";font-variant-numeric:tabular-nums}',
+  'body[data-av-portal="parent"] :focus-visible{outline:3px solid var(--av-focus,#1D5DB5)!important;outline-offset:2px}',
+  'body[data-av-portal="parent"][data-av-theme="dark"]{--av-focus:#8DD1FF}',
+  'body[data-av-portal="parent"] input::placeholder,body[data-av-portal="parent"] textarea::placeholder{opacity:.75}',
   // School Admin Portal: Inter throughout, denim focus ring.
-  'body[data-av-portal="schoolAdmin"]{--av-heading:"Inter";--av-body:"Inter";--av-nav:"Inter";--av-card:"Inter";--av-reading:"Lora";font-variant-numeric:tabular-nums}',
-  'body[data-av-portal="schoolAdmin"] :focus-visible{outline:2px solid var(--av-focus,#2F5E9E)!important;outline-offset:2px}',
-  'body[data-av-portal="schoolAdmin"][data-av-theme="dark"]{--av-focus:#8FB6EA}',
+  // Website Redesign, Phases 6–7: Aivorah type and focus colours.
+  'body[data-av-portal="schoolAdmin"]{--av-heading:"Fraunces";--av-body:"DM Sans";--av-nav:"DM Sans";--av-card:"DM Sans";--av-reading:"Lora";font-variant-numeric:tabular-nums}',
+  'body[data-av-portal="schoolAdmin"] :focus-visible{outline:3px solid var(--av-focus,#1D5DB5)!important;outline-offset:2px}',
+  'body[data-av-portal="schoolAdmin"][data-av-theme="dark"]{--av-focus:#8DD1FF}',
   // Company Admin Portal: same shared sans throughout (tables included), denim focus.
-  'body[data-av-portal="companyAdmin"]{--av-heading:"Inter";--av-body:"Inter";--av-nav:"Inter";--av-card:"Inter";--av-reading:"Inter";font-variant-numeric:tabular-nums}',
-  'body[data-av-portal="companyAdmin"] :focus-visible{outline:2px solid var(--av-focus,#2F5E9E)!important;outline-offset:2px}',
-  'body[data-av-portal="companyAdmin"][data-av-theme="dark"]{--av-focus:#8FB6EA}',
+  // Website Redesign, Phases 6–7: Aivorah type and focus colours.
+  'body[data-av-portal="companyAdmin"]{--av-heading:"Fraunces";--av-body:"DM Sans";--av-nav:"DM Sans";--av-card:"DM Sans";--av-reading:"Lora";font-variant-numeric:tabular-nums}',
+  'body[data-av-portal="companyAdmin"] :focus-visible{outline:3px solid var(--av-focus,#1D5DB5)!important;outline-offset:2px}',
+  'body[data-av-portal="companyAdmin"][data-av-theme="dark"]{--av-focus:#8DD1FF}',
 ].join(' ');
 
 // react-native-web gives every Text / TextInput a base class with the system
@@ -184,7 +188,7 @@ function PortalThemeProvider({ portal, children }: { portal: 'student' | 'teache
   const parent = useContext(ThemeContext);
   const colors = parent.isDark ? PORTAL_COLORS[portal].dark : PORTAL_COLORS[portal].light;
   // Student / Teacher accent constants follow Light / Dark; set before children render.
-  if (portal === 'student' || portal === 'teacher') applyStudentAccent(parent.isDark);
+  applyStudentAccent(parent.isDark); // every portal shares the accent (Phases 3–7)
 
   useEffect(() => {
     if (Platform.OS !== 'web' || typeof document === 'undefined') return;

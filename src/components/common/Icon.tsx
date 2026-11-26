@@ -81,6 +81,8 @@ import Users from 'lucide-react-native/icons/users';
 import X from 'lucide-react-native/icons/x';
 import Zap from 'lucide-react-native/icons/zap';
 // Website Redesign, Phase 4 (Teacher Portal)
+import UserRoundCheck from 'lucide-react-native/icons/user-round-check';
+import Newspaper from 'lucide-react-native/icons/newspaper';
 import FileText from 'lucide-react-native/icons/file-text';
 import ImageIcon from 'lucide-react-native/icons/image';
 import CloudUpload from 'lucide-react-native/icons/cloud-upload';
@@ -173,6 +175,8 @@ const LUCIDE: Record<string, LucideIcon> = {
   zap: Zap,
   'message-square': MessageSquare,
   'timer-reset': TimerReset,
+  'user-round-check': UserRoundCheck,
+  newspaper: Newspaper,
   'file-text': FileText,
   'image': ImageIcon,
   'cloud-upload': CloudUpload,

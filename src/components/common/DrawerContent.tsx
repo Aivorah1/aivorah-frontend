@@ -119,10 +119,10 @@ const THEME_OPTIONS: { id: ThemeMode; icon: string; label: string }[] = [
 const ADMIN_NAV_ITEMS = [
   { label: 'Platform Overview', icon: 'bar-chart-2', screen: 'PlatformOverview', group: 'MENU' },
   { label: 'Users', icon: 'users', screen: 'AdminUsers', group: 'MENU' },
-  { label: 'Map to Teacher', icon: 'user-check', screen: 'MapToTeacher', group: 'MENU' },
+  { label: 'Map to Teacher', icon: 'user-round-check', screen: 'MapToTeacher', group: 'MENU' },
   { label: 'Bulk Import', icon: 'upload-cloud', screen: 'BulkImport', group: 'MENU' },
   { label: 'LLM Usage', icon: 'cpu', screen: 'LlmUsage', group: 'MENU' },
-  { label: 'Current Affairs', icon: 'globe', screen: 'CurrentAffairsAdmin', group: 'MENU' },
+  { label: 'Current Affairs', icon: 'newspaper', screen: 'CurrentAffairsAdmin', group: 'MENU' },
 ];
 
 const SUPER_ADMIN_NAV_ITEMS = [
@@ -169,7 +169,7 @@ export default function DrawerContent(props: any) {
   const isStudentPortal = !!portal; // student, teacher or parent
   // Website Redesign, Phase 3: Student Portal wordmark, Lucide icons, close button;
   // the theme switch sits in the header and Auto lives in Settings.
-  const isStudentRole = portal === 'student' || portal === 'teacher'; // redesigned portals (Phase 3 student, Phase 4 teacher)
+  const isStudentRole = !!portal; // every signed-in portal is redesigned (Phases 3–7)
   const styles = useMemo(() => makeStyles(colors, isStudentPortal, isStudentRole), [colors, isStudentPortal, isStudentRole]);
 
   const isAdmin = isAdminEmail(user?.email);

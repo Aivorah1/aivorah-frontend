@@ -25,7 +25,7 @@ export default function SubjectCard({
 }) {
   const { isDark, portal, colors } = useTheme();
   // Student Portal: neutral card surfaces in both themes (no gold/tinted blocks).
-  const neutral = portal === 'student' || portal === 'teacher'; // Phase 4: Teacher Learning Paths reuse this card
+  const neutral = portal === 'student' || portal === 'teacher' || portal === 'parent'; // Teacher (Phase 4) and Parent (Phase 5) reuse this card
   const meta = subjectMeta(data.subject);
   const done = data.topics.reduce((acc, topic) => acc + (completedSet.has(topic.topic) ? 1 : 0), 0);
   const pct = data.topicCount > 0 ? Math.round((done / data.topicCount) * 100) : 0;

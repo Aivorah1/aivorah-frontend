@@ -23,12 +23,13 @@ import WeeklySnapshotStats from './components/WeeklySnapshotStats';
 import ActivityChart from './components/ActivityChart';
 import BottomGrid from './components/BottomGrid';
 import UpcomingEvents from './components/UpcomingEvents';
+import { WelcomeShapes } from '../../../components/common/WelcomeShapes';
 import ReportModal from './components/modals/ReportModal';
 import CredentialsModal from './components/modals/CredentialsModal';
 import AttendanceHistoryModal from './components/modals/AttendanceHistoryModal';
 
 export default function ParentDashboardScreen({ navigation, route }: any) {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const { user } = useAuth();
   const { unreadCount, unreadAssignments } = useNotification();
   const s = useMemo(() => makeStyles(colors), [colors]);
@@ -139,6 +140,10 @@ export default function ParentDashboardScreen({ navigation, route }: any) {
         />
 
         <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
+          {/* Website Redesign, Phase 5: the homepage shapes around the welcome area. */}
+          <View pointerEvents="none" style={s.welcomeShapes}>
+            <WelcomeShapes isDark={isDark} />
+          </View>
 
           {(unreadAssignments > 0 || unreadCount > 0) && (
             <TouchableOpacity
@@ -284,7 +289,8 @@ export default function ParentDashboardScreen({ navigation, route }: any) {
 const makeStyles = (c: AppColors) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: c.bgDark },
   scroll: { flex: 1 },
-  content: { padding: 20, paddingBottom: 48 },
+  content: { padding: 20, paddingTop: 44, paddingBottom: 48, position: 'relative' },
+  welcomeShapes: { position: 'absolute', top: -6, right: 8, width: 250, height: 110 },
 
   // Alert banner
   alertBanner: {
@@ -296,13 +302,13 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
   alertBannerText: { flex: 1, fontSize: 13, fontWeight: '600', color: c.accentYellow },
 
   // Section titles
-  sectionTitle: { fontSize: 17, fontWeight: '700', color: c.textMain, fontFamily: fonts.serif },
+  sectionTitle: { fontSize: 22, fontWeight: '600', color: c.textHeading, fontFamily: fonts.serif, letterSpacing: -0.2 },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   dailyGoal: { fontSize: 12, color: c.textMuted },
 
   // Top row
   topRow: { gap: 16, marginBottom: 4 },
-  childSection: { alignSelf: 'flex-start' },
+  childSection: { alignSelf: 'stretch' },
   childScroll: { marginTop: 12 },
 
   insightChipsCol: { marginTop: 14, gap: 8 },
