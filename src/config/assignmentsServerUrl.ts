@@ -10,7 +10,7 @@ import { Platform } from 'react-native';
 // original name is still claimed by the suspended account.
 declare const __DEV__: boolean;
 
-const LIVE_ASSIGNMENTS_BACKEND = 'https://aivorah-assignments-service-craq.onrender.com';
+const LIVE_ASSIGNMENTS_BACKEND = 'https://aivorah-assignments-service-1.onrender.com';
 
 // EXPO_PUBLIC_ASSIGNMENTS_URL points only this service elsewhere (e.g. a local copy).
 const ASSIGNMENTS_SERVER_URL =

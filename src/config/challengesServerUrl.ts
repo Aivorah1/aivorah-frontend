@@ -9,7 +9,7 @@ import { Platform } from 'react-native';
 // original name is still claimed by the suspended account.
 declare const __DEV__: boolean;
 
-const LIVE_SERVICE = 'https://aivorah-challenges-service-1uot.onrender.com';
+const LIVE_SERVICE = 'https://aivorah-challenges-service-1.onrender.com';
 
 const CHALLENGES_SERVER_URL =
   USE_LOCAL_SERVICES ? 'http://localhost:3008' : LIVE_SERVICE;

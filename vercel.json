@@ -19,7 +19,7 @@
       "headers": [
         {
           "key": "Link",
-          "value": "<https://aivorah-auth-service-6zno.onrender.com>; rel=preconnect; crossorigin, <https://aivorah-profile-service-mrby.onrender.com>; rel=preconnect; crossorigin, <https://securetoken.googleapis.com>; rel=preconnect; crossorigin, <https://identitytoolkit.googleapis.com>; rel=preconnect; crossorigin"
+          "value": "<https://aivorah-auth-service-1.onrender.com>; rel=preconnect; crossorigin, <https://aivorah-profile-service-mrby.onrender.com>; rel=preconnect; crossorigin, <https://securetoken.googleapis.com>; rel=preconnect; crossorigin, <https://identitytoolkit.googleapis.com>; rel=preconnect; crossorigin"
         }
       ]
     }
