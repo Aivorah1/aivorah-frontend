@@ -19,12 +19,15 @@ interface Props {
   onVoiceChange: (v: VoiceOption) => void;
   onAutoToggle: () => void;
   onRateChange: (rate: number) => void;
+  /** Why the narration couldn't play, if it couldn't; shows a Try again button. */
+  audioError?: string | null;
+  onRetry?: () => void;
   styles: any;
 }
 
 export default function ReaderControls({
   playing, isPaused, isLoading, voice, autoPlay, playbackRate, pastelAccent, textDim, borderColor,
-  onListenPress, onVoiceChange, onAutoToggle, onRateChange, styles,
+  onListenPress, onVoiceChange, onAutoToggle, onRateChange, audioError, onRetry, styles,
 }: Props) {
   return (
     <View style={styles.controlsCol}>
@@ -63,6 +66,30 @@ export default function ReaderControls({
           <Text style={[styles.voiceChipText, { color: autoPlay ? pastelAccent : textDim }]}>Auto</Text>
         </TouchableOpacity>
       </View>
+
+      {audioError ? (
+        <View
+          testID="narration-error"
+          accessibilityRole="alert"
+          style={[styles.audioErrorBox, { borderColor: pastelAccent }]}
+        >
+          <Feather name="volume-x" size={14} color={pastelAccent} />
+          <Text style={[styles.audioErrorText, { color: textDim }]}>{audioError}</Text>
+          {onRetry ? (
+            <TouchableOpacity
+              testID="narration-retry"
+              accessibilityRole="button"
+              accessibilityLabel="Try playing the story voice again"
+              style={[styles.audioRetryBtn, { backgroundColor: pastelAccent }]}
+              onPress={onRetry}
+              activeOpacity={0.85}
+            >
+              <Feather name="refresh-cw" size={12} color="#fff" />
+              <Text style={styles.audioRetryText}>Try again</Text>
+            </TouchableOpacity>
+          ) : null}
+        </View>
+      ) : null}
 
       {/* Playback speed — its own labeled row */}
       <View style={styles.speedRow}>

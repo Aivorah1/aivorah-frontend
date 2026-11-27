@@ -10,6 +10,7 @@ import { Text, TouchableOpacity } from 'react-native';
 import { render, screen, userEvent, waitFor, act } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useStoryReader } from '../useStoryReader';
+import { SILENT_WAV } from '../../../../../utils/platformAudio';
 
 jest.mock('react-native/Libraries/Utilities/Platform', () => ({
   __esModule: true,
@@ -49,9 +50,19 @@ class MockAudio {
   onended: (() => void) | null = null;
   onerror: (() => void) | null = null;
   constructor(src: string) { this.src = src; }
-  play() { this.paused = false; return Promise.resolve(); }
+  play() {
+    mockPlayedSrcs.push(this.src);
+    if (mockPlayRejection && this.src !== SILENT_WAV) return Promise.reject(mockPlayRejection);
+    this.paused = false;
+    return Promise.resolve();
+  }
   pause() { this.paused = true; }
 }
+
+// Every src the narration element was asked to play, in order.
+let mockPlayedSrcs: string[] = [];
+// When set, play() of a real (non-silent) file rejects with this error.
+let mockPlayRejection: any = null;
 
 function mockFetchByUrl(handlers: { story?: () => Promise<any>; audio?: () => Promise<any> }) {
   global.fetch = jest.fn((url: string) => {
@@ -74,6 +85,8 @@ function Harness({ storyId }: { storyId: string }) {
       <Text testID="resumedFrom">{String(hook.resumedFrom)}</Text>
       <Text testID="donePages">{JSON.stringify([...hook.donePages])}</Text>
       <Text testID="playbackRate">{hook.playbackRate}</Text>
+      <Text testID="audioError">{hook.audioError ?? ''}</Text>
+      <TouchableOpacity testID="retry" onPress={() => hook.retryAudio()}><Text>retry</Text></TouchableOpacity>
       <TouchableOpacity testID="speakPage1" onPress={() => hook.speakPage(1)}><Text>speak1</Text></TouchableOpacity>
       <TouchableOpacity testID="goToPage1" onPress={() => hook.goToPage(1)}><Text>goto1</Text></TouchableOpacity>
       <TouchableOpacity testID="pause" onPress={() => hook.pauseAudio()}><Text>pause</Text></TouchableOpacity>
@@ -87,11 +100,13 @@ beforeEach(async () => {
   jest.clearAllMocks();
   await AsyncStorage.clear();
   (global as any).Audio = MockAudio;
+  mockPlayedSrcs = [];
+  mockPlayRejection = null;
 });
 
 describe('useStoryReader — loading the story', () => {
   test('fetches the real story on mount and populates state', async () => {
-    mockFetchByUrl({ story: () => Promise.resolve({ json: async () => STORY }) });
+    mockFetchByUrl({ story: () => Promise.resolve({ ok: true, json: async () => STORY }) });
     await render(<Harness storyId="ambarisha" />);
     expect(await screen.findByText('Ambarisha Maharaja')).toBeTruthy();
     expect(screen.getByTestId('loading').props.children).toBe('false');
@@ -107,7 +122,7 @@ describe('useStoryReader — loading the story', () => {
 
 describe('useStoryReader — resume from storage', () => {
   test('no saved progress -> starts at page 0, no resume banner', async () => {
-    mockFetchByUrl({ story: () => Promise.resolve({ json: async () => STORY }) });
+    mockFetchByUrl({ story: () => Promise.resolve({ ok: true, json: async () => STORY }) });
     await render(<Harness storyId="ambarisha" />);
     await screen.findByText('Ambarisha Maharaja');
     expect(screen.getByTestId('currentPage').props.children).toBe(0);
@@ -116,7 +131,7 @@ describe('useStoryReader — resume from storage', () => {
 
   test('page 1 already done -> auto-resumes to page 2 (index 1), shows the resume banner', async () => {
     await AsyncStorage.setItem('story_done_ambarisha', JSON.stringify([1]));
-    mockFetchByUrl({ story: () => Promise.resolve({ json: async () => STORY }) });
+    mockFetchByUrl({ story: () => Promise.resolve({ ok: true, json: async () => STORY }) });
     await render(<Harness storyId="ambarisha" />);
     await screen.findByText('Ambarisha Maharaja');
     await waitFor(() => expect(screen.getByTestId('currentPage').props.children).toBe(1));
@@ -125,7 +140,7 @@ describe('useStoryReader — resume from storage', () => {
 
   test('all pages already done -> stays at page 0 (no resume target)', async () => {
     await AsyncStorage.setItem('story_done_ambarisha', JSON.stringify([1, 2, 3]));
-    mockFetchByUrl({ story: () => Promise.resolve({ json: async () => STORY }) });
+    mockFetchByUrl({ story: () => Promise.resolve({ ok: true, json: async () => STORY }) });
     await render(<Harness storyId="ambarisha" />);
     await screen.findByText('Ambarisha Maharaja');
     await new Promise(r => setTimeout(r, 0));
@@ -135,7 +150,7 @@ describe('useStoryReader — resume from storage', () => {
 
 describe('useStoryReader — goToPage', () => {
   test('plays the page-flip sound and changes the current page', async () => {
-    mockFetchByUrl({ story: () => Promise.resolve({ json: async () => STORY }) });
+    mockFetchByUrl({ story: () => Promise.resolve({ ok: true, json: async () => STORY }) });
     const user = userEvent.setup();
     await render(<Harness storyId="ambarisha" />);
     await screen.findByText('Ambarisha Maharaja');
@@ -150,8 +165,8 @@ describe('useStoryReader — goToPage', () => {
 describe('useStoryReader — speakPage', () => {
   test('fetches page audio, starts playback, and stores the ambient track', async () => {
     mockFetchByUrl({
-      story: () => Promise.resolve({ json: async () => STORY }),
-      audio: () => Promise.resolve({ json: async () => ({ audioUrl: '/data/audio/x.mp3', wordTimings: null, timingProvider: 'none' }) }),
+      story: () => Promise.resolve({ ok: true, json: async () => STORY }),
+      audio: () => Promise.resolve({ ok: true, json: async () => ({ audioUrl: '/data/audio/x.mp3', wordTimings: null, timingProvider: 'none' }) }),
     });
     const user = userEvent.setup();
     await render(<Harness storyId="ambarisha" />);
@@ -166,8 +181,8 @@ describe('useStoryReader — speakPage', () => {
 
   test('no audioUrl in the response -> stops loading, never starts playback', async () => {
     mockFetchByUrl({
-      story: () => Promise.resolve({ json: async () => STORY }),
-      audio: () => Promise.resolve({ json: async () => ({}) }),
+      story: () => Promise.resolve({ ok: true, json: async () => STORY }),
+      audio: () => Promise.resolve({ ok: true, json: async () => ({}) }),
     });
     const user = userEvent.setup();
     await render(<Harness storyId="ambarisha" />);
@@ -181,7 +196,7 @@ describe('useStoryReader — speakPage', () => {
 
   test('a network failure during audio fetch stops loading, does not crash', async () => {
     mockFetchByUrl({
-      story: () => Promise.resolve({ json: async () => STORY }),
+      story: () => Promise.resolve({ ok: true, json: async () => STORY }),
       audio: () => Promise.reject(new Error('down')),
     });
     const user = userEvent.setup();
@@ -198,8 +213,8 @@ describe('useStoryReader — speakPage', () => {
 describe('useStoryReader — pause/resume', () => {
   test('pauseAudio pauses playback and force-silences any stray ambient', async () => {
     mockFetchByUrl({
-      story: () => Promise.resolve({ json: async () => STORY }),
-      audio: () => Promise.resolve({ json: async () => ({ audioUrl: '/x.mp3', wordTimings: null, timingProvider: 'none' }) }),
+      story: () => Promise.resolve({ ok: true, json: async () => STORY }),
+      audio: () => Promise.resolve({ ok: true, json: async () => ({ audioUrl: '/x.mp3', wordTimings: null, timingProvider: 'none' }) }),
     });
     const user = userEvent.setup();
     await render(<Harness storyId="ambarisha" />);
@@ -215,8 +230,8 @@ describe('useStoryReader — pause/resume', () => {
 
   test('resumeAudio resumes playback and the ambient track', async () => {
     mockFetchByUrl({
-      story: () => Promise.resolve({ json: async () => STORY }),
-      audio: () => Promise.resolve({ json: async () => ({ audioUrl: '/x.mp3', wordTimings: null, timingProvider: 'none' }) }),
+      story: () => Promise.resolve({ ok: true, json: async () => STORY }),
+      audio: () => Promise.resolve({ ok: true, json: async () => ({ audioUrl: '/x.mp3', wordTimings: null, timingProvider: 'none' }) }),
     });
     const user = userEvent.setup();
     await render(<Harness storyId="ambarisha" />);
@@ -234,7 +249,7 @@ describe('useStoryReader — pause/resume', () => {
 
 describe('useStoryReader — playback rate', () => {
   test('setPlaybackRate updates the returned state (applied to any live <audio> via effect)', async () => {
-    mockFetchByUrl({ story: () => Promise.resolve({ json: async () => STORY }) });
+    mockFetchByUrl({ story: () => Promise.resolve({ ok: true, json: async () => STORY }) });
     const user = userEvent.setup();
     await render(<Harness storyId="ambarisha" />);
     await screen.findByText('Ambarisha Maharaja');
@@ -242,5 +257,72 @@ describe('useStoryReader — playback rate', () => {
     await user.press(screen.getByTestId('setRate'));
 
     expect(screen.getByTestId('playbackRate').props.children).toBe(1.5);
+  });
+});
+
+describe('useStoryReader — the narration is really played (voice regression)', () => {
+  const okAudio = () => Promise.resolve({ ok: true, json: async () => ({ audioUrl: '/data/audio/stories/p1.mp3', wordTimings: null }) });
+
+  test('unlocks the player inside the tap, then plays the page mp3 from the service', async () => {
+    mockFetchByUrl({ story: () => Promise.resolve({ ok: true, json: async () => STORY }), audio: okAudio });
+    const user = userEvent.setup();
+    await render(<Harness storyId="ambarisha" />);
+    await screen.findByText('Ambarisha Maharaja');
+
+    await user.press(screen.getByTestId('speakPage1'));
+
+    await waitFor(() => expect(screen.getByTestId('playing').props.children).toBe('true'));
+    // Before the fix the <audio> element's play() was never called: silence.
+    expect(mockPlayedSrcs[0]).toBe(SILENT_WAV);
+    expect(mockPlayedSrcs[mockPlayedSrcs.length - 1]).toMatch(/\/data\/audio\/stories\/p1\.mp3$/);
+    expect(screen.getByTestId('audioError').props.children).toBe('');
+  });
+
+  test('a service error (503) shows a clear message and no music plays without the voice', async () => {
+    mockFetchByUrl({
+      story: () => Promise.resolve({ ok: true, json: async () => STORY }),
+      audio: () => Promise.resolve({ ok: false, status: 503, json: async () => ({ error: 'TTS not configured' }) }),
+    });
+    const user = userEvent.setup();
+    await render(<Harness storyId="ambarisha" />);
+    await screen.findByText('Ambarisha Maharaja');
+
+    await user.press(screen.getByTestId('speakPage1'));
+
+    await waitFor(() => expect(screen.getByTestId('audioError').props.children).toMatch(/story voice isn’t available/));
+    expect(screen.getByTestId('playing').props.children).toBe('false');
+    expect(screen.getByTestId('isLoading').props.children).toBe('false');
+    expect(mockCreateAmbient).not.toHaveBeenCalled();
+  });
+
+  test('the browser blocking the sound is explained, not silent', async () => {
+    mockPlayRejection = Object.assign(new Error('blocked'), { name: 'NotAllowedError' });
+    mockFetchByUrl({ story: () => Promise.resolve({ ok: true, json: async () => STORY }), audio: okAudio });
+    const user = userEvent.setup();
+    await render(<Harness storyId="ambarisha" />);
+    await screen.findByText('Ambarisha Maharaja');
+
+    await user.press(screen.getByTestId('speakPage1'));
+
+    await waitFor(() => expect(screen.getByTestId('audioError').props.children).toMatch(/blocked the sound/));
+    expect(screen.getByTestId('playing').props.children).toBe('false');
+  });
+
+  test('Try again after a failure plays the page and clears the message', async () => {
+    let calls = 0;
+    mockFetchByUrl({
+      story: () => Promise.resolve({ ok: true, json: async () => STORY }),
+      audio: () => (++calls === 1 ? Promise.reject(new Error('network down')) : okAudio()),
+    });
+    const user = userEvent.setup();
+    await render(<Harness storyId="ambarisha" />);
+    await screen.findByText('Ambarisha Maharaja');
+    await user.press(screen.getByTestId('speakPage1'));
+    await waitFor(() => expect(screen.getByTestId('audioError').props.children).toMatch(/Check your connection/));
+
+    await user.press(screen.getByTestId('retry'));
+
+    await waitFor(() => expect(screen.getByTestId('playing').props.children).toBe('true'));
+    expect(screen.getByTestId('audioError').props.children).toBe('');
   });
 });

@@ -25,9 +25,17 @@ class FakeAudio {
   constructor(public src: string) { FakeAudio.last = this; }
   addEventListener(name: string, fn: () => void) { this.listeners[name] = fn; }
   load() {}
-  play() { this.paused = false; return Promise.resolve(); }
+  playCalls = 0;
+  pending: { resolve: () => void; reject: (e: any) => void }[] = [];
+  // Like a real <audio>: play() resolves once sound actually starts, and
+  // rejects when the file fails to load.
+  play() { this.paused = false; this.playCalls++; return new Promise<void>((resolve, reject) => { this.pending.push({ resolve, reject }); }); }
+  startSound() { this.pending.splice(0).forEach(p => p.resolve()); }
   pause() { this.paused = true; }
-  fire(name: string) { this.listeners[name]?.(); }
+  fire(name: string) {
+    this.listeners[name]?.();
+    if (name === 'error') this.pending.splice(0).forEach(p => p.reject(Object.assign(new Error('decode'), { name: 'NotSupportedError' })));
+  }
 }
 
 const speech = { cancel: jest.fn(), speak: jest.fn(), pause: jest.fn(), resume: jest.fn(), paused: false, speaking: false };
@@ -52,10 +60,12 @@ afterEach(() => restoreOS());
 test('plays the narration, then pauses, resumes and stops', async () => {
   mockApi.fetchSpeech.mockResolvedValue({ audioUrl: 'https://cdn/a.mp3', wordTimings: null });
   const { result } = await renderHook(() => useListenFirst(PASSAGE));
-  await act(async () => { await result.current.toggle(); });
+  await act(async () => { result.current.toggle(); });
   expect(mockApi.fetchSpeech).toHaveBeenCalledWith(PASSAGE.text);
   expect(result.current.isLoading).toBe(true);
-  await act(async () => { FakeAudio.last.fire('loadeddata'); });
+  // The <audio> element's play() is really called (the bug: it never was).
+  expect(FakeAudio.last.playCalls).toBeGreaterThan(0);
+  await act(async () => { FakeAudio.last.startSound(); });
   expect(result.current.isLoading).toBe(false);
   expect(result.current.isPlaying).toBe(true);
   expect(FakeAudio.last.src).toBe('https://cdn/a.mp3');
@@ -63,7 +73,7 @@ test('plays the narration, then pauses, resumes and stops', async () => {
   await act(async () => { result.current.toggle(); });
   expect(result.current.isPaused).toBe(true);
   // Pausing before the first word has played must still resume (currentTime is 0).
-  await act(async () => { result.current.toggle(); });
+  await act(async () => { result.current.toggle(); FakeAudio.last.startSound(); });
   expect(result.current.isPlaying).toBe(true);
 
   await act(async () => { result.current.stop(); });
@@ -83,7 +93,7 @@ test('falls back to the browser voice when narration is unavailable', async () =
 test('a broken audio file also falls back to the browser voice', async () => {
   mockApi.fetchSpeech.mockResolvedValue({ audioUrl: 'https://cdn/broken.mp3' });
   const { result } = await renderHook(() => useListenFirst(PASSAGE));
-  await act(async () => { await result.current.toggle(); });
+  await act(async () => { result.current.toggle(); });
   await act(async () => { FakeAudio.last.fire('error'); });
   expect(speech.speak).toHaveBeenCalled();
 });
@@ -91,8 +101,8 @@ test('a broken audio file also falls back to the browser voice', async () => {
 test('leaving the screen silences the narration', async () => {
   mockApi.fetchSpeech.mockResolvedValue({ audioUrl: 'https://cdn/a.mp3' });
   const { result, unmount } = await renderHook(() => useListenFirst(PASSAGE));
-  await act(async () => { await result.current.toggle(); });
-  await act(async () => { FakeAudio.last.fire('loadeddata'); });
+  await act(async () => { result.current.toggle(); });
+  await act(async () => { FakeAudio.last.startSound(); });
   const audio = FakeAudio.last;
   await act(async () => { unmount(); });
   expect(audio.paused).toBe(true);

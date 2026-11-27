@@ -20,6 +20,7 @@ export function useStoryReader(storyId: string) {
   const [playbackRate, setPlaybackRate] = useState(1);
   const [donePagesLoaded, setDonePagesLoaded] = useState(false);
   const [resumedFrom,  setResumedFrom]  = useState<number | null>(null);
+  const [audioError,   setAudioError]   = useState<string | null>(null);
   const didResume      = useRef(false);
 
   const audioRef   = useRef<PlatformAudio | null>(null);
@@ -159,7 +160,7 @@ export function useStoryReader(storyId: string) {
       audioRef.current = null;
     }
     ambientRef.current?.stop(); ambientRef.current = null;
-    setIsLoading(false); setPlaying(false);
+    setIsLoading(false); setPlaying(false); setAudioError(null);
   }
 
   function resumeAudio() {
@@ -171,7 +172,22 @@ export function useStoryReader(storyId: string) {
       }
       try { ambientRef.current?.resume(); } catch {}
       setPlaying(true);
-    }).catch(() => {});
+    }).catch((err) => failPlayback(err));
+  }
+
+  // "Try again" after a failed narration: reload the current page's audio.
+  function retryAudio() {
+    if (!story) return;
+    const page = story.pages[currentPage];
+    stopAudio();
+    if (page) speakPage(page.pageNumber);
+  }
+
+  function failPlayback(err: unknown) {
+    cancelHighlightLoop();
+    ambientRef.current?.stop(); ambientRef.current = null;
+    setIsLoading(false); setPlaying(false);
+    setAudioError(narrationErrorMessage(err));
   }
 
   async function speakPage(pageNum: number) {
@@ -181,16 +197,23 @@ export function useStoryReader(storyId: string) {
       resumeAudio(); return;
     }
     stopAudio();
+    setAudioError(null);
     const gen = ++playGenRef.current;
+    // Create + unlock the player now, while we're still inside the tap.
+    // After the fetch below, browsers (Safari/iOS especially) block play()
+    // unless the element was already started from the user's gesture.
+    const audio = createPlatformAudio();
+    audio.prime();
+    audioRef.current = audio;
     setIsLoading(true);
     try {
-      const res  = await fetch(`${SERVER_URL}/stories/${story.id}/audio/${pageNum}?narrator=${voice}`);
-      const data = await res.json();
+      const res  = await fetchWithTimeout(
+        `${SERVER_URL}/stories/${story.id}/audio/${pageNum}?narrator=${voice}`,
+        AUDIO_FETCH_TIMEOUT_MS,
+      );
+      const data = await res.json().catch(() => ({}));
       if (playGenRef.current !== gen) return;
-      if (!data.audioUrl) { setIsLoading(false); return; }
-
-      const audio = createPlatformAudio();
-      audioRef.current = audio;
+      if (!res.ok || !data.audioUrl) throw new NarrationUnavailableError(data?.error);
 
       const pageText      = story.pages.find(p => p.pageNumber === pageNum)?.text ?? '';
       const words         = splitWords(pageText);
@@ -199,16 +222,19 @@ export function useStoryReader(storyId: string) {
       const timingProvider: string = data.timingProvider || 'none';
       audioMeta.current = { words, timings, wordBounds, timingProvider };
 
-      // Start ambient music matched to this page's scene/mood
-      const currentPageObj = story.pages.find(p => p.pageNumber === pageNum);
-      ambientRef.current = createAmbient(story.id, currentPageObj);
-      ambientRef.current?.start?.();
-
       audio.setRate(playbackRate).catch(() => {});
       audio.onStatusChange((status: AudioStatus) => {
         if (status === 'playing' && playGenRef.current === gen) {
           setIsLoading(false);
           setPlaying(true);
+          setAudioError(null);
+          // Ambient music matched to this page's scene/mood — only once the
+          // narration is actually audible, so it never plays without the voice.
+          if (!ambientRef.current) {
+            const currentPageObj = story.pages.find(p => p.pageNumber === pageNum);
+            ambientRef.current = createAmbient(story.id, currentPageObj);
+            ambientRef.current?.start?.();
+          }
           startHighlightLoop(audio, words, timings, wordBounds, timingProvider);
         }
       });
@@ -220,17 +246,16 @@ export function useStoryReader(storyId: string) {
         ambientRef.current?.stop(); ambientRef.current = null;
         if (autoPlay && story && currentPage < story.pages.length - 1) goToPage(currentPage + 1);
       });
-      audio.onError(() => {
-        cancelHighlightLoop();
-        setIsLoading(false); setPlaying(false);
-        ambientRef.current?.stop(); ambientRef.current = null;
+      audio.onError((e: unknown) => {
+        if (playGenRef.current === gen) failPlayback(e);
       });
 
-      await audio.load(`${SERVER_URL}${data.audioUrl}`);
+      const src = /^https?:\/\//.test(data.audioUrl) ? data.audioUrl : `${SERVER_URL}${data.audioUrl}`;
+      await audio.load(src);
       if (playGenRef.current !== gen) { await audio.unload(); return; }
       await audio.play();
-    } catch {
-      if (playGenRef.current === gen) { setIsLoading(false); setPlaying(false); }
+    } catch (err) {
+      if (playGenRef.current === gen) failPlayback(err);
     }
   }
 
@@ -259,7 +284,30 @@ export function useStoryReader(storyId: string) {
   return {
     story, loading, currentPage, voice, setVoice, isLoading, playing, autoPlay, setAutoPlay,
     wordIndex, donePages, playbackRate, setPlaybackRate, resumedFrom, setResumedFrom,
-    fadeAnim, slideAnim, isPaused,
-    pauseAudio, stopAudio, resumeAudio, speakPage, goToPage,
+    fadeAnim, slideAnim, isPaused, audioError,
+    pauseAudio, stopAudio, resumeAudio, speakPage, goToPage, retryAudio,
   };
+}
+
+// Render's free plan can take ~50s to wake the service and generate a page.
+const AUDIO_FETCH_TIMEOUT_MS = 90_000;
+
+class NarrationUnavailableError extends Error {
+  constructor(detail?: string) { super(detail || 'Narration unavailable'); this.name = 'NarrationUnavailableError'; }
+}
+
+function fetchWithTimeout(url: string, ms: number): Promise<Response> {
+  if (typeof AbortController === 'undefined') return fetch(url);
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), ms);
+  return fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(t));
+}
+
+// Student-facing message for a narration that couldn't start.
+export function narrationErrorMessage(err: unknown): string {
+  const name = (err as any)?.name;
+  if (name === 'NotAllowedError') return 'Your browser blocked the sound. Tap “Try again” to hear the story.';
+  if (name === 'AbortError') return 'The story voice is taking too long to load. Please try again.';
+  if (name === 'NarrationUnavailableError') return 'The story voice isn’t available right now. Please try again in a moment.';
+  return 'We couldn’t play the story voice. Check your connection and try again.';
 }

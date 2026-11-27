@@ -25,8 +25,8 @@ export default function StoryReaderScreen({ route, navigation }: any) {
   const {
     story, loading, currentPage, voice, setVoice, isLoading, playing, autoPlay, setAutoPlay,
     wordIndex, donePages, playbackRate, setPlaybackRate, resumedFrom, setResumedFrom,
-    fadeAnim, slideAnim, isPaused,
-    pauseAudio, stopAudio, resumeAudio, speakPage, goToPage,
+    fadeAnim, slideAnim, isPaused, audioError,
+    pauseAudio, stopAudio, resumeAudio, speakPage, goToPage, retryAudio,
   } = useStoryReader(storyId);
 
   if (loading || !story) return (
@@ -122,6 +122,8 @@ export default function StoryReaderScreen({ route, navigation }: any) {
                 onVoiceChange={(v) => { stopAudio(); setVoice(v); }}
                 onAutoToggle={() => { stopAudio(); setAutoPlay(p => !p); }}
                 onRateChange={setPlaybackRate}
+                audioError={audioError}
+                onRetry={retryAudio}
                 styles={styles}
               />
             </LinearGradient>
@@ -213,6 +215,10 @@ const makeStyles = (c: any, isDark: boolean) => StyleSheet.create({
   listenBtnText:  { fontSize: 14, fontWeight: '700', color: '#fff' },
   voiceChip:      { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 13, paddingVertical: 9, borderRadius: 22, borderWidth: 1 },
   voiceChipText:  { fontSize: 12, fontWeight: '600' },
+  audioErrorBox:  { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8, paddingHorizontal: 12, paddingVertical: 10, borderRadius: radius.lg, borderWidth: 1 },
+  audioErrorText: { flex: 1, minWidth: 160, fontSize: 13, fontWeight: '600' },
+  audioRetryBtn:  { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18 },
+  audioRetryText: { fontSize: 12.5, fontWeight: '700', color: '#fff' },
   speedRow:       { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8 },
   speedLabel:     { fontSize: 12, fontWeight: '700', marginRight: 2 },
   speedChip:      { paddingHorizontal: 13, paddingVertical: 8, borderRadius: 18, borderWidth: 1, minWidth: 42, alignItems: 'center' },
