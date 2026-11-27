@@ -23,11 +23,11 @@ it('keeps every field, label and action', () => {
   expect(body).toContain("var endpoint = '/api/demo-request';");
 });
 
-it('keeps the introduction and puts it beside the form on wide screens', () => {
+it('keeps the introduction and puts it beside the form on tablet and desktop', () => {
   expect(body).toContain('<span class="badge">For Schools</span>');
   expect(body).toContain('<h1 id="demoTitle">Book a Demo</h1>');
   expect(body).toContain("Tell us about your school and we'll set up a personalised walkthrough.");
-  expect(style).toMatch(/@media \(min-width:1024px\)\{\.split\{grid-template-columns:/);
+  expect(style).toMatch(/@media \(min-width:768px\)\{\s*\.split\{grid-template-columns:/);
 });
 
 it('uses the text-only wordmark and the homepage palette', () => {

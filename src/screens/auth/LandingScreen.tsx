@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, Platform, Alert, Modal, BackHandler, Pressable } from 'react-native';
+import { View, Text, TouchableOpacity, Platform, Alert, Modal, BackHandler, Pressable, type ViewStyle } from 'react-native';
 import ActivityIndicator from '../../components/common/AivorahLoader';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import Svg, { Path } from 'react-native-svg';
@@ -546,15 +546,15 @@ function ForgotForm({ onSwitchLogin }: { onSwitchLogin: () => void }) {
 }
 
 // ─────────────────────────────────────────────────────────
-// Page layouts: heading + artwork beside the card on wide screens,
-// heading inside the card on phones and tablets.
+// Page layouts: heading and artwork beside the card where both fit,
+// and heading inside the card on narrower screens.
 // ─────────────────────────────────────────────────────────
 type Copy = { title: string; subtitle?: string };
 
-function IntroPanel({ copy, art, width: w }: { copy: Copy; art: React.ReactNode; width: number }) {
+function IntroPanel({ copy, art, style }: { copy: Copy; art: React.ReactNode; style: ViewStyle }) {
   const { headingSize } = useAuthLayout();
   return (
-    <View style={{ width: w, flexShrink: 0 }}>
+    <View style={style}>
       <AuthHeading title={copy.title} subtitle={copy.subtitle} align="left" size={Math.round(headingSize * 1.15)} />
       <Decorative style={{ marginTop: 8 }}>{art}</Decorative>
     </View>
@@ -567,19 +567,29 @@ function AuthPageLayout({ copy, onBack, children, cardMax, splitMax, art, corner
   cardMax: number; splitMax: number;
   art: React.ReactNode; cornerArt: React.ReactNode;
 }) {
-  const { width, isWide, isTV } = useAuthLayout();
+  const { width, gutter, isWide, isTV } = useAuthLayout();
+  const edgeAligned = IS_WEB && width >= 768;
+  const showIntro = edgeAligned || isWide;
   const introW = isTV ? 420 : width >= 1280 ? 330 : 280;
   // Two columns inside the card once the card itself has room for both.
   const split = canSplit && isWide && width - introW - 160 >= splitMax;
   const cardW = split ? splitMax : cardMax;
+  const frameWidth = edgeAligned && !split ? Math.min(cardW, Math.round((width - gutter * 2) * 0.58)) : cardW;
+  const introStyle: ViewStyle = edgeAligned ? { flex: 1, minWidth: 0, maxWidth: introW } : { width: introW, flexShrink: 0 };
   return (
     <AuthShell onBack={onBack} contentMaxWidth={isWide ? introW + cardW + 120 : undefined}>
       <SplitContext.Provider value={split}>
-        <View style={{ flexDirection: isWide ? 'row' : 'column', alignItems: 'center', justifyContent: 'center', gap: isWide ? 64 : 0, paddingVertical: isWide ? 24 : 16 }}>
-          {isWide && <IntroPanel copy={copy} art={art} width={introW} />}
-          <ShapeFrame style={{ maxWidth: cardW, flexShrink: 1 }}>
-            <AuthCard maxWidth={cardW}>
-              {!isWide && (
+        <View style={{
+          flexDirection: showIntro ? 'row' : 'column',
+          alignItems: 'center',
+          justifyContent: edgeAligned ? 'space-between' : 'center',
+          gap: edgeAligned && gutter === 24 ? 36 : isWide ? 64 : 0,
+          paddingVertical: showIntro ? 24 : 16,
+        }}>
+          {showIntro && <IntroPanel copy={copy} art={art} style={introStyle} />}
+          <ShapeFrame style={{ maxWidth: frameWidth, flexShrink: 1 }} compact={edgeAligned && gutter === 24}>
+            <AuthCard maxWidth={frameWidth}>
+              {!showIntro && (
                 <View>
                   <Decorative style={{ position: 'absolute', top: -38, left: -14 }}>{cornerArt}</Decorative>
                   <AuthHeading title={copy.title} subtitle={copy.subtitle} />

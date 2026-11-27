@@ -29,7 +29,7 @@
     --ok:#23803A; --ok-soft:rgba(35,128,58,0.10); --warn:#B3261E; --warn-soft:rgba(179,38,30,0.07); --soft:rgba(184,67,18,0.08);
     --shadow:0 2px 4px rgba(48,33,23,0.05), 0 20px 40px -22px rgba(48,33,23,0.32);
     --green:#77B742; --yellow:#F6C931; --orange:#F58B3A; --blue:#61ABD7; --ink:#302117; --paper:#FFFFFF;
-    --gutter:16px; --max:1200px; --t:200ms; --ease:cubic-bezier(.2,.7,.2,1);
+    --gutter:16px; --t:200ms; --ease:cubic-bezier(.2,.7,.2,1);
     --serif:"Fraunces", ui-serif, Georgia, serif;
     --sans:"DM Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     color-scheme:light;
@@ -44,8 +44,7 @@
     color-scheme:dark;
   }
   @media (min-width:640px){:root{--gutter:24px}}
-  @media (min-width:1024px){:root{--gutter:40px}}
-  @media (min-width:1920px){:root{--max:1440px;--gutter:64px}}
+  @media (min-width:1200px){:root{--gutter:40px}}
 
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
@@ -59,11 +58,11 @@
   button{font-family:inherit}
   :where(a,button,input,textarea):focus{outline:none}
   :where(a,button):focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:8px}
-  .container{max-width:calc(var(--max) + 2 * var(--gutter));margin:0 auto;padding:0 var(--gutter)}
+  .container{width:100%;padding-inline:var(--gutter)}
 
   /* Header */
   header{position:relative;z-index:2}
-  .bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px var(--gutter)}
+  .bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:16px}
   .logo{font-family:var(--serif);font-weight:600;font-size:30px;letter-spacing:-0.02em;color:var(--heading);text-decoration:none;line-height:1}
   @media (max-width:479px){.logo{font-size:26px}}
   @media (min-width:1920px){.logo{font-size:36px}}
@@ -86,7 +85,9 @@
   /* Layout: introduction beside the form on wide screens, above it on phones */
   main{position:relative;z-index:1;padding:12px 0 64px;overflow-x:hidden;overflow-x:clip}
   .split{display:grid;grid-template-columns:minmax(0,1fr);gap:32px;align-items:start}
-  @media (min-width:1024px){.split{grid-template-columns:minmax(0,0.8fr) minmax(560px,1fr);gap:72px;align-items:center;padding-top:16px}}
+  @media (min-width:768px){
+    .split{grid-template-columns:minmax(0,1fr) minmax(0,min(61%,680px));gap:clamp(32px,5vw,72px);align-items:center;padding-top:16px}
+  }
   .intro{max-width:560px}
   .badge{display:inline-block;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--eyebrow)}
   h1{font-family:var(--serif);font-weight:600;color:var(--heading);font-size:clamp(38px, 2.6vw + 22px, 72px);line-height:1.04;letter-spacing:-0.02em;margin:8px 0 0}
@@ -95,22 +96,23 @@
   html.motion .rule path{stroke-dasharray:200;stroke-dashoffset:200;animation:draw .9s .2s var(--ease) forwards}
   @keyframes draw{to{stroke-dashoffset:0}}
   .lead{margin:16px 0 0;font-size:clamp(16px, 0.4vw + 14px, 20px);line-height:1.6;color:var(--text);max-width:34em}
-  .art{display:none;margin-top:28px;width:200px;pointer-events:none}
+  .art{display:none;margin-top:28px;width:clamp(144px,17vw,200px);max-width:100%;pointer-events:none}
   .art svg{display:block;width:100%;height:auto}
-  @media (min-width:1024px){.art{display:block}}
+  @media (min-width:768px){.art{display:block}}
 
   /* Form card with the homepage's coloured shapes peeking out behind it */
   .stage{position:relative;justify-self:stretch}
-  @media (max-width:1023px){.stage{max-width:720px;margin:0 auto;width:100%}}
+  @media (max-width:767px){.stage{max-width:720px;margin:0 auto;width:100%}}
   .blob{position:absolute;z-index:0;pointer-events:none}
   .b1{top:-26px;right:-30px;width:34%;height:46%;background:var(--orange);border-radius:58% 42% 50% 50% / 46% 54% 46% 54%}
   .b2{top:22%;left:-28px;width:22%;height:50%;background:var(--green);border-radius:44% 56% 52% 48% / 52% 46% 54% 48%}
   .b3{bottom:-24px;left:-14px;width:28%;height:32%;background:var(--yellow);border-radius:52% 48% 40% 60% / 56% 50% 50% 44%}
   .b4{bottom:-22px;right:-24px;width:22%;height:42%;background:var(--blue);border-radius:48% 52% 56% 44% / 50% 54% 46% 50%}
+  @media (min-width:640px) and (max-width:1199px){.b1{right:-18px}.b4{right:-16px}}
   @media (max-width:639px){.b1{top:-14px;right:-10px}.b2{left:-10px}.b3{bottom:-12px;left:-8px}.b4{bottom:-12px;right:-10px}}
   .card{position:relative;z-index:1;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:var(--shadow);width:100%;
     transition:background-color var(--t) var(--ease), border-color var(--t) var(--ease)}
-  @media (min-width:640px){.card{padding:28px 32px}}
+  @media (min-width:640px){.card{padding:28px clamp(22px,3vw,32px)}}
   @media (min-width:1920px){.card{padding:36px 44px}}
   .cs-form{text-align:left}
   .cs-field{margin-bottom:16px}

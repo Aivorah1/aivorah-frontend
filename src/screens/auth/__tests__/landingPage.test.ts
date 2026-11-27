@@ -83,7 +83,7 @@ describe('header', () => {
     // Between them only the Login / Join buttons, which the compact header hides.
     const between = nav.slice(toggle, menu);
     expect(between.match(/class="btn /g)).toHaveLength(2);
-    expect(style).toMatch(/@media \(max-width:1023px\)\{\s*\.nav-links,\.nav-cta \.btn\{display:none\}/);
+    expect(style).toMatch(/@media \(max-width:999px\)\{[^}]*\}\s*\.nav-links,\.nav-cta \.btn\{display:none\}/);
   });
 
   it('exposes the switch state and menu state to assistive tech', () => {
@@ -92,16 +92,16 @@ describe('header', () => {
     expect(html).toContain("mb.setAttribute('aria-expanded', open ? 'true' : 'false')");
   });
 
-  it('labels the switch Light / Dark on wide screens and shows sun / moon on small ones', () => {
-    expect(nav).toMatch(/class="tt-opt tt-light"[\s\S]*?class="tt-sun"[\s\S]*?<span class="tt-word">Light<\/span>/);
-    expect(nav).toMatch(/class="tt-opt tt-dark"[\s\S]*?class="tt-moon"[\s\S]*?<span class="tt-word">Dark<\/span>/);
-    expect(style).toMatch(/@media \(min-width:1280px\)\{[\s\S]*?\.theme-toggle \.tt-word\{display:inline\}/);
+  it('shows named, icon-only theme controls at every width', () => {
+    expect(nav).toContain('class="tt-sun"');
+    expect(nav).toContain('class="tt-moon"');
+    expect(nav).not.toContain('tt-word');
   });
 
-  it('keeps Login and Join Early Access in the menu', () => {
-    const menu = body.slice(body.indexOf('id="mobileMenu"'), body.indexOf('</div>', body.indexOf('id="mobileMenu"')));
-    expect(menu).toContain('>Login<');
-    expect(menu).toContain('>Join Early Access<');
+  it('puts Join Early Access before the shared Login pill in the mobile menu', () => {
+    const menu = body.slice(body.indexOf('id="mobileMenu"'), body.indexOf('<header class="hero">'));
+    expect(menu).toMatch(/>Join Early Access<\/a>\s*<a href="#" class="btn login-pill">Login</);
+    expect(nav).toContain('class="btn login-pill"');
   });
 });
 
@@ -182,9 +182,11 @@ describe('motion', () => {
     expect(html).toContain('if(reduce) showAll();');
   });
 
-  it('no longer runs the endless curriculum marquee or pulsing dot', () => {
-    expect(style).not.toContain('@keyframes marq');
-    expect(style).not.toMatch(/infinite/);
+  it('loops the board row only when allowed and provides a pause control', () => {
+    expect(style).toMatch(/@media \(prefers-reduced-motion:no-preference\)[\s\S]*?animation:board-scroll 60s linear infinite/);
+    expect(style).toContain('animation-play-state:paused');
+    expect(body).toContain('Pause board motion');
+    expect(html).toContain("copy.setAttribute('aria-hidden', 'true')");
   });
 });
 

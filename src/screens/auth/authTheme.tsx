@@ -111,7 +111,9 @@ export const useHomeTheme = () => useContext(HomeThemeContext);
 /** Responsive helpers: gutters and content caps. */
 export function useAuthLayout() {
   const { width, height } = useWindowDimensions();
-  const gutter = width < 640 ? 16 : width < 1024 ? 24 : width >= 1920 ? 56 : 32;
+  const gutter = IS_WEB
+    ? (width < 640 ? 16 : width < 1200 ? 24 : 40)
+    : (width < 640 ? 16 : width < 1024 ? 24 : width >= 1920 ? 56 : 32);
   const maxContent = width >= 1920 ? 1440 : 1200;
   const headingSize = width < 640 ? 30 : width < 1024 ? 36 : width >= 1920 ? 52 : 44;
   return { width, height, gutter, maxContent, headingSize, isWide: width >= 1024, isTablet: width >= 640, isTV: width >= 1920 };
@@ -201,7 +203,7 @@ export function AuthShell({
   children, onBack, backLabel = 'Back to home', backIcon = 'home', backStyle = 'link', headerRight, contentStyle, center = true, contentMaxWidth,
 }: {
   children: React.ReactNode;
-  /** Wider content area than the default 1200/1440px cap. */
+  /** Wider native content area than the default 1200/1440px cap. */
   contentMaxWidth?: number;
   onBack?: () => void;
   backLabel?: string;
@@ -224,7 +226,7 @@ export function AuthShell({
         contentContainerStyle={{ flexGrow: 1, paddingBottom: isTablet ? 48 : 28 }}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={{ flexGrow: 1, width: '100%', maxWidth: Math.max(maxContent, contentMaxWidth ?? 0) + gutter * 2, alignSelf: 'center', paddingHorizontal: gutter }}>
+        <View style={{ flexGrow: 1, width: '100%', maxWidth: IS_WEB ? undefined : Math.max(maxContent, contentMaxWidth ?? 0) + gutter * 2, alignSelf: 'center', paddingHorizontal: gutter }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, paddingTop: isTablet ? 18 : 12, paddingBottom: isTablet ? 18 : 12 }}>
             <BrandMark size={isTV ? 36 : isTablet ? 30 : 26} />
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: isTablet ? 12 : 8 }}>
