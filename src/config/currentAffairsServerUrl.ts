@@ -5,7 +5,7 @@ import { USE_LOCAL_SERVICES } from './localServices';
 // /current-affairs, so the live URL and local port (3010) are that service's
 // (same as worldAndYouServerUrl.ts). The attendance service only forwards old
 // app versions' calls there.
-const LIVE_SERVICE = 'https://aivorah-world-and-you-service-1.onrender.com';
+const LIVE_SERVICE = 'https://aivorah-world-and-you-service-kt7l.onrender.com';
 
 // EXPO_PUBLIC_CURRENT_AFFAIRS_URL points only this feature elsewhere (e.g. a preview deploy).
 const CURRENT_AFFAIRS_SERVER_URL =
