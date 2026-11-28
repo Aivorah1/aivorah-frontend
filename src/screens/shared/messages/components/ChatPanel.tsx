@@ -15,11 +15,13 @@ interface Props {
   colors: AppColors;
   styles: any;
   userRole: string;
+  compact?: boolean;
   userEmail: string;
   activeChannel: Channel | null;
   onCloseChannel: () => void;
   onChannelsReload: () => void;
   activeConvo: Conversation | null;
+  onBackToInbox?: () => void;
   loadingThread: boolean;
   messages: Message[];
   flatListRef: React.RefObject<FlatList | null>;
@@ -46,17 +48,30 @@ interface Props {
 }
 
 export default function ChatPanel({
-  colors, styles, userRole, userEmail, activeChannel, onCloseChannel, onChannelsReload,
-  activeConvo, loadingThread, messages, flatListRef,
+  colors, styles, userRole, compact, userEmail, activeChannel, onCloseChannel, onChannelsReload,
+  activeConvo, onBackToInbox, loadingThread, messages, flatListRef,
   focusedMsgId, setFocusedMsgId, copiedMsgId, setContextMenu, startEdit, toggleReaction,
   showEmoji, setShowEmoji, emojiCategory, setEmojiCategory,
   replyTo, setReplyTo, attachment, removeAttachment, uploading, sending, pickFile,
   inputText, setInputText, sendMessage,
 }: Props) {
+  const emojiPicker = showEmoji && (
+    <EmojiPicker
+      onClose={() => setShowEmoji(false)}
+      styles={compact ? { ...styles, emojiPickerFloating: [styles.emojiPickerFloating, styles.compactEmojiPicker] } : styles}
+      emojiCategory={emojiCategory}
+      setEmojiCategory={setEmojiCategory}
+      onPickEmoji={(e) => setInputText(inputText + e)}
+    />
+  );
   return (
-    <View style={styles.chatPanel}>
+    <KeyboardAvoidingView
+      style={styles.chatPanel}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={compact ? 0 : 80}
+    >
       {activeChannel ? (
-        <ChannelThreadView channel={activeChannel} onBack={() => { onCloseChannel(); onChannelsReload(); }} />
+        <ChannelThreadView channel={activeChannel} compact={compact} onBack={() => { onCloseChannel(); onChannelsReload(); }} />
       ) : !activeConvo ? (
         <View style={styles.noConvoState}>
           <Feather name="message-circle" size={48} color={colors.textDim} />
@@ -68,18 +83,14 @@ export default function ChatPanel({
           )}
         </View>
       ) : (
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          keyboardVerticalOffset={80}
-        >
-          <ChatHeader activeConvo={activeConvo} colors={colors} styles={styles} />
+        <View style={{ flex: 1, minHeight: 0 }}>
+          <ChatHeader activeConvo={activeConvo} colors={colors} styles={styles} onBackToInbox={onBackToInbox} />
 
           {loadingThread ? (
             <ActivityIndicator color={colors.accentYellow} style={{ flex: 1 }} />
           ) : (
             <>
-              {showEmoji && (
+              {!compact && showEmoji && (
                 <TouchableOpacity
                   style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10 }}
                   activeOpacity={1}
@@ -87,6 +98,7 @@ export default function ChatPanel({
                 />
               )}
               <FlatList
+                style={compact ? { flex: 1, minHeight: 0 } : undefined}
                 ref={flatListRef}
                 data={messages}
                 keyExtractor={i => i.id}
@@ -125,32 +137,27 @@ export default function ChatPanel({
             </>
           )}
 
+          {compact && emojiPicker}
           <MessageComposer
-            activeConvo={activeConvo} colors={colors} styles={styles} userRole={userRole} userEmail={userEmail}
+            activeConvo={activeConvo} colors={colors} styles={styles} userRole={userRole} userEmail={userEmail} compact={compact}
             replyTo={replyTo} setReplyTo={setReplyTo}
             attachment={attachment} removeAttachment={removeAttachment}
             uploading={uploading} sending={sending} pickFile={pickFile}
             showEmoji={showEmoji} setShowEmoji={setShowEmoji}
             inputText={inputText} setInputText={setInputText} sendMessage={sendMessage}
           />
-        </KeyboardAvoidingView>
+        </View>
       )}
 
       {/* Emoji picker — floats above the composer as an overlay spanning the
           whole chat panel, so tapping anywhere outside (message list included)
           closes it, WhatsApp-style. */}
-      {showEmoji && (
+      {!compact && showEmoji && (
         <>
           <TouchableOpacity style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} activeOpacity={1} onPress={() => setShowEmoji(false)} />
-          <EmojiPicker
-            onClose={() => setShowEmoji(false)}
-            styles={styles}
-            emojiCategory={emojiCategory}
-            setEmojiCategory={setEmojiCategory}
-            onPickEmoji={(e) => setInputText(inputText + e)}
-          />
+          {emojiPicker}
         </>
       )}
-    </View>
+    </KeyboardAvoidingView>
   );
 }

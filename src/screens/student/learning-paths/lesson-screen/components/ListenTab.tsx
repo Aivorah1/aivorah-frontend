@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image, useWindowDimensions } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import SERVER_URL from '../../../../../config/serverUrl';
 import type { AppColors } from '../../../../../theme';
@@ -104,6 +104,9 @@ export default function ListenTab({
   const playMode = !!step?.lines?.length && !isMath;
   const tutorMode = isMath && listenSteps.some((st) => st.math);
   const tutorFinished = !!narration.completedSteps?.has(listenStep);
+  const compact = useWindowDimensions().width < 768 && !isMath;
+  const narrationActive = listenPlaying || narration.paused;
+  const narrationColor = narrationActive ? colors.accentGreen : colors.primary;
   const sceneYRef = React.useRef<Record<number, number>>({});
   const word = vocab[vocabIndex];
   const stepsCount = listenSteps.length;
@@ -115,17 +118,206 @@ export default function ListenTab({
     setExampleOpen(() => false);
   }
 
+  function renderListenItem(item: typeof listenSteps[number], index: number, testID: string) {
+    const active = index === listenStep && narrationActive;
+    const playing = active && listenPlaying;
+    const accent = active ? colors.accentGreen : colors.primary;
+    const hasNarrator = !item.lines?.length || item.lines.some(line => line.speaker.trim().toLowerCase() === 'narrator');
+    const title = item.heading || item.label;
+    return (
+      <TouchableOpacity
+        key={testID}
+        testID={testID}
+        accessibilityRole="button"
+        accessibilityLabel={`${playing ? 'Pause' : active ? 'Resume' : 'Play'} ${title}`}
+        accessibilityState={{ selected: !!active }}
+        onPress={() => active ? toggleListenPlay() : playListenStep(index)}
+        activeOpacity={0.75}
+        style={[styles.listenItem, { borderColor: active ? accent + '65' : colors.borderColor, backgroundColor: active ? accent + '18' : colors.cardDark }]}
+      >
+        <View style={[styles.listenItemIcon, { backgroundColor: accent + '22' }]}>
+          <Feather name={playing ? 'pause' : 'play'} size={16} color={accent} />
+        </View>
+        <Text style={[styles.listenItemTitle, { color: colors.textMain }]}>{title}</Text>
+        {hasNarrator && (
+          <View style={[styles.listenBadge, { alignSelf: 'center', backgroundColor: accent + '18' }]}>
+            <Feather name="mic" size={11} color={accent} />
+            <Text style={[styles.listenBadgeText, { color: accent }]}>Narrator</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    );
+  }
+
+  function renderResources() {
+    return (
+      <>
+      {isMath && !step?.math && listenSteps.some((st) => st.math) && (
+        <IntroBoard
+          intro={step?.keyIdea || step?.text || ''}
+          examples={listenSteps.map((st, index) => ({ index, st })).filter(({ st }) => st.math).map(({ index, st }) => ({ index, title: st.heading, problem: st.math!.problem, page: st.math!.page }))}
+          onOpen={(i) => goToListenStep(i, closeAllPanels)}
+          colors={colors}
+        />
+      )}
+      {isMath && !!step?.math && (
+        <MathBoard
+          key={listenStep}
+          math={step.math}
+          revealed={curSentenceIdx}
+          finished={!!narration.completedSteps?.has(listenStep)}
+          colors={colors}
+        />
+      )}
+      {reasoning && (
+        <ListenVisualBoard
+          cards={reasoning.cards}
+          activeCard={cardAtLine ?? reasoning.stepToCard[listenStep] ?? null}
+          bookQuote={followsBook ? undefined : reasoning.bookQuote}
+          bookPage={bookPage}
+          followsBook={followsBook}
+          sceneVisual={sceneVisual}
+          hasVisuals={hasVisuals}
+          topic={topic}
+          grade={grade}
+          subject={subject}
+          colors={colors}
+        />
+      )}
+      {(() => {
+        // Per-stanza illustration for the current Listen step — map the
+        // active stanza to its book image so the panel shows the real
+        // picture, not "coming soon".
+        const prompts = (topic.readText as any).illustrationPrompts as any[] | undefined;
+        const withImg = (prompts || []).filter(p => p?.image || p?.image_ref || p?.url);
+        if (withImg.length === 0) return null;
+        const pick = withImg[Math.min(listenStep, withImg.length - 1)];
+        const raw = pick.image || pick.image_ref || pick.url;
+        const uri = /^https?:/.test(raw) ? raw : `${SERVER_URL}${raw}`;
+        return (
+          <View>
+            <TouchableOpacity
+              style={[styles.illustrationBox, { borderColor: colors.borderColor, backgroundColor: colors.bgDark }]}
+              activeOpacity={0.85}
+              onPress={() => setZoomImage({ uri, caption: pick.altText })}
+            >
+              <Image source={{ uri }} style={styles.figureImg} resizeMode="contain" />
+              <View style={styles.zoomHint}><Feather name="maximize-2" size={11} color="#fff" /></View>
+            </TouchableOpacity>
+            {!!pick.altText && (
+              <View style={[styles.captionBox, { borderColor: colors.accentYellow + '30', backgroundColor: colors.accentYellow + '10' }]}>
+                <Text style={[styles.captionText, { color: colors.textMain }]}>{pick.altText}</Text>
+              </View>
+            )}
+          </View>
+        );
+      })() || (topic.readText.figureUrl ? (
+        <View>
+          <TouchableOpacity
+            style={[styles.illustrationBox, { borderColor: colors.borderColor, backgroundColor: colors.bgDark }]}
+            activeOpacity={0.85}
+            onPress={() => setZoomImage({ uri: topic.readText.figureUrl!, caption: topic.readText.figureCaption })}
+          >
+            <Image source={{ uri: topic.readText.figureUrl }} style={styles.figureImg} resizeMode="contain" />
+            <View style={styles.zoomHint}>
+              <Feather name="maximize-2" size={11} color="#fff" />
+            </View>
+          </TouchableOpacity>
+          {!!topic.readText.figureCaption && (
+            <View style={[styles.captionBox, { borderColor: colors.accentYellow + '30', backgroundColor: colors.accentYellow + '10' }]}>
+              <Text style={[styles.captionText, { color: colors.textMain }]}>{topic.readText.figureCaption}</Text>
+            </View>
+          )}
+        </View>
+      ) : (() => {
+        // Maths AI Tutor: no illustration — show the worked example being
+        // taught, solved step-by-step on a "whiteboard" card that follows
+        // the current tutor step. This is the AI explaining, not an image.
+        const worked = (topic.readText as any).workedExamples as any[] | undefined;
+        if (worked && worked.length > 0) {
+          const ex = worked[Math.max(0, Math.min(worked.length - 1, listenStep - 1))];
+          return (
+            <View style={[styles.card, { borderColor: colors.accentGreen + '40', backgroundColor: colors.accentGreen + '0a' }]}>
+              <View style={styles.newWordHeader}>
+                <Feather name="edit-3" size={13} color={colors.accentGreen} />
+                <Text style={[styles.newWordLabel, { color: colors.accentGreen }]}>Let&apos;s solve it together</Text>
+              </View>
+              <Text style={[styles.whyText, { color: colors.textMain, fontWeight: '800', fontSize: 18, marginTop: 8 }]}>
+                {ex.problem}
+              </Text>
+              {(ex.steps || []).map((s: string, i: number) => (
+                <View key={i} style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
+                  <Text style={{ color: colors.accentGreen, fontWeight: '800', fontSize: 13 }}>{i + 1}</Text>
+                  <Text style={[styles.whyText, { color: colors.textMuted, flex: 1 }]}>{s}</Text>
+                </View>
+              ))}
+              {ex.answer != null && (
+                <Text style={{ color: colors.accentGreen, fontWeight: '800', fontSize: 16, marginTop: 10 }}>= {ex.answer}</Text>
+              )}
+            </View>
+          );
+        }
+        // No picture exists for this lesson (senior-grade NCERT chapters
+        // are often text-only). Render NOTHING rather than an empty grey
+        // frame promising art that isn't coming — the placeholder read as
+        // a broken page. The right pane still shows New Word etc.
+        return null;
+      })())}
+
+      {!!word && (
+        <View style={[styles.card, { borderColor: colors.borderColor, backgroundColor: colors.cardDark }]}>
+          <View style={styles.newWordHeader}>
+            <Feather name="book" size={13} color={colors.accentYellow} />
+            <Text style={[styles.newWordLabel, { color: colors.accentYellow }]}>New Word</Text>
+          </View>
+          <View style={styles.newWordRow}>
+            <Text style={[styles.newWordText, { color: colors.textMain }]}>{word.word}</Text>
+            <TouchableOpacity
+              style={[styles.wordSpeakBtn, { backgroundColor: colors.accentGreen + '18' }]}
+              onPress={() => speakWithBoundary(word.word, () => {}, () => {})}
+              activeOpacity={0.7}
+            >
+              <Feather name="volume-2" size={13} color={colors.accentGreen} />
+            </TouchableOpacity>
+          </View>
+          <Text style={[styles.newWordDef, { color: colors.textMuted }]}>{word.definition}</Text>
+          <View style={styles.newWordFooter}>
+            <TouchableOpacity style={styles.useInSentenceLink} activeOpacity={0.7}>
+              <Feather name="edit-3" size={12} color={colors.accentGreen} />
+              <Text style={[styles.useInSentenceText, { color: colors.accentGreen }]}>Use in a sentence</Text>
+            </TouchableOpacity>
+            <View style={styles.vocabNavRow}>
+              <Text style={[styles.vocabPageText, { color: colors.textMuted }]}>{vocabIndex + 1}/{vocab.length}</Text>
+              <TouchableOpacity onPress={() => setVocabIndex(i => Math.max(0, i - 1))} disabled={vocabIndex === 0}>
+                <Feather name="chevron-left" size={16} color={vocabIndex === 0 ? colors.borderColor : colors.textMuted} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.vocabNavActive, { backgroundColor: colors.accentGreen + '18' }]}
+                onPress={() => setVocabIndex(i => Math.min(vocab.length - 1, i + 1))}
+                disabled={vocabIndex === vocab.length - 1}
+              >
+                <Feather name="chevron-right" size={16} color={colors.accentGreen} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
+
+      </>
+    );
+  }
+
   return (
     <View style={styles.listenModeWrap}>
       <View style={styles.dualPane}>
         {/* Left column: the text scrolls, the play/pause controls stay put underneath it. */}
-        <View style={styles.leftPane}>
+        <View style={compact ? styles.leftPaneFull : styles.leftPane}>
         <ScrollView ref={leftScrollRef} style={styles.leftScroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <View style={styles.listenTopRow}>
             {tutorMode ? <View /> : (
-            <View style={[styles.listeningToChip, { backgroundColor: colors.accentGreen + '1c' }]}>
-              <Text style={[styles.listeningToText, { color: colors.accentGreen }]}>
-                {isMath ? `Step ${listenStep + 1} of ${stepsCount}: ${step?.label}` : `Listening to: ${step?.label} of ${stepsCount}`}
+            <View style={[styles.listeningToChip, { backgroundColor: (isMath ? colors.accentGreen : narrationColor) + '1c' }]}>
+              <Text style={[styles.listeningToText, { color: isMath ? colors.accentGreen : narrationColor }]}>
+                {isMath ? `Step ${listenStep + 1} of ${stepsCount}: ${step?.label}` : `${listenPlaying ? 'Listening to' : narration.paused ? 'Paused' : 'Selected'}: ${step?.label} of ${stepsCount}`}
               </Text>
             </View>
             )}
@@ -147,6 +339,12 @@ export default function ListenTab({
             <View style={[styles.aiTutorBadge, { backgroundColor: colors.primary + '14', borderColor: colors.primary + '30' }]}>
               <Feather name="cpu" size={12} color={colors.primary} />
               <Text style={[styles.aiTutorBadgeText, { color: colors.primary }]}>AI Tutor — let&apos;s understand this step by step</Text>
+            </View>
+          )}
+
+          {!playMode && !isMath && stepsCount > 1 && (
+            <View style={styles.listenItemList}>
+              {listenSteps.map((item, index) => renderListenItem(item, index, `listen-item-${index}`))}
             </View>
           )}
 
@@ -192,24 +390,14 @@ export default function ListenTab({
                 const current = si === listenStep;
                 return (
                   <View key={si} onLayout={(e) => { sceneYRef.current[si] = e.nativeEvent.layout.y; }} style={{ marginBottom: 18 }}>
-                    <TouchableOpacity
-                      testID={`scene-${si}`}
-                      accessibilityRole="button"
-                      accessibilityLabel={`Play ${st.heading}`}
-                      onPress={() => playListenStep(si)}
-                      activeOpacity={0.7}
-                      style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: current ? colors.accentGreen : colors.borderColor }}
-                    >
-                      <Feather name={current && listenPlaying ? 'volume-2' : 'play-circle'} size={16} color={current ? colors.accentGreen : colors.textMuted} />
-                      <Text style={[styles.listenHeading, { color: current ? colors.textMain : colors.textMuted, marginVertical: 0, flex: 1 }]}>{st.heading}</Text>
-                    </TouchableOpacity>
+                    {renderListenItem(st, si, `scene-${si}`)}
                     {(current ? sentences : (st.lines || []).map((line) => ({ sentence: line.text, line }))).map((s, i, all: any[]) => {
                       const active = current && i === curSentenceIdx;
                       const line = s.line;
                       return (
                         <View key={i} onLayout={current ? (e) => { sentenceYRef.current[i] = (sceneYRef.current[si] || 0) + e.nativeEvent.layout.y; } : undefined}>
                           {line && (i === 0 || all[i - 1].line?.speaker !== line.speaker) && !line.stage && (
-                            <Text style={[styles.playSpeaker, { color: active ? colors.accentGreen : colors.textDim }]}>{line.speaker}</Text>
+                            <Text style={[styles.playSpeaker, { color: active && narrationActive ? colors.accentGreen : colors.textDim }]}>{line.speaker}</Text>
                           )}
                           {!!line?.direction && !line.stage && (
                             <Text style={[styles.playDirection, { color: colors.textMuted }]}>({line.direction})</Text>
@@ -251,7 +439,7 @@ export default function ListenTab({
                 return (
                   <View key={i} onLayout={(e) => { sentenceYRef.current[i] = e.nativeEvent.layout.y; }}>
                     {line && (i === 0 || sentences[i - 1].line?.speaker !== line.speaker) && !line.stage && (
-                      <Text style={[styles.playSpeaker, { color: active ? colors.accentGreen : colors.textDim }]}>{line.speaker}</Text>
+                      <Text style={[styles.playSpeaker, { color: active && narrationActive ? colors.accentGreen : colors.textDim }]}>{line.speaker}</Text>
                     )}
                     {!!line?.direction && !line.stage && (
                       <Text style={[styles.playDirection, { color: colors.textMuted }]}>({line.direction})</Text>
@@ -433,6 +621,7 @@ export default function ListenTab({
               )}
             </View>
           )}
+          {compact && <View style={styles.listenResources}>{renderResources()}</View>}
         </ScrollView>
 
         {/* Play / Pause always in view: long text scrolls (and follows the voice)
@@ -498,15 +687,15 @@ export default function ListenTab({
             {!isMath && (
             <View style={[styles.card, styles.playerBar, styles.playerBarFixed, { borderColor: colors.borderColor, backgroundColor: colors.cardDark }]}>
                 <TouchableOpacity
-                  style={[styles.playBtn, { backgroundColor: colors.accentGreen }]}
+                  style={[styles.playBtn, { backgroundColor: narrationColor + '22' }]}
                   onPress={toggleListenPlay}
                   activeOpacity={0.85}
                   accessibilityRole="button"
                   accessibilityLabel={listenPlaying ? 'Pause' : 'Play'}
                 >
-                  <Feather name={listenPlaying ? 'pause' : 'play'} size={18} color="#fff" />
+                  <Feather name={listenPlaying ? 'pause' : 'play'} size={18} color={narrationColor} />
                 </TouchableOpacity>
-                <Text style={[styles.playerStatus, { color: colors.textMuted }]}>{listenPlaying ? 'Reading aloud…' : 'Tap to listen'}</Text>
+                <Text style={[styles.playerStatus, { color: colors.textMuted }]}>{listenPlaying ? 'Reading aloud…' : narration.paused ? 'Paused' : 'Tap to listen'}</Text>
                 <TouchableOpacity
                   style={[styles.playerIconBtn, { borderColor: colors.borderColor }]}
                   onPress={repeatStep}
@@ -550,158 +739,11 @@ export default function ListenTab({
         </View>
 
         {/* ── Right pane: illustration + New Word ── */}
-        <ScrollView style={styles.rightPane} contentContainerStyle={{ gap: 14 }} showsVerticalScrollIndicator={false}>
-          {isMath && !step?.math && listenSteps.some((st) => st.math) && (
-            <IntroBoard
-              intro={step?.keyIdea || step?.text || ''}
-              examples={listenSteps.map((st, index) => ({ index, st })).filter(({ st }) => st.math).map(({ index, st }) => ({ index, title: st.heading, problem: st.math!.problem, page: st.math!.page }))}
-              onOpen={(i) => goToListenStep(i, closeAllPanels)}
-              colors={colors}
-            />
-          )}
-          {isMath && !!step?.math && (
-            <MathBoard
-              key={listenStep}
-              math={step.math}
-              revealed={curSentenceIdx}
-              finished={!!narration.completedSteps?.has(listenStep)}
-              colors={colors}
-            />
-          )}
-          {reasoning && (
-            <ListenVisualBoard
-              cards={reasoning.cards}
-              activeCard={cardAtLine ?? reasoning.stepToCard[listenStep] ?? null}
-              bookQuote={followsBook ? undefined : reasoning.bookQuote}
-              bookPage={bookPage}
-              followsBook={followsBook}
-              sceneVisual={sceneVisual}
-              hasVisuals={hasVisuals}
-              topic={topic}
-              grade={grade}
-              subject={subject}
-              colors={colors}
-            />
-          )}
-          {(() => {
-            // Per-stanza illustration for the current Listen step — map the
-            // active stanza to its book image so the panel shows the real
-            // picture, not "coming soon".
-            const prompts = (topic.readText as any).illustrationPrompts as any[] | undefined;
-            const withImg = (prompts || []).filter(p => p?.image || p?.image_ref || p?.url);
-            if (withImg.length === 0) return null;
-            const pick = withImg[Math.min(listenStep, withImg.length - 1)];
-            const raw = pick.image || pick.image_ref || pick.url;
-            const uri = /^https?:/.test(raw) ? raw : `${SERVER_URL}${raw}`;
-            return (
-              <View>
-                <TouchableOpacity
-                  style={[styles.illustrationBox, { borderColor: colors.borderColor, backgroundColor: colors.bgDark }]}
-                  activeOpacity={0.85}
-                  onPress={() => setZoomImage({ uri, caption: pick.altText })}
-                >
-                  <Image source={{ uri }} style={styles.figureImg} resizeMode="contain" />
-                  <View style={styles.zoomHint}><Feather name="maximize-2" size={11} color="#fff" /></View>
-                </TouchableOpacity>
-                {!!pick.altText && (
-                  <View style={[styles.captionBox, { borderColor: colors.accentYellow + '30', backgroundColor: colors.accentYellow + '10' }]}>
-                    <Text style={[styles.captionText, { color: colors.textMain }]}>{pick.altText}</Text>
-                  </View>
-                )}
-              </View>
-            );
-          })() || (topic.readText.figureUrl ? (
-            <View>
-              <TouchableOpacity
-                style={[styles.illustrationBox, { borderColor: colors.borderColor, backgroundColor: colors.bgDark }]}
-                activeOpacity={0.85}
-                onPress={() => setZoomImage({ uri: topic.readText.figureUrl!, caption: topic.readText.figureCaption })}
-              >
-                <Image source={{ uri: topic.readText.figureUrl }} style={styles.figureImg} resizeMode="contain" />
-                <View style={styles.zoomHint}>
-                  <Feather name="maximize-2" size={11} color="#fff" />
-                </View>
-              </TouchableOpacity>
-              {!!topic.readText.figureCaption && (
-                <View style={[styles.captionBox, { borderColor: colors.accentYellow + '30', backgroundColor: colors.accentYellow + '10' }]}>
-                  <Text style={[styles.captionText, { color: colors.textMain }]}>{topic.readText.figureCaption}</Text>
-                </View>
-              )}
-            </View>
-          ) : (() => {
-            // Maths AI Tutor: no illustration — show the worked example being
-            // taught, solved step-by-step on a "whiteboard" card that follows
-            // the current tutor step. This is the AI explaining, not an image.
-            const worked = (topic.readText as any).workedExamples as any[] | undefined;
-            if (worked && worked.length > 0) {
-              const ex = worked[Math.max(0, Math.min(worked.length - 1, listenStep - 1))];
-              return (
-                <View style={[styles.card, { borderColor: colors.accentGreen + '40', backgroundColor: colors.accentGreen + '0a' }]}>
-                  <View style={styles.newWordHeader}>
-                    <Feather name="edit-3" size={13} color={colors.accentGreen} />
-                    <Text style={[styles.newWordLabel, { color: colors.accentGreen }]}>Let&apos;s solve it together</Text>
-                  </View>
-                  <Text style={[styles.whyText, { color: colors.textMain, fontWeight: '800', fontSize: 18, marginTop: 8 }]}>
-                    {ex.problem}
-                  </Text>
-                  {(ex.steps || []).map((s: string, i: number) => (
-                    <View key={i} style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
-                      <Text style={{ color: colors.accentGreen, fontWeight: '800', fontSize: 13 }}>{i + 1}</Text>
-                      <Text style={[styles.whyText, { color: colors.textMuted, flex: 1 }]}>{s}</Text>
-                    </View>
-                  ))}
-                  {ex.answer != null && (
-                    <Text style={{ color: colors.accentGreen, fontWeight: '800', fontSize: 16, marginTop: 10 }}>= {ex.answer}</Text>
-                  )}
-                </View>
-              );
-            }
-            // No picture exists for this lesson (senior-grade NCERT chapters
-            // are often text-only). Render NOTHING rather than an empty grey
-            // frame promising art that isn't coming — the placeholder read as
-            // a broken page. The right pane still shows New Word etc.
-            return null;
-          })())}
-
-          {!!word && (
-            <View style={[styles.card, { borderColor: colors.borderColor, backgroundColor: colors.cardDark }]}>
-              <View style={styles.newWordHeader}>
-                <Feather name="book" size={13} color={colors.accentYellow} />
-                <Text style={[styles.newWordLabel, { color: colors.accentYellow }]}>New Word</Text>
-              </View>
-              <View style={styles.newWordRow}>
-                <Text style={[styles.newWordText, { color: colors.textMain }]}>{word.word}</Text>
-                <TouchableOpacity
-                  style={[styles.wordSpeakBtn, { backgroundColor: colors.accentGreen + '18' }]}
-                  onPress={() => speakWithBoundary(word.word, () => {}, () => {})}
-                  activeOpacity={0.7}
-                >
-                  <Feather name="volume-2" size={13} color={colors.accentGreen} />
-                </TouchableOpacity>
-              </View>
-              <Text style={[styles.newWordDef, { color: colors.textMuted }]}>{word.definition}</Text>
-              <View style={styles.newWordFooter}>
-                <TouchableOpacity style={styles.useInSentenceLink} activeOpacity={0.7}>
-                  <Feather name="edit-3" size={12} color={colors.accentGreen} />
-                  <Text style={[styles.useInSentenceText, { color: colors.accentGreen }]}>Use in a sentence</Text>
-                </TouchableOpacity>
-                <View style={styles.vocabNavRow}>
-                  <Text style={[styles.vocabPageText, { color: colors.textMuted }]}>{vocabIndex + 1}/{vocab.length}</Text>
-                  <TouchableOpacity onPress={() => setVocabIndex(i => Math.max(0, i - 1))} disabled={vocabIndex === 0}>
-                    <Feather name="chevron-left" size={16} color={vocabIndex === 0 ? colors.borderColor : colors.textMuted} />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.vocabNavActive, { backgroundColor: colors.accentGreen + '18' }]}
-                    onPress={() => setVocabIndex(i => Math.min(vocab.length - 1, i + 1))}
-                    disabled={vocabIndex === vocab.length - 1}
-                  >
-                    <Feather name="chevron-right" size={16} color={colors.accentGreen} />
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </View>
-          )}
-        </ScrollView>
+        {!compact && (
+          <ScrollView style={styles.rightPane} contentContainerStyle={{ gap: 14 }} showsVerticalScrollIndicator={false}>
+            {renderResources()}
+          </ScrollView>
+        )}
       </View>
 
       {isMath && !tutorMode && (

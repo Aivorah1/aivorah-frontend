@@ -24,6 +24,7 @@ import { normalizeCurriculum, normalizeUserCurricula } from '../utils/curriculum
 import { getNativeGoogleIdToken, nativeGoogleErrorMessage, signOutNativeGoogle } from '../services/nativeGoogleSignIn';
 
 const PROFILE_KEY = 'ai_mentor_user_profile';
+const PROFILE_LOOKUP_ERROR = 'Aivorah could not load your account right now. Please try signing in again shortly.';
 
 function normalizeEmail(email: string | undefined | null) {
   return String(email || '').toLowerCase().trim();
@@ -144,7 +145,6 @@ async function fetchSupabaseProfile(email: string): Promise<Partial<User> & { _s
       // _accountExists: a real identity row was returned. When no row exists,
       // /user/sync replies with just { email, onboardingComplete:false } (no id,
       // no role) — meaning the account was never created or has been deleted.
-      combined._syncOk = true;
       combined._accountExists = !!(data.id || data.role);
       if (data.id) primeStudentId(email, String(data.id));
       Object.assign(combined, {
@@ -172,6 +172,7 @@ async function fetchSupabaseProfile(email: string): Promise<Partial<User> & { _s
         state:              data.state   || undefined,
         country:            data.country || undefined,
       });
+      combined._syncOk = true;
     }
   } catch {}
 
@@ -389,7 +390,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         cached = null;
       }
 
-      if (cached?.email && cached?.role) {
+      if (cached?.email && cached?.role && cached.onboardingComplete === true) {
         setUser(cached);
         setLoading(false);
       }
@@ -441,37 +442,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        // Load saved local profile + fetch Supabase profile (needed to detect parent-activated accounts)
-        let supaProfile: Partial<User> & { _syncOk?: boolean; _accountExists?: boolean } = {};
-        let savedRaw: string | null = null;
-        try {
-          [supaProfile, savedRaw] = await Promise.all([
-            fetchSupabaseProfile(email),
-            AsyncStorage.getItem(PROFILE_KEY).catch(() => null),
-          ]);
-        } catch {
-          // Network error — fall back to cached profile so refresh doesn't kick user out
-          const cached = await AsyncStorage.getItem(PROFILE_KEY).catch(() => null);
-          if (cached) {
-            try {
-              const parsed = JSON.parse(cached);
-              if (parsed?.email === email) {
-                setUser(parsed);
-                setLoading(false);
-                return;
-              }
-            } catch {}
-          }
-          setLoading(false);
-          return;
-        }
-        let savedLocal: Partial<User> = {};
+        // Load saved local profile + fetch Supabase profile (needed to detect parent-activated accounts).
+        const [profile, savedRaw] = await Promise.all([
+          fetchSupabaseProfile(email),
+          AsyncStorage.getItem(PROFILE_KEY).catch(() => null),
+        ]);
+        let supaProfile = profile;
+        let cachedUser: User | null = null;
         try {
           if (savedRaw) {
             const parsed = JSON.parse(savedRaw);
-            savedLocal = isCachedProfileForEmail(parsed, email) ? parsed : {};
+            if (parsed?.role && isCachedProfileForEmail(parsed, email)) cachedUser = parsed;
           }
         } catch {}
+
+        if (supaProfile._syncOk !== true) {
+          // Only a previously completed session can be restored without a fresh lookup.
+          const completedSession = cachedUser?.onboardingComplete === true ? cachedUser : null;
+          setUser(completedSession);
+          if (!completedSession) setAuthError(PROFILE_LOOKUP_ERROR);
+          setLoading(false);
+          return;
+        }
+        const savedLocal: Partial<User> = cachedUser ?? {};
 
         // Auto-generated @aivorah.student emails have no mailbox — bypass verification
         // Parent-activated student accounts (accountStatus = 'active') also bypass verification
@@ -931,6 +924,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         fetchSupabaseProfile(email),
         AsyncStorage.getItem(PROFILE_KEY).catch(() => null),
       ]);
+      if (profile._syncOk !== true) throw new Error(PROFILE_LOOKUP_ERROR);
       let savedLocal: Partial<User> = {};
       try {
         if (savedRaw) {
@@ -1176,6 +1170,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         fetchSupabaseProfile(email),
         AsyncStorage.getItem(PROFILE_KEY).catch(() => null),
       ]);
+      if (profile._syncOk !== true) throw new Error(PROFILE_LOOKUP_ERROR);
       const name = profile.name || googleDisplayName;
       let savedLocal: Partial<User> = {};
       try {

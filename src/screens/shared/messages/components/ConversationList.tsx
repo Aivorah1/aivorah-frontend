@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, TextInput, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, ScrollView, TextInput, TouchableOpacity } from 'react-native';
 import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../theme';
@@ -17,6 +17,7 @@ interface Props {
   colors: AppColors;
   styles: any;
   userRole: string;
+  compact?: boolean;
   loadingConvos: boolean;
   unifiedInbox: InboxItem[];
   activeConvoEmail: string | null;
@@ -36,15 +37,24 @@ interface Props {
 }
 
 export default function ConversationList({
-  colors, styles, userRole, loadingConvos, unifiedInbox, activeConvoEmail,
+  colors, styles, userRole, compact, loadingConvos, unifiedInbox, activeConvoEmail,
   convoFilter, setConvoFilter, convoSearch, setConvoSearch, showChannels,
   channels, totalUnread, conversations, newBtnRef, onNewPress,
   onOpenChannel, onOpenConversation, onAivorahBannerPress,
 }: Props) {
+  const newButton = userRole !== 'student' && (
+    <TouchableOpacity testID="messages-new-button" ref={newBtnRef}
+      style={[styles.newBtn, compact && styles.compactNewBtn]} onPress={onNewPress}
+      activeOpacity={0.7} accessibilityRole="button">
+      <Feather name={compact ? 'plus' : 'edit'} size={compact ? 17 : 13} color={compact ? colors.onPrimary : colors.accentYellow} />
+      <Text style={[styles.newBtnText, compact && styles.compactNewBtnText]}>{compact ? 'New Message' : 'New'}</Text>
+    </TouchableOpacity>
+  );
+  const Filters = compact ? View : ScrollView;
   return (
-    <View style={styles.sidebar}>
+    <View style={[styles.sidebar, compact && styles.sidebarCompact]}>
       {/* Big header */}
-      <View style={styles.sidebarHeader}>
+      {!compact && <View style={styles.sidebarHeader}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <Feather name="star" size={20} color={colors.accentYellow} />
           <View>
@@ -52,26 +62,15 @@ export default function ConversationList({
             <Text style={styles.sidebarSubtitle}>Stay connected with Aivorah</Text>
           </View>
         </View>
-        {userRole !== 'student' && (
-          <TouchableOpacity
-            testID="messages-new-button"
-            ref={newBtnRef}
-            style={styles.newBtn}
-            onPress={onNewPress}
-            activeOpacity={0.7}
-          >
-            <Feather name="edit" size={13} color={colors.accentYellow} />
-            <Text style={styles.newBtnText}>New</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+        {newButton}
+      </View>}
 
       {/* Search — filters conversations & channels by name, WhatsApp-style. */}
       <View style={styles.convoSearchBar}>
         <Feather name="search" size={14} color={colors.textDim} />
         <TextInput
           testID="messages-search-input"
-          style={styles.convoSearchInput}
+          style={[styles.convoSearchInput, compact && styles.compactSearchInput]}
           value={convoSearch}
           onChangeText={setConvoSearch}
           placeholder="Search chats and groups…"
@@ -85,13 +84,9 @@ export default function ConversationList({
       {/* Filter tabs — students keep the lean DM tabs; everyone else gets the
           unified inbox tabs (channels merged in). Horizontally scrollable
           so labels never clip on narrower panels. */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.filterRow}
-        contentContainerStyle={styles.filterRowContent}
-        nestedScrollEnabled
-        {...(Platform.OS === 'web' ? { persistentScrollbar: false } : {})}
+      <Filters
+        style={compact ? [styles.filterRowContent, styles.compactFilters] : styles.filterRow}
+        {...(!compact ? { horizontal: true, showsHorizontalScrollIndicator: false, contentContainerStyle: styles.filterRowContent, nestedScrollEnabled: true } : {})}
       >
         {(showChannels ? (['all', 'unread', 'staff'] as const) : (['all', 'unread', 'starred'] as const)).map(tab => {
           const chUnread = channels.reduce((n, c) => n + c.unread, 0);
@@ -104,12 +99,12 @@ export default function ConversationList({
           return (
             <TouchableOpacity key={tab} testID={`messages-filter-${tab}`} style={[styles.filterTab, active && styles.filterTabActive]} onPress={() => setConvoFilter(tab)} activeOpacity={0.7}>
               <Feather name={icon as any} size={11} color={active ? colors.accentYellow : colors.textDim} />
-              <Text style={[styles.filterTabText, active && styles.filterTabTextActive]}>{tab.charAt(0).toUpperCase() + tab.slice(1)}</Text>
+              <Text style={[styles.filterTabText, compact && styles.compactFilterText, active && styles.filterTabTextActive]}>{tab.charAt(0).toUpperCase() + tab.slice(1)}</Text>
               {count > 0 && <View style={[styles.filterBadge, active && styles.filterBadgeActive]}><Text style={[styles.filterBadgeText, active && { color: '#0B0B0B' }]}>{count}</Text></View>}
             </TouchableOpacity>
           );
         })}
-      </ScrollView>
+      </Filters>
 
       {/* Unified inbox — channels and DMs share one scrollable, recency-
           sorted list (WhatsApp-style), instead of channels being pinned
@@ -128,7 +123,7 @@ export default function ConversationList({
           )}
         </View>
       ) : (
-        <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
+        <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} style={{ flex: 1, minHeight: 0 }}>
           {unifiedInbox.map((item) => item.kind === 'channel' ? (
             <TouchableOpacity key={item.key} style={styles.chRow} onPress={() => onOpenChannel(item.data)} activeOpacity={0.75}>
               <View style={[styles.chBadge, { backgroundColor: pastelBg(item.data.name) }]}><Feather name={isGroupIcon(item.data.iconLabel) ? item.data.iconLabel : 'users'} size={18} color={pastelText(item.data.name)} /></View>
@@ -164,6 +159,7 @@ export default function ConversationList({
         <Text style={styles.aivBannerText}>Aivorah is here to <Text style={{ color: colors.accentYellow, fontWeight: '700' }}>support</Text>{'\n'}your child&apos;s learning journey.</Text>
         <Feather name="chevron-right" size={16} color={colors.accentYellow} />
       </TouchableOpacity>
+      {compact && newButton}
     </View>
   );
 }

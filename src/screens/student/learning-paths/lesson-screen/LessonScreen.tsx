@@ -274,13 +274,13 @@ export default function LessonScreen({ navigation, route, embedded = false, prac
           <Header
             title={topic.name}
             subtitle={`Unit ${chapterIndex + 1} · ${chapter.title}`}
+            compactMobileTitle
             showBack
             onMenuPress={() => navigation.openDrawer()}
           />
         )}
 
-        <View style={styles.tabBarRow}>
-          <View style={styles.tabBar} accessibilityRole="tablist">
+        <View style={styles.tabBar} accessibilityRole="tablist">
             {tabs.map(t => {
               const active = mode === t.key;
               return (
@@ -301,15 +301,15 @@ export default function LessonScreen({ navigation, route, embedded = false, prac
                 </TouchableOpacity>
               );
             })}
-          </View>
           {!!topic.pdfFile && (
             <TouchableOpacity
-              style={[styles.viewInBookBtn, { borderColor: colors.primary, backgroundColor: colors.cardDark }]}
+              style={[styles.tab, { borderColor: colors.primary, backgroundColor: colors.cardDark }]}
               onPress={() => setFullBookView(true)}
+              accessibilityRole="button"
               activeOpacity={0.8}
             >
               <Icon name="book-open-text" size={17} color={colors.primary} />
-              <Text style={[styles.viewInBookText, { color: colors.primary }]}>View in Book</Text>
+              <Text style={[styles.tabText, { color: colors.primary }]}>View in Book</Text>
             </TouchableOpacity>
           )}
         </View>

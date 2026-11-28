@@ -72,28 +72,31 @@ export default function ChallengesScreen({ navigation, route }: any) {
   return (
     <ScreenLayout>
       <View style={styles.screen}>
-        <Header title="Challenges" onMenuPress={() => navigation.openDrawer()} />
+        <Header title="Challenges" onMenuPress={() => navigation.openDrawer()}
+          renderContent={mobileTitle => (
+            <ScrollView
+              contentContainerStyle={styles.content}
+              showsVerticalScrollIndicator={false}
+              refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => fetchChallenges(true)} tintColor={colors.accentYellow} />}
+            >
+              {mobileTitle}
+              <StatsRow stats={stats} styles={styles} colors={colors} />
 
-        <ScrollView
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => fetchChallenges(true)} tintColor={colors.accentYellow} />}
-        >
-          <StatsRow stats={stats} styles={styles} colors={colors} />
+              <LeaderboardCTA onPress={() => navigation.navigate('Leaderboard')} styles={styles} colors={colors} />
 
-          <LeaderboardCTA onPress={() => navigation.navigate('Leaderboard')} styles={styles} colors={colors} />
+              <ChallengeTabs activeTab={activeTab} setActiveTab={setActiveTab} counts={counts} styles={styles} colors={colors} />
 
-          <ChallengeTabs activeTab={activeTab} setActiveTab={setActiveTab} counts={counts} styles={styles} colors={colors} />
-
-          <ChallengesGrid
-            loading={loading}
-            filtered={filtered}
-            activeTab={activeTab}
-            onStart={startChallenge}
-            styles={styles}
-            colors={colors}
-          />
-        </ScrollView>
+              <ChallengesGrid
+                loading={loading}
+                filtered={filtered}
+                activeTab={activeTab}
+                onStart={startChallenge}
+                styles={styles}
+                colors={colors}
+              />
+            </ScrollView>
+          )}
+        />
 
         <QuizModal
           visible={quizVisible}

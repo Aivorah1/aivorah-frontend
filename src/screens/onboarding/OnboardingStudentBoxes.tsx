@@ -42,6 +42,7 @@ const GRADE_GROUPS = [
 const GROUP_ICONS: Record<string, string> = {
   'Early Years': 'sun', Primary: 'book-open', 'Middle School': 'layers', 'Senior School': 'award',
 };
+const PROFILE_SAVE_UNAVAILABLE = 'Aivorah could not reach the profile service. Your setup details are still here. Please try again shortly.';
 
 function getAge(dobStr: string): number | null {
   const parts = dobStr.split('/');
@@ -226,8 +227,11 @@ function StudentOnboarding() {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
+      }).catch(() => {
+        throw new Error(PROFILE_SAVE_UNAVAILABLE);
       });
       if (!profileRes.ok) {
+        if ([502, 503, 504].includes(profileRes.status)) throw new Error(PROFILE_SAVE_UNAVAILABLE);
         const errText = await profileRes.text().catch(() => '');
         throw new Error(`Profile save failed (${profileRes.status}): ${errText.slice(0, 200)}`);
       }

@@ -4,7 +4,8 @@
 
 import React from 'react';
 import { Text, TouchableOpacity } from 'react-native';
-import { render, screen, userEvent, waitFor } from '@testing-library/react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { act, render, screen, userEvent, waitFor } from '@testing-library/react-native';
 import { AuthProvider, useAuth } from '../AuthContext';
 
 jest.mock('react-native/Libraries/Utilities/Platform', () => ({
@@ -18,8 +19,12 @@ jest.mock('firebase/app', () => ({ initializeApp: jest.fn(), deleteApp: jest.fn(
 
 const mockSignInWithPopup = jest.fn();
 const mockSignInWithEmailAndPassword = jest.fn();
+let mockAuthStateChanged: (firebaseUser: unknown) => Promise<void>;
 jest.mock('firebase/auth', () => ({
-  onAuthStateChanged: jest.fn(() => jest.fn()),
+  onAuthStateChanged: jest.fn((_auth, callback) => {
+    mockAuthStateChanged = callback;
+    return jest.fn();
+  }),
   signInWithEmailAndPassword: (...args: any[]) => mockSignInWithEmailAndPassword(...args),
   createUserWithEmailAndPassword: jest.fn(),
   signOut: jest.fn().mockResolvedValue(undefined),
@@ -33,25 +38,29 @@ jest.mock('../ThemeContext', () => ({ useTheme: () => ({ setThemeMode: jest.fn()
 jest.mock('../../utils/curriculumPrefetch', () => ({ prefetchStudentDashboard: jest.fn() }));
 
 function TestConsumer() {
-  const { user, signInWithGoogle, signInWithEmail } = useAuth();
+  const { user, authError, signInWithGoogle, signInWithEmail } = useAuth();
+  const [error, setError] = React.useState('');
   return (
     <>
+      <Text testID="role">{user?.role ?? '(none)'}</Text>
+      <Text testID="error">{error || authError}</Text>
       <Text testID="avatar">{(user as any)?.avatarStyle ?? '(none)'}</Text>
       <Text testID="learning">{(user as any)?.learningStyle ?? '(none)'}</Text>
       <Text testID="photo">{(user as any)?.photoUrl ?? '(none)'}</Text>
       <Text testID="school">{user?.school ?? '(none)'}</Text>
-      <TouchableOpacity testID="signin-google" onPress={() => signInWithGoogle('student').catch(() => {})}>
+      <TouchableOpacity testID="signin-google" onPress={() => signInWithGoogle('student').catch((err) => setError(err.message))}>
         <Text>Google</Text>
       </TouchableOpacity>
-      <TouchableOpacity testID="signin-email" onPress={() => signInWithEmail('student@example.com', 'password123').catch(() => {})}>
+      <TouchableOpacity testID="signin-email" onPress={() => signInWithEmail('student@example.com', 'password123').catch((err) => setError(err.message))}>
         <Text>Email</Text>
       </TouchableOpacity>
     </>
   );
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   jest.clearAllMocks();
+  await AsyncStorage.clear();
   (global as any).window = { location: { hostname: 'aivorah-frontend.vercel.app', search: '', origin: 'https://aivorah-frontend.vercel.app' } };
   mockSignInWithPopup.mockResolvedValue({
     user: { displayName: 'Brintha', email: 'student@example.com', emailVerified: true },
@@ -78,6 +87,36 @@ beforeEach(() => {
     }
     return Promise.resolve({ ok: true, json: async () => ({}) });
   });
+});
+
+test.each(['signin-email', 'signin-google'])('%s reports a profile lookup outage without starting onboarding', async (button) => {
+  (global.fetch as jest.Mock).mockImplementation((url: string) => url.includes('/user/sync')
+    ? Promise.resolve({ ok: false, status: 503 })
+    : Promise.reject(new TypeError('Failed to fetch')));
+
+  const user = userEvent.setup();
+  await render(<AuthProvider><TestConsumer /></AuthProvider>);
+  await user.press(screen.getByTestId(button));
+
+  expect(await screen.findByText(/could not load your account/)).toBeTruthy();
+  expect(screen.getByTestId('role').props.children).toBe('(none)');
+  expect(await AsyncStorage.getItem('ai_mentor_user_profile')).toBeNull();
+});
+
+test('restoring an incomplete cached session waits for a successful profile lookup', async () => {
+  await AsyncStorage.setItem('ai_mentor_user_profile', JSON.stringify({
+    email: 'student@example.com', role: 'student', onboardingComplete: false,
+  }));
+  (global.fetch as jest.Mock).mockRejectedValue(new TypeError('Failed to fetch'));
+  await render(<AuthProvider><TestConsumer /></AuthProvider>);
+
+  expect(screen.getByTestId('role').props.children).toBe('(none)');
+  await act(async () => {
+    await mockAuthStateChanged({ email: 'student@example.com', providerData: [{ providerId: 'password' }] });
+  });
+
+  expect(screen.getByText(/could not load your account/)).toBeTruthy();
+  expect(screen.getByTestId('role').props.children).toBe('(none)');
 });
 
 test.each([['signin-email'], ['signin-google']])(

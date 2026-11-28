@@ -15,7 +15,9 @@ export interface SubjectStat {
   name: string;
   total: number;
   done: number;
-  pct: number;
+  pct: number | null;
+  completedChapters: number;
+  totalChapters: number;
   color: string;
   icon: FeatherName;
 }

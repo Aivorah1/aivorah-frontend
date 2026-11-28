@@ -15,7 +15,6 @@ import {
   type AgeGroup, type AnswerReveal, type Quiz, type QuizAnswer, type QuizCompleteResult, type QuizQuestion, type QuizResult,
 } from '../../../services/currentAffairsApi';
 import {
-  GOLD, SAGE, DEEP_SAGE, CORRECT, WRONG, TINT_BG, TITLE_LIGHT,
   QUESTION_TYPES, OPTION_LETTERS, EXCELLENCE_PERCENT, ageGroupForStudent, normalizeAgeGroup,
 } from './constants';
 import CategoryBadge from './components/CategoryBadge';
@@ -49,10 +48,10 @@ export function resumePoint(questions: QuizQuestion[], progress: AnswerReveal[] 
 
 export default function QuizScreen({ navigation, route }: any) {
   const { user } = useAuth();
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const { isMobile } = useResponsive();
   const styles = useMemo(() => makeStyles(colors, isMobile), [colors, isMobile]);
-  const titleColor = isDark ? colors.textMain : TITLE_LIGHT;
+  const titleColor = colors.textHeading;
 
   const ageGroup: AgeGroup = normalizeAgeGroup(route?.params?.ageGroup) || ageGroupForStudent(user);
   const email = user?.email || undefined;
@@ -160,7 +159,7 @@ export default function QuizScreen({ navigation, route }: any) {
   if (loading) {
     body = (
       <View style={styles.center}>
-        <ActivityIndicator testID="quiz-loading" size="large" color={GOLD} />
+        <ActivityIndicator testID="quiz-loading" size="large" color={colors.primary} />
       </View>
     );
   } else if (error || !quiz) {
@@ -168,16 +167,16 @@ export default function QuizScreen({ navigation, route }: any) {
       <View style={styles.center}>
         <Feather name="wifi-off" size={28} color={colors.textDim} />
         <Text style={[styles.hint, { color: colors.textMuted }]}>{error}</Text>
-        <TouchableOpacity style={[styles.outlineBtn, { borderColor: GOLD + '60' }]} onPress={load} accessibilityRole="button">
-          <Feather name="refresh-cw" size={13} color={GOLD} />
-          <Text style={[styles.outlineBtnText, { color: GOLD }]}>Try again</Text>
+        <TouchableOpacity style={[styles.outlineBtn, { borderColor: colors.primary + '60' }]} onPress={load} accessibilityRole="button">
+          <Feather name="refresh-cw" size={13} color={colors.primary} />
+          <Text style={[styles.outlineBtnText, { color: colors.primary }]}>Try again</Text>
         </TouchableOpacity>
       </View>
     );
   } else if (result) {
     body = (
       <ResultView
-        styles={styles} colors={colors} titleColor={titleColor} isDark={isDark}
+        styles={styles} colors={colors} titleColor={titleColor}
         result={result} award={award} awardError={awardError}
         alreadyTaken={!!result.alreadySubmitted || (!!quiz.attempt && result === quiz.attempt)}
         onDone={goToDigest}
@@ -186,14 +185,14 @@ export default function QuizScreen({ navigation, route }: any) {
   } else if (questions.length === 0) {
     body = (
       <View style={[styles.emptyBox, { backgroundColor: colors.cardDark, borderColor: colors.borderColor }]} testID="quiz-empty">
-        <View style={[styles.iconCircle, { backgroundColor: GOLD + '20' }]}>
-          <Feather name="calendar" size={16} color={GOLD} />
+        <View style={[styles.iconCircle, { backgroundColor: colors.primary + '20' }]}>
+          <Feather name="calendar" size={16} color={colors.primary} />
         </View>
         <Text style={[styles.emptyTitle, { color: titleColor }]}>This week’s quiz isn’t ready yet</Text>
         <Text style={[styles.emptySub, { color: colors.textMuted }]}>A new quiz comes out every Sunday. Keep reading the daily stories!</Text>
-        <TouchableOpacity style={[styles.outlineBtn, { borderColor: GOLD + '60' }]} onPress={goToDigest} accessibilityRole="button">
-          <Feather name="arrow-left" size={13} color={GOLD} />
-          <Text style={[styles.outlineBtnText, { color: GOLD }]}>Back to today’s stories</Text>
+        <TouchableOpacity style={[styles.outlineBtn, { borderColor: colors.primary + '60' }]} onPress={goToDigest} accessibilityRole="button">
+          <Feather name="arrow-left" size={13} color={colors.primary} />
+          <Text style={[styles.outlineBtnText, { color: colors.primary }]}>Back to today’s stories</Text>
         </TouchableOpacity>
       </View>
     );
@@ -208,31 +207,31 @@ export default function QuizScreen({ navigation, route }: any) {
           </Text>
         </View>
         {resumedCount > 0 ? (
-          <Text style={[styles.infoText, { color: GOLD }]} testID="quiz-resumed">
+          <Text style={[styles.infoText, { color: colors.primary }]} testID="quiz-resumed">
             Welcome back! You answered {resumedCount} of {questions.length} questions. Carry on from here.
           </Text>
         ) : null}
         <View style={[styles.card, { backgroundColor: colors.cardDark, borderColor: colors.borderColor }]}>
           <View style={styles.counterRow}>
             <Text style={[styles.counter, { color: colors.textMuted }]}>Question {index + 1} of {questions.length}</Text>
-            <Text style={[styles.typeText, { color: GOLD }]}>{QUESTION_TYPES[question.type]}</Text>
+            <Text style={[styles.typeText, { color: colors.primary }]}>{QUESTION_TYPES[question.type]}</Text>
           </View>
           <View style={[styles.track, { backgroundColor: colors.borderColor }]}>
             <View style={[styles.fill, { width: `${Math.round(((index + (reveal ? 1 : 0)) / questions.length) * 100)}%` }]} />
           </View>
           <CategoryBadge category={question.category} />
-          <Text style={[styles.question, { color: titleColor }]}>{question.question}</Text>
+          <Text accessibilityRole="header" style={[styles.question, { color: titleColor }]}>{question.question}</Text>
 
-          <View style={styles.options}>
+          <View style={styles.options} accessibilityRole="radiogroup">
             {question.options.map((option, i) => {
               const isChosen = selected === i;
               const isCorrect = !!reveal && reveal.correctIndex === i;
               const isWrongChoice = !!reveal && isChosen && !reveal.correct;
-              let bg = isDark ? colors.bgDark : '#fff';
-              let border = GOLD + '40';
-              if (isCorrect) { bg = CORRECT + '18'; border = CORRECT + '80'; }
-              else if (isWrongChoice) { bg = WRONG + '18'; border = WRONG + '80'; }
-              else if (isChosen) { bg = GOLD + '18'; border = GOLD; }
+              let bg = colors.surfaceSubtle;
+              let border = colors.borderColor;
+              if (isCorrect) { bg = colors.accentGreen + '18'; border = colors.accentGreen + '80'; }
+              else if (isWrongChoice) { bg = colors.accentRed + '18'; border = colors.accentRed + '80'; }
+              else if (isChosen) { bg = colors.primary + '18'; border = colors.primary; }
               return (
                 <TouchableOpacity
                   key={`${question.id}-${i}`}
@@ -241,15 +240,15 @@ export default function QuizScreen({ navigation, route }: any) {
                   onPress={() => setSelected(i)}
                   activeOpacity={0.8}
                   accessibilityRole="radio"
-                  accessibilityState={{ selected: isChosen, disabled: !!reveal }}
+                  accessibilityState={{ checked: isChosen, selected: isChosen, disabled: !!reveal || busy }}
                   style={[styles.option, { backgroundColor: bg, borderColor: border }]}
                 >
-                  <View style={[styles.optionIdx, { backgroundColor: (isChosen ? GOLD : GOLD + '20') }]}>
-                    <Text style={[styles.optionIdxText, { color: isChosen ? '#fff' : GOLD }]}>{OPTION_LETTERS[i]}</Text>
+                  <View style={[styles.optionIdx, { backgroundColor: (isChosen ? colors.primary : colors.primary + '20') }]}>
+                    <Text style={[styles.optionIdxText, { color: isChosen ? colors.onPrimary : colors.primary }]}>{OPTION_LETTERS[i]}</Text>
                   </View>
                   <Text style={[styles.optionText, { color: titleColor }]}>{option}</Text>
-                  {isCorrect ? <Feather name="check" size={14} color={CORRECT} /> : null}
-                  {isWrongChoice ? <Feather name="x" size={14} color={WRONG} /> : null}
+                  {isCorrect ? <Feather name="check" size={14} color={colors.accentGreen} /> : null}
+                  {isWrongChoice ? <Feather name="x" size={14} color={colors.accentRed} /> : null}
                 </TouchableOpacity>
               );
             })}
@@ -260,13 +259,13 @@ export default function QuizScreen({ navigation, route }: any) {
           <View
             testID="answer-feedback"
             style={[styles.feedback, {
-              backgroundColor: (reveal.correct ? CORRECT : WRONG) + '12',
-              borderColor: (reveal.correct ? CORRECT : WRONG) + '35',
+              backgroundColor: (reveal.correct ? colors.accentGreen : colors.accentRed) + '12',
+              borderColor: (reveal.correct ? colors.accentGreen : colors.accentRed) + '35',
             }]}
           >
             <View style={styles.feedbackTop}>
-              <Feather name={reveal.correct ? 'check-circle' : 'info'} size={15} color={reveal.correct ? CORRECT : WRONG} />
-              <Text style={[styles.feedbackTitle, { color: reveal.correct ? CORRECT : WRONG }]}>
+              <Feather name={reveal.correct ? 'check-circle' : 'info'} size={15} color={reveal.correct ? colors.accentGreen : colors.accentRed} />
+              <Text style={[styles.feedbackTitle, { color: reveal.correct ? colors.accentGreen : colors.accentRed }]}>
                 {reveal.correct ? 'Correct!' : `Not quite — the answer is ${OPTION_LETTERS[reveal.correctIndex]}: ${question.options[reveal.correctIndex]}`}
               </Text>
             </View>
@@ -282,8 +281,8 @@ export default function QuizScreen({ navigation, route }: any) {
                 onPress={() => navigation.navigate('CurrentAffairsStory', { storyId: reveal.storyId, ageGroup })}
                 accessibilityRole="link"
               >
-                <Feather name="book-open" size={12} color={GOLD} />
-                <Text style={[styles.link, { color: GOLD }]}>Read the story</Text>
+                <Feather name="book-open" size={12} color={colors.primary} />
+                <Text style={[styles.link, { color: colors.primary }]}>Read the story</Text>
               </TouchableOpacity>
             ) : null}
           </View>
@@ -293,28 +292,28 @@ export default function QuizScreen({ navigation, route }: any) {
 
         {!reveal ? (
           <TouchableOpacity
-            style={[styles.primaryBtn, { backgroundColor: GOLD }, (selected === null || busy) && styles.disabled]}
+            style={[styles.primaryBtn, { backgroundColor: colors.primary }, (selected === null || busy) && styles.disabled]}
             disabled={selected === null || busy}
             onPress={onCheck}
             activeOpacity={0.85}
             accessibilityRole="button"
           >
-            {busy ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.primaryBtnText}>Check Answer</Text>}
+            {busy ? <ActivityIndicator color={colors.onPrimary} size="small" /> : <Text style={styles.primaryBtnText}>Check Answer</Text>}
           </TouchableOpacity>
         ) : isLast ? (
           <TouchableOpacity
-            style={[styles.primaryBtn, { backgroundColor: GOLD }, busy && styles.disabled]}
+            style={[styles.primaryBtn, { backgroundColor: colors.primary }, busy && styles.disabled]}
             disabled={busy}
             onPress={onSubmit}
             activeOpacity={0.85}
             accessibilityRole="button"
           >
-            {busy ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.primaryBtnText}>Submit Quiz</Text>}
+            {busy ? <ActivityIndicator color={colors.onPrimary} size="small" /> : <Text style={styles.primaryBtnText}>Submit Quiz</Text>}
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity style={[styles.primaryBtn, { backgroundColor: GOLD }]} onPress={onNext} activeOpacity={0.85} accessibilityRole="button">
+          <TouchableOpacity style={[styles.primaryBtn, { backgroundColor: colors.primary }]} onPress={onNext} activeOpacity={0.85} accessibilityRole="button">
             <Text style={styles.primaryBtnText}>Next Question</Text>
-            <Feather name="arrow-right" size={14} color="#fff" />
+            <Feather name="arrow-right" size={14} color={colors.onPrimary} />
           </TouchableOpacity>
         )}
       </>
@@ -328,23 +327,26 @@ export default function QuizScreen({ navigation, route }: any) {
           title="Weekly Quiz"
           subtitle="Current Affairs"
           showSearch={false}
+          compactMobileTitle
           showBack
           onBack={goToDigest}
           onMenuPress={() => navigation.openDrawer?.()}
+          renderContent={mobileTitle => (
+            <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+              {mobileTitle}
+              {body}
+            </ScrollView>
+          )}
         />
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          {body}
-        </ScrollView>
       </View>
     </ScreenLayout>
   );
 }
 
-function ResultView({ styles, colors, titleColor, isDark, result, award, awardError, alreadyTaken, onDone }: {
+function ResultView({ styles, colors, titleColor, result, award, awardError, alreadyTaken, onDone }: {
   styles: ReturnType<typeof makeStyles>;
   colors: AppColors;
   titleColor: string;
-  isDark: boolean;
   result: QuizResult;
   award: QuizCompleteResult | null;
   awardError: string | null;
@@ -355,56 +357,56 @@ function ResultView({ styles, colors, titleColor, isDark, result, award, awardEr
   return (
     <View style={{ gap: spacing.md }} testID="quiz-result">
       <View style={[styles.card, styles.resultCard, {
-        backgroundColor: isDark ? colors.cardDark : TINT_BG,
-        borderColor: isDark ? colors.borderColor : GOLD + '25',
+        backgroundColor: colors.cardDark,
+        borderColor: colors.borderColor,
       }]}>
-        <View style={[styles.bigIcon, { backgroundColor: GOLD + '20' }]}>
-          <Feather name={excellent ? 'award' : 'check-circle'} size={22} color={GOLD} />
+        <View style={[styles.bigIcon, { backgroundColor: colors.primary + '20' }]}>
+          <Feather name={excellent ? 'award' : 'check-circle'} size={22} color={colors.primary} />
         </View>
-        <Text style={[styles.score, { color: GOLD }]}>{result.score}/{result.total}</Text>
-        <Text style={[styles.percent, { color: DEEP_SAGE }]}>{result.percentage}%</Text>
+        <Text style={[styles.score, { color: colors.primary }]}>{result.score}/{result.total}</Text>
+        <Text style={[styles.percent, { color: colors.accentGreen }]}>{result.percentage}%</Text>
         {alreadyTaken ? <Text style={[styles.hint, { color: colors.textMuted }]}>You already took this week’s quiz — here is your result.</Text> : null}
         {award ? (
-          <Text style={[styles.points, { color: GOLD }]}>
+          <Text style={[styles.points, { color: colors.primary }]}>
             {award.alreadyRecorded ? 'Points for this quiz were already added.' : `+${award.pointsAwarded} points`}
           </Text>
         ) : null}
         {awardError ? <Text style={[styles.hint, { color: colors.accentRed }]}>{awardError}</Text> : null}
         {excellent ? (
-          <View style={[styles.pill, { backgroundColor: GOLD }]} testID="excellence-badge">
-            <Feather name="award" size={13} color="#fff" />
+          <View style={[styles.pill, { backgroundColor: colors.primary }]} testID="excellence-badge">
+            <Feather name="award" size={13} color={colors.onPrimary} />
             <Text style={styles.pillText}>Excellence badge — {EXCELLENCE_PERCENT}% or more!</Text>
           </View>
         ) : (
           <Text style={[styles.hint, { color: colors.textMuted }]}>Every week is a chance to learn more. Keep reading the daily stories!</Text>
         )}
         {award?.newBadges.includes('growth') ? (
-          <View style={[styles.pill, { backgroundColor: SAGE + '25' }]}>
-            <Feather name="trending-up" size={13} color={DEEP_SAGE} />
-            <Text style={[styles.pillText, { color: DEEP_SAGE }]}>Growth badge — you beat your last score!</Text>
+          <View style={[styles.pill, { backgroundColor: colors.accentGreen + '25' }]}>
+            <Feather name="trending-up" size={13} color={colors.accentGreen} />
+            <Text style={[styles.pillText, { color: colors.accentGreen }]}>Growth badge — you beat your last score!</Text>
           </View>
         ) : null}
       </View>
 
-      <Text style={[styles.sectionTitle, { color: GOLD }]}>REVIEW YOUR ANSWERS</Text>
+      <Text style={[styles.sectionTitle, { color: colors.primary }]}>REVIEW YOUR ANSWERS</Text>
       {result.results.map((r, i) => (
         <View key={r.questionId} style={[styles.reviewItem, { backgroundColor: colors.cardDark, borderColor: colors.borderColor }]}>
           <View style={styles.reviewHeader}>
-            <Feather name={r.correct ? 'check-circle' : 'x-circle'} size={16} color={r.correct ? CORRECT : WRONG} />
+            <Feather name={r.correct ? 'check-circle' : 'x-circle'} size={16} color={r.correct ? colors.accentGreen : colors.accentRed} />
             <Text style={[styles.reviewQuestion, { color: titleColor }]}>{i + 1}. {r.question}</Text>
           </View>
           <Text style={[styles.reviewText, { color: colors.textMain }]}>
             Your answer: {r.selected === null ? 'not answered' : `${OPTION_LETTERS[r.selected]}. ${r.options[r.selected]}`}
           </Text>
           {!r.correct ? (
-            <Text style={[styles.reviewText, { color: CORRECT }]}>Correct answer: {OPTION_LETTERS[r.correctIndex]}. {r.options[r.correctIndex]}</Text>
+            <Text style={[styles.reviewText, { color: colors.accentGreen }]}>Correct answer: {OPTION_LETTERS[r.correctIndex]}. {r.options[r.correctIndex]}</Text>
           ) : null}
           <Text style={[styles.reviewExplain, { color: colors.textMuted }]}>{r.explanation}</Text>
         </View>
       ))}
 
-      <TouchableOpacity style={[styles.primaryBtn, { backgroundColor: GOLD }]} onPress={onDone} activeOpacity={0.85} accessibilityRole="button">
-        <Feather name="calendar" size={14} color="#fff" />
+      <TouchableOpacity style={[styles.primaryBtn, { backgroundColor: colors.primary }]} onPress={onDone} activeOpacity={0.85} accessibilityRole="button">
+        <Feather name="calendar" size={14} color={colors.onPrimary} />
         <Text style={styles.primaryBtnText}>Try Again Next Week</Text>
       </TouchableOpacity>
     </View>
@@ -415,25 +417,25 @@ const makeStyles = (c: AppColors, isMobile: boolean) => StyleSheet.create({
   infoRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
   infoText: { fontSize: 12, fontWeight: '600' },
   screen: { flex: 1, backgroundColor: c.bgDark },
-  content: { padding: isMobile ? spacing.lg : spacing.xl, paddingBottom: 56, gap: spacing.md },
+  content: { width: '100%', maxWidth: 900, alignSelf: 'center', padding: isMobile ? spacing.lg : spacing.xl, paddingBottom: 56, gap: spacing.md },
   center: { alignItems: 'center', paddingVertical: 60, gap: 10 },
   hint: { fontSize: 13, textAlign: 'center' },
   body: { fontSize: 14, lineHeight: 21 },
   bold: { fontWeight: '800' },
 
-  card: { borderRadius: radius.xl, borderWidth: 1, padding: spacing.lg, gap: spacing.md },
-  counterRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  counter: { fontSize: 11, fontWeight: '600' },
-  typeText: { fontSize: 11, fontWeight: '700' },
+  card: { borderRadius: radius.lg, borderWidth: 1, padding: spacing.lg, gap: spacing.md },
+  counterRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs, justifyContent: 'space-between', alignItems: 'center' },
+  counter: { fontSize: 12, fontWeight: '600' },
+  typeText: { fontSize: 12, fontWeight: '700' },
   track: { height: 6, borderRadius: 3, overflow: 'hidden' },
-  fill: { height: '100%', borderRadius: 3, backgroundColor: GOLD },
-  question: { fontSize: 15, fontWeight: '700', lineHeight: 22 },
+  fill: { height: '100%', borderRadius: 3, backgroundColor: c.primary },
+  question: { fontFamily: fonts.title, fontSize: isMobile ? 19 : 22, fontWeight: '700', lineHeight: isMobile ? 25 : 29 },
 
   options: { gap: 8 },
-  option: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 11, paddingHorizontal: 12, borderRadius: 10, borderWidth: 1 },
+  option: { minHeight: 48, flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 11, paddingHorizontal: 12, borderRadius: radius.md, borderWidth: 1 },
   optionIdx: { width: 24, height: 24, borderRadius: 6, alignItems: 'center', justifyContent: 'center' },
   optionIdxText: { fontSize: 12, fontWeight: '800' },
-  optionText: { flex: 1, fontSize: 14, fontWeight: '500' },
+  optionText: { flex: 1, minWidth: 0, fontSize: 15, lineHeight: 21, fontWeight: '500' },
 
   feedback: { borderRadius: 12, borderWidth: 1, padding: spacing.lg, gap: spacing.sm },
   feedbackTop: { flexDirection: 'row', alignItems: 'center', gap: 8 },
@@ -445,7 +447,7 @@ const makeStyles = (c: AppColors, isMobile: boolean) => StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
     paddingVertical: 12, paddingHorizontal: 16, borderRadius: 10, minHeight: 44,
   },
-  primaryBtnText: { color: '#fff', fontSize: 13, fontWeight: '700' },
+  primaryBtnText: { color: c.onPrimary, fontSize: 13, fontWeight: '700' },
   disabled: { opacity: 0.5 },
   outlineBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 7, paddingVertical: 8, paddingHorizontal: 16,
@@ -464,7 +466,7 @@ const makeStyles = (c: AppColors, isMobile: boolean) => StyleSheet.create({
   percent: { fontSize: 16, fontWeight: '700' },
   points: { fontSize: 15, fontWeight: '800' },
   pill: { flexDirection: 'row', alignItems: 'center', gap: 6, borderRadius: radius.full, paddingHorizontal: 14, paddingVertical: 7 },
-  pillText: { color: '#fff', fontSize: 12, fontWeight: '800' },
+  pillText: { color: c.onPrimary, fontSize: 12, fontWeight: '800' },
 
   sectionTitle: { fontSize: 11, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginTop: spacing.xs },
   reviewItem: { borderRadius: radius.md, borderWidth: 1, padding: spacing.md, gap: 4 },

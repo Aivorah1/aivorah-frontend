@@ -347,9 +347,11 @@ export default function TopicAICoach({
           <View style={[styles.aiDot, { backgroundColor: colors.accentYellow }]}>
             <Feather name="cpu" size={14} color="#fff" />
           </View>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.panelTitle, { color: colors.textMain }]}>AI Coach</Text>
-            <Text style={[styles.panelSub, { color: colors.textMuted }]} numberOfLines={1}>{topic}</Text>
+          <View style={{ flex: 1, minWidth: 0 }}>
+            <Text accessibilityRole="header" style={[styles.panelTitle, { color: colors.textMain }]}>{inline ? 'Ask Aivorah' : 'AI Coach'}</Text>
+            <Text style={[styles.panelSub, { color: colors.textMuted }]} numberOfLines={inline ? undefined : 1}>
+              {inline ? 'Have a doubt or want more practice on this topic?' : topic}
+            </Text>
           </View>
           {!inline && (
             <TouchableOpacity onPress={() => setOpen(false)} style={styles.closeBtn}>

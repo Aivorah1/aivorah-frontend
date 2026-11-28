@@ -28,10 +28,14 @@ export default function CourseVideoSection({ video, vIndex, isWide, colors, gold
             ? React.createElement('video', {
                 src: video.url,
                 controls: true,
+                playsInline: true,
                 preload: 'metadata',
                 style: {
                   width: '100%',
+                  maxWidth: '100%',
+                  height: 'auto',
                   aspectRatio: '16 / 9',
+                  objectFit: 'contain',
                   borderRadius: 16,
                   background: '#050505',
                   display: 'block',
@@ -52,7 +56,7 @@ export default function CourseVideoSection({ video, vIndex, isWide, colors, gold
               <View style={styles.outcomeIcon}>
                 <Feather name={item.icon as any} size={16} color={gold} />
               </View>
-              <View style={{ flex: 1 }}>
+              <View style={{ flex: 1, minWidth: 0 }}>
                 <Text style={styles.outcomeTitle}>{item.title}</Text>
                 <Text style={styles.outcomeDesc}>{item.desc}</Text>
               </View>

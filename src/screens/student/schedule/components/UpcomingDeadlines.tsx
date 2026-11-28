@@ -24,8 +24,8 @@ export default function UpcomingDeadlines({ deadlines, styles }: Props) {
             <View style={[styles.deadlineIcon, { backgroundColor: fill }]}>
               <Feather name={dl.type === 'challenge' ? 'award' : 'flag'} size={14} color={accent} />
             </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.deadlineTitle} numberOfLines={1}>{dl.title}</Text>
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <Text style={styles.deadlineTitle}>{dl.title}</Text>
               <Text style={[styles.deadlineDue, { color: accent }]}>Due {dl.date}</Text>
             </View>
           </View>

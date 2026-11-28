@@ -20,6 +20,10 @@ export function useSubjects(curriculum: string, grade: string, isCBSE: boolean, 
   const [subjects, setSubjects] = useState<SubjectData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [warning, setWarning] = useState('');
+  const [revision, setRevision] = useState(0);
+  const scope = JSON.stringify([curriculum, grade]);
+  const [resolvedScope, setResolvedScope] = useState('');
 
   useEffect(() => {
     let cancelled = false;
@@ -27,9 +31,11 @@ export function useSubjects(curriculum: string, grade: string, isCBSE: boolean, 
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     setError('');
+    setWarning('');
     // Never show the previous curriculum/grade's list while the new one loads (parent switching child).
     setSubjects([]);
     if (!curriculum || !grade) {
+      setResolvedScope(scope);
       setLoading(false);
       return;
     }
@@ -38,11 +44,12 @@ export function useSubjects(curriculum: string, grade: string, isCBSE: boolean, 
     const queryCurriculum = isCBSE ? 'CBSE' : curriculum;
 
     fetch(`${LEARNING_PATHS_SERVER_URL}/curriculum/subjects?grade=${encodeURIComponent(grade)}&curriculum=${encodeURIComponent(queryCurriculum)}`)
-      .then((r) => r.json())
+      .then((r) => { if (r.ok === false) throw new Error('Could not load subjects'); return r.json(); })
       .then((data: { subjects: SubjectData[] }) => {
         if (cancelled) return;
-        if (data.subjects && data.subjects.length > 0) {
-          setSubjects(data.subjects);
+        if (!Array.isArray(data.subjects)) throw new Error('Invalid subjects response');
+        if (data.subjects.length > 0) {
+          setSubjects(data.subjects.map(subject => ({ ...subject, topics: subject.topics ?? [] })));
         } else if (isPYP) {
           // Offline / empty fallback only (server is the source of truth).
           setSubjects(getIBPYPStaticSubjects(grade));
@@ -50,17 +57,26 @@ export function useSubjects(curriculum: string, grade: string, isCBSE: boolean, 
       })
       .catch(() => {
         if (cancelled) return;
-        if (isPYP) setSubjects(getIBPYPStaticSubjects(grade));
+        if (isPYP) {
+          setSubjects(getIBPYPStaticSubjects(grade));
+          setWarning('Could not load the latest syllabus. Try again.');
+        }
         else setError('Could not load curriculum right now. Check if the server is running and try again.');
       })
       .finally(() => {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) { setResolvedScope(scope); setLoading(false); }
       });
 
     return () => {
       cancelled = true;
     };
-  }, [curriculum, grade, isCBSE, isPYP]);
+  }, [curriculum, grade, isCBSE, isPYP, revision, scope]);
 
-  return { subjects, loading, error };
+  return {
+    subjects: resolvedScope === scope ? subjects : [],
+    loading: !!curriculum && !!grade && (loading || resolvedScope !== scope),
+    error: resolvedScope === scope ? error : '',
+    warning: resolvedScope === scope ? warning : '',
+    retry: () => setRevision(value => value + 1),
+  };
 }

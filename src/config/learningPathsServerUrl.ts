@@ -10,7 +10,7 @@ import { Platform } from 'react-native';
 // original name is still claimed by the suspended account.
 declare const __DEV__: boolean;
 
-const LIVE_LEARNING_PATHS_BACKEND = 'https://aivorah-learning-paths-service-ob0u.onrender.com';
+const LIVE_LEARNING_PATHS_BACKEND = 'https://aivorah-learning-paths-service-ngbe.onrender.com';
 
 // EXPO_PUBLIC_LEARNING_PATHS_URL points only this service elsewhere (e.g. a local copy).
 const LEARNING_PATHS_SERVER_URL =

@@ -64,10 +64,10 @@ function TeacherPortalNavigator() {
       drawerContent={(props) => <DrawerContent {...props} />}
       screenOptions={{
         headerShown: false,
-        drawerType: isLargeScreen ? 'permanent' : 'slide',
+        drawerType: isLargeScreen ? 'permanent' : 'front',
         drawerStyle: isLargeScreen
           ? { width: 0, opacity: 0, pointerEvents: 'none' as const }
-          : { width: 260, backgroundColor: colors.sidebarDark },
+          : { width: Math.min(260, width * 0.84), backgroundColor: colors.sidebarDark },
         overlayColor: 'rgba(0,0,0,0.5)',
         swipeEnabled: !isLargeScreen,
         sceneContainerStyle: { backgroundColor: colors.bgDark },

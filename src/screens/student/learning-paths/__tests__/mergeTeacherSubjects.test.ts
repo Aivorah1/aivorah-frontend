@@ -35,7 +35,7 @@ test('a card that counts its book chapters as "topics" (Maths) grows its count b
     [teacherPath('Mathematics', '6', [['Number Systems', ['A', 'B']], ['Fractions', ['C']], ['Geometry', ['D']]])],
     'Grade 6',
   );
-  expect(merged[0]).toMatchObject({ subject: 'Mathematics', topicCount: 13 });
+  expect(merged[0]).toMatchObject({ subject: 'Mathematics', topicCount: 14 });
 });
 
 test('IB: a subject with no standard syllabus gets a card built from the teacher path', () => {

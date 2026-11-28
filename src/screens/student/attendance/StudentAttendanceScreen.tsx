@@ -62,6 +62,7 @@ export default function StudentAttendanceScreen({ navigation }: any) {
         <Header
           title="My Attendance"
           subtitle="See how often you've checked in on time"
+          compactMobileTitle
           onMenuPress={() => navigation.openDrawer()}
           onNotificationPress={() => navigation.navigate('Announcements')}
         />
@@ -84,7 +85,7 @@ export default function StudentAttendanceScreen({ navigation }: any) {
                   <View style={[styles.statIconBadge, { backgroundColor: colors.accentYellowGlow, width: 40, height: 40, borderRadius: 20 }]}>
                     <Feather name="award" size={18} color={colors.accentYellow} />
                   </View>
-                  <View testID="attendance-rate">
+                  <View testID="attendance-rate" style={styles.overallRateCopy}>
                     <Text style={styles.overallRateText}>{hasRecords ? `${counts!.ratePct}%` : 'No attendance recorded yet'}</Text>
                     {hasRecords && <Text style={styles.overallRateLabel}>Overall Attendance</Text>}
                   </View>

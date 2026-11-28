@@ -224,7 +224,7 @@ import OnboardingParentBoxes from './src/screens/parent/onboarding/OnboardingPar
 import SetPasswordScreen from './src/screens/onboarding/SetPasswordScreen';
 import { AuthProvider, useAuth, getPendingReturnRole } from './src/context/AuthContext';
 import { StudentDataProvider } from './src/context/StudentDataContext';
-import { ThemeProvider, useTheme } from './src/context/ThemeContext';
+import { ParentThemeProvider, ThemeProvider, useTheme } from './src/context/ThemeContext';
 import { NotificationProvider } from './src/context/NotificationContext';
 import NotificationBanner from './src/components/common/NotificationBanner';
 import { AnnouncementProvider } from './src/screens/shared/announcements/context/AnnouncementProvider';
@@ -915,7 +915,7 @@ function RootNavigator() {
     return <OnboardingTeacherBoxes />;
   }
   if (Platform.OS === 'web' && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('demo') === 'onboarding-parent') {
-    return <OnboardingParentBoxes />;
+    return <ParentThemeProvider><OnboardingParentBoxes /></ParentThemeProvider>;
   }
 
   if (loading) {

@@ -60,72 +60,75 @@ export default function WorldAndYouScreen({ navigation, route }: any) {
         <Header
           title="The World & You"
           subtitle="Learn something new every day"
+          compactMobileTitle={tidbitTab === 'news'}
           showBack={true}
           onMenuPress={() => navigation.openDrawer()}
+          renderContent={mobileTitle => (
+            <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+              {mobileTitle}
+
+              {/* ── Date pill ─────────────────────────────────────── */}
+              <View style={styles.datePill}>
+                <Feather name="calendar" size={13} color={TEAL} />
+                <Text style={[styles.dateText, { color: TEAL }]}>
+                  {worldData?.date ?? new Date().toISOString().split('T')[0]}
+                </Text>
+                <View style={styles.gradePill}>
+                  <Text style={[styles.gradeText, { color: colors.textMuted }]}>{grade}</Text>
+                </View>
+              </View>
+
+              {/* ── GK + Current Affairs card ─────────────────────── */}
+              <DailyTidbitCard grade={grade} tab={tidbitTab} onTabChange={setTidbitTab} onFact={setGkFact} />
+
+              {/* ── Current Affairs tab: today's stories + weekly quiz ── */}
+              {tidbitTab === 'news' && <CurrentAffairsTab navigation={navigation} />}
+
+              {/* ── Today's important day, explained — GK tab ───────── */}
+              {tidbitTab === 'gk' && showImportantDay && (
+                <ImportantDayCard
+                  events={importantDay.events}
+                  loading={importantDay.loading}
+                  mainEventName={gkFact?.eventName}
+                  isToday={gkFact?.eventDate === todayMMDD}
+                  styles={styles}
+                  colors={colors}
+                />
+              )}
+
+              {/* ── On This Day (only without an important day) / Brain Teaser — GK tab ─ */}
+              {tidbitTab === 'gk' && (
+                loading ? (
+                  <View style={styles.center}>
+                    <ActivityIndicator size="small" color={TEAL} />
+                    <Text style={[styles.hint, { color: colors.textMuted }]}>Loading history & challenge…</Text>
+                  </View>
+                ) : error ? (
+                  <View style={styles.center}>
+                    <Feather name="wifi-off" size={26} color={colors.textDim} />
+                    <Text style={[styles.hint, { color: colors.textMuted }]}>{error}</Text>
+                  </View>
+                ) : worldData ? (
+                  <>
+                    {!showImportantDay && worldData.onThisDay?.length > 0 && (
+                      <OnThisDayCard items={worldData.onThisDay} styles={styles} colors={colors} />
+                    )}
+                    {worldData.funChallenge && (
+                      <BrainTeaserCard
+                        challenge={worldData.funChallenge}
+                        showAnswer={showAnswer}
+                        onReveal={() => setShowAnswer(true)}
+                        styles={styles}
+                        colors={colors}
+                      />
+                    )}
+                  </>
+                ) : null
+              )}
+
+            </ScrollView>
+          )}
         />
-
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-
-          {/* ── Date pill ─────────────────────────────────────── */}
-          <View style={styles.datePill}>
-            <Feather name="calendar" size={13} color={TEAL} />
-            <Text style={[styles.dateText, { color: TEAL }]}>
-              {worldData?.date ?? new Date().toISOString().split('T')[0]}
-            </Text>
-            <View style={styles.gradePill}>
-              <Text style={[styles.gradeText, { color: colors.textMuted }]}>{grade}</Text>
-            </View>
-          </View>
-
-          {/* ── GK + Current Affairs card ─────────────────────── */}
-          <DailyTidbitCard grade={grade} tab={tidbitTab} onTabChange={setTidbitTab} onFact={setGkFact} />
-
-          {/* ── Current Affairs tab: today's stories + weekly quiz ── */}
-          {tidbitTab === 'news' && <CurrentAffairsTab navigation={navigation} />}
-
-          {/* ── Today's important day, explained — GK tab ───────── */}
-          {tidbitTab === 'gk' && showImportantDay && (
-            <ImportantDayCard
-              events={importantDay.events}
-              loading={importantDay.loading}
-              mainEventName={gkFact?.eventName}
-              isToday={gkFact?.eventDate === todayMMDD}
-              styles={styles}
-              colors={colors}
-            />
-          )}
-
-          {/* ── On This Day (only without an important day) / Brain Teaser — GK tab ─ */}
-          {tidbitTab === 'gk' && (
-            loading ? (
-              <View style={styles.center}>
-                <ActivityIndicator size="small" color={TEAL} />
-                <Text style={[styles.hint, { color: colors.textMuted }]}>Loading history & challenge…</Text>
-              </View>
-            ) : error ? (
-              <View style={styles.center}>
-                <Feather name="wifi-off" size={26} color={colors.textDim} />
-                <Text style={[styles.hint, { color: colors.textMuted }]}>{error}</Text>
-              </View>
-            ) : worldData ? (
-              <>
-                {!showImportantDay && worldData.onThisDay?.length > 0 && (
-                  <OnThisDayCard items={worldData.onThisDay} styles={styles} colors={colors} />
-                )}
-                {worldData.funChallenge && (
-                  <BrainTeaserCard
-                    challenge={worldData.funChallenge}
-                    showAnswer={showAnswer}
-                    onReveal={() => setShowAnswer(true)}
-                    styles={styles}
-                    colors={colors}
-                  />
-                )}
-              </>
-            ) : null
-          )}
-
-        </ScrollView>
       </View>
     </ScreenLayout>
   );

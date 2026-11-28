@@ -49,7 +49,7 @@
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
   html{background:var(--bg)}
-  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden;min-height:100vh;
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden;display:flex;flex-direction:column;min-height:100vh;min-height:100dvh;
     transition:background-color var(--t) var(--ease), color var(--t) var(--ease)}
   @media (min-width:1920px){body{font-size:18px}}
   @media (min-width:2560px){body{zoom:1.3}}
@@ -83,14 +83,15 @@
   .theme-toggle[aria-checked="true"] .tt-moon{color:var(--on-primary)}
 
   /* Layout: introduction beside the form on wide screens, above it on phones */
-  main{position:relative;z-index:1;padding:12px 0 64px;overflow-x:hidden;overflow-x:clip}
-  .split{display:grid;grid-template-columns:minmax(0,1fr);gap:32px;align-items:start}
+  main{position:relative;z-index:1;flex:1 0 auto;display:flex;align-items:center;padding-block:clamp(28px,3.5vh,48px);overflow-x:hidden;overflow-x:clip}
+  .split{display:grid;grid-template-columns:minmax(0,1fr);gap:32px;align-items:start;max-width:720px;margin-inline:auto;padding-inline:clamp(20px,5vw,56px)}
   @media (min-width:768px){
-    .split{grid-template-columns:minmax(0,1fr) minmax(0,min(61%,680px));gap:clamp(32px,5vw,72px);align-items:center;padding-top:16px}
+    .split{grid-template-columns:minmax(0,.8fr) minmax(0,1.25fr);gap:clamp(34px,5vw,68px);align-items:center;max-width:1120px}
   }
   .intro{max-width:560px}
   .badge{display:inline-block;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--eyebrow)}
   h1{font-family:var(--serif);font-weight:600;color:var(--heading);font-size:clamp(38px, 2.6vw + 22px, 72px);line-height:1.04;letter-spacing:-0.02em;margin:8px 0 0}
+  @media (min-width:768px) and (max-width:1023px){.intro h1{max-width:8ch}}
   .rule{display:block;width:180px;height:16px;margin:6px 0 0}
   .rule path{stroke:var(--orange);stroke-width:4;fill:none;stroke-linecap:round}
   html.motion .rule path{stroke-dasharray:200;stroke-dashoffset:200;animation:draw .9s .2s var(--ease) forwards}
@@ -102,7 +103,6 @@
 
   /* Form card with the homepage's coloured shapes peeking out behind it */
   .stage{position:relative;justify-self:stretch}
-  @media (max-width:767px){.stage{max-width:720px;margin:0 auto;width:100%}}
   .blob{position:absolute;z-index:0;pointer-events:none}
   .b1{top:-26px;right:-30px;width:34%;height:46%;background:var(--orange);border-radius:58% 42% 50% 50% / 46% 54% 46% 54%}
   .b2{top:22%;left:-28px;width:22%;height:50%;background:var(--green);border-radius:44% 56% 52% 48% / 52% 46% 54% 48%}
@@ -118,6 +118,7 @@
   .cs-field{margin-bottom:16px}
   .cs-row{display:flex;flex-wrap:wrap;gap:0 16px}
   .cs-row .cs-field{flex:1 1 200px;min-width:0}
+  @media (min-width:768px){.cs-row .cs-field{flex-basis:140px}}
   .cs-form label,.cs-form .lbl{display:block;font-size:14.5px;font-weight:600;color:var(--heading);margin-bottom:6px}
   .cs-form label .opt,.cs-form .lbl .opt{font-weight:400;color:var(--muted)}
   .cs-form input,.cs-form textarea{width:100%;min-height:48px;background:var(--input);border:1.5px solid var(--input-line);border-radius:12px;padding:11px 14px;color:var(--text);font-size:16px;font-family:inherit;transition:border-color .15s,box-shadow .15s,background-color var(--t)}

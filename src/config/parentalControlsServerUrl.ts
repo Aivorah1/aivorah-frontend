@@ -8,7 +8,7 @@ import { Platform } from 'react-native';
 // deployment.
 declare const __DEV__: boolean;
 
-const LIVE_SERVICE = 'https://aivorah-parental-controls-service-6qpz.onrender.com';
+const LIVE_SERVICE = 'https://aivorah-parental-controls-service-9p05.onrender.com';
 
 // EXPO_PUBLIC_PARENTAL_CONTROLS_URL points only this service elsewhere (e.g. a local copy).
 const OVERRIDE = process.env.EXPO_PUBLIC_PARENTAL_CONTROLS_URL;

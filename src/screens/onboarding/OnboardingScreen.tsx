@@ -14,6 +14,7 @@ import React, { useState, useRef } from 'react';
 import { View, Text, TouchableOpacity, Modal } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
+import { ParentThemeProvider } from '../../context/ThemeContext';
 import OnboardingStudentBoxes from './OnboardingStudentBoxes';
 import OnboardingTeacherBoxes from './OnboardingTeacherBoxes';
 import OnboardingParentBoxes from '../parent/onboarding/OnboardingParentBoxes';
@@ -233,6 +234,6 @@ export default function OnboardingScreen() {
   const role: string = user?.role || 'student';
 
   if (role === 'teacher') return <OnboardingTeacherBoxes />;
-  if (role === 'parent')  return <OnboardingParentBoxes />;
+  if (role === 'parent')  return <ParentThemeProvider><OnboardingParentBoxes /></ParentThemeProvider>;
   return <OnboardingStudentBoxes />;
 }

@@ -62,58 +62,60 @@ export default function HelpCenterScreen({ navigation }: any) {
           showBack
           onBack={() => navigation.goBack()}
           onMenuPress={() => navigation.openDrawer()}
-        />
+          renderContent={mobileTitle => (
+            <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+              {mobileTitle}
 
-        <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+              <View style={styles.heroSection}>
+                <View style={styles.heroPill}>
+                  <View style={styles.heroPillDot} />
+                  <Text style={styles.heroPillText}>HELP CENTER · AIVORAH</Text>
+                </View>
+                <Text style={styles.heroHeadline}>How can we{'\n'}help you?</Text>
+              </View>
 
-          <View style={styles.heroSection}>
-            <View style={styles.heroPill}>
-              <View style={styles.heroPillDot} />
-              <Text style={styles.heroPillText}>HELP CENTER · AIVORAH</Text>
-            </View>
-            <Text style={styles.heroHeadline}>How can we{'\n'}help you?</Text>
-          </View>
+              <View style={styles.searchBox}>
+                <Feather name="search" size={16} color={colors.textDim} />
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Search topics, questions..."
+                  placeholderTextColor={colors.textDim}
+                  value={search}
+                  onChangeText={setSearch}
+                />
+                {search.length > 0 && (
+                  <TouchableOpacity onPress={() => setSearch('')} accessibilityRole="button" accessibilityLabel="Clear search">
+                    <Feather name="x" size={16} color={colors.textDim} />
+                  </TouchableOpacity>
+                )}
+              </View>
+              {search.length > 0 && (
+                <Text style={styles.searchCount}>{filteredTopics.length} topic{filteredTopics.length !== 1 ? 's' : ''} · {filteredFaqs.length} FAQ{filteredFaqs.length !== 1 ? 's' : ''}</Text>
+              )}
 
-          <View style={styles.searchBox}>
-            <Feather name="search" size={16} color={colors.textDim} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search topics, questions..."
-              placeholderTextColor={colors.textDim}
-              value={search}
-              onChangeText={setSearch}
-            />
-            {search.length > 0 && (
-              <TouchableOpacity onPress={() => setSearch('')} accessibilityRole="button" accessibilityLabel="Clear search">
-                <Feather name="x" size={16} color={colors.textDim} />
-              </TouchableOpacity>
-            )}
-          </View>
-          {search.length > 0 && (
-            <Text style={styles.searchCount}>{filteredTopics.length} topic{filteredTopics.length !== 1 ? 's' : ''} · {filteredFaqs.length} FAQ{filteredFaqs.length !== 1 ? 's' : ''}</Text>
+              <Text style={styles.sectionTitle}>Still need help?</Text>
+              <SupportCards
+                colors={colors}
+                isDark={isDark}
+                onOpenChat={() => chat.setChatVisible(true)}
+                onOpenTicket={() => ticket.setTicketVisible(true)}
+              />
+
+              <Text style={styles.sectionTitle}>Browse Topics</Text>
+              <TopicsList topics={filteredTopics} search={search} colors={colors} isDark={isDark} onSelectTopic={setActiveTopic} />
+
+              <Text style={styles.sectionTitle}>Frequently Asked Questions</Text>
+              <FaqList
+                faqs={filteredFaqs}
+                search={search}
+                openFaq={openFaq}
+                onToggleFaq={(i) => setOpenFaq(openFaq === i ? null : i)}
+                colors={colors}
+              />
+
+            </ScrollView>
           )}
-
-          <Text style={styles.sectionTitle}>Still need help?</Text>
-          <SupportCards
-            colors={colors}
-            isDark={isDark}
-            onOpenChat={() => chat.setChatVisible(true)}
-            onOpenTicket={() => ticket.setTicketVisible(true)}
-          />
-
-          <Text style={styles.sectionTitle}>Browse Topics</Text>
-          <TopicsList topics={filteredTopics} search={search} colors={colors} isDark={isDark} onSelectTopic={setActiveTopic} />
-
-          <Text style={styles.sectionTitle}>Frequently Asked Questions</Text>
-          <FaqList
-            faqs={filteredFaqs}
-            search={search}
-            openFaq={openFaq}
-            onToggleFaq={(i) => setOpenFaq(openFaq === i ? null : i)}
-            colors={colors}
-          />
-
-        </ScrollView>
+        />
 
         <ChatModal
           visible={chat.chatVisible}

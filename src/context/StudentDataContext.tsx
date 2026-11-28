@@ -60,11 +60,9 @@ export interface StudentStats {
 interface StudentDataContextType {
   stats:             StudentStats;
   studentId:         string;
-  // True only when the initial load genuinely failed after retries AND no
-  // cached fallback was found either — i.e. what's showing may not be real
-  // zero progress, it's "we don't know yet". Distinct from a real student
-  // whose stats are actually all zero (statsLoadError stays false for them).
+  statsLoading:      boolean;
   statsLoadError:    boolean;
+  activityRevision:  number;
   refreshStats:      () => void;
   addXP:             (xp: number) => void;
   exploreTopic:      () => void;
@@ -194,7 +192,9 @@ export async function resolveStudentId(email: string): Promise<string> {
 const StudentDataContext = createContext<StudentDataContextType>({
   stats:             ZERO_STATS,
   studentId:         '',
+  statsLoading:      true,
   statsLoadError:    false,
+  activityRevision:  0,
   refreshStats:      () => {},
   addXP:             () => {},
   exploreTopic:      () => {},
@@ -216,9 +216,11 @@ export function StudentDataProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [stats,          setStats]          = useState<StudentStats>(ZERO_STATS);
   const [studentId,      setStudentId]      = useState('');
+  const [studentEmail, setStudentEmail]     = useState<string>();
   const [loaded,         setLoaded]         = useState(false);
   const [statsLoadError, setStatsLoadError] = useState(false);
   const [retryTick,      setRetryTick]      = useState(0);
+  const [activityRevision, setActivityRevision] = useState(0);
   const reconcilingRef = useRef(false);
   // Tracks which email the zero-reset below has already run for, so a
   // manual refreshStats() retry (same email, retryTick bumped) doesn't wipe
@@ -299,15 +301,23 @@ export function StudentDataProvider({ children }: { children: ReactNode }) {
       setStats(ZERO_STATS);
     }
 
+    const email = user.email;
+    let cancelled = false;
     async function init() {
-      const id = await resolveStudentId(user!.email);
+      const id = await resolveStudentId(email);
+      if (cancelled) return;
       setStudentId(id);
+      setStudentEmail(email);
       try {
         const res = await fetchWithRetry(`${LEADERBOARD_SERVICE_URL}/student/${id}`);
         if (res.ok) {
           const data = await res.json();
+          if (cancelled) return;
+          if (!Array.isArray(data?.completedTopics)) throw new Error('Invalid student stats response');
+          reconcilingRef.current = true;
           setStats({ ...ZERO_STATS, ...data });
           setStatsLoadError(false);
+          setActivityRevision(value => value + 1);
         } else {
           throw new Error(`GET /student/${id} → ${res.status}`);
         }
@@ -317,17 +327,17 @@ export function StudentDataProvider({ children }: { children: ReactNode }) {
         // the screen. Only when there's no cache either do we flag this as
         // a genuine load failure, so the UI can say "couldn't load" instead
         // of silently rendering a real student's progress as all zeros.
-        let recoveredFromCache = false;
         try {
           const raw = await AsyncStorage.getItem(`@stats_${id}`);
-          if (raw) { setStats({ ...ZERO_STATS, ...JSON.parse(raw) }); recoveredFromCache = true; }
+          if (!cancelled && raw) setStats({ ...ZERO_STATS, ...JSON.parse(raw) });
         } catch {}
-        setStatsLoadError(!recoveredFromCache);
+        if (!cancelled) setStatsLoadError(true);
       } finally {
-        setLoaded(true);
+        if (!cancelled) setLoaded(true);
       }
     }
     init();
+    return () => { cancelled = true; };
   }, [user?.email, retryTick]);
 
   function refreshStats() {
@@ -336,7 +346,7 @@ export function StudentDataProvider({ children }: { children: ReactNode }) {
 
   // ── Sync to server whenever stats change ──────────────
   useEffect(() => {
-    if (!loaded || !studentId) return;
+    if (!loaded || !studentId || studentEmail !== user?.email || statsLoadError) return;
     // Local backup
     AsyncStorage.setItem(`@stats_${studentId}`, JSON.stringify(stats)).catch(() => {});
     // A reconciliation write (below) shouldn't immediately re-trigger
@@ -353,18 +363,21 @@ export function StudentDataProvider({ children }: { children: ReactNode }) {
       method:  'PUT',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify(stats),
+    }).then(response => {
+      if (!response.ok) throw new Error('Could not sync student stats');
+      if (lastResetEmailRef.current === studentEmail) setActivityRevision(value => value + 1);
     }).catch(() => {
       fetchWithRetry(`${LEADERBOARD_SERVICE_URL}/student/${studentId}`)
         .then(res => (res.ok ? res.json() : null))
         .then(data => {
-          if (data) {
+          if (data && lastResetEmailRef.current === studentEmail) {
             reconcilingRef.current = true;
             setStats(prev => ({ ...prev, ...data }));
           }
         })
         .catch(() => {});
     });
-  }, [stats, loaded, studentId]);
+  }, [stats, loaded, studentId, studentEmail, user?.email, statsLoadError]);
 
   // Study time is recorded only by screens where real learning happens —
   // TopicLessonScreen / VideoLessonScreen / Learn5EScreen, ChallengesScreen (while
@@ -401,6 +414,8 @@ export function StudentDataProvider({ children }: { children: ReactNode }) {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ minutes: mins, source, subject }),
+    }).then(response => {
+      if (response.ok && lastResetEmailRef.current === studentEmail) setActivityRevision(value => value + 1);
     }).catch(() => {});
   }
 
@@ -452,35 +467,23 @@ export function StudentDataProvider({ children }: { children: ReactNode }) {
   }
 
   function completeLesson(topic: string, subject?: string, grade?: string, curriculum?: string) {
+    if (!studentId || studentEmail !== user?.email) return;
     // Call server to record completion
     fetch(`${LEADERBOARD_SERVICE_URL}/student/${studentId}/complete-lesson`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ topic, subject, grade, curriculum }),
     })
-      // A server error (400/500) still returns valid JSON — without this check,
-      // r.json() resolves "successfully" with an { error } body, which used to
-      // get merged straight into stats (leaving completedTopics untouched) and
-      // never reach the offline-fallback catch below. That's how a student could
-      // pass a quiz, see XP awarded, but the topic never actually marks as done.
       .then(r => { if (!r.ok) throw new Error('complete-lesson failed'); return r.json(); })
-      .then(data => setStats(prev => ({ ...prev, ...data })))
-      .catch(() => {
-        // Offline fallback
-        setStats(prev => {
-          const already = prev.completedTopics.includes(topic);
-          const newXP = already ? prev.xpPoints : prev.xpPoints + 150;
-          return {
-            ...prev,
-            completedTopics: already ? prev.completedTopics : [...prev.completedTopics, topic],
-            xpPoints:        newXP,
-            level:           computeLevel(newXP),
-            todayXP:         already ? prev.todayXP : prev.todayXP + 150,
-            topicsExplored:  already ? prev.topicsExplored : prev.topicsExplored + 1,
-            lastLesson:      topic,
-            lastActiveDate:  todayISO(),
-          };
-        });
+      .then(data => {
+        if (lastResetEmailRef.current !== studentEmail) return;
+        if (!Array.isArray(data?.completedTopics) || !data.completedTopics.includes(topic)) throw new Error('Completion was not confirmed');
+        reconcilingRef.current = true;
+        setStats(prev => ({ ...prev, ...data, completedTopics: [...new Set<string>([...prev.completedTopics, ...data.completedTopics])] }));
+        setStatsLoadError(false);
+        setActivityRevision(value => value + 1);
+      }).catch(() => {
+        if (lastResetEmailRef.current === studentEmail) setStatsLoadError(true);
       });
   }
 
@@ -504,7 +507,12 @@ export function StudentDataProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <StudentDataContext.Provider value={{ stats, studentId, statsLoadError, refreshStats, addXP, exploreTopic, startTopicActivity, completeLesson, completeChallenge, completeAssignment, recordStudyTime, recordStudySeconds, learningActivity, recordQuizResult }}>
+    <StudentDataContext.Provider value={{
+      stats, studentId: studentEmail === user?.email ? studentId : '',
+      statsLoading: !loaded || studentEmail !== user?.email,
+      statsLoadError, activityRevision, refreshStats, addXP, exploreTopic, startTopicActivity, completeLesson,
+      completeChallenge, completeAssignment, recordStudyTime, recordStudySeconds, learningActivity, recordQuizResult,
+    }}>
       {children}
     </StudentDataContext.Provider>
   );

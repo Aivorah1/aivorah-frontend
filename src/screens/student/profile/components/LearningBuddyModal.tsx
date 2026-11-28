@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, TextInput, Modal, Image, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import Crown from 'lucide-react-native/icons/crown';
+import PawPrint from 'lucide-react-native/icons/paw-print';
 import { LinearGradient } from 'expo-linear-gradient';
 import { spacing, radius, fonts } from '../../../../theme';
 import type { AppColors } from '../../../../theme';
@@ -430,22 +432,27 @@ export function LearningBuddyModal({
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.lg }}>
           {BUDDY_CATEGORIES.map(cat => {
             const active = activeCategory === cat.id;
+            const color = active ? colors.accentYellow : colors.textDim;
             return (
               <TouchableOpacity
                 key={cat.id}
                 onPress={() => setActiveCategory(cat.id)}
                 style={[
                   styles.chip,
+                  { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 44 },
                   active && styles.chipActive,
                 ]}
+                accessibilityRole="button"
+                accessibilityState={{ selected: active }}
                 activeOpacity={0.7}
               >
-                <Feather name={cat.icon as any} size={13} color={active ? colors.accentYellow : colors.textDim} />
+                {cat.icon === 'crown' ? <Crown size={14} color={color} />
+                  : cat.icon === 'paw-print' ? <PawPrint size={14} color={color} />
+                  : <Feather name={cat.icon} size={14} color={color} />}
                 <Text style={[
                   styles.chipTxt,
                   active && styles.chipTxtActive,
-                  { marginLeft: 4 },
-                ]}>{cat.label}</Text>
+                ]} numberOfLines={1}>{cat.label}</Text>
               </TouchableOpacity>
             );
           })}

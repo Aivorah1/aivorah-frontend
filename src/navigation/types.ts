@@ -61,7 +61,7 @@ export type ParentDrawerParamList = {
   ParentDashboard: { childId?: string } | undefined;
   ParentStudentView: { childData: any } | undefined;
   ParentProfile: undefined;
-  ParentMyKids: undefined;
+  ParentMyKids: { openAddChild?: boolean } | undefined;
   ParentSchedule: { childId?: string } | undefined;
   ParentLearning: { childId?: string } | undefined;
   ParentAssignments: undefined;

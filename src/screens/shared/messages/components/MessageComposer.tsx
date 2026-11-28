@@ -1,8 +1,9 @@
-import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, Platform } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, Keyboard, Platform, StyleSheet } from 'react-native';
 import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../theme';
+import { fonts } from '../../../../theme';
 import type { Attachment, Conversation, Message } from '../types';
 import { fileIcon, formatFileSize, parseContent } from '../utils/messageFormat';
 
@@ -11,6 +12,7 @@ interface Props {
   colors: AppColors;
   styles: any;
   userRole: string;
+  compact?: boolean;
   userEmail: string;
   replyTo: Message | null;
   setReplyTo: (m: Message | null) => void;
@@ -27,9 +29,13 @@ interface Props {
 }
 
 export default function MessageComposer({
-  activeConvo, colors, styles, userRole, userEmail, replyTo, setReplyTo, attachment, removeAttachment,
-  uploading, sending, pickFile, showEmoji, setShowEmoji, inputText, setInputText, sendMessage,
+  activeConvo, colors, styles, userRole, compact, userEmail, replyTo, setReplyTo, attachment, removeAttachment,
+  uploading, sending, pickFile, setShowEmoji, inputText, setInputText, sendMessage,
 }: Props) {
+  const [focused, setFocused] = useState(false);
+  const [inputHeight, setInputHeight] = useState(44);
+  const teacherComposer = userRole === 'teacher' || userRole === 'super_admin';
+  const web = Platform.OS === 'web';
   if (userRole === 'student') {
     return (
       <View style={{ padding: 12, alignItems: 'center', borderTopWidth: 1, borderTopColor: colors.borderColor }}>
@@ -37,6 +43,41 @@ export default function MessageComposer({
       </View>
     );
   }
+
+  const input = (
+    <TextInput
+      testID="messages-input"
+      accessibilityLabel="Message"
+      style={[styles.input, teacherComposer && [
+        composerStyles.input,
+        web ? composerStyles.webInput : { height: inputText ? inputHeight : 44 },
+        focused && { borderColor: '#4B9187' },
+      ]]}
+      value={inputText}
+      onChangeText={setInputText}
+      placeholder={`Message ${activeConvo.otherName}...`}
+      placeholderTextColor={colors.textDim}
+      multiline
+      {...(teacherComposer && web ? { rows: 1 } : {})}
+      {...(teacherComposer && {
+        onFocus: () => setFocused(true),
+        onBlur: () => setFocused(false),
+        ...(web ? {} : {
+          textAlignVertical: 'top' as const,
+          onContentSizeChange: (e: { nativeEvent: { contentSize: { height: number } } }) =>
+            setInputHeight(Math.min(110, Math.max(44, e.nativeEvent.contentSize.height))),
+        }),
+      })}
+      maxLength={1000}
+      onKeyPress={(e: any) => {
+        if (web && (e.key ?? e.nativeEvent?.key) === 'Enter'
+          && !(e.shiftKey ?? e.nativeEvent?.shiftKey) && !e.nativeEvent?.isComposing) {
+          e.preventDefault?.();
+          if (inputText.trim() || attachment) sendMessage();
+        }
+      }}
+    />
+  );
 
   return (
     <View>
@@ -66,10 +107,32 @@ export default function MessageComposer({
         </View>
       )}
 
-      <View style={styles.inputRow}>
+      <View style={[styles.inputRow, teacherComposer && composerStyles.row, compact && composerStyles.compactRow]}>
+        {teacherComposer && web && React.createElement('style', null, `
+          [data-teacher-composer] { display: grid; }
+          [data-teacher-composer] > * { grid-area: 1 / 1; min-width: 0; }
+          [data-teacher-composer] > span {
+            visibility: hidden;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            box-sizing: border-box;
+            max-height: 110px;
+            overflow: hidden;
+            padding: 11px 13px;
+            font: 16px/22px var(--av-body, sans-serif);
+          }
+          [data-teacher-composer] textarea { width: 100%; height: 100%; resize: none; }
+          body[data-av-portal] [data-teacher-composer] textarea:focus-visible {
+            outline: 2px solid #226B64 !important;
+            outline-offset: 1px !important;
+          }
+          body[data-av-theme="dark"] [data-teacher-composer] textarea:focus-visible { outline-color: #94D9CA !important; }
+        `)}
         {Platform.OS === 'web' && (
           <TouchableOpacity
             testID="messages-attach-button"
+            accessibilityRole="button"
+            accessibilityLabel="Attach a file"
             style={styles.attachBtn}
             onPress={pickFile}
             disabled={uploading || sending}
@@ -83,30 +146,28 @@ export default function MessageComposer({
         )}
         <TouchableOpacity
           style={styles.attachBtn}
-          onPress={() => setShowEmoji((v) => !v)}
+          accessibilityRole="button"
+          accessibilityLabel="Emoji picker"
+          onPress={() => {
+            if (compact) Keyboard.dismiss();
+            setShowEmoji((v) => !v);
+          }}
           {...(Platform.OS === 'web' ? { onClick: (e: any) => e.stopPropagation?.() } : {})}
           activeOpacity={0.7}
         >
           <Feather name="smile" size={18} color={colors.accentYellow} />
         </TouchableOpacity>
-        <TextInput
-          testID="messages-input"
-          style={styles.input}
-          value={inputText}
-          onChangeText={setInputText}
-          placeholder={`Message ${activeConvo.otherName}...`}
-          placeholderTextColor={colors.textDim}
-          multiline
-          maxLength={1000}
-          onKeyPress={(e: any) => {
-            if (Platform.OS === 'web' && e.nativeEvent?.key === 'Enter' && !e.nativeEvent?.shiftKey) {
-              e.preventDefault?.();
-              if (inputText.trim() || attachment) sendMessage();
-            }
-          }}
-        />
+        {teacherComposer ? (
+          <View style={composerStyles.field} {...{ dataSet: { teacherComposer: 'true' } }}>
+            {/* The hidden draft sets the textarea height across browsers. */}
+            {web && React.createElement('span', { 'aria-hidden': true }, (inputText || '') + '\u200b')}
+            {input}
+          </View>
+        ) : input}
         <TouchableOpacity
           testID="messages-send-button"
+          accessibilityRole="button"
+          accessibilityLabel="Send message"
           style={[styles.sendBtn, (!inputText.trim() && !attachment || sending) && styles.sendBtnDisabled]}
           onPress={sendMessage}
           disabled={(!inputText.trim() && !attachment) || sending}
@@ -121,3 +182,14 @@ export default function MessageComposer({
     </View>
   );
 }
+
+const composerStyles = StyleSheet.create({
+  row: { gap: 7 },
+  compactRow: { paddingHorizontal: 8, paddingVertical: 8, gap: 6 },
+  field: { flex: 1, minWidth: 0 },
+  input: { fontSize: 16, lineHeight: 22, includeFontPadding: false, paddingHorizontal: 12, paddingVertical: 10, minHeight: 44, maxHeight: 110, borderRadius: 16 },
+  webInput: {
+    fontFamily: fonts.sans,
+    ...{ resize: 'none', overflowY: 'auto' },
+  },
+});

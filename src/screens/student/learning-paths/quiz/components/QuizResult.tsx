@@ -108,42 +108,46 @@ export default function QuizResult({
   return (
     <ScreenLayout>
       <View style={styles.screen}>
-        <Header title={review ? 'Test Report' : 'Practice Results'} subtitle={review ? topic : undefined} showBack onBack={onBack} onMenuPress={onMenuPress} />
+        <Header title={review ? 'Test Report' : 'Practice Results'} subtitle={review ? topic : undefined} compactMobileTitle showBack onBack={onBack} onMenuPress={onMenuPress} />
         <ScrollView contentContainerStyle={[styles.scrollContent]} showsVerticalScrollIndicator={false}>
-        <View style={[styles.content, { alignItems: 'center', paddingTop: 32 }]}>
+        <View style={{ width: '100%', alignItems: 'center', paddingTop: 32 }}>
 
           {/* ── Score hero ── */}
-          {passed && !review && <Confetti trigger />}
-          <TrophyIcon size={96} tier={trophyTier} />
-          <Text style={[styles.resultScore, { color: scoreColor, marginTop: 12 }]}>{pct}%</Text>
-          <Text style={[styles.resultLabel, { color: colors.textMain }]}>{score} / {questions.length} correct</Text>
-          <Text style={[styles.resultMessage, { color: colors.textMuted }]}>{message}</Text>
-          {followupSlot}
+          <View style={[styles.content, { alignItems: 'center' }]}>
+            {passed && !review && <Confetti trigger />}
+            <TrophyIcon size={96} tier={trophyTier} />
+            <Text style={[styles.resultScore, { color: scoreColor, marginTop: 12 }]}>{pct}%</Text>
+            <Text style={[styles.resultLabel, { color: colors.textMain }]}>{score} / {questions.length} correct</Text>
+            <Text style={[styles.resultMessage, { color: colors.textMuted }]}>{message}</Text>
+            {followupSlot}
+          </View>
 
           {/* badges */}
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12, justifyContent: 'center' }}>
+          <View style={styles.topicBadges}>
             <View style={[styles.topicBadge, { backgroundColor: accent + '18', borderColor: accent + '40' }]}>
+              <Feather name="book-open" size={14} color={accent} />
               <Text style={[styles.topicBadgeText, { color: accent }]}>{topic}</Text>
             </View>
             <View style={[styles.topicBadge, { backgroundColor: colors.cardDark, borderColor: colors.borderColor }]}>
-              <Feather name="clock" size={11} color={colors.textMuted} />
-              <Text style={[styles.topicBadgeText, { color: colors.textMuted }]}> {timeStr}</Text>
+              <Feather name="clock" size={14} color={colors.textMuted} />
+              <Text style={[styles.topicBadgeText, { color: colors.textMuted }]}>{timeStr}</Text>
             </View>
             {!!takenAt && (
               <View testID="quiz-taken-at" style={[styles.topicBadge, { backgroundColor: colors.cardDark, borderColor: colors.borderColor }]}>
-                <Feather name="calendar" size={11} color={colors.textMuted} />
-                <Text style={[styles.topicBadgeText, { color: colors.textMuted }]}> {takenAt}</Text>
+                <Feather name="calendar" size={14} color={colors.textMuted} />
+                <Text style={[styles.topicBadgeText, { color: colors.textMuted }]}>{takenAt}</Text>
               </View>
             )}
             {attemptNumber > 1 && (
               <View style={[styles.topicBadge, { backgroundColor: colors.cardDark, borderColor: colors.borderColor }]}>
+                <Feather name="layers" size={14} color={colors.textMuted} />
                 <Text style={[styles.topicBadgeText, { color: colors.textMuted }]}>Attempt #{attemptNumber}</Text>
               </View>
             )}
           </View>
 
           {/* action buttons */}
-          <View style={styles.resultBtns}>
+          <View style={[styles.resultBtns, styles.content]}>
             <TouchableOpacity
               style={[styles.retryBtn, { borderColor: !passed ? colors.accentRed : accent, backgroundColor: !passed ? colors.accentRed + '14' : accent + '14' }]}
               onPress={onRetry} activeOpacity={0.8}

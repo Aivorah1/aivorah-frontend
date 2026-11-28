@@ -200,7 +200,7 @@ export function ThemeSwitch() {
 
 // ── Page shell: ivory / navy page, header, scrolling body ────────────────────
 export function AuthShell({
-  children, onBack, backLabel = 'Back to home', backIcon = 'home', backStyle = 'link', headerRight, contentStyle, center = true, contentMaxWidth,
+  children, onBack, backLabel = 'Back to home', backIcon = 'home', backStyle = 'link', headerRight, contentStyle, center = true, contentMaxWidth, balancedBody = false,
 }: {
   children: React.ReactNode;
   /** Wider native content area than the default 1200/1440px cap. */
@@ -214,6 +214,8 @@ export function AuthShell({
   contentStyle?: StyleProp<ViewStyle>;
   /** Vertically centre the content when it is shorter than the screen. */
   center?: boolean;
+  /** Apply equal spacing above and below the content within the scrollable body. */
+  balancedBody?: boolean;
   /** Kept for callers of the previous design; the page is always plain now. */
   backdrop?: 'full' | 'plain';
 }) {
@@ -223,7 +225,7 @@ export function AuthShell({
     <View style={{ flex: 1, backgroundColor: t.bg, ...colorTransition() }}>
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ flexGrow: 1, paddingBottom: isTablet ? 48 : 28 }}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: balancedBody ? 0 : isTablet ? 48 : 28 }}
         keyboardShouldPersistTaps="handled"
       >
         <View style={{ flexGrow: 1, width: '100%', maxWidth: IS_WEB ? undefined : Math.max(maxContent, contentMaxWidth ?? 0) + gutter * 2, alignSelf: 'center', paddingHorizontal: gutter }}>
@@ -250,7 +252,11 @@ export function AuthShell({
               <ThemeSwitch />
             </View>
           </View>
-          <View style={[{ flexGrow: 1, justifyContent: center ? 'center' : 'flex-start', paddingTop: isTablet ? 12 : 6 }, contentStyle]}>{children}</View>
+          <View style={[
+            { flexGrow: 1, justifyContent: center ? 'center' : 'flex-start' },
+            balancedBody ? { paddingVertical: isTablet ? 32 : 24 } : { paddingTop: isTablet ? 12 : 6 },
+            contentStyle,
+          ]}>{children}</View>
         </View>
       </ScrollView>
     </View>

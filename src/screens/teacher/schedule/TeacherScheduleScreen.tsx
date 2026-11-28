@@ -6,6 +6,8 @@ import { useTheme } from '../../../context/ThemeContext';
 import { useAuth } from '../../../context/AuthContext';
 import ScreenLayout from '../../../components/common/ScreenLayout';
 import Header from '../../../components/common/Header';
+import TealActionButton from '../../../components/common/TealActionButton';
+import { useResponsive } from '../../../hooks/useResponsive';
 
 import { TIMES, HOUR_HEIGHT } from './constants';
 import { useScheduleScroll } from '../../../hooks/useScheduleScroll';
@@ -21,11 +23,15 @@ import WeekNavBar from './components/WeekNavBar';
 import CalendarGrid from './components/CalendarGrid';
 import EventFormModal from './components/EventFormModal';
 import EventDetailModal from './components/EventDetailModal';
+import { dateISO, tagColors } from './utils/scheduleUtils';
+
+const agendaDateFormat = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
 export default function TeacherScheduleScreen({ navigation }: any) {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
+  const { isMobile } = useResponsive();
   const gold = colors.accentYellow;
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const styles = useMemo(() => makeStyles(colors, isDark, isMobile), [colors, isDark, isMobile]);
   const { user } = useAuth();
 
   // Shared between the week-scroll effect and the initial data fetch so the
@@ -36,7 +42,14 @@ export default function TeacherScheduleScreen({ navigation }: any) {
   const scrollToNowRef = useRef<((animated?: boolean) => void) | null>(null);
   const [gridWidth, setGridWidth] = useState<number | null>(null);
   const { week, todayISO, weekBase, setWeekBase, colWidth, hScrollRef, goToday, onGridContentSizeChange, scrollToCurrentTime } =
-    useWeekNav(firstLoadDoneRef, scrollToNowRef, gridWidth);
+    useWeekNav(firstLoadDoneRef, scrollToNowRef, gridWidth, false);
+  const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
+  const selectedISO = week[selectedDayIndex ?? weekBase.getDay()]?.iso ?? dateISO(weekBase);
+
+  function selectDate(iso: string) {
+    const index = week.findIndex(day => day.iso === iso);
+    if (index >= 0) setSelectedDayIndex(index);
+  }
 
   const { eventsMap, setEventsMap, loading, nowTime, removeEvent } =
     useScheduleEvents(week, user?.email, firstLoadDoneRef);
@@ -44,6 +57,8 @@ export default function TeacherScheduleScreen({ navigation }: any) {
   const { students } = useStudents(user?.email);
 
   const { passesTagFilter, allDayHeight } = useTagFilters(eventsMap, week);
+  const dayEvents = (eventsMap[selectedISO] ?? []).filter(passesTagFilter)
+    .sort((a, b) => Number(!!b.isAllDay) - Number(!!a.isAllDay) || (a.startTime || '').localeCompare(b.startTime || ''));
 
   const form = useEventForm({
     todayISO,
@@ -70,22 +85,13 @@ export default function TeacherScheduleScreen({ navigation }: any) {
   );
 
   const gridHeight = TIMES.length * HOUR_HEIGHT;
-  const { scrollRef: scheduleScrollRef, onGridLayout: onScheduleGridLayout, scrollToNow: scrollScheduleToNow } = useScheduleScroll({ ready: !loading, allDayHeight, hourHeight: HOUR_HEIGHT, pinnedHeader: Platform.OS === 'web' });
+  const { scrollRef: scheduleScrollRef, onGridLayout: onScheduleGridLayout, scrollToNow: scrollScheduleToNow } = useScheduleScroll({ ready: !loading, allDayHeight, hourHeight: HOUR_HEIGHT, pinnedHeader: Platform.OS === 'web', openAtCurrentTime: false });
   useEffect(() => { scrollToNowRef.current = scrollScheduleToNow; });
 
   return (
     <ScreenLayout>
       <View style={styles.screen}>
-        {/* Header row with + New Event button */}
-        <View style={styles.headerRow}>
-          <View style={{ flex: 1 }}>
-            <Header title="Class Schedule" subtitle="Create sessions and deadlines for students." />
-          </View>
-          <TouchableOpacity testID="teacher-schedule-add-event-button" style={styles.addEventBtnTop} onPress={() => form.openModal()} activeOpacity={0.8}>
-            <Feather name="plus" size={15} color={colors.onPrimary} />
-            <Text style={styles.addEventBtnTopText}>New Event</Text>
-          </TouchableOpacity>
-        </View>
+        <Header title="Class Schedule" subtitle="Create sessions and deadlines for students." onMenuPress={navigation?.openDrawer ? () => navigation.openDrawer() : undefined} />
 
         <ScrollView ref={scheduleScrollRef} style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
@@ -95,8 +101,34 @@ export default function TeacherScheduleScreen({ navigation }: any) {
             <Text style={styles.infoText}>Events you create here are visible to students and parents in their Schedule screen.</Text>
           </View>
 
-          {/* ── Week navigation bar ── */}
-          <WeekNavBar colors={colors} styles={styles} week={week} weekBase={weekBase} setWeekBase={setWeekBase} goToday={goToday} />
+          <WeekNavBar colors={colors} styles={styles} week={week} weekBase={weekBase} setWeekBase={setWeekBase}
+            compact={isMobile}
+            goToday={() => { setSelectedDayIndex(null); goToday(); }}
+            selectedISO={selectedISO} onSelectDate={selectDate}
+            action={<TealActionButton testID="teacher-schedule-add-event-button" label="New Event" icon="plus" onPress={() => form.openModal(selectedISO)} />}
+          />
+
+          <View style={styles.agenda} testID="teacher-schedule-agenda">
+            <Text accessibilityRole="header" accessibilityLiveRegion="polite" style={styles.agendaHeading}>
+              {agendaDateFormat.format(new Date(selectedISO + 'T12:00:00'))}
+            </Text>
+            {eventsMap[selectedISO] === undefined ? (
+              <Text style={styles.agendaEmpty}>Loading events…</Text>
+            ) : dayEvents.length === 0 ? (
+              <Text style={styles.agendaEmpty}>No events scheduled for this day.</Text>
+            ) : dayEvents.map(event => {
+              const [accent, fill, textCol] = tagColors(event.tag, event.type);
+              return (
+                <TouchableOpacity key={event.id} accessibilityRole="button"
+                  onPress={() => form.setSelectedEvent({ ...event, accent, fill, textCol })}
+                  style={[styles.agendaEvent, { borderLeftWidth: 3, borderLeftColor: accent }]}>
+                  <Text style={styles.agendaTime}>{event.isAllDay || event.startTime === '23:59' ? 'All day' : [event.startTime, event.endTime].filter(Boolean).join(' – ')}</Text>
+                  <Text style={styles.agendaTitle}>{event.title}</Text>
+                  <Feather name="chevron-right" size={16} color={colors.textMuted} />
+                </TouchableOpacity>
+              );
+            })}
+          </View>
 
           {/* ── Grid: fixed time labels + horizontally scrollable day columns ── */}
           {loading ? (
@@ -125,7 +157,7 @@ export default function TeacherScheduleScreen({ navigation }: any) {
                 removeEvent={removeEvent}
                 openModal={form.openModal}
                 setSelectedEvent={form.setSelectedEvent}
-                onDayHeaderPress={() => scrollToCurrentTime()}
+                onDayHeaderPress={(iso) => { selectDate(iso); if (iso === todayISO) scrollToCurrentTime(); }}
               />
 
             </View>
