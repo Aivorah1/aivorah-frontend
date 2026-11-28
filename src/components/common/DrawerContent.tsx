@@ -104,8 +104,6 @@ const TEACHER_NAV_ITEMS = [
   { label: 'Announcements', icon: 'volume-2', screen: 'TeacherAnnouncements', group: 'MANAGE' },
   { label: 'Send Announcement', icon: 'edit-3', screen: 'AnnouncementManager', group: 'MANAGE' },
   { label: 'Student Progress', icon: 'bar-chart-2', screen: 'TeacherProgress', group: 'MANAGE' },
-  { label: 'Achievements', icon: 'award', screen: 'TeacherAchievements', group: 'TEACHING DEVELOPMENT' },
-  { label: 'Project Details', icon: 'activity', screen: 'ProjectDetails', group: 'SYSTEM' },
   { label: 'Help Center', icon: 'help-circle', screen: 'TeacherHelp', group: 'SYSTEM' },
   { label: 'Settings', icon: 'settings', screen: 'TeacherSettings', group: 'SYSTEM' },
 ];
@@ -229,7 +227,12 @@ export default function DrawerContent(props: any) {
   // The logo / brand name takes you to your own dashboard (the first item of
   // your menu). It used to ask "Leave to Home?" and sign you out.
   const homeItem = NAV_ITEMS[0];
-  const goToDashboard = () => { if (homeItem) navigation.navigate(homeItem.screen, (homeItem as any).params); };
+  const closeMenu = () => navigation.closeDrawer?.();
+  const openItem = (item: { screen: string; params?: Record<string, unknown> }) => {
+    navigation.navigate(item.screen, item.params);
+    closeMenu();
+  };
+  const goToDashboard = () => { if (homeItem) openItem(homeItem); };
   const groups = isAdmin ? ['MENU'] : isTeacher ? ['MENU', 'CLASS', 'RESOURCES', 'MANAGE', 'TEACHING DEVELOPMENT', 'SYSTEM'] : isSuperAdmin ? ['MENU', 'TEACHING DEVELOPMENT', 'SYSTEM'] : isSchoolAdmin ? ['WORKSPACE', 'STUDENT MANAGEMENT', 'ACADEMIC STRUCTURE', 'PEOPLE', 'COMMUNICATION', 'ADMINISTRATION', 'SUPPORT'] : isParent ? ['MENU', 'CHILDREN', 'SYSTEM'] : ['MENU', 'FOCUS', 'SYSTEM'];
   const { unreadCount, unreadAssignments, unreadChallenges } = useNotification();
   const { bannerAnnouncements } = useAnnouncements();
@@ -255,7 +258,7 @@ export default function DrawerContent(props: any) {
       </TouchableOpacity>
       {isStudentRole && (
         <TouchableOpacity
-          onPress={() => { try { (navigation as any).closeDrawer?.(); } catch (_) {} }}
+          onPress={closeMenu}
           style={styles.closeBtn}
           accessibilityRole="button"
           accessibilityLabel="Close menu"
@@ -282,7 +285,7 @@ export default function DrawerContent(props: any) {
         </View>
       )}
 
-      <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
+      <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
         {groups.map((group) => {
           const items = NAV_ITEMS.filter((i) => i.group === group);
           // A section with nothing to show (e.g. on the phone app) gets no heading.
@@ -302,7 +305,7 @@ export default function DrawerContent(props: any) {
                   <TouchableOpacity
                     key={`${item.screen}-${item.label}`}
                     style={[styles.navItem, isActive && styles.navItemActive]}
-                    onPress={() => navigation.navigate(item.screen, (item as any).params)}
+                    onPress={() => openItem(item)}
                     activeOpacity={0.7}
                   >
                     {isActive && !isStudentPortal && <View style={styles.activeBar} />}

@@ -35,6 +35,8 @@ jest.mock('../../../../context/NotificationContext', () => ({
 
 const mockAddEvent = jest.fn();
 const mockRemoveEvent = jest.fn();
+const mockSelectDate = jest.fn();
+const mockSyncPickerMonth = jest.fn();
 let scheduleEventsState: any;
 
 function baseScheduleEventsState(overrides: any = {}) {
@@ -68,7 +70,7 @@ jest.mock('../hooks/useWeekNavigation', () => ({
     colWidth: 140, gridHeight: 1344,
     hScrollRef: { current: null }, vScrollRef: { current: null }, didInitialScrollRef: { current: true },
     prevWeek: jest.fn(), nextWeek: jest.fn(), goToday: jest.fn(),
-    prevMonth: jest.fn(), nextMonth: jest.fn(), selectDate: jest.fn(),
+    prevMonth: jest.fn(), nextMonth: jest.fn(), selectDate: mockSelectDate, syncPickerMonth: mockSyncPickerMonth,
     scrollToToday: jest.fn(), scrollToCurrentTime: jest.fn(),
   }),
 }));
@@ -128,6 +130,19 @@ describe('ScheduleScreen — opening the Add Event modal', () => {
 
     expect(mockAddEvent).toHaveBeenCalledWith(expect.objectContaining({ title: 'Homework' }));
   });
+});
+
+test('opens the selected month and closes the picker after choosing a date', async () => {
+  const user = userEvent.setup();
+  await render(<ScheduleScreen navigation={navProp()} />);
+
+  await user.press(await screen.findByTestId('schedule-date-picker-button'));
+  expect(mockSyncPickerMonth).toHaveBeenCalledTimes(1);
+  expect(screen.getByText('April 2026')).toBeTruthy();
+
+  await user.press(screen.getByTestId('schedule-minical-date-2026-04-15'));
+  expect(mockSelectDate).toHaveBeenCalledWith(2026, 4, 15);
+  expect(screen.queryByText('April 2026')).toBeNull();
 });
 
 describe('ScheduleScreen — event detail + navigation', () => {

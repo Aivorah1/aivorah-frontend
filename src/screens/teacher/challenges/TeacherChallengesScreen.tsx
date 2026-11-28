@@ -5,6 +5,7 @@ import { Feather } from '@expo/vector-icons';
 import { spacing } from '../../../theme';
 import { useTheme } from '../../../context/ThemeContext';
 import { useAuth } from '../../../context/AuthContext';
+import { useResponsive } from '../../../hooks/useResponsive';
 import ScreenLayout from '../../../components/common/ScreenLayout';
 import Header from '../../../components/common/Header';
 import DatePicker from '../../../components/common/DatePicker';
@@ -28,8 +29,10 @@ followStudentAccent((a) => { GOLD = a; });
 
 export default function TeacherChallengesScreen({ navigation }: any) {
   const { colors, isDark } = useTheme();
+  const { width, isMobile } = useResponsive();
+  const compact = width < 1024;
   const gold = colors.accentYellow;
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const styles = useMemo(() => makeStyles(colors, compact, isMobile), [colors, compact, isMobile]);
   const { user } = useAuth();
   const teacherCurriculum = (user as any)?.teaches?.[0]?.curriculum || (user as any)?.curriculum || 'IB PYP';
 
@@ -200,7 +203,7 @@ export default function TeacherChallengesScreen({ navigation }: any) {
                   ) : (
                     <View style={styles.podiumRow}>
                       {podium.map((entry, i) => entry && (
-                        <PodiumCard key={entry.id} entry={entry} place={[2, 1, 3][i]} colors={colors} styles={styles} isDark={isDark} elevated={i === 1} />
+                        <PodiumCard key={entry.id} entry={entry} place={[2, 1, 3][i]} colors={colors} styles={styles} isDark={isDark} elevated={i === 1} compact={compact} />
                       ))}
                     </View>
                   )}
@@ -219,7 +222,7 @@ export default function TeacherChallengesScreen({ navigation }: any) {
                     <View style={styles.colHeadRow}>
                       <Text style={[styles.colHead, styles.colRankW]}>Rank</Text>
                       <Text style={[styles.colHead, { flex: 1 }]}>Student</Text>
-                      <Text style={[styles.colHead, styles.colGradeHead]}>Grade</Text>
+                      {!compact && <Text style={[styles.colHead, styles.colGradeHead]}>Grade</Text>}
                       <Text style={[styles.colHead, styles.colXPHead]}>XP</Text>
                       <Text style={[styles.colHead, styles.colChangeHead]}>Change</Text>
                     </View>
@@ -249,12 +252,12 @@ export default function TeacherChallengesScreen({ navigation }: any) {
                                   <View style={[styles.tableAvatar, { backgroundColor: gold + '20' }]}>
                                     <Text style={[styles.tableInitials, { color: gold }]}>{initials(s.name)}</Text>
                                   </View>
-                                  <View style={{ flex: 1 }}>
+                                  <View style={{ flex: 1, minWidth: 0 }}>
                                     <Text style={styles.tableName} numberOfLines={1}>{s.name}</Text>
-                                    <Text style={styles.tableSub} numberOfLines={1}>{s.grade} · {s.streak}d streak</Text>
+                                    <Text style={styles.tableSub} numberOfLines={compact ? 2 : 1}>{s.grade} · {s.streak}d streak</Text>
                                   </View>
                                 </View>
-                                <Text style={[styles.cellGrade, styles.colGradeHead]}>{(s.grade || '').replace('Grade ', '')}</Text>
+                                {!compact && <Text style={[styles.cellGrade, styles.colGradeHead]}>{(s.grade || '').replace('Grade ', '')}</Text>}
                                 <View style={styles.colXPCell}>
                                   <Text style={styles.cellXP}>{s.score.toLocaleString()} <Text style={styles.cellXPUnit}>XP</Text></Text>
                                 </View>

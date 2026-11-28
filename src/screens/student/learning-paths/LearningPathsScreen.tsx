@@ -14,20 +14,17 @@ import { useResponsive } from '../../../hooks/useResponsive';
 
 import { NO_CONTENT_GRADES } from './constants';
 import { makeStyles } from './styles';
-import { useSubjects } from './hooks/useSubjects';
+import { useStudentSubjectProgress } from './hooks/useStudentSubjectProgress';
 import { useBlockedSubjects } from './hooks/useBlockedSubjects';
 import { useRefreshOnFocus } from './subject-syllabus/hooks/useRefreshOnFocus';
-import { useSubjectTopics } from './hooks/useSubjectTopics';
 import SubjectCard from './components/SubjectCard';
-import { useTeacherPaths } from './teacher-learning-paths/hooks/useTeacherPaths';
-import { mergeTeacherSubjects } from './mergeTeacherSubjects';
 import { curriculumFlags } from './utils';
 
 export default function LearningPathsScreen({ navigation }: any) {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { isMobile } = useResponsive();
-  const { stats } = useStudentData();
+  const { stats, statsLoading, statsLoadError, refreshStats } = useStudentData();
   const { user, refreshProfile } = useAuth();
 
   const curriculum = user?.curriculum ?? '';
@@ -38,33 +35,14 @@ export default function LearningPathsScreen({ navigation }: any) {
   // until the student happened to visit Dashboard/Settings first (same fix
   // already applied there and in Challenges).
   useFocusEffect(useCallback(() => { refreshProfile().catch(() => {}); }, [refreshProfile]));
-  const { isPYP, isCBSE } = curriculumFlags(curriculum);
-
-  const { subjects: courseSubjects, loading, error } = useSubjects(curriculum, grade, isCBSE, isPYP);
-  // Teacher-published units count as chapters of their subject; a subject the curriculum has no card for (IB has
-  // no standard syllabus) gets its own card built from them.
-  const { paths: teacherPaths } = useTeacherPaths(grade);
-  const mergedSubjects = useMemo(
-    () => mergeTeacherSubjects(courseSubjects, teacherPaths, grade),
-    [courseSubjects, teacherPaths, grade],
-  );
+  const { isCBSE } = curriculumFlags(curriculum);
   const blockedSubjects = useBlockedSubjects(user?.email, useRefreshOnFocus(navigation));
 
   const completedSet = useMemo(() => new Set(stats.completedTopics ?? []), [stats.completedTopics]);
-  const subjects = useSubjectTopics(mergedSubjects, curriculum, grade, completedSet.size > 0);
+  const { progress, loading, error, warning, retry, overallPct } = useStudentSubjectProgress(curriculum, grade, completedSet, user?.email);
+  const showProgress = !statsLoading && !statsLoadError;
 
   const cardWidth = (isMobile ? '100%' : '48.7%') as `${number}%`;
-
-  const totals = useMemo(() => {
-    const totalTopics = subjects.reduce((acc, s) => acc + s.topicCount, 0);
-    const doneTopics = subjects.reduce(
-      (acc, s) => acc + s.topics.reduce((sum, t) => sum + (completedSet.has(t.topic) ? 1 : 0), 0),
-      0,
-    );
-    const cappedDone = Math.min(doneTopics, totalTopics);
-    const overallPct = totalTopics > 0 ? Math.round((cappedDone / totalTopics) * 100) : 0;
-    return { totalTopics, doneTopics: cappedDone, overallPct };
-  }, [subjects, completedSet]);
 
   const heroName = user?.name?.split(' ')[0] ?? 'Student';
   // Raw topic counts (e.g. "0/2350 topics completed") read as discouraging for a
@@ -73,9 +51,9 @@ export default function LearningPathsScreen({ navigation }: any) {
   // this for a subject-progress framing instead. True unit-level completion
   // isn't tracked on the student side yet (syllabus_chapters/unit_no exists
   // server-side for teacher import only) — that would need a new endpoint.
-  const subjectsInProgress = subjects.filter((s) => s.topics.some((t) => completedSet.has(t.topic))).length;
-  const heroSubtitle = subjects.length > 0
-    ? `${subjectsInProgress}/${subjects.length} subjects in progress`
+  const subjectsInProgress = progress.filter(subject => subject.done > 0).length;
+  const heroSubtitle = showProgress && !loading && overallPct !== null
+    ? `${subjectsInProgress}/${progress.length} subjects in progress`
     : '';
 
   // Guard: if grade or curriculum is missing, the user's profile is incomplete.
@@ -129,6 +107,7 @@ export default function LearningPathsScreen({ navigation }: any) {
         <View style={[styles.screen, styles.center]}>
           <Feather name="wifi-off" size={38} color={colors.textDim} />
           <Text style={[styles.dimText, { marginTop: 12, textAlign: 'center', maxWidth: 420 }]}>{error}</Text>
+          <TouchableOpacity onPress={retry} accessibilityRole="button"><Text style={styles.sectionSub}>Try again</Text></TouchableOpacity>
         </View>
       </ScreenLayout>
     );
@@ -141,92 +120,100 @@ export default function LearningPathsScreen({ navigation }: any) {
           title="My Learning Journey"
           subtitle={`${isCBSE ? 'CBSE' : curriculum} - ${grade}`}
           onMenuPress={() => navigation.openDrawer()}
+          renderContent={mobileTitle => (
+            <ScrollView
+              style={styles.scroll}
+              contentContainerStyle={styles.content}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+            >
+              {mobileTitle}
+              <LinearGradient
+                colors={[colors.cardDark, colors.cardDark]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={[styles.heroCard, { borderColor: colors.borderColor }]}
+              >
+                <View style={styles.heroTop}>
+                  <View style={styles.heroTitleWrap}>
+                    <Text style={styles.heroEyebrow}>Dashboard</Text>
+                    <Text style={styles.heroTitle}>{heroName}, keep the streak alive</Text>
+                    <Text style={styles.heroSubtitle}>{heroSubtitle}</Text>
+                  </View>
+                  <View style={[styles.heroProgress, { borderColor: colors.accentYellow + '65' }]}>
+                    <Text style={[styles.heroProgressValue, { color: colors.accentYellow }]}>{showProgress && overallPct !== null ? `${overallPct}%` : '—'}</Text>
+                    <Text style={styles.heroProgressLabel}>topics</Text>
+                  </View>
+                </View>
+                <View style={styles.heroMetaRow}>
+                  <View style={[styles.heroMetaChip, { borderColor: colors.borderColor }]}>
+                    <Feather name="book" size={12} color={colors.textMuted} />
+                    <Text style={styles.heroMetaText}>{curriculum}</Text>
+                  </View>
+                  <View style={[styles.heroMetaChip, { borderColor: colors.borderColor }]}>
+                    <Feather name="layers" size={12} color={colors.textMuted} />
+                    <Text style={styles.heroMetaText}>{grade}</Text>
+                  </View>
+                </View>
+              </LinearGradient>
+
+              <>
+                <View style={styles.sectionHead}>
+                  <Text style={styles.sectionTitle}>Subjects</Text>
+                  <Text style={styles.sectionSub}>Choose what to study next</Text>
+                </View>
+
+                {(warning || statsLoadError) && (
+                  <TouchableOpacity accessibilityRole="button" onPress={() => { if (warning) retry(); if (statsLoadError) refreshStats(); }}>
+                    <Text style={styles.dimText}>{warning || 'Could not load your latest progress. Try again.'}</Text>
+                  </TouchableOpacity>
+                )}
+                {loading && progress.length === 0 ? (
+                  <View style={styles.emptyState}>
+                    <ActivityIndicator size="small" color={colors.accentYellow} />
+                    <Text style={styles.dimText}>Loading {isCBSE ? 'CBSE' : curriculum} subjects…</Text>
+                  </View>
+                ) : (
+                  <View style={styles.subjectGrid}>
+                    {progress.map(({ subject, ...metrics }) => {
+                      const resolvedCurriculum = isCBSE ? 'CBSE' : curriculum;
+                      return (
+                        <SubjectCard
+                          key={subject.subject}
+                          data={subject}
+                          completedSet={completedSet}
+                          progress={showProgress && !loading && !warning ? metrics : null}
+                          width={cardWidth}
+                          isBlocked={blockedSubjects.has(subject.subject)}
+                          onPress={() => {
+                            // Always route through the textbook-first Syllabus screen: it
+                            // fetches the DB-published syllabus first (the real pipeline
+                            // output), falls back to the curated hardcode, and — when a
+                            // subject genuinely has neither — auto-forwards to the flat
+                            // topic list. Deciding here off the frontend hardcode alone
+                            // hid DB-published syllabi (e.g. Grade 1) behind raw book codes.
+                            navigation.navigate('SubjectSyllabus', {
+                              subject: subject.subject,
+                              curriculum: resolvedCurriculum,
+                              grade,
+                            });
+                          }}
+                        />
+                      );
+                    })}
+                  </View>
+                )}
+
+                {!loading && progress.length === 0 ? (
+                  <View style={styles.emptyState}>
+                    <Feather name="inbox" size={18} color={colors.textDim} />
+                    <Text style={styles.dimText}>No subjects available for this profile yet.</Text>
+                  </View>
+                ) : null}
+              </>
+            </ScrollView>
+          )}
         />
-
-        <ScrollView
-          style={styles.scroll}
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
-          <LinearGradient
-            colors={[colors.cardDark, colors.cardDark]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={[styles.heroCard, { borderColor: colors.borderColor }]}
-          >
-            <View style={styles.heroTop}>
-              <View style={styles.heroTitleWrap}>
-                <Text style={styles.heroEyebrow}>Dashboard</Text>
-                <Text style={styles.heroTitle}>{heroName}, keep the streak alive</Text>
-                <Text style={styles.heroSubtitle}>{heroSubtitle}</Text>
-              </View>
-              <View style={[styles.heroProgress, { borderColor: colors.accentYellow + '65' }]}>
-                <Text style={[styles.heroProgressValue, { color: colors.accentYellow }]}>{totals.overallPct}%</Text>
-                <Text style={styles.heroProgressLabel}>overall</Text>
-              </View>
-            </View>
-            <View style={styles.heroMetaRow}>
-              <View style={[styles.heroMetaChip, { borderColor: colors.borderColor }]}>
-                <Feather name="book" size={12} color={colors.textMuted} />
-                <Text style={styles.heroMetaText}>{curriculum}</Text>
-              </View>
-              <View style={[styles.heroMetaChip, { borderColor: colors.borderColor }]}>
-                <Feather name="layers" size={12} color={colors.textMuted} />
-                <Text style={styles.heroMetaText}>{grade}</Text>
-              </View>
-            </View>
-          </LinearGradient>
-
-          <>
-            <View style={styles.sectionHead}>
-              <Text style={styles.sectionTitle}>Subjects</Text>
-              <Text style={styles.sectionSub}>Choose what to study next</Text>
-            </View>
-
-            {loading && subjects.length === 0 ? (
-              <View style={styles.emptyState}>
-                <ActivityIndicator size="small" color={colors.accentYellow} />
-                <Text style={styles.dimText}>Loading {isCBSE ? 'CBSE' : curriculum} subjects…</Text>
-              </View>
-            ) : (
-              <View style={styles.subjectGrid}>
-                {subjects.map((subject) => {
-                  const resolvedCurriculum = isCBSE ? 'CBSE' : curriculum;
-                  return (
-                    <SubjectCard
-                      key={subject.subject}
-                      data={subject}
-                      completedSet={completedSet}
-                      width={cardWidth}
-                      isBlocked={blockedSubjects.has(subject.subject)}
-                      onPress={() => {
-                        // Always route through the textbook-first Syllabus screen: it
-                        // fetches the DB-published syllabus first (the real pipeline
-                        // output), falls back to the curated hardcode, and — when a
-                        // subject genuinely has neither — auto-forwards to the flat
-                        // topic list. Deciding here off the frontend hardcode alone
-                        // hid DB-published syllabi (e.g. Grade 1) behind raw book codes.
-                        navigation.navigate('SubjectSyllabus', {
-                          subject: subject.subject,
-                          curriculum: resolvedCurriculum,
-                          grade,
-                        });
-                      }}
-                    />
-                  );
-                })}
-              </View>
-            )}
-
-            {!loading && subjects.length === 0 ? (
-              <View style={styles.emptyState}>
-                <Feather name="inbox" size={18} color={colors.textDim} />
-                <Text style={styles.dimText}>No subjects available for this profile yet.</Text>
-              </View>
-            ) : null}
-          </>
-        </ScrollView>
       </View>
     </ScreenLayout>
   );

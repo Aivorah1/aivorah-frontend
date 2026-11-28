@@ -5,6 +5,7 @@ import { Feather } from '@expo/vector-icons';
 import { spacing } from '../../../theme';
 import { useTheme } from '../../../context/ThemeContext';
 import { useAuth } from '../../../context/AuthContext';
+import { useResponsive } from '../../../hooks/useResponsive';
 import ScreenLayout from '../../../components/common/ScreenLayout';
 import Header from '../../../components/common/Header';
 
@@ -27,6 +28,7 @@ export default function TeacherStudentsScreen({ navigation, route }: any) {
   const { colors, isDark } = useTheme();
   const gold = colors.accentYellow;
   const { user } = useAuth();
+  const { isMobile } = useResponsive();
   const styles = useMemo(() => makeStyles(colors), [colors]);
 
   const [search, setSearch] = useState('');
@@ -82,6 +84,7 @@ export default function TeacherStudentsScreen({ navigation, route }: any) {
   const filtered = filterStudents(students, search, activeTab, todayISO);
   const gradeTabs = buildGradeTabs(students);
   const stats = computeStats(students, todayISO);
+  const showEmptyAdd = !loading && students.length === 0;
 
   return (
     <ScreenLayout>
@@ -92,28 +95,30 @@ export default function TeacherStudentsScreen({ navigation, route }: any) {
           onMenuPress={() => navigation.openDrawer()}
         />
         {/* Add Student / Promote Students buttons */}
-        <View style={{ flexDirection: 'row', gap: 8, alignSelf: 'flex-end', marginHorizontal: spacing.xl, marginBottom: 4 }}>
-          <TouchableOpacity testID="teacher-students-add-button" style={[styles.addBtn, { marginHorizontal: 0, marginBottom: 0, alignSelf: 'auto' }]} onPress={openAddModal} activeOpacity={0.8}>
-            <Feather name="user-plus" size={14} color="#0B0B0B" />
-            <Text style={styles.addBtnText}>Add Student</Text>
-          </TouchableOpacity>
-          {students.length > 0 && (
-            promote.promoteMode ? (
-              <TouchableOpacity testID="teacher-students-promote-cancel" style={styles.promoteBtnActive} onPress={promote.exitPromoteMode} activeOpacity={0.8}>
-                <Feather name="x" size={14} color={colors.textMuted} />
-                <Text style={styles.promoteBtnActiveText}>Cancel</Text>
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity testID="teacher-students-promote-mode-button" style={styles.promoteBtn} onPress={() => promote.setPromoteMode(true)} activeOpacity={0.8}>
-                <Feather name="arrow-up-circle" size={14} color="#0B0B0B" />
-                <Text style={styles.promoteBtnText}>Promote Students</Text>
-              </TouchableOpacity>
-            )
-          )}
-        </View>
+        {(!isMobile || !showEmptyAdd) && (
+          <View style={{ flexDirection: 'row', flexWrap: isMobile ? 'wrap' : 'nowrap', justifyContent: 'flex-end', gap: 8, alignSelf: 'flex-end', marginHorizontal: isMobile ? 0 : spacing.xl, marginBottom: isMobile ? 0 : 4 }}>
+            <TouchableOpacity testID="teacher-students-add-button" style={[styles.addBtn, { marginHorizontal: 0, marginBottom: 0, alignSelf: 'auto' }]} onPress={openAddModal} activeOpacity={0.8}>
+              <Feather name="user-plus" size={14} color="#0B0B0B" />
+              <Text style={styles.addBtnText}>Add Student</Text>
+            </TouchableOpacity>
+            {students.length > 0 && (
+              promote.promoteMode ? (
+                <TouchableOpacity testID="teacher-students-promote-cancel" style={styles.promoteBtnActive} onPress={promote.exitPromoteMode} activeOpacity={0.8}>
+                  <Feather name="x" size={14} color={colors.textMuted} />
+                  <Text style={styles.promoteBtnActiveText}>Cancel</Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity testID="teacher-students-promote-mode-button" style={styles.promoteBtn} onPress={() => promote.setPromoteMode(true)} activeOpacity={0.8}>
+                  <Feather name="arrow-up-circle" size={14} color="#0B0B0B" />
+                  <Text style={styles.promoteBtnText}>Promote Students</Text>
+                </TouchableOpacity>
+              )
+            )}
+          </View>
+        )}
 
         {promote.promoteMode && (
-          <View testID="teacher-students-promote-bar" style={styles.promoteBar}>
+          <View testID="teacher-students-promote-bar" style={[styles.promoteBar, isMobile && { marginHorizontal: 0, marginBottom: 0 }]}>
             <Text style={styles.promoteBarText}>
               {promote.selectedForPromote.size === 0 ? 'Tap students to select them' : `${promote.selectedForPromote.size} selected`}
             </Text>

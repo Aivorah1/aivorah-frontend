@@ -34,7 +34,7 @@ export default function ChatModal({
           <View style={[styles.chatHeader, { borderBottomColor: colors.borderColor }]}>
             <View style={styles.chatHeaderLeft}>
               <View style={styles.chatAvatar}>
-                <Feather name="zap" size={16} color={colors.accentYellow} />
+                <Feather name="zap" size={16} color={colors.accentOrange} />
                 <View style={styles.onlineDot} />
               </View>
               <View>
@@ -55,7 +55,7 @@ export default function ChatModal({
                   <View key={m.id} style={styles.firstMsgWrap}>
                     <View style={styles.mascotWrap}>
                       <View style={styles.mascotCircle}>
-                        <Feather name="zap" size={36} color={colors.accentYellow} />
+                        <Feather name="zap" size={36} color={colors.accentOrange} />
                       </View>
                     </View>
                     <View style={[styles.firstMsgBubble, { backgroundColor: isDark ? '#141414' : '#fff', borderColor: colors.borderColor }]}>
@@ -69,7 +69,7 @@ export default function ChatModal({
                 <View key={m.id} style={[styles.msgRow, m.role === 'user' ? styles.msgRowUser : styles.msgRowAi]}>
                   {m.role === 'ai' && (
                     <View style={styles.msgAvatar}>
-                      <Feather name="zap" size={10} color="#fff" />
+                      <Feather name="zap" size={10} color={colors.accentOrange} />
                     </View>
                   )}
                   <View style={{ maxWidth: '72%' }}>
@@ -89,7 +89,7 @@ export default function ChatModal({
             {chatLoading && (
               <View style={[styles.msgRow, styles.msgRowAi]}>
                 <View style={styles.msgAvatar}>
-                  <Feather name="zap" size={10} color={colors.accentYellow} />
+                  <Feather name="zap" size={10} color={colors.accentOrange} />
                 </View>
                 <View style={[styles.msgBubble, styles.msgBubbleAi, { backgroundColor: isDark ? '#141414' : '#fff', borderColor: colors.borderColor }]}>
                   <ActivityIndicator size="small" color={colors.accentYellow} />
@@ -159,7 +159,7 @@ const makeStyles = (c: AppColors, isDark: boolean) => StyleSheet.create({
   },
   chatHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 1 },
   chatHeaderLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  chatAvatar: { width: 42, height: 42, borderRadius: 21, backgroundColor: isDark ? '#1E1E1E' : '#2A2A2A', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: c.accentYellow + '50' },
+  chatAvatar: { width: 42, height: 42, borderRadius: 21, backgroundColor: c.tintPeach, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: c.accentOrange + '50' },
   onlineDot: { position: 'absolute', bottom: 1, right: 1, width: 10, height: 10, borderRadius: 5, backgroundColor: c.accentYellow, borderWidth: 2, borderColor: isDark ? '#0B0B0B' : '#F5F3EE' },
   chatTitle: { fontSize: 15, fontWeight: '800', fontFamily: fonts.serif },
   chatSubtitle: { fontSize: 11, marginTop: 1 },
@@ -168,14 +168,14 @@ const makeStyles = (c: AppColors, isDark: boolean) => StyleSheet.create({
   chatMsgsContent: { padding: 16, gap: 12 },
   firstMsgWrap: { flexDirection: 'row', alignItems: 'flex-end', gap: 12, marginBottom: 4 },
   mascotWrap: { flexShrink: 0 },
-  mascotCircle: { width: 60, height: 60, borderRadius: 30, backgroundColor: isDark ? '#1E1E1E' : '#2A2A2A', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: c.accentYellow + '40' },
+  mascotCircle: { width: 60, height: 60, borderRadius: 30, backgroundColor: c.tintPeach, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: c.accentOrange + '40' },
   firstMsgBubble: { flex: 1, borderRadius: 16, borderTopLeftRadius: 4, padding: 14, borderWidth: 1, gap: 6 },
   firstMsgTitle: { fontSize: 14, fontWeight: '800', lineHeight: 21, fontFamily: fonts.serif },
   firstMsgBody: { fontSize: 13, lineHeight: 19 },
   msgRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
   msgRowUser: { justifyContent: 'flex-end' },
   msgRowAi: { justifyContent: 'flex-start' },
-  msgAvatar: { width: 26, height: 26, borderRadius: 13, backgroundColor: isDark ? '#1E1E1E' : '#2A2A2A', borderWidth: 1, borderColor: c.accentYellow + '40', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  msgAvatar: { width: 26, height: 26, borderRadius: 13, backgroundColor: c.tintPeach, borderWidth: 1, borderColor: c.accentOrange + '40', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   msgBubble: { borderRadius: 16, padding: 11, paddingHorizontal: 14, borderWidth: 1 },
   msgBubbleUser: { borderTopRightRadius: 4, borderColor: 'transparent' },
   msgBubbleAi: { borderTopLeftRadius: 4 },
@@ -186,6 +186,6 @@ const makeStyles = (c: AppColors, isDark: boolean) => StyleSheet.create({
   suggestChip: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20, borderWidth: 1, borderColor: c.accentYellow + '40', backgroundColor: c.accentYellow + '0D' },
   suggestChipText: { fontSize: 12, fontWeight: '600', color: c.textMain },
   chatInputRow: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12, borderTopWidth: 1 },
-  chatTextInput: { flex: 1, fontSize: 14, paddingVertical: 10, paddingHorizontal: 14, borderRadius: 24, borderWidth: 1, maxHeight: 80 },
+  chatTextInput: { flex: 1, minWidth: 0, fontSize: 14, paddingVertical: 10, paddingHorizontal: 14, borderRadius: 24, borderWidth: 1, maxHeight: 80 },
   chatSendBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
 });

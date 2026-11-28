@@ -313,6 +313,25 @@ describe('OnboardingStudentBoxes — DOB/Grade consistency', () => {
     expect(profileCall).toBeTruthy();
   });
 
+  test('Complete Setup keeps the form available when the profile service cannot be reached', async () => {
+    mockAuthUser = { ...mockAuthUser, name: 'A Student' };
+    (global.fetch as jest.Mock).mockImplementation((url: string) => url.includes('/user/profile')
+      ? Promise.reject(new TypeError('Failed to fetch'))
+      : Promise.resolve({ ok: true, json: async () => [] }));
+    const user = userEvent.setup();
+    await render(<OnboardingStudentBoxes />);
+    await user.type(screen.getByPlaceholderText('DD/MM/YYYY'), agedDob(15));
+    await user.press(screen.getByText('CBSE'));
+    await user.type(screen.getByPlaceholderText('Type your school name (e.g. Senthil Public School)'), 'Example School');
+    await user.press(await screen.findByText('Grade 9'));
+
+    await user.press(screen.getByText('Complete Setup'));
+
+    expect(await screen.findByText(/could not reach the profile service/)).toBeTruthy();
+    expect(screen.getByPlaceholderText('Your name').props.value).toBe('A Student');
+    expect(screen.getByText('Complete Setup').parent?.props.accessibilityState?.disabled).toBe(false);
+  });
+
   // Regression test for the "Gender/DOB/State missing on re-login" bug
   // (2026-08-26): dob/gender used to be sent ONLY on the un-awaited
   // /user/preferences PATCH, never on this primary, awaited /user/profile

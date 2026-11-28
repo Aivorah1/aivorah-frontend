@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
-import ActivityIndicator from '../../../../../components/common/AivorahLoader';
+import TealActionButton from '../../../../../components/common/TealActionButton';
 import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../../theme';
 import { isRealStudentEmail } from '../../utils/studentDisplay';
@@ -8,6 +8,7 @@ import { isRealStudentEmail } from '../../utils/studentDisplay';
 interface Props {
   colors: AppColors;
   gold: string;
+  focusColor?: string;
   styles: any;
   allowedGrades: string[];
   allowedCurricula: string[];
@@ -23,36 +24,46 @@ interface Props {
 }
 
 export default function CreateStudentTab({
-  colors, gold, styles, allowedGrades, allowedCurricula,
+  colors, gold, focusColor = gold, styles, allowedGrades, allowedCurricula,
   newName, setNewName, newEmail, setNewEmail, newPassword, setNewPassword,
   newGrade, setNewGrade, newCurriculum, setNewCurriculum,
   creating, createError, onCancel, onSubmit,
 }: Props) {
   const invite = isRealStudentEmail(newEmail);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+  const fieldStyle = (id: string) => [styles.modalInput, focusedField === id && { borderColor: focusColor }];
   return (
-    <View style={{ gap: 10 }}>
-      <Text style={styles.modalFieldLabel}>Full Name *</Text>
-      <View style={styles.modalInput}>
-        <Feather name="user" size={14} color={colors.textDim} />
-        <TextInput
-          testID="teacher-students-create-name-input"
-          style={styles.modalTextInput}
-          value={newName} onChangeText={setNewName}
-          placeholder="e.g. Aanya Kapoor" placeholderTextColor={colors.textDim}
-          autoCapitalize="words" autoFocus
-        />
+    <View style={{ gap: 14 }}>
+      <View style={{ gap: 3 }}>
+        <Text style={styles.modalFieldLabel}>Full Name *</Text>
+        <View style={fieldStyle('name')} {...{ dataSet: { studentField: 'name' } }}>
+          <Feather name="user" size={14} color={colors.textDim} />
+          <TextInput
+            testID="teacher-students-create-name-input"
+            style={styles.modalTextInput}
+            value={newName} onChangeText={setNewName}
+            placeholder="e.g. Aanya Kapoor" placeholderTextColor={colors.textDim}
+            accessibilityLabel="Full Name"
+            onFocus={() => setFocusedField('name')} onBlur={() => setFocusedField(null)}
+            autoCapitalize="words"
+          />
+          </View>
       </View>
 
-      <Text style={styles.modalFieldLabel}>Email <Text style={{ fontWeight: '400', color: colors.textDim }}>(optional — auto-generated if blank)</Text></Text>
-      <View style={styles.modalInput}>
-        <Feather name="mail" size={14} color={colors.textDim} />
-        <TextInput
-          testID="teacher-students-create-email-input"
-          style={styles.modalTextInput}
-          value={newEmail} onChangeText={setNewEmail}
-          placeholder="Leave blank to auto-generate" placeholderTextColor={colors.textDim}
-          keyboardType="email-address" autoCapitalize="none"
-        />
+      <View style={{ gap: 3 }}>
+        <Text style={styles.modalFieldLabel}>Email <Text style={{ fontWeight: '400', color: colors.textDim }}>(optional — auto-generated if blank)</Text></Text>
+        <View style={fieldStyle('email')} {...{ dataSet: { studentField: 'email' } }}>
+          <Feather name="mail" size={14} color={colors.textDim} />
+          <TextInput
+            testID="teacher-students-create-email-input"
+            style={styles.modalTextInput}
+            value={newEmail} onChangeText={setNewEmail}
+            placeholder="Leave blank to auto-generate" placeholderTextColor={colors.textDim}
+            accessibilityLabel="Email"
+            onFocus={() => setFocusedField('email')} onBlur={() => setFocusedField(null)}
+            keyboardType="email-address" autoCapitalize="none"
+          />
+      </View>
       </View>
 
       {invite ? (
@@ -60,19 +71,21 @@ export default function CreateStudentTab({
           We&apos;ll email this student an invite to set their password and verify their email. They can sign in once verified.
         </Text>
       ) : (
-        <>
+        <View style={{ gap: 3 }}>
           <Text style={styles.modalFieldLabel}>Password <Text style={{ fontWeight: '400', color: colors.textDim }}>(optional)</Text></Text>
-          <View style={styles.modalInput}>
+          <View style={fieldStyle('password')} {...{ dataSet: { studentField: 'password' } }}>
             <Feather name="lock" size={14} color={colors.textDim} />
             <TextInput
               testID="teacher-students-create-password-input"
               style={styles.modalTextInput}
               value={newPassword} onChangeText={setNewPassword}
               placeholder="Leave blank to auto-generate" placeholderTextColor={colors.textDim}
+              accessibilityLabel="Password"
+              onFocus={() => setFocusedField('password')} onBlur={() => setFocusedField(null)}
               secureTextEntry
             />
           </View>
-        </>
+        </View>
       )}
 
       <View style={{ flexDirection: 'row', gap: 10 }}>
@@ -83,9 +96,10 @@ export default function CreateStudentTab({
               key={g} activeOpacity={0.8}
               testID={`teacher-students-create-grade-${g.toLowerCase().replace(/\s+/g, '-')}`}
               onPress={() => setNewGrade(g)}
+              accessibilityRole="radio" accessibilityState={{ checked: newGrade === g }} aria-checked={newGrade === g}
               style={[styles.modalOption, { borderColor: newGrade === g ? gold : colors.borderColor, backgroundColor: newGrade === g ? gold + '18' : 'transparent' }]}
             >
-              <Text style={{ fontSize: 12, color: newGrade === g ? gold : colors.textMuted, fontWeight: '600' }}>{g}</Text>
+              <Text style={{ fontSize: 12, color: newGrade === g ? gold : colors.textMuted, fontWeight: '600', flexShrink: 1 }}>{g}</Text>
               {newGrade === g && <Feather name="check" size={12} color={gold} />}
             </TouchableOpacity>
           ))}
@@ -97,6 +111,7 @@ export default function CreateStudentTab({
               key={c} activeOpacity={0.8}
               testID={`teacher-students-create-curriculum-${c.toLowerCase().replace(/\s+/g, '-')}`}
               onPress={() => setNewCurriculum(c)}
+              accessibilityRole="radio" accessibilityState={{ checked: newCurriculum === c, disabled: allowedCurricula.length <= 1 }} aria-checked={newCurriculum === c}
               disabled={allowedCurricula.length <= 1}
               style={[styles.modalOption, { borderColor: newCurriculum === c ? gold : colors.borderColor, backgroundColor: newCurriculum === c ? gold + '18' : 'transparent' }]}
             >
@@ -116,11 +131,9 @@ export default function CreateStudentTab({
         <TouchableOpacity style={styles.modalCancelBtn} onPress={onCancel}>
           <Text style={styles.modalCancelText}>Cancel</Text>
         </TouchableOpacity>
-        <TouchableOpacity testID="teacher-students-create-submit-button" style={styles.modalSaveBtn} onPress={onSubmit} disabled={creating}>
-          {creating
-            ? <ActivityIndicator color={colors.onPrimary} size="small" />
-            : <Text style={styles.modalSaveText}>{invite ? 'Create & Send Invite' : 'Create Account'}</Text>}
-        </TouchableOpacity>
+        <TealActionButton testID="teacher-students-create-submit-button" style={{ flex: 1.35, minWidth: 0 }}
+          label={creating ? 'Creating account…' : invite ? 'Create & Send Invite' : 'Create Account'}
+          icon="user-plus" onPress={onSubmit} loading={creating} />
       </View>
     </View>
   );

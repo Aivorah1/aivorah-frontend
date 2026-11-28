@@ -10,13 +10,10 @@ export const makeStyles = (c: AppColors) => StyleSheet.create({
   // remaining screen height so the bottom bar can never be pushed off-screen.
   listenModeWrap: { flex: 1, minHeight: 0 },
 
-  tabBarRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginHorizontal: spacing.xl },
   // Website Redesign, Phase 3: pill tabs; the active one is filled with the primary colour.
-  tabBar: { flex: 1, flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  tab: { flexGrow: 1, flexBasis: 120, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 44, paddingHorizontal: 14, borderRadius: 999, borderWidth: 1.5 },
-  tabText: { fontSize: 14.5, fontWeight: '700' },
-  viewInBookBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1.5, borderRadius: 999, minHeight: 44, paddingHorizontal: 16 },
-  viewInBookText: { fontSize: 14.5, fontWeight: '700' },
+  tabBar: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginHorizontal: spacing.xl, marginTop: spacing.md, marginBottom: spacing.lg },
+  tab: { flexGrow: 1, flexBasis: 126, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 44, paddingHorizontal: 10, borderRadius: 999, borderWidth: 1.5 },
+  tabText: { fontSize: 14.5, fontWeight: '700', flexShrink: 1, textAlign: 'center' },
 
   dualPane: { flex: 1, flexDirection: 'row', minHeight: 0 },
   leftPane: { flex: 0.6, minHeight: 0 },
@@ -37,6 +34,11 @@ export const makeStyles = (c: AppColors) => StyleSheet.create({
   progressThumb: { position: 'absolute', top: -4, width: 14, height: 14, borderRadius: 7, marginLeft: -7, borderWidth: 2, borderColor: '#fff' },
   listenBadge: { flexDirection: 'row', alignSelf: 'flex-start', alignItems: 'center', gap: 5, paddingVertical: 4, paddingHorizontal: 9, borderRadius: 999 },
   listenBadgeText: { fontSize: 10.5, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.3 },
+  listenItemList: { gap: 6, marginBottom: spacing.md },
+  listenResources: { gap: 14, marginTop: spacing.lg },
+  listenItem: { minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 8, padding: 7, borderWidth: 1, borderRadius: radius.md },
+  listenItemIcon: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
+  listenItemTitle: { flex: 1, minWidth: 0, fontSize: 14, fontWeight: '700' },
   listenEyebrow: { fontSize: 11.5, fontWeight: '700', marginTop: 10 },
   listenBodyText: { fontSize: 15, lineHeight: 26, marginTop: 4 },
   listenBodyTextLarge: { fontSize: 18, lineHeight: 30 },

@@ -223,119 +223,121 @@ export default function SubscriptionScreen({ navigation }: any) {
           showBack={true}
           onMenuPress={() => navigation.openDrawer()}
           showSearch={false}
-        />
+          renderContent={mobileTitle => (
+            <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+              {mobileTitle}
 
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-
-          {/* ── Aivorah brand header ─────────────────────────── */}
-          <View style={styles.brandHeader}>
-            <View style={[styles.brandLogoMark, { backgroundColor: colors.primary }]}>
-              <Feather name="zap" size={20} color={colors.onPrimary} />
-            </View>
-            <View>
-              <Text style={[styles.brandTitle, { color: colors.textMain }]}>Aivorah Plans</Text>
-              <Text style={[styles.brandSub, { color: colors.textMuted }]}>
-                Choose the right plan for your learning journey
-              </Text>
-            </View>
-          </View>
-
-          {/* ── Plan cards ───────────────────────────────────── */}
-          <View style={styles.cardsRow}>
-            {PLANS.map((plan) => {
-              const isCurrent = plan.id === currentPlanId;
-              const isUpgrade = PLANS.findIndex(p => p.id === plan.id) > PLANS.findIndex(p => p.id === currentPlanId);
-              // Website Redesign, Phase 3: the accent plans use the theme's primary
-              // (burnt orange / pale blue) with matching text on filled buttons.
-              const pc = plan.color === AMBER || plan.color === ROSE ? colors.primary : plan.color;
-              const onPc = pc === colors.primary ? colors.onPrimary : '#fff';
-
-              return (
-                <View
-                  key={plan.id}
-                  style={[
-                    styles.card,
-                    {
-                      backgroundColor: colors.cardDark,
-                      borderColor: isCurrent ? pc + '50' : colors.borderColor,
-                    },
-                  ]}
-                >
-                  {/* Badge */}
-                  {plan.badge && (
-                    <View style={[styles.badge, { backgroundColor: pc }]}>
-                      <Text style={[styles.badgeText, { color: onPc }]}>{plan.badge}</Text>
-                    </View>
-                  )}
-
-                  {/* Tier icon */}
-                  <TierIcon color={pc} plan={plan} />
-
-                  {/* Name & tagline */}
-                  <Text style={[styles.planName, { color: colors.textMain }]}>{plan.name}</Text>
-                  <Text style={[styles.planTagline, { color: colors.textMuted }]}>{plan.tagline}</Text>
-
-                  {/* Price */}
-                  <Text style={[styles.price, { color: colors.textMain }]}>{plan.price}</Text>
-                  <Text style={[styles.priceNote, { color: colors.textMuted }]}>{plan.priceNote}</Text>
-
-                  {/* CTA */}
-                  {isCurrent ? (
-                    <View style={[styles.ctaOutline, { borderColor: pc + '50' }]}>
-                      <Feather name="check-circle" size={14} color={pc} />
-                      <Text style={[styles.ctaOutlineText, { color: pc, marginLeft: 6 }]}>Current Plan</Text>
-                    </View>
-                  ) : isUpgrade ? (
-                    <TouchableOpacity
-                      style={[styles.ctaFilled, { backgroundColor: pc, opacity: processing ? 0.7 : 1 }]}
-                      onPress={() => handleUpgrade(plan.id)}
-                      disabled={!!processing}
-                    >
-                      {processing === plan.id ? (
-                        <ActivityIndicator size="small" color={onPc} />
-                      ) : (
-                        <Text style={[styles.ctaFilledText, { color: onPc }]}>{plan.ctaLabel}</Text>
-                      )}
-                    </TouchableOpacity>
-                  ) : (
-                    <View style={[styles.ctaOutline, { borderColor: colors.borderColor }]}>
-                      <Text style={[styles.ctaOutlineText, { color: colors.textDim }]}>Included</Text>
-                    </View>
-                  )}
-
-                  {/* Divider */}
-                  <View style={[styles.divider, { backgroundColor: colors.borderColor }]} />
-
-                  {/* Features heading */}
-                  {plan.featuresHeading && (
-                    <Text style={[styles.featuresHeading, { color: colors.textMain }]}>
-                      {plan.featuresHeading}
-                    </Text>
-                  )}
-
-                  {/* Feature list */}
-                  <View style={styles.featureList}>
-                    {plan.features.map((f, i) => (
-                      <View key={i} style={styles.featureRow}>
-                        <Feather name="check" size={14} color={pc} />
-                        <Text style={[styles.featureText, { color: colors.textMain }]}>{f}</Text>
-                      </View>
-                    ))}
-                  </View>
+              {/* ── Aivorah brand header ─────────────────────────── */}
+              <View style={styles.brandHeader}>
+                <View style={[styles.brandLogoMark, { backgroundColor: colors.primary }]}>
+                  <Feather name="zap" size={20} color={colors.onPrimary} />
                 </View>
-              );
-            })}
-          </View>
+                <View>
+                  <Text style={[styles.brandTitle, { color: colors.textMain }]}>Aivorah Plans</Text>
+                  <Text style={[styles.brandSub, { color: colors.textMuted }]}>
+                    Choose the right plan for your learning journey
+                  </Text>
+                </View>
+              </View>
 
-          {/* Footer */}
-          <View style={styles.footer}>
-            <Feather name="info" size={13} color={colors.textDim} />
-            <Text style={[styles.footerText, { color: colors.textDim }]}>
-              Premium access can also be activated by your school or parent. Pricing may vary by institution. All plans include a 7-day free trial.
-            </Text>
-          </View>
+              {/* ── Plan cards ───────────────────────────────────── */}
+              <View style={styles.cardsRow}>
+                {PLANS.map((plan) => {
+                  const isCurrent = plan.id === currentPlanId;
+                  const isUpgrade = PLANS.findIndex(p => p.id === plan.id) > PLANS.findIndex(p => p.id === currentPlanId);
+                  // Website Redesign, Phase 3: the accent plans use the theme's primary
+                  // (burnt orange / pale blue) with matching text on filled buttons.
+                  const pc = plan.color === AMBER || plan.color === ROSE ? colors.primary : plan.color;
+                  const onPc = pc === colors.primary ? colors.onPrimary : '#fff';
 
-        </ScrollView>
+                  return (
+                    <View
+                      key={plan.id}
+                      style={[
+                        styles.card,
+                        {
+                          backgroundColor: colors.cardDark,
+                          borderColor: isCurrent ? pc + '50' : colors.borderColor,
+                        },
+                      ]}
+                    >
+                      {/* Badge */}
+                      {plan.badge && (
+                        <View style={[styles.badge, { backgroundColor: pc }]}>
+                          <Text style={[styles.badgeText, { color: onPc }]}>{plan.badge}</Text>
+                        </View>
+                      )}
+
+                      {/* Tier icon */}
+                      <TierIcon color={pc} plan={plan} />
+
+                      {/* Name & tagline */}
+                      <Text style={[styles.planName, { color: colors.textMain }]}>{plan.name}</Text>
+                      <Text style={[styles.planTagline, { color: colors.textMuted }]}>{plan.tagline}</Text>
+
+                      {/* Price */}
+                      <Text style={[styles.price, { color: colors.textMain }]}>{plan.price}</Text>
+                      <Text style={[styles.priceNote, { color: colors.textMuted }]}>{plan.priceNote}</Text>
+
+                      {/* CTA */}
+                      {isCurrent ? (
+                        <View style={[styles.ctaOutline, { borderColor: pc + '50' }]}>
+                          <Feather name="check-circle" size={14} color={pc} />
+                          <Text style={[styles.ctaOutlineText, { color: pc, marginLeft: 6 }]}>Current Plan</Text>
+                        </View>
+                      ) : isUpgrade ? (
+                        <TouchableOpacity
+                          style={[styles.ctaFilled, { backgroundColor: pc, opacity: processing ? 0.7 : 1 }]}
+                          onPress={() => handleUpgrade(plan.id)}
+                          disabled={!!processing}
+                        >
+                          {processing === plan.id ? (
+                            <ActivityIndicator size="small" color={onPc} />
+                          ) : (
+                            <Text style={[styles.ctaFilledText, { color: onPc }]}>{plan.ctaLabel}</Text>
+                          )}
+                        </TouchableOpacity>
+                      ) : (
+                        <View style={[styles.ctaOutline, { borderColor: colors.borderColor }]}>
+                          <Text style={[styles.ctaOutlineText, { color: colors.textDim }]}>Included</Text>
+                        </View>
+                      )}
+
+                      {/* Divider */}
+                      <View style={[styles.divider, { backgroundColor: colors.borderColor }]} />
+
+                      {/* Features heading */}
+                      {plan.featuresHeading && (
+                        <Text style={[styles.featuresHeading, { color: colors.textMain }]}>
+                          {plan.featuresHeading}
+                        </Text>
+                      )}
+
+                      {/* Feature list */}
+                      <View style={styles.featureList}>
+                        {plan.features.map((f, i) => (
+                          <View key={i} style={styles.featureRow}>
+                            <Feather name="check" size={14} color={pc} />
+                            <Text style={[styles.featureText, { color: colors.textMain }]}>{f}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
+
+              {/* Footer */}
+              <View style={styles.footer}>
+                <Feather name="info" size={13} color={colors.textDim} />
+                <Text style={[styles.footerText, { color: colors.textDim }]}>
+                  Premium access can also be activated by your school or parent. Pricing may vary by institution. All plans include a 7-day free trial.
+                </Text>
+              </View>
+
+            </ScrollView>
+          )}
+        />
       </View>
     </ScreenLayout>
   );

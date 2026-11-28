@@ -179,68 +179,70 @@ export default function SubjectSyllabusScreen({ navigation, route }: any) {
           subtitle={`${books.length ? `${books.join(' · ')} · ` : ''}${curriculum} · ${grade} · Full syllabus`}
           showBack
           onMenuPress={() => navigation.openDrawer()}
+          renderContent={mobileTitle => (
+            <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+              {mobileTitle}
+              {/* Search */}
+              <View style={[styles.searchBar, { borderColor: colors.borderColor, backgroundColor: colors.cardDark }]}>
+                <Feather name="search" size={15} color={colors.textMuted} />
+                <TextInput
+                  style={[styles.searchInput, { color: colors.textMain }]}
+                  placeholder="Search chapters or topics…"
+                  placeholderTextColor={colors.textMuted}
+                  value={query}
+                  onChangeText={setQuery}
+                />
+                {!!query && (
+                  <TouchableOpacity onPress={() => setQuery('')}>
+                    <Feather name="x" size={15} color={colors.textMuted} />
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              {/* Overall progress */}
+              <View style={[styles.progressCard, { borderColor: colors.borderColor, backgroundColor: colors.cardDark }]}>
+                <View style={[styles.ring, { borderColor: colors.borderColor }]}>
+                  <Text style={[styles.ringPct, { color: colors.textMain }]}>{overallPct}%</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.progressLine, { color: colors.textMain }]}>
+                    {startedChapters} of {chapters.length} {isUnitShaped ? 'units' : 'chapters'} started
+                  </Text>
+                  <Text style={[styles.progressSub, { color: colors.textMuted }]}>
+                    {grade} {subject} · {chapters.length} {isUnitShaped ? 'units' : 'chapters'} · {totalTopicsCount} {isUnitShaped ? 'chapters' : 'topics'} total
+                  </Text>
+                  {syllabusOnly ? (
+                    <Text testID="syllabus-only-note" style={[styles.progressSub, { color: colors.textMuted, marginTop: 4 }]}>
+                      There&apos;s no official {curriculum} textbook in Aivorah yet — browse the full syllabus here. Lessons for each topic are coming soon.
+                    </Text>
+                  ) : (
+                    <Text testID="completion-rule" style={[styles.progressSub, { color: colors.textMuted, marginTop: 4 }]}>
+                      A topic is done when you finish Learn or Listen, then pass its Practice test (60% or more).
+                    </Text>
+                  )}
+                </View>
+              </View>
+
+              {/* Chapters — single column: a 2-column grid left an awkward gap
+                  next to whichever card was expanded to show its topics. */}
+              {filteredChapters.map(({ chapter, ci, topics }) => (
+                <ChapterCard
+                  key={`${(chapter as any).teacherUnit ? 'u' : 'c'}-${ci}-${chapter.title}`}
+                  chapter={chapter}
+                  ci={ci}
+                  topics={topics}
+                  isOpen={effectiveOpen.has(ci)}
+                  completedSet={completedSet}
+                  isUnitShaped={isUnitShaped}
+                  colors={colors}
+                  styles={styles}
+                  onToggle={() => toggleChapter(ci)}
+                  onOpenTopic={(ti) => openLesson(chapter, ci, ti)}
+                />
+              ))}
+            </ScrollView>
+          )}
         />
-
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          {/* Search */}
-          <View style={[styles.searchBar, { borderColor: colors.borderColor, backgroundColor: colors.cardDark }]}>
-            <Feather name="search" size={15} color={colors.textMuted} />
-            <TextInput
-              style={[styles.searchInput, { color: colors.textMain }]}
-              placeholder="Search chapters or topics…"
-              placeholderTextColor={colors.textMuted}
-              value={query}
-              onChangeText={setQuery}
-            />
-            {!!query && (
-              <TouchableOpacity onPress={() => setQuery('')}>
-                <Feather name="x" size={15} color={colors.textMuted} />
-              </TouchableOpacity>
-            )}
-          </View>
-
-          {/* Overall progress */}
-          <View style={[styles.progressCard, { borderColor: colors.borderColor, backgroundColor: colors.cardDark }]}>
-            <View style={[styles.ring, { borderColor: colors.borderColor }]}>
-              <Text style={[styles.ringPct, { color: colors.textMain }]}>{overallPct}%</Text>
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.progressLine, { color: colors.textMain }]}>
-                {startedChapters} of {chapters.length} {isUnitShaped ? 'units' : 'chapters'} started
-              </Text>
-              <Text style={[styles.progressSub, { color: colors.textMuted }]}>
-                {grade} {subject} · {chapters.length} {isUnitShaped ? 'units' : 'chapters'} · {totalTopicsCount} {isUnitShaped ? 'chapters' : 'topics'} total
-              </Text>
-              {syllabusOnly ? (
-                <Text testID="syllabus-only-note" style={[styles.progressSub, { color: colors.textMuted, marginTop: 4 }]}>
-                  There&apos;s no official {curriculum} textbook in Aivorah yet — browse the full syllabus here. Lessons for each topic are coming soon.
-                </Text>
-              ) : (
-                <Text testID="completion-rule" style={[styles.progressSub, { color: colors.textMuted, marginTop: 4 }]}>
-                  A topic is done when you finish Learn or Listen, then pass its Practice test (60% or more).
-                </Text>
-              )}
-            </View>
-          </View>
-
-          {/* Chapters — single column: a 2-column grid left an awkward gap
-              next to whichever card was expanded to show its topics. */}
-          {filteredChapters.map(({ chapter, ci, topics }) => (
-            <ChapterCard
-              key={`${(chapter as any).teacherUnit ? 'u' : 'c'}-${ci}-${chapter.title}`}
-              chapter={chapter}
-              ci={ci}
-              topics={topics}
-              isOpen={effectiveOpen.has(ci)}
-              completedSet={completedSet}
-              isUnitShaped={isUnitShaped}
-              colors={colors}
-              styles={styles}
-              onToggle={() => toggleChapter(ci)}
-              onOpenTopic={(ti) => openLesson(chapter, ci, ti)}
-            />
-          ))}
-        </ScrollView>
 
         <Modal visible={!!comingSoonTopic} transparent animationType="fade" onRequestClose={() => setComingSoonTopic(null)}>
           <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', alignItems: 'center', justifyContent: 'center', padding: 24 }}>

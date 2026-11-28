@@ -237,7 +237,7 @@ describe('LearningPathsScreen', () => {
     mockFetchByUrl({
       subjects: () => Promise.resolve({
         json: async () => ({
-          subjects: [{ subject: 'Mathematics', topicCount: 2, topics: [{ topic: 'Addition', unit: 'Numbers', description: '' }] }],
+          subjects: [{ subject: 'Mathematics', topicCount: 2, topics: [{ topic: 'Addition', unit: 'Numbers', description: '' }, { topic: 'Subtraction', unit: 'Numbers', description: '' }] }],
         }),
       }),
     });
@@ -263,7 +263,7 @@ describe('LearningPathsScreen', () => {
       ] }) }),
     });
     await render(<LearningPathsScreen navigation={navProp()} />);
-    expect(await screen.findByText('2 completed')).toBeTruthy();
+    expect(await screen.findByText('2 / 4 topics complete')).toBeTruthy();
     expect(screen.getByText('2 chapters')).toBeTruthy();
     expect(screen.getAllByText('50%')).toHaveLength(2); // the card and the overall ring
     mockCompletedTopics = [];

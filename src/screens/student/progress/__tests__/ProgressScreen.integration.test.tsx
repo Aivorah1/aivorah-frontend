@@ -1,6 +1,6 @@
 // Integration test for ProgressScreen — the real screen, driven through a
 // mocked global.fetch routed by URL. Overall % and Subject Performance use the
-// Dashboard's chapter list (/curriculum/subjects + curated syllabus mastery).
+// same published syllabus and completion records as Learning Journey.
 
 import React from 'react';
 import { render, screen, waitFor, userEvent } from '@testing-library/react-native';
@@ -23,6 +23,10 @@ jest.mock('../../../../context/ThemeContext', () => ({
 let mockUser: any;
 jest.mock('../../../../context/AuthContext', () => ({
   useAuth: () => ({ user: mockUser }),
+}));
+
+jest.mock('../../learning-paths/teacher-learning-paths/hooks/useTeacherPaths', () => ({
+  useTeacherPaths: () => ({ paths: [], loaded: true }),
 }));
 
 let mockStats: any;
@@ -69,6 +73,7 @@ function mockFetchRoutes({ weekly, subjects, performance }: any = {}) {
   global.fetch = jest.fn((url: string) => {
     if (url.includes('/weekly')) return jsonRes(weekly ?? { days: [] });
     if (url.includes('/curriculum/subjects')) return subjects === 'fail' ? Promise.reject(new Error('down')) : jsonRes(subjects ?? subjectsBody());
+    if (url.includes('/teacher/syllabus/current')) return jsonRes({ units: [] });
     if (url.includes('/performance')) return jsonRes(performance ?? { topics: {}, avgScore: null });
     return jsonRes({});
   }) as any;
@@ -85,14 +90,16 @@ beforeEach(() => {
 });
 
 describe('ProgressScreen — hero (B005)', () => {
-  test('overall % = mastered chapters / Dashboard chapter total, never "N of 0"', async () => {
+  test('overall % uses completed syllabus topics and labels chapters separately', async () => {
     mockStats = baseStats({ completedTopics: ['s1a', 's1b', 'm1a'], totalTopics: 0, currentStreak: 3, level: 2 });
     mockFetchRoutes();
 
     await render(<ProgressScreen navigation={navProp()} />);
 
-    await waitFor(() => expect(screen.getByText('2 of 4 chapters mastered · 3-day streak · Level 2')).toBeTruthy());
-    expect(screen.getAllByText('50%').length).toBeGreaterThan(0);
+    await waitFor(() => expect(screen.getByText('2 of 4 chapters complete · 3-day streak · Level 2')).toBeTruthy());
+    expect(screen.getByText('60%')).toBeTruthy();
+    expect(screen.getByText('67%')).toBeTruthy();
+    expect(screen.getByText('50%')).toBeTruthy();
   });
 
   test('ignores a broken server totalTopics (Qdrant down → 0) entirely', async () => {
@@ -101,27 +108,28 @@ describe('ProgressScreen — hero (B005)', () => {
 
     await render(<ProgressScreen navigation={navProp()} />);
 
-    await waitFor(() => expect(screen.getByText('1 of 4 chapters mastered · 1-day streak · Level 1')).toBeTruthy());
+    await waitFor(() => expect(screen.getByText('1 of 4 chapters complete · 1-day streak · Level 1')).toBeTruthy());
     expect(screen.queryByText(/of 0/)).toBeNull();
   });
 
-  test('topics done but no chapter fully mastered is a real 0%, with Topics Done still counted', async () => {
+  test('partially completed chapters contribute to topic progress and the lifetime count', async () => {
     mockStats = baseStats({ completedTopics: ['s1a', 'unrelated topic'] });
     mockFetchRoutes();
 
     await render(<ProgressScreen navigation={navProp()} />);
 
-    await waitFor(() => expect(screen.getByText('0 of 4 chapters mastered · 0-day streak · Level 1')).toBeTruthy());
-    expect(screen.getByText('Topics Done')).toBeTruthy();
+    await waitFor(() => expect(screen.getByText('0 of 4 chapters complete · 0-day streak · Level 1')).toBeTruthy());
+    expect(screen.getByText('20%')).toBeTruthy();
+    expect(screen.getByText('All-time Topics')).toBeTruthy();
     expect(screen.getAllByText('2').length).toBeGreaterThan(0);
   });
 
-  test('a mastery-level quiz score also masters a chapter (same rule as Dashboard)', async () => {
+  test('a quiz score without a recorded completion does not complete a chapter', async () => {
     mockFetchRoutes({ performance: { topics: { m2a: { avgScore: 95 } }, avgScore: 95 } });
 
     await render(<ProgressScreen navigation={navProp()} />);
 
-    await waitFor(() => expect(screen.getByText('1 of 4 chapters mastered · 0-day streak · Level 1')).toBeTruthy());
+    await waitFor(() => expect(screen.getByText('0 of 4 chapters complete · 0-day streak · Level 1')).toBeTruthy());
   });
 
   test('chapter list fetch failure hides the fraction instead of showing "N of 0"', async () => {
@@ -131,7 +139,7 @@ describe('ProgressScreen — hero (B005)', () => {
     await render(<ProgressScreen navigation={navProp()} />);
 
     await waitFor(() => expect(screen.getByText('1-day streak · Level 1')).toBeTruthy());
-    expect(screen.getByText('0%')).toBeTruthy();
+    expect(screen.getByText('—')).toBeTruthy();
     expect(screen.queryByText(/of 0/)).toBeNull();
   });
 
@@ -140,7 +148,7 @@ describe('ProgressScreen — hero (B005)', () => {
     mockStats = baseStats({ completedTopics: ['s2a'] });
     global.fetch = jest.fn((url: string) => {
       if (url.includes('/curriculum/subjects')) return new Promise(r => { resolveSubjects = r; });
-      if (url.includes('/performance')) return jsonRes({ topics: {}, avgScore: null });
+      if (url.includes('/teacher/syllabus/current')) return jsonRes({ units: [] });
       return jsonRes({ days: [] });
     }) as any;
 
@@ -148,20 +156,20 @@ describe('ProgressScreen — hero (B005)', () => {
     await waitFor(() => expect(screen.getByText('0-day streak · Level 1')).toBeTruthy());
 
     resolveSubjects(await jsonRes(subjectsBody()));
-    await waitFor(() => expect(screen.getByText('1 of 4 chapters mastered · 0-day streak · Level 1')).toBeTruthy());
+    await waitFor(() => expect(screen.getByText('1 of 4 chapters complete · 0-day streak · Level 1')).toBeTruthy());
   });
 
   test('a grade change re-fetches the chapter list for the new grade', async () => {
     mockFetchRoutes();
     const { rerender } = await render(<ProgressScreen navigation={navProp()} />);
-    await waitFor(() => expect(screen.getByText(/of 4 chapters mastered/)).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/of 4 chapters complete/)).toBeTruthy());
 
     mockUser = { ...mockUser, grade: 'Grade 7' };
     mockSyllabus = { Science: { 'G7a': ['x'], 'G7b': ['y'], 'G7c': ['z'] } };
     mockFetchRoutes();
     await rerender(<ProgressScreen navigation={navProp()} />);
 
-    await waitFor(() => expect(screen.getByText(/of 3 chapters mastered/)).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/of 3 chapters complete/)).toBeTruthy());
     expect((global.fetch as jest.Mock).mock.calls.some(([u]) => String(u).includes('grade=Grade%207'))).toBe(true);
   });
 
@@ -176,10 +184,10 @@ describe('ProgressScreen — hero (B005)', () => {
   });
 
   test.each([
-    [['s1a', 's1b'], 'Great start, keep going!'],           // 1/4 = 25%
-    [['s1a', 's1b', 's2a', 'm1a'], 'Amazing progress this week!'], // 3/4 = 75%
-    [['s1a', 's1b', 's2a', 'm1a', 'm2a'], 'Outstanding work!'],    // 4/4
-  ])('hero title follows the chapter %%', async (done, expectedTitle) => {
+    [['s1a', 's1b'], 'Great start, keep going!'], // 2/5 = 40%
+    [['s1a', 's1b', 's2a'], 'Amazing progress!'], // 3/5 = 60%
+    [['s1a', 's1b', 's2a', 'm1a', 'm2a'], 'Outstanding work!'],    // 5/5
+  ])('hero title follows the topic %%', async (done, expectedTitle) => {
     mockStats = baseStats({ completedTopics: done });
     mockFetchRoutes();
 
@@ -234,29 +242,31 @@ describe('ProgressScreen — weekly activity', () => {
     expect(screen.getByText('3')).toBeTruthy();
   });
 
-  test('loading spinner before the weekly data resolves', async () => {
-    const pending: { resolve: (v: any) => void }[] = [];
-    global.fetch = jest.fn(() => new Promise((resolve) => { pending.push({ resolve }); })) as any;
+  test('weekly loading is independent from the rest of the page', async () => {
+    let resolveWeekly!: (value: any) => void;
+    global.fetch = jest.fn((url: string) => url.includes('/weekly')
+      ? new Promise(resolve => { resolveWeekly = resolve; })
+      : jsonRes(url.includes('/curriculum/subjects') ? subjectsBody() : { units: [] })) as any;
 
     await render(<ProgressScreen navigation={navProp()} />);
 
-    expect(screen.getByText('Loading your progress…')).toBeTruthy();
+    expect(screen.getByText('Loading weekly activity…')).toBeTruthy();
 
-    pending.forEach(p => p.resolve(jsonRes({ days: [] })));
-    await waitFor(() => expect(screen.queryByText('Loading your progress…')).toBeNull());
+    resolveWeekly(await jsonRes({ days: [] }));
+    await waitFor(() => expect(screen.queryByText('Loading weekly activity…')).toBeNull());
   });
 });
 
 describe('ProgressScreen — Subject Performance', () => {
-  test('one card per subject with chapters mastered / chapters total', async () => {
+  test('one card per subject with chapters complete / chapters total', async () => {
     mockStats = baseStats({ completedTopics: ['s1a', 's1b'] });
     mockFetchRoutes();
 
     await render(<ProgressScreen navigation={navProp()} />);
 
     await waitFor(() => expect(screen.getByText('Science')).toBeTruthy());
-    expect(screen.getByText('1 / 2 chapters')).toBeTruthy();
-    expect(screen.getByText('0 / 2 chapters')).toBeTruthy();
+    expect(screen.getByText('1 / 2 chapters complete')).toBeTruthy();
+    expect(screen.getByText('0 / 2 chapters complete')).toBeTruthy();
   });
 
   test('chapter list fetch failure shows the empty state, no crash', async () => {
@@ -264,26 +274,25 @@ describe('ProgressScreen — Subject Performance', () => {
 
     await render(<ProgressScreen navigation={navProp()} />);
 
-    await waitFor(() => expect(screen.getByText('Complete lessons to see subject scores.')).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/Could not load/)).toBeTruthy());
   });
 
-  test('zero subjects (not a failure) shows the empty state', async () => {
+  test('zero subjects shows the empty state', async () => {
     mockFetchRoutes({ subjects: { subjects: [] } });
 
     await render(<ProgressScreen navigation={navProp()} />);
 
-    await waitFor(() => expect(screen.getByText('Complete lessons to see subject scores.')).toBeTruthy());
+    await waitFor(() => expect(screen.getByText('No subjects are available for this profile yet.')).toBeTruthy());
   });
 
-  test('a Grade 11 student with no curriculum set queries NCERT, not IB PYP', async () => {
+  test('a Grade 11 student with no curriculum set is not shown another curriculum', async () => {
     mockUser = { name: 'A Student', email: 'a@a.com', grade: 'Grade 11', curriculum: undefined };
     mockFetchRoutes();
 
     await render(<ProgressScreen navigation={navProp()} />);
 
-    await waitFor(() => expect(screen.getByText('Science')).toBeTruthy());
-    const subjUrl = (global.fetch as jest.Mock).mock.calls.map(([u]) => String(u)).find(u => u.includes('/curriculum/subjects'));
-    expect(subjUrl).toContain('curriculum=NCERT');
+    expect(await screen.findByText('No subjects are available for this profile yet.')).toBeTruthy();
+    expect((global.fetch as jest.Mock).mock.calls.some(([url]) => String(url).includes('/curriculum/subjects'))).toBe(false);
   });
 });
 
@@ -332,18 +341,19 @@ describe('ProgressScreen — navigation', () => {
     expect(nav.navigate).toHaveBeenCalledWith('LearningPaths');
   });
 
-  test('pressing "See all" under Completed Topics navigates to LearningPaths', async () => {
-    mockStats = baseStats({ completedTopics: ['Fractions'] });
+  test('pressing See all reveals the remaining completed topics', async () => {
+    mockStats = baseStats({ completedTopics: Array.from({ length: 7 }, (_, i) => `Topic ${i}`) });
     mockFetchRoutes();
     const nav = navProp();
     const user = userEvent.setup();
 
     await render(<ProgressScreen navigation={nav} />);
-    await waitFor(() => expect(screen.getByText('See all →')).toBeTruthy());
+    await waitFor(() => expect(screen.getByText('See all')).toBeTruthy());
 
-    await user.press(screen.getByText('See all →'));
+    await user.press(screen.getByText('See all'));
 
-    expect(nav.navigate).toHaveBeenCalledWith('LearningPaths');
+    expect(screen.getByText('Topic 6')).toBeTruthy();
+    expect(screen.getByText('Show less')).toBeTruthy();
   });
 });
 

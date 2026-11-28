@@ -21,6 +21,7 @@ export interface TopicItem {
 export interface SubjectData {
   subject: string;
   topicCount: number;
+  topicsIncomplete?: boolean;
   topics: TopicItem[];
   chapterCount?: number; // authoritative chapter count (CBSE); 0 for IB PYP
   unitCount?: number;    // chapters if present, else distinct units from topics

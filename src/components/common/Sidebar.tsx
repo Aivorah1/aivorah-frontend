@@ -77,6 +77,7 @@ const TEACHER_NAV_ITEMS = [
   // "School Policies" is the Resources page (Library), unchanged — only its menu label differs for teachers.
   { label: 'School Policies', icon: 'folder', screen: 'Resources', group: 'RESOURCES' },
   { label: 'Student Report', icon: 'file-text', screen: 'TeacherStudentReport', group: 'RESOURCES' },
+  { label: 'Student Progress', icon: 'bar-chart-2', screen: 'TeacherProgress', group: 'RESOURCES' },
   // Its own page (blank until a Portfolio feature exists).
   { label: 'Portfolio', icon: 'image', screen: 'TeacherPortfolio', group: 'RESOURCES' },
   { label: 'Assignments', icon: 'check-square', screen: 'TeacherAssignments', group: 'MANAGE', childScreens: ['TeacherPrepareWorksheet'] },
@@ -85,12 +86,9 @@ const TEACHER_NAV_ITEMS = [
   { label: 'Learning Paths', icon: 'map', screen: 'TeacherClassLearningPaths', group: 'MANAGE' },
   { label: 'Messages', icon: 'message-square', screen: 'TeacherMessages', group: 'MANAGE' },
   { label: 'Professional Development', icon: 'briefcase', screen: 'TeacherLearningPaths', group: 'MANAGE' },
-  // Student Progress restored 2026-08-29 — it's now a real, refactored
-  // screen backed by a real extracted endpoint (see
-  // aivorah-teacher-dashboard-service's /heatmap route), not the dummy
-  // mock it was on 2026-08-28 when this whole group was removed.
   { label: 'Announcements', icon: 'volume-2', screen: 'TeacherAnnouncements', group: 'MANAGE' },
   { label: 'Send Announcement', icon: 'edit-3', screen: 'AnnouncementManager', group: 'MANAGE' },
+  { label: 'Help Center', icon: 'help-circle', screen: 'TeacherHelp', group: 'SYSTEM' },
   { label: 'Settings', icon: 'settings', screen: 'TeacherSettings', group: 'SYSTEM' },
 ];
 

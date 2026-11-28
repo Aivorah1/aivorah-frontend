@@ -56,7 +56,7 @@ export default function SuperAdminNavigator() {
       drawerContent={(props) => <DrawerContent {...props} />}
       screenOptions={{
         headerShown: false,
-        drawerType: isLargeScreen ? 'permanent' : 'slide',
+        drawerType: isLargeScreen ? 'permanent' : 'front',
         drawerStyle: isLargeScreen
           ? { width: 0, opacity: 0, pointerEvents: 'none' as const }
           : { width: 260, backgroundColor: colors.sidebarDark },

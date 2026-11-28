@@ -171,82 +171,86 @@ export default function MathLessonScreen({ route, navigation }: any) {
 
   return (
     <ScreenLayout>
-      <Header title={lesson.meta.chapterTitle} subtitle={`${subject} · ${grade}`} showBack onMenuPress={() => navigation.openDrawer?.()} />
-      <ScrollView contentContainerStyle={styles.content}>
-        {scene.kind === 'concept' && (
-          <View>
-            <Text style={[styles.title, { color: colors.textMain }]}>{scene.data.title}</Text>
-            <Text style={[styles.body, { color: colors.textMain }]}>{scene.data.description}</Text>
-            <Text style={[styles.label, { color: colors.textMuted }]}>Learning objective</Text>
-            <Text style={[styles.body, { color: colors.textMain }]}>{scene.data.learningObjective}</Text>
-            {scene.data.prerequisites?.length > 0 && (
-              <>
-                <Text style={[styles.label, { color: colors.textMuted }]}>Before you start</Text>
-                {scene.data.prerequisites.map((p, i) => (
-                  <Text key={i} style={[styles.bullet, { color: colors.textMain }]}>• {p}</Text>
-                ))}
-              </>
-            )}
-          </View>
-        )}
-
-        {scene.kind === 'formula' && (
-          <View>
-            <Text style={[styles.label, { color: colors.textMuted }]}>Formula</Text>
-            <Text style={[styles.title, { color: colors.textMain }]}>{scene.data.name}</Text>
-            <Text style={[styles.equation, { color: colors.primary }]}>{scene.data.expression}</Text>
-            <Text style={[styles.body, { color: colors.textMain }]}>{scene.data.description}</Text>
-          </View>
-        )}
-
-        {scene.kind === 'property' && (
-          <View>
-            <Text style={[styles.title, { color: colors.textMain }]}>{scene.data.title}</Text>
-            <Text style={[styles.body, { color: colors.textMain }]}>{scene.data.description}</Text>
-          </View>
-        )}
-
-        {(scene.kind === 'worked_example' || scene.kind === 'exercise_question') && (
-          <View>
-            <Text style={[styles.label, { color: colors.textMuted }]}>
-              {scene.kind === 'worked_example' ? 'Worked example' : 'Guided solution'}
-            </Text>
-            <Text style={[styles.body, { color: colors.textMain }]}>{scene.data.problem}</Text>
-            {scene.data.steps.slice(0, stepIndex + 1).map((step, i) => (
-              <View key={i} style={[styles.stepCard, { borderColor: colors.borderColor }]}>
-                <Text style={[styles.stepLabel, { color: colors.textMuted }]}>Step {i + 1}</Text>
-                {!!step.visual && <Text style={[styles.equation, { color: colors.primary }]}>{step.visual}</Text>}
-                <Text style={[styles.body, { color: colors.textMain }]}>{step.stepText}</Text>
+      <Header title={lesson.meta.chapterTitle} subtitle={`${subject} · ${grade}`} showBack onMenuPress={() => navigation.openDrawer?.()}
+        renderContent={mobileTitle => (
+          <ScrollView contentContainerStyle={styles.content}>
+            {mobileTitle}
+            {scene.kind === 'concept' && (
+              <View>
+                <Text style={[styles.title, { color: colors.textMain }]}>{scene.data.title}</Text>
+                <Text style={[styles.body, { color: colors.textMain }]}>{scene.data.description}</Text>
+                <Text style={[styles.label, { color: colors.textMuted }]}>Learning objective</Text>
+                <Text style={[styles.body, { color: colors.textMain }]}>{scene.data.learningObjective}</Text>
+                {scene.data.prerequisites?.length > 0 && (
+                  <>
+                    <Text style={[styles.label, { color: colors.textMuted }]}>Before you start</Text>
+                    {scene.data.prerequisites.map((p, i) => (
+                      <Text key={i} style={[styles.bullet, { color: colors.textMain }]}>• {p}</Text>
+                    ))}
+                  </>
+                )}
               </View>
-            ))}
-            {'commonMistake' in scene.data && scene.data.commonMistake && stepIndex === scene.data.steps.length - 1 && (
-              <Text style={[styles.mistakeNote, { color: colors.textMuted }]}>⚠ Common mistake: {scene.data.commonMistake}</Text>
             )}
-          </View>
-        )}
 
-        {scene.kind === 'practice_attempt' && (
-          <View>
-            <Text style={[styles.label, { color: colors.textMuted }]}>Try it yourself</Text>
-            <Text style={[styles.body, { color: colors.textMain }]}>{scene.data.problem}</Text>
-            <TextInput
-              style={[styles.input, { borderColor: colors.borderColor, color: colors.textMain }]}
-              value={attemptValue}
-              onChangeText={setAttemptValue}
-              placeholder="Your answer"
-              placeholderTextColor={colors.textMuted}
-            />
-            <TouchableOpacity style={[styles.checkButton, { backgroundColor: colors.primary }]} onPress={submitAttempt}>
-              <Text style={styles.checkButtonText}>Check my answer</Text>
-            </TouchableOpacity>
-            {attemptResult && (
-              <Text style={[styles.body, { color: attemptResult.correct ? '#2E7D32' : '#C62828' }]}>
-                {attemptResult.correct ? 'Correct! Well done.' : `Not quite — ${attemptResult.hint || 'try again'}`}
-              </Text>
+            {scene.kind === 'formula' && (
+              <View>
+                <Text style={[styles.label, { color: colors.textMuted }]}>Formula</Text>
+                <Text style={[styles.title, { color: colors.textMain }]}>{scene.data.name}</Text>
+                <Text style={[styles.equation, { color: colors.primary }]}>{scene.data.expression}</Text>
+                <Text style={[styles.body, { color: colors.textMain }]}>{scene.data.description}</Text>
+              </View>
             )}
-          </View>
+
+            {scene.kind === 'property' && (
+              <View>
+                <Text style={[styles.title, { color: colors.textMain }]}>{scene.data.title}</Text>
+                <Text style={[styles.body, { color: colors.textMain }]}>{scene.data.description}</Text>
+              </View>
+            )}
+
+            {(scene.kind === 'worked_example' || scene.kind === 'exercise_question') && (
+              <View>
+                <Text style={[styles.label, { color: colors.textMuted }]}>
+                  {scene.kind === 'worked_example' ? 'Worked example' : 'Guided solution'}
+                </Text>
+                <Text style={[styles.body, { color: colors.textMain }]}>{scene.data.problem}</Text>
+                {scene.data.steps.slice(0, stepIndex + 1).map((step, i) => (
+                  <View key={i} style={[styles.stepCard, { borderColor: colors.borderColor }]}>
+                    <Text style={[styles.stepLabel, { color: colors.textMuted }]}>Step {i + 1}</Text>
+                    {!!step.visual && <Text style={[styles.equation, { color: colors.primary }]}>{step.visual}</Text>}
+                    <Text style={[styles.body, { color: colors.textMain }]}>{step.stepText}</Text>
+                  </View>
+                ))}
+                {'commonMistake' in scene.data && scene.data.commonMistake && stepIndex === scene.data.steps.length - 1 && (
+                  <Text style={[styles.mistakeNote, { color: colors.textMuted }]}>⚠ Common mistake: {scene.data.commonMistake}</Text>
+                )}
+              </View>
+            )}
+
+            {scene.kind === 'practice_attempt' && (
+              <View>
+                <Text style={[styles.label, { color: colors.textMuted }]}>Try it yourself</Text>
+                <Text style={[styles.body, { color: colors.textMain }]}>{scene.data.problem}</Text>
+                <TextInput
+                  style={[styles.input, { borderColor: colors.borderColor, color: colors.textMain }]}
+                  value={attemptValue}
+                  onChangeText={setAttemptValue}
+                  placeholder="Your answer"
+                  placeholderTextColor={colors.textMuted}
+                />
+                <TouchableOpacity style={[styles.checkButton, { backgroundColor: colors.primary }]} onPress={submitAttempt}>
+                  <Text style={styles.checkButtonText}>Check my answer</Text>
+                </TouchableOpacity>
+                {attemptResult && (
+                  <Text style={[styles.body, { color: attemptResult.correct ? '#2E7D32' : '#C62828' }]}>
+                    {attemptResult.correct ? 'Correct! Well done.' : `Not quite — ${attemptResult.hint || 'try again'}`}
+                  </Text>
+                )}
+              </View>
+            )}
+          </ScrollView>
         )}
-      </ScrollView>
+      />
 
       <View style={styles.footer}>
         <TouchableOpacity onPress={goPrev} disabled={sceneIndex === 0} style={styles.navButton}>

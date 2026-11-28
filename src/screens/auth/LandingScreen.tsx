@@ -561,30 +561,39 @@ function IntroPanel({ copy, art, style }: { copy: Copy; art: React.ReactNode; st
   );
 }
 
-function AuthPageLayout({ copy, onBack, children, cardMax, splitMax, art, cornerArt, canSplit = true }: {
+function AuthPageLayout({ copy, onBack, children, cardMax, splitMax, art, cornerArt, canSplit = true, centeredSignIn = false }: {
   copy: Copy; onBack: () => void; children: React.ReactNode; canSplit?: boolean;
+  centeredSignIn?: boolean;
   /** card width in one column / in two columns */
   cardMax: number; splitMax: number;
   art: React.ReactNode; cornerArt: React.ReactNode;
 }) {
   const { width, gutter, isWide, isTV } = useAuthLayout();
   const edgeAligned = IS_WEB && width >= 768;
+  const centeredRow = centeredSignIn && edgeAligned;
+  const centeredWidth = Math.min(width - gutter * 2 - 40, isTV ? 1100 : 900);
+  const centeredGap = Math.min(64, Math.max(32, Math.round(centeredWidth * 0.065)));
   const showIntro = edgeAligned || isWide;
   const introW = isTV ? 420 : width >= 1280 ? 330 : 280;
   // Two columns inside the card once the card itself has room for both.
   const split = canSplit && isWide && width - introW - 160 >= splitMax;
   const cardW = split ? splitMax : cardMax;
-  const frameWidth = edgeAligned && !split ? Math.min(cardW, Math.round((width - gutter * 2) * 0.58)) : cardW;
-  const introStyle: ViewStyle = edgeAligned ? { flex: 1, minWidth: 0, maxWidth: introW } : { width: introW, flexShrink: 0 };
+  const frameWidth = centeredRow
+    ? Math.round(centeredWidth * 0.62)
+    : edgeAligned && !split ? Math.min(cardW, Math.round((width - gutter * 2) * 0.58)) : cardW;
+  const introStyle: ViewStyle = edgeAligned
+    ? { flex: 1, minWidth: 0, maxWidth: centeredRow ? (isTV ? 340 : 270) : introW }
+    : { width: introW, flexShrink: 0 };
   return (
-    <AuthShell onBack={onBack} contentMaxWidth={isWide ? introW + cardW + 120 : undefined}>
+    <AuthShell onBack={onBack} contentMaxWidth={isWide ? introW + cardW + 120 : undefined} balancedBody={centeredSignIn}>
       <SplitContext.Provider value={split}>
         <View style={{
           flexDirection: showIntro ? 'row' : 'column',
           alignItems: 'center',
-          justifyContent: edgeAligned ? 'space-between' : 'center',
-          gap: edgeAligned && gutter === 24 ? 36 : isWide ? 64 : 0,
-          paddingVertical: showIntro ? 24 : 16,
+          justifyContent: edgeAligned && !centeredRow ? 'space-between' : 'center',
+          gap: centeredRow ? centeredGap : edgeAligned && gutter === 24 ? 36 : isWide ? 64 : 0,
+          paddingVertical: centeredSignIn ? 0 : showIntro ? 24 : 16,
+          ...(centeredRow ? { width: centeredWidth, alignSelf: 'center' } : null),
         }}>
           {showIntro && <IntroPanel copy={copy} art={art} style={introStyle} />}
           <ShapeFrame style={{ maxWidth: frameWidth, flexShrink: 1 }} compact={edgeAligned && gutter === 24}>
@@ -613,7 +622,7 @@ function SignInLayout({ children, onBack, copy = PAGE_COPY.signin }: { children:
     </View>
   );
   return (
-    <AuthPageLayout copy={copy} onBack={onBack} cardMax={480} splitMax={isTV ? 900 : 760} art={art} cornerArt={<PencilArt width={46} />} canSplit={false}>
+    <AuthPageLayout copy={copy} onBack={onBack} cardMax={480} splitMax={isTV ? 900 : 760} art={art} cornerArt={<PencilArt width={46} />} canSplit={false} centeredSignIn={IS_WEB && copy === PAGE_COPY.signin}>
       {children}
     </AuthPageLayout>
   );

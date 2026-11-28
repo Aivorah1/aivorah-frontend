@@ -6,11 +6,14 @@ export type LoadedTeacherPath = { summary: TeacherLearningPathSummary; path: Stu
 
 // The published paths of the student's teachers for a grade (and optionally one subject), with their full units and
 // topics. Failures read as "no teacher paths" — the book syllabus still shows.
-export function useTeacherPaths(grade: string, subject?: string) {
+export function useTeacherPaths(grade: string, subject?: string, studentScope?: string) {
   const [paths, setPaths] = useState<LoadedTeacherPath[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const scope = JSON.stringify([grade, subject, studentScope]);
+  const [resolvedScope, setResolvedScope] = useState('');
 
   useEffect(() => {
+    if (!grade) return;
     let cancelled = false;
     // data fetching effect — reset before the async fetch below
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -26,11 +29,11 @@ export function useTeacherPaths(grade: string, subject?: string) {
       } catch {
         if (!cancelled) setPaths([]);
       } finally {
-        if (!cancelled) setLoaded(true);
+        if (!cancelled) { setResolvedScope(scope); setLoaded(true); }
       }
     })();
     return () => { cancelled = true; };
-  }, [grade, subject]);
+  }, [grade, subject, scope]);
 
-  return { paths, loaded };
+  return { paths: resolvedScope === scope ? paths : [], loaded: loaded && resolvedScope === scope };
 }

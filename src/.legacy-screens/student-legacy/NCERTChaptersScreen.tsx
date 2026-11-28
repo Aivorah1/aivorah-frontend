@@ -300,155 +300,157 @@ export default function NCERTChaptersScreen({ navigation, route }: any) {
             : `${selectedCurriculum} · ${selectedGrade} · Maths Mela`}
           showBack={true}
           onMenuPress={() => navigation.openDrawer()}
-        />
+          renderContent={mobileTitle => (
+            <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
+              {mobileTitle}
 
-        <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
+              {/* Profile pill — shows curriculum+grade, no picker needed */}
+              {profileSet ? (
+                <View style={[s.profilePill, { backgroundColor: colors.accentYellow + '22', borderColor: colors.accentYellow + '30' }]}>
+                  <Feather name="book-open" size={14} color={colors.accentYellow} />
+                  <Text style={[s.profilePillText, { color: colors.accentYellow }]}>
+                    {selectedCurriculum} · {selectedGrade}
+                  </Text>
+                  <View style={{ flex: 1 }} />
+                  <View style={[s.statusPill, { backgroundColor: '#10b98120' }]}>
+                    <Text style={[s.statusPillText, { color: '#10b981' }]}>Active</Text>
+                  </View>
+                </View>
+              ) : (
+                /* Show curriculum + grade pickers only if profile not set */
+                <>
+                  <View style={s.curriculumRow}>
+                    {CURRICULUM_OPTIONS.map((curriculum) => {
+                      const meta = CURRICULUM_META[curriculum];
+                      const isActive = selectedCurriculum === curriculum;
+                      return (
+                        <TouchableOpacity
+                          key={curriculum}
+                          activeOpacity={0.85}
+                          onPress={() => { setSelectedCurriculum(curriculum); setSelectedGrade('Grade 3'); }}
+                          style={[s.curriculumCard, { borderColor: isActive ? meta.accent : colors.borderColor, backgroundColor: isActive ? meta.accent + '12' : colors.cardDark }]}
+                        >
+                          <View style={s.curriculumTop}>
+                            <View style={[s.curriculumIcon, { backgroundColor: meta.accent + '20' }]}>
+                              <Feather name={meta.icon as any} size={15} color={meta.accent} />
+                            </View>
+                            <View style={[s.statusPill, { backgroundColor: meta.accent + '18' }]}>
+                              <Text style={[s.statusPillText, { color: meta.accent }]}>{meta.status}</Text>
+                            </View>
+                          </View>
+                          <Text style={[s.curriculumTitle, { color: colors.textMain }]}>{curriculum}</Text>
+                          <Text style={[s.curriculumSub, { color: colors.textMuted }]}>{meta.sub}</Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
 
-          {/* Profile pill — shows curriculum+grade, no picker needed */}
-          {profileSet ? (
-            <View style={[s.profilePill, { backgroundColor: colors.accentYellow + '22', borderColor: colors.accentYellow + '30' }]}>
-              <Feather name="book-open" size={14} color={colors.accentYellow} />
-              <Text style={[s.profilePillText, { color: colors.accentYellow }]}>
-                {selectedCurriculum} · {selectedGrade}
-              </Text>
-              <View style={{ flex: 1 }} />
-              <View style={[s.statusPill, { backgroundColor: '#10b98120' }]}>
-                <Text style={[s.statusPillText, { color: '#10b981' }]}>Active</Text>
-              </View>
-            </View>
-          ) : (
-            /* Show curriculum + grade pickers only if profile not set */
-            <>
-              <View style={s.curriculumRow}>
-                {CURRICULUM_OPTIONS.map((curriculum) => {
-                  const meta = CURRICULUM_META[curriculum];
-                  const isActive = selectedCurriculum === curriculum;
-                  return (
-                    <TouchableOpacity
-                      key={curriculum}
-                      activeOpacity={0.85}
-                      onPress={() => { setSelectedCurriculum(curriculum); setSelectedGrade('Grade 3'); }}
-                      style={[s.curriculumCard, { borderColor: isActive ? meta.accent : colors.borderColor, backgroundColor: isActive ? meta.accent + '12' : colors.cardDark }]}
-                    >
-                      <View style={s.curriculumTop}>
-                        <View style={[s.curriculumIcon, { backgroundColor: meta.accent + '20' }]}>
-                          <Feather name={meta.icon as any} size={15} color={meta.accent} />
-                        </View>
-                        <View style={[s.statusPill, { backgroundColor: meta.accent + '18' }]}>
-                          <Text style={[s.statusPillText, { color: meta.accent }]}>{meta.status}</Text>
-                        </View>
-                      </View>
-                      <Text style={[s.curriculumTitle, { color: colors.textMain }]}>{curriculum}</Text>
-                      <Text style={[s.curriculumSub, { color: colors.textMuted }]}>{meta.sub}</Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
+                  <View style={s.gradeRow}>
+                    {GRADE_OPTIONS.map((grade) => {
+                      const meta = GRADE_META[grade];
+                      const isActive = selectedGrade === grade;
+                      const status = getGradeStatus(grade);
+                      return (
+                        <TouchableOpacity
+                          key={grade}
+                          activeOpacity={0.85}
+                          onPress={() => setSelectedGrade(grade)}
+                          style={[s.gradeCard, { borderColor: isActive ? meta.accent : colors.borderColor, backgroundColor: isActive ? meta.accent + '12' : colors.cardDark }]}
+                        >
+                          <View style={s.gradeTop}>
+                            <View style={[s.gradeIcon, { backgroundColor: meta.accent + '20' }]}>
+                              <Feather name={meta.icon as any} size={15} color={meta.accent} />
+                            </View>
+                            <View style={[s.statusPill, { backgroundColor: meta.accent + '18' }]}>
+                              <Text style={[s.statusPillText, { color: meta.accent }]}>{status}</Text>
+                            </View>
+                          </View>
+                          <Text style={[s.gradeTitle, { color: colors.textMain }]}>{grade}</Text>
+                          <Text style={[s.gradeSub, { color: colors.textMuted }]}>{selectedCurriculum} Curriculum</Text>
+                          <Text style={[s.gradeMetaText, { color: colors.textMuted }]}>{getGradeSummary(grade)}</Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                </>
+              )}
 
-              <View style={s.gradeRow}>
-                {GRADE_OPTIONS.map((grade) => {
-                  const meta = GRADE_META[grade];
-                  const isActive = selectedGrade === grade;
-                  const status = getGradeStatus(grade);
-                  return (
-                    <TouchableOpacity
-                      key={grade}
-                      activeOpacity={0.85}
-                      onPress={() => setSelectedGrade(grade)}
-                      style={[s.gradeCard, { borderColor: isActive ? meta.accent : colors.borderColor, backgroundColor: isActive ? meta.accent + '12' : colors.cardDark }]}
-                    >
-                      <View style={s.gradeTop}>
-                        <View style={[s.gradeIcon, { backgroundColor: meta.accent + '20' }]}>
-                          <Feather name={meta.icon as any} size={15} color={meta.accent} />
-                        </View>
-                        <View style={[s.statusPill, { backgroundColor: meta.accent + '18' }]}>
-                          <Text style={[s.statusPillText, { color: meta.accent }]}>{status}</Text>
-                        </View>
-                      </View>
-                      <Text style={[s.gradeTitle, { color: colors.textMain }]}>{grade}</Text>
-                      <Text style={[s.gradeSub, { color: colors.textMuted }]}>{selectedCurriculum} Curriculum</Text>
-                      <Text style={[s.gradeMetaText, { color: colors.textMuted }]}>{getGradeSummary(grade)}</Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            </>
-          )}
+              <View style={[s.sectionCard, { backgroundColor: colors.cardDark, borderColor: gradeMeta.accent + '30' }]}>
+                <View style={s.sectionTop}>
+                  <View>
+                    <Text style={[s.sectionTitle, { color: colors.textMain }]}>{selectedGrade}</Text>
+                    <Text style={[s.sectionSub, { color: colors.textMuted }]}>{selectedCurriculum} Curriculum</Text>
+                  </View>
+                  <View style={[s.sectionBadge, { backgroundColor: gradeMeta.accent + '18' }]}>
+                    <Text style={[s.sectionBadgeText, { color: gradeMeta.accent }]}>
+                      {isNcertGrade3 ? (isScience ? 'Our Wondrous World Active' : 'Maths Mela Active') : 'Coming Soon'}
+                    </Text>
+                  </View>
+                </View>
 
-          <View style={[s.sectionCard, { backgroundColor: colors.cardDark, borderColor: gradeMeta.accent + '30' }]}>
-            <View style={s.sectionTop}>
-              <View>
-                <Text style={[s.sectionTitle, { color: colors.textMain }]}>{selectedGrade}</Text>
-                <Text style={[s.sectionSub, { color: colors.textMuted }]}>{selectedCurriculum} Curriculum</Text>
-              </View>
-              <View style={[s.sectionBadge, { backgroundColor: gradeMeta.accent + '18' }]}>
-                <Text style={[s.sectionBadgeText, { color: gradeMeta.accent }]}>
-                  {isNcertGrade3 ? (isScience ? 'Our Wondrous World Active' : 'Maths Mela Active') : 'Coming Soon'}
-                </Text>
-              </View>
-            </View>
-
-            {isNcertGrade3 ? (
-              <>
-                {/* Progress summary */}
-                {(() => {
-                  const doneCount = chapters.filter(ch => completedTopics.has(ch.topic)).length;
-                  const pct = chapters.length > 0 ? Math.round((doneCount / chapters.length) * 100) : 0;
-                  return doneCount > 0 ? (
-                    <View style={{ backgroundColor: '#10b981' + '12', borderRadius: 12, padding: 14, marginBottom: 12, flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 1, borderColor: '#10b981' + '30' }}>
-                      <Feather name="trending-up" size={20} color="#10b981" />
-                      <View style={{ flex: 1 }}>
-                        <Text style={{ color: '#10b981', fontSize: 14, fontWeight: '700' }}>{doneCount}/{chapters.length} chapters completed · {pct}%</Text>
-                        <View style={{ height: 4, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 2, marginTop: 6, overflow: 'hidden' }}>
-                          <View style={{ width: `${pct}%` as any, height: '100%', backgroundColor: '#10b981', borderRadius: 2 }} />
+                {isNcertGrade3 ? (
+                  <>
+                    {/* Progress summary */}
+                    {(() => {
+                      const doneCount = chapters.filter(ch => completedTopics.has(ch.topic)).length;
+                      const pct = chapters.length > 0 ? Math.round((doneCount / chapters.length) * 100) : 0;
+                      return doneCount > 0 ? (
+                        <View style={{ backgroundColor: '#10b981' + '12', borderRadius: 12, padding: 14, marginBottom: 12, flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 1, borderColor: '#10b981' + '30' }}>
+                          <Feather name="trending-up" size={20} color="#10b981" />
+                          <View style={{ flex: 1 }}>
+                            <Text style={{ color: '#10b981', fontSize: 14, fontWeight: '700' }}>{doneCount}/{chapters.length} chapters completed · {pct}%</Text>
+                            <View style={{ height: 4, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 2, marginTop: 6, overflow: 'hidden' }}>
+                              <View style={{ width: `${pct}%` as any, height: '100%', backgroundColor: '#10b981', borderRadius: 2 }} />
+                            </View>
+                          </View>
                         </View>
-                      </View>
+                      ) : null;
+                    })()}
+                    <Text style={[s.sectionHelper, { color: colors.textMuted }]}>
+                      {isScience
+                        ? 'Our Wondrous World (NCERT Grade 3) — 12 chapters with Drawing Buddy & Word Wizard.'
+                        : 'Maths Mela (NCERT Grade 3) chapters and tools are available below.'}
+                    </Text>
+                    <View style={s.grid}>
+                      {chapters.map((ch) => (
+                        <ChapterCard
+                          key={ch.id}
+                          ch={ch}
+                          isMobile={isMobile}
+                          colors={colors}
+                          isDone={completedTopics.has(ch.topic)}
+                          isScience={isScience}
+                          onModule={(route) =>
+                            navigation.navigate(route as any, {
+                              topic: ch.topic,
+                              chapterId: ch.id,
+                              unit: ch.unit,
+                              subject: isScience ? 'Science' : 'Mathematics',
+                            })
+                          }
+                        />
+                      ))}
                     </View>
-                  ) : null;
-                })()}
-                <Text style={[s.sectionHelper, { color: colors.textMuted }]}>
-                  {isScience
-                    ? 'Our Wondrous World (NCERT Grade 3) — 12 chapters with Drawing Buddy & Word Wizard.'
-                    : 'Maths Mela (NCERT Grade 3) chapters and tools are available below.'}
-                </Text>
-                <View style={s.grid}>
-                  {chapters.map((ch) => (
-                    <ChapterCard
-                      key={ch.id}
-                      ch={ch}
-                      isMobile={isMobile}
-                      colors={colors}
-                      isDone={completedTopics.has(ch.topic)}
-                      isScience={isScience}
-                      onModule={(route) =>
-                        navigation.navigate(route as any, {
-                          topic: ch.topic,
-                          chapterId: ch.id,
-                          unit: ch.unit,
-                          subject: isScience ? 'Science' : 'Mathematics',
-                        })
-                      }
-                    />
-                  ))}
-                </View>
-              </>
-            ) : (
-              <View style={[s.comingCard, { borderColor: curriculumMeta.accent + '35' }]}>
-                <View style={[s.comingIcon, { backgroundColor: curriculumMeta.accent + '20' }]}>
-                  <Feather name="clock" size={18} color={curriculumMeta.accent} />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={[s.comingTitle, { color: colors.textMain }]}>
-                    {selectedCurriculum} {selectedGrade} is coming soon
-                  </Text>
-                  <Text style={[s.comingText, { color: colors.textMuted }]}>
-                    Currently available: NCERT Grade 3 Maths Mela.
-                  </Text>
-                </View>
+                  </>
+                ) : (
+                  <View style={[s.comingCard, { borderColor: curriculumMeta.accent + '35' }]}>
+                    <View style={[s.comingIcon, { backgroundColor: curriculumMeta.accent + '20' }]}>
+                      <Feather name="clock" size={18} color={curriculumMeta.accent} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[s.comingTitle, { color: colors.textMain }]}>
+                        {selectedCurriculum} {selectedGrade} is coming soon
+                      </Text>
+                      <Text style={[s.comingText, { color: colors.textMuted }]}>
+                        Currently available: NCERT Grade 3 Maths Mela.
+                      </Text>
+                    </View>
+                  </View>
+                )}
               </View>
-            )}
-          </View>
-        </ScrollView>
+            </ScrollView>
+          )}
+        />
       </View>
     </ScreenLayout>
   );

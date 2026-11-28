@@ -52,9 +52,9 @@ export default function QuestionCoach({ attemptId, questionIndex, mode, lessonTe
   return (
     <View style={styles.wrap} testID="question-coach">
       {/* Header: which action, which wrong question */}
-      <View style={[styles.head, { backgroundColor: colors.cardDark, borderColor: colors.borderColor }]}>
+      <View style={styles.head}>
         <Text style={[styles.kicker, { color: colors.textMuted }]}>
-          {c.mode === 'explain' ? 'Explain This Question' : 'Practise This Skill'}
+          {c.mode === 'explain' ? 'Answer explanation' : 'Follow-up practice'}
           {c.wrong.length > 1 && position >= 0 ? ` · Wrong question ${position + 1} of ${c.wrong.length}` : ''}
         </Text>
         <Text style={[styles.title, { color: colors.textMain }]} testID="coach-skill">
@@ -63,7 +63,7 @@ export default function QuestionCoach({ attemptId, questionIndex, mode, lessonTe
       </View>
 
       {!!c.busy && !c.explain && !c.practice && (
-        <View style={styles.center}><ActivityIndicator color={gold} /><Text style={[styles.muted, { color: colors.textMuted }]}>Aivorah is getting this ready…</Text></View>
+        <View style={styles.center} accessibilityLiveRegion="polite"><ActivityIndicator color={gold} /><Text style={[styles.muted, { color: colors.textMuted }]}>{c.mode === 'practice' ? 'Preparing your practice question…' : 'Preparing your answer explanation…'}</Text></View>
       )}
 
       {!!c.error && (
@@ -78,7 +78,10 @@ export default function QuestionCoach({ attemptId, questionIndex, mode, lessonTe
         <View style={[styles.card, { borderColor: colors.borderColor, backgroundColor: colors.cardDark }]} testID="coach-explanation">
           <Text style={[styles.kicker, { color: colors.textMuted }]}>The question</Text>
           <Text style={[styles.question, { color: colors.textMain }]}>{c.explain.question.text}</Text>
-          <Text style={[styles.muted, { color: colors.textMuted }]}>Your answer: {c.explain.question.yourAnswer || '—'} · Correct answer: {c.explain.question.correctAnswer}</Text>
+          <View style={styles.answerRow}>
+            {!!c.explain.question.yourAnswer && <Text style={[styles.answer, { color: colors.accentRed, backgroundColor: colors.accentRed + '15' }]}>Your answer: {c.explain.question.yourAnswer}</Text>}
+            {!!c.explain.question.correctAnswer && <Text style={[styles.answer, { color: colors.accentGreen, backgroundColor: colors.accentGreen + '15' }]}>Correct answer: {c.explain.question.correctAnswer}</Text>}
+          </View>
           <View style={[styles.divider, { backgroundColor: colors.borderColor }]} />
           <Text style={[styles.kicker, { color: colors.textMuted }]}>{c.explain.explanation.methodName || 'Explanation'}</Text>
           <Text style={[styles.subTitle, { color: colors.textMain }]}>{c.explain.explanation.title}</Text>
@@ -192,14 +195,17 @@ export default function QuestionCoach({ attemptId, questionIndex, mode, lessonTe
       )}
 
       {/* Natural messages: "explain it another way", "give me another question"… */}
-      <View style={[styles.msgRow, { borderColor: colors.borderColor }]}>
-        <TextInput value={message} onChangeText={setMessage} placeholder={c.mode === 'explain' ? 'Ask Aivorah (e.g. “explain it another way”)' : 'Ask Aivorah (e.g. “give me another question”)'}
-          placeholderTextColor={colors.textMuted} style={[styles.msgInput, { color: colors.textMain }]} maxLength={300}
-          accessibilityLabel="Message Aivorah" testID="coach-message" />
-        <TouchableOpacity onPress={async () => { const t = message.trim(); if (!t) return; setMessage(''); await c.sendMessage(t); }}
-          accessibilityRole="button" accessibilityLabel="Send" disabled={!message.trim() || !!c.busy} testID="coach-message-send">
-          <Feather name="send" size={18} color={message.trim() ? gold : colors.textMuted} />
-        </TouchableOpacity>
+      <View style={{ gap: 5 }}>
+        <Text style={[styles.kicker, { color: colors.textMuted }]}>Help with this question</Text>
+        <View style={[styles.msgRow, { borderColor: colors.borderColor }]}>
+          <TextInput value={message} onChangeText={setMessage} placeholder={c.mode === 'explain' ? 'e.g. Explain it another way' : 'e.g. Give me another question'}
+            placeholderTextColor={colors.textMuted} style={[styles.msgInput, { color: colors.textMain }]} maxLength={300}
+            accessibilityLabel="Ask for help with this question" testID="coach-message" />
+          <TouchableOpacity onPress={async () => { const t = message.trim(); if (!t) return; setMessage(''); await c.sendMessage(t); }}
+            accessibilityRole="button" accessibilityLabel="Send" disabled={!message.trim() || !!c.busy} testID="coach-message-send">
+            <Feather name="send" size={18} color={message.trim() ? gold : colors.textMuted} />
+          </TouchableOpacity>
+        </View>
       </View>
       {!!c.reply && <Text style={[styles.muted, { color: colors.textMuted }]} testID="coach-reply">{c.reply}</Text>}
       {!!c.busy && (!!c.explain || !!c.practice) && <ActivityIndicator color={gold} />}
@@ -214,9 +220,9 @@ export default function QuestionCoach({ attemptId, questionIndex, mode, lessonTe
 }
 
 const styles = StyleSheet.create({
-  wrap: { gap: 12, width: '100%', maxWidth: 760 },
+  wrap: { gap: 12, width: '100%' },
   center: { alignItems: 'center', gap: 8, padding: 20 },
-  head: { borderWidth: 1, borderRadius: 12, padding: 12, gap: 2 },
+  head: { gap: 4 },
   kicker: { fontSize: 12.5, fontWeight: '700' },
   title: { fontSize: 18, fontWeight: '800' },
   subTitle: { fontSize: 16, fontWeight: '800' },
@@ -225,6 +231,8 @@ const styles = StyleSheet.create({
   question: { fontSize: 17, fontWeight: '800', lineHeight: 24 },
   body: { fontSize: 15, lineHeight: 22 },
   muted: { fontSize: 13, lineHeight: 19 },
+  answerRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  answer: { flexGrow: 1, flexBasis: 180, fontSize: 13, lineHeight: 19, fontWeight: '700', padding: 8, borderRadius: 8 },
   table: { borderWidth: 1, borderRadius: 10, overflow: 'hidden' },
   tableRow: { flexDirection: 'row' },
   tableCell: { flex: 1, padding: 8, fontSize: 13.5, lineHeight: 19 },

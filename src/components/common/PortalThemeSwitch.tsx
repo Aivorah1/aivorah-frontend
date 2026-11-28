@@ -8,9 +8,10 @@ import { Platform, Pressable, View } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import Icon from './Icon';
 
-export default function PortalThemeSwitch({ size = 'md' }: { size?: 'md' | 'lg' }) {
+export default function PortalThemeSwitch({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
   const { isDark, setThemeMode, colors } = useTheme();
-  const w = size === 'lg' ? 96 : 80, h = size === 'lg' ? 48 : 40;
+  const w = size === 'lg' ? 96 : size === 'sm' ? 64 : 80;
+  const h = size === 'lg' ? 48 : size === 'sm' ? 34 : 40;
   const knob = (w - 8) / 2;
   const web = Platform.OS === 'web';
   return (

@@ -3,10 +3,10 @@ import { spacing, radius } from '../../../theme';
 import type { AppColors } from '../../../theme';
 
 
-export const makeStyles = (c: AppColors) => StyleSheet.create({
+export const makeStyles = (c: AppColors, stacked = false, mobile = false) => StyleSheet.create({
   screen:   { flex: 1, backgroundColor: c.bgDark },
   scroll:   { flex: 1 },
-  content:  { padding: spacing.xl, paddingBottom: 48, gap: spacing.xl, maxWidth: 1280, width: '100%', alignSelf: 'center' },
+  content:  { padding: mobile ? 14 : spacing.xl, paddingBottom: 48, gap: mobile ? 14 : spacing.xl, maxWidth: 1280, width: '100%', alignSelf: 'center' },
 
   heroBanner: {
     flexDirection: 'row', flexWrap: 'wrap', overflow: 'hidden',
@@ -34,7 +34,7 @@ export const makeStyles = (c: AppColors) => StyleSheet.create({
   heroSub: { fontSize: 15, color: c.textMuted, lineHeight: 24, maxWidth: 720 },
   statRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md, marginTop: spacing.sm },
   statCard: {
-    minWidth: 150, flexDirection: 'row', alignItems: 'center', gap: spacing.md,
+    minWidth: 150, flexDirection: 'row', alignItems: 'center', gap: mobile ? 8 : spacing.md,
     backgroundColor: c.bgDark, borderWidth: 1, borderColor: c.borderColor,
     borderRadius: radius.md, padding: spacing.lg,
   },
@@ -55,20 +55,20 @@ export const makeStyles = (c: AppColors) => StyleSheet.create({
   videoSection: {
     backgroundColor: c.cardDark,
     borderWidth: 1, borderColor: c.borderColor,
-    borderRadius: radius.xl, padding: spacing.xxxl, gap: spacing.xl,
+    borderRadius: radius.xl, padding: mobile ? 12 : spacing.xxxl, gap: mobile ? 12 : spacing.xl,
   },
   videoGridReverse: { flexDirection: 'row-reverse' },
-  videoIntro: { alignItems: 'center', gap: 8, alignSelf: 'center', maxWidth: 760 },
+  videoIntro: { minWidth: 0, width: mobile ? '100%' : undefined, alignItems: 'center', gap: 8, alignSelf: 'center', maxWidth: 760 },
   videoEyebrow: {
     fontSize: 12, fontWeight: '800', color: c.accentYellow,
     textTransform: 'uppercase', letterSpacing: 0.8,
   },
-  videoTitle: { fontSize: 28, fontWeight: '800', color: c.textHeading, textAlign: 'center', lineHeight: 34 },
-  videoDesc: { fontSize: 14, color: c.textMuted, textAlign: 'center', lineHeight: 22 },
+  videoTitle: { maxWidth: '100%', fontSize: mobile ? 21 : 28, fontWeight: '800', color: c.textHeading, textAlign: 'center', lineHeight: mobile ? 27 : 34 },
+  videoDesc: { maxWidth: '100%', fontSize: 14, color: c.textMuted, textAlign: 'center', lineHeight: 22 },
   videoGrid: { flexDirection: 'row', gap: spacing.xl, alignItems: 'stretch' },
-  videoGridStack: { flexDirection: 'column' },
+  videoGridStack: { flexDirection: 'column', gap: mobile ? 12 : spacing.xl },
   videoPlayerPanel: {
-    flex: 1.25, minWidth: 280,
+    flex: stacked ? undefined : 1.25, minWidth: stacked ? 0 : 280, width: stacked ? '100%' : undefined,
     borderRadius: radius.lg, overflow: 'hidden',
     backgroundColor: '#050505',
     borderWidth: 1, borderColor: c.borderColor,
@@ -79,15 +79,15 @@ export const makeStyles = (c: AppColors) => StyleSheet.create({
   },
   nativeVideoText: { color: '#fff', fontSize: 13, fontWeight: '700' },
   videoSidePanel: {
-    flex: 0.85, minWidth: 270,
+    flex: stacked ? undefined : 0.85, minWidth: stacked ? 0 : 270, width: stacked ? '100%' : undefined,
     backgroundColor: c.bgDark,
     borderWidth: 1, borderColor: c.borderColor,
-    borderRadius: radius.lg, padding: spacing.xl, gap: spacing.lg,
+    borderRadius: radius.lg, padding: mobile ? 12 : spacing.xl, gap: mobile ? 12 : spacing.lg,
   },
   panelTitle: { fontSize: 16, fontWeight: '800', color: c.textHeading },
   outcomeRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md },
   outcomeIcon: {
-    width: 40, height: 40, borderRadius: 20,
+    width: 40, height: 40, borderRadius: 20, flexShrink: 0,
     backgroundColor: c.accentYellow + '12',
     borderWidth: 1, borderColor: c.accentYellow + '28',
     alignItems: 'center', justifyContent: 'center',
@@ -98,19 +98,19 @@ export const makeStyles = (c: AppColors) => StyleSheet.create({
   overviewGrid: { flexDirection: 'row', gap: spacing.xl, alignItems: 'flex-start' },
   overviewGridStack: { flexDirection: 'column' },
   coursePanel: {
-    flex: 1.6, width: '100%',
+    flex: stacked ? undefined : 1.6, minWidth: 0, width: '100%',
     backgroundColor: c.cardDark,
     borderWidth: 1, borderColor: c.borderColor,
-    borderRadius: radius.xl, padding: spacing.xl,
+    borderRadius: radius.xl, padding: mobile ? 12 : spacing.xl,
   },
   sectionHead: { marginBottom: spacing.lg },
   sectionTitle: { fontSize: 20, fontWeight: '800', color: c.textHeading },
   sectionSub: { fontSize: 12, color: c.textMuted, marginTop: 6 },
   pathList: { gap: spacing.sm },
   pathCard: {
-    flexDirection: 'row', alignItems: 'center', gap: spacing.md,
+    flexDirection: 'row', alignItems: 'center', gap: mobile ? 8 : spacing.md,
     backgroundColor: c.bgDark, borderWidth: 1, borderColor: c.borderColor,
-    borderRadius: radius.md, padding: spacing.lg,
+    borderRadius: radius.md, padding: mobile ? 9 : spacing.lg,
   },
   pathCardActive: {
     borderColor: c.accentYellow + '45',
@@ -124,11 +124,11 @@ export const makeStyles = (c: AppColors) => StyleSheet.create({
   pathStepActive: { backgroundColor: c.accentYellow },
   pathStepText: { fontSize: 13, fontWeight: '800', color: c.textMuted },
   pathStepTextActive: { color: c.cardDark },
-  pathInfo: { flex: 1, gap: 4 },
+  pathInfo: { flex: 1, minWidth: 0, gap: 4 },
   pathLabel: { fontSize: 14, fontWeight: '800', color: c.textHeading },
   pathDesc: { fontSize: 12.5, color: c.textMuted, lineHeight: 18 },
   pathMeta: { fontSize: 11, color: c.accentYellow, fontWeight: '800', marginTop: 2 },
-  pathAction: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  pathAction: { flexDirection: 'row', alignItems: 'center', flexShrink: 0, gap: mobile ? 2 : spacing.sm },
   sideColumn: { flex: 0.75, width: '100%', gap: spacing.md, minWidth: 280 },
   progressPanel: {
     backgroundColor: c.cardDark,
@@ -198,7 +198,7 @@ export const makeStyles = (c: AppColors) => StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   lessonNumText: { fontSize: 12, fontWeight: '700', color: c.accentYellow },
-  lessonTitle: { flex: 1, fontSize: 15, fontWeight: '700', color: c.textHeading },
+  lessonTitle: { flex: 1, minWidth: 0, fontSize: 15, fontWeight: '700', color: c.textHeading },
   minPill: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   minText: { fontSize: 11, color: c.textDim },
   videoPlaceholder: {

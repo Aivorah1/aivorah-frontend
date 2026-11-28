@@ -29,15 +29,15 @@ export function StatCard({ icon, tint, value, label, styles }: {
       </View>
       <View style={{ flex: 1 }}>
         <Text style={styles.statValue} numberOfLines={1}>{value}</Text>
-        <Text style={styles.statLabel} numberOfLines={1}>{label}</Text>
+        <Text style={styles.statLabel} numberOfLines={2}>{label}</Text>
       </View>
     </View>
   );
 }
 
-export function PodiumCard({ entry, place, colors, styles, isDark, elevated }: {
+export function PodiumCard({ entry, place, colors, styles, isDark, elevated, compact }: {
   entry: LeaderEntry; place: number; colors: AppColors;
-  styles: ReturnType<typeof makeStyles>; isDark: boolean; elevated?: boolean;
+  styles: ReturnType<typeof makeStyles>; isDark: boolean; elevated?: boolean; compact?: boolean;
 }) {
   const medal = MEDAL_COLORS[place - 1];
   const body = (
@@ -49,8 +49,8 @@ export function PodiumCard({ entry, place, colors, styles, isDark, elevated }: {
         <Text style={[styles.podiumInitials, { color: GOLD }]}>{initials(entry.name)}</Text>
       </View>
       <Text style={styles.podiumName} numberOfLines={1}>{entry.name}</Text>
-      <Text style={styles.podiumGrade}>{entry.grade}</Text>
-      <Text style={[styles.podiumXP, elevated && { color: medal, fontSize: 22 }]}>
+      <Text style={styles.podiumGrade} numberOfLines={1}>{entry.grade}</Text>
+      <Text style={[styles.podiumXP, elevated && { color: medal, fontSize: compact ? 17 : 22 }]}>
         {entry.score.toLocaleString()} <Text style={styles.podiumXPUnit}>XP</Text>
       </Text>
     </>

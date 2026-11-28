@@ -7,8 +7,8 @@ import type { LayoutChangeEvent, ScrollView } from 'react-native';
 // its y is where the grid starts on the page.
 // `headerHeight`: the calendar's day-header row above the "All day" row. With `pinnedHeader` those rows stay at the
 // top of the view, so the hours scroll up to just under them.
-export function useScheduleScroll({ ready, allDayHeight, hourHeight, headerHeight = 62, startHour = 0, pinnedHeader = false }: {
-  ready: boolean; allDayHeight: number; hourHeight: number; headerHeight?: number; startHour?: number; pinnedHeader?: boolean;
+export function useScheduleScroll({ ready, allDayHeight, hourHeight, headerHeight = 62, startHour = 0, pinnedHeader = false, openAtCurrentTime = true }: {
+  ready: boolean; allDayHeight: number; hourHeight: number; headerHeight?: number; startHour?: number; pinnedHeader?: boolean; openAtCurrentTime?: boolean;
 }) {
   const scrollRef = useRef<ScrollView>(null);
   const gridTop = useRef<number | null>(null);
@@ -21,7 +21,7 @@ export function useScheduleScroll({ ready, allDayHeight, hourHeight, headerHeigh
   }
 
   function openAtNow() {
-    if (opened.current || !ready || gridTop.current == null) return;
+    if (!openAtCurrentTime || opened.current || !ready || gridTop.current == null) return;
     opened.current = true;
     setTimeout(() => scrollToNow(false), 0);
   }
@@ -31,7 +31,7 @@ export function useScheduleScroll({ ready, allDayHeight, hourHeight, headerHeigh
     openAtNow();
   }
 
-  useEffect(openAtNow, [ready]);
+  useEffect(openAtNow, [ready, openAtCurrentTime]);
 
   // An hour before now, so the current time has a little context above it (opening, and the Today button).
   function scrollToNow(animated = true) {

@@ -1,6 +1,5 @@
 import { SUBJECT_CONFIG, SUBJECT_ACCENT_COLOR, ACHIEVEMENT_DEFS } from '../constants';
-import type { SubjectStat, Achievement } from '../types';
-import type { BarTopic } from '../../utils/performanceStats';
+import type { Achievement } from '../types';
 
 export function subjectColor(s: string): string {
   return SUBJECT_CONFIG[s]?.color ?? SUBJECT_ACCENT_COLOR;
@@ -8,29 +7,6 @@ export function subjectColor(s: string): string {
 
 export function subjectIcon(s: string) {
   return SUBJECT_CONFIG[s]?.icon ?? 'book-open';
-}
-
-export function computeOverallPct(completedCount: number, totalTopics: number): number {
-  return totalTopics > 0 ? Math.min(100, Math.round((completedCount / totalTopics) * 100)) : 0;
-}
-
-// Per-subject chapters mastered, from the same chapter list the Dashboard uses.
-export function computeSubjectStats(chapters: BarTopic[] | null): SubjectStat[] {
-  if (!chapters) return [];
-  const result: { name: string; total: number; done: number }[] = [];
-  for (const ch of chapters) {
-    const existing = result.find(r => r.name === ch.subject);
-    if (existing) { existing.total += 1; existing.done += ch.mastered ? 1 : 0; }
-    else result.push({ name: ch.subject, total: 1, done: ch.mastered ? 1 : 0 });
-  }
-  return result.map(r => ({
-    name: r.name,
-    total: r.total,
-    done: r.done,
-    pct: r.total > 0 ? Math.round((r.done / r.total) * 100) : 0,
-    color: subjectColor(r.name),
-    icon: subjectIcon(r.name),
-  }));
 }
 
 export function computeMaxMinutes(weeklyDays: { studyMinutes: number }[]): number {

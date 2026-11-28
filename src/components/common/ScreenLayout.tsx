@@ -1,8 +1,9 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet, Text, ScrollView, type ScrollViewProps, type ViewProps } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useResponsive } from '../../hooks/useResponsive';
 import Sidebar from './Sidebar';
+import Header from './Header';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import TeacherAIPanel from './TeacherAIPanel';
@@ -47,11 +48,66 @@ const ANNOUNCEMENTS_ROUTE: Record<string, string> = {
 };
 const ANNOUNCEMENT_PAGES = new Set([...Object.values(ANNOUNCEMENTS_ROUTE), 'AnnouncementManager']);
 
+function isVerticalPageScroll(node: React.ReactNode): node is React.ReactElement<ScrollViewProps> {
+  return React.isValidElement<ScrollViewProps>(node)
+    && node.type === ScrollView
+    && !node.props.horizontal
+    && node.props.scrollEnabled !== false
+    && !node.props.stickyHeaderIndices?.length;
+}
+
+function asPixels(value: unknown) {
+  return typeof value === 'number' ? value : 0;
+}
+
+// Standard screens pair a Header with a vertical ScrollView. Keep the navigation
+// outside that scroller and prepend the mobile title alongside its page tools.
+function placeMobilePageTitles(children: React.ReactNode): React.ReactNode {
+  const items = React.Children.toArray(children);
+  const headerIndex = items.findIndex(item => React.isValidElement(item) && item.type === Header);
+  const header = items[headerIndex];
+  if (React.isValidElement<React.ComponentProps<typeof Header>>(header) && !header.props.renderContent) {
+    let scrollIndex = headerIndex + 1;
+    let scroll = items[scrollIndex];
+    while (React.isValidElement<ViewProps>(scroll) && scroll.type === View
+      && StyleSheet.flatten(scroll.props.style)?.position !== 'absolute') {
+      scrollIndex += 1;
+      scroll = items[scrollIndex];
+    }
+    if (isVerticalPageScroll(scroll)) {
+      const tools = items.slice(headerIndex + 1, scrollIndex);
+      const padding = StyleSheet.flatten(scroll.props.contentContainerStyle) ?? {};
+      const insetX = padding.paddingHorizontal ?? padding.padding;
+      const top = asPixels(padding.paddingTop ?? padding.paddingVertical ?? padding.padding);
+      const left = asPixels(padding.paddingLeft ?? insetX);
+      const right = asPixels(padding.paddingRight ?? insetX);
+      const gap = asPixels(padding.rowGap ?? padding.gap);
+      items.splice(headerIndex, scrollIndex - headerIndex + 1, React.cloneElement(header, {
+        renderContent: mobileTitle => React.cloneElement(scroll, undefined,
+          <View key="mobile-page-title" style={{
+            alignSelf: 'stretch', marginTop: -top, marginLeft: -left, marginRight: -right,
+            paddingHorizontal: 16, marginBottom: Math.max(0, 12 - gap),
+          }}>
+            {mobileTitle}
+          </View>,
+          ...tools,
+          ...React.Children.toArray(scroll.props.children),
+        ),
+      }));
+      return items;
+    }
+  }
+
+  return items.map(item => React.isValidElement<ViewProps>(item) && (item.type === View || item.type === React.Fragment)
+    ? React.cloneElement(item, undefined, placeMobilePageTitles(item.props.children))
+    : item);
+}
+
 export default function ScreenLayout({ children, hideAIPanel }: ScreenLayoutProps) {
   const { showPermanentSidebar } = useResponsive();
   const navigation = useNavigation<any>();
   const route = useRoute();
-  const { colors } = useTheme();
+  const { colors, portal } = useTheme();
   const { user } = useAuth();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const isTeacher = user?.role === 'teacher' || user?.role === 'super_admin';
@@ -212,7 +268,7 @@ export default function ScreenLayout({ children, hideAIPanel }: ScreenLayoutProp
           onViewAll={() => navigation.navigate(announcementsRoute)}
         />
       )}
-      {isStudent && !controlsLoaded ? null : children}
+      {isStudent && !controlsLoaded ? null : !showPermanentSidebar && portal ? placeMobilePageTitles(children) : children}
     </View>
   );
 

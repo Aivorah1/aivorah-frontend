@@ -8,7 +8,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import ActivityIndicator from '../../../../../components/common/AivorahLoader';
-import { Feather } from '@expo/vector-icons';
 import type { AppColors } from '../../../../../theme';
 import { followupApi } from '../services/practiceFollowupApi';
 import QuestionCoach from './QuestionCoach';
@@ -67,11 +66,7 @@ export default function TopicPractice({ request, topicName, subject, topicId, le
     return <View style={styles.row} testID="topic-practice-loading"><ActivityIndicator size="small" color={colors.accentYellow} /><Text style={[styles.muted, { color: colors.textMuted }]}>Checking your practice…</Text></View>;
   }
   return (
-    <View style={[styles.card, { borderColor: colors.borderColor, backgroundColor: colors.cardDark }]} testID="topic-practice-none">
-      <View style={styles.row}>
-        <Feather name="target" size={16} color={colors.accentYellow} />
-        <Text style={[styles.title, { color: colors.textMain }]}>Practise with Aivorah</Text>
-      </View>
+    <View style={styles.summary} testID="topic-practice-none">
       <Text style={[styles.muted, { color: colors.textMuted }]}>
         {found.error
           ? found.error
@@ -90,9 +85,8 @@ export default function TopicPractice({ request, topicName, subject, topicId, le
 }
 
 const styles = StyleSheet.create({
-  card: { borderWidth: 1, borderRadius: 14, padding: 14, gap: 8 },
+  summary: { gap: 8 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  title: { fontSize: 15, fontWeight: '800' },
   muted: { fontSize: 13.5, lineHeight: 20 },
   link: { fontSize: 13.5, fontWeight: '700' },
 });

@@ -19,6 +19,7 @@ type ResumeRef = { subject: string; chapter: { chapterNo: number | string; title
 export interface DashboardOverviewProps {
   colors: AppColors;
   isDark: boolean;
+  compactTop?: boolean;
   goals: Goal[];
   /** One line about chapter mastery, e.g. "2 of 5 chapters mastered. Keep going!" */
   masteryLine: string;
@@ -38,7 +39,7 @@ const widthTransition = Platform.OS === 'web'
   : null;
 
 export function DashboardOverview({
-  colors: c, isDark, goals, masteryLine, stats, levelProgress, maxLevel, weekXP, resume, cta,
+  colors: c, isDark, compactTop = false, goals, masteryLine, stats, levelProgress, maxLevel, weekXP, resume, cta,
 }: DashboardOverviewProps) {
   const { width } = useWindowDimensions();
   const narrow = width < 760;   // cards stack
@@ -62,7 +63,7 @@ export function DashboardOverview({
   const small = { fontSize: 13.5, lineHeight: 19, color: c.textMuted };
 
   return (
-    <View style={{ position: 'relative', paddingTop: narrow ? 30 : 38 }} testID="dashboard-overview">
+    <View style={{ position: 'relative', paddingTop: compactTop ? 6 : narrow ? 30 : 38 }} testID="dashboard-overview">
       <WelcomeShapes isDark={isDark} />
       <View style={{ flexDirection: narrow ? 'column' : 'row', flexWrap: mid ? 'wrap' : 'nowrap', gap: 16, alignItems: 'stretch' }}>
 

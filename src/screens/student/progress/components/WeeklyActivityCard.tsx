@@ -14,12 +14,18 @@ export function WeeklyActivityCard({
   weeklyDays: DayActivity[];
   maxMinutes: number;
 }) {
+  const today = new Date().toISOString().slice(0, 10);
+  const totals = weeklyDays.reduce((sum, day) => ({
+    minutes: sum.minutes + day.studyMinutes,
+    xp: sum.xp + day.xp,
+    topics: sum.topics + day.topicsCompleted,
+  }), { minutes: 0, xp: 0, topics: 0 });
   return (
     <View style={[styles.glassCard, { marginBottom: spacing.xxl }]}>
       <View style={styles.cardHeader}>
         <Text style={styles.cardTitle}>Weekly Activity</Text>
       </View>
-      {weeklyDays.every(d => d.studyMinutes === 0 && d.xp === 0) ? (
+      {weeklyDays.every(d => d.studyMinutes === 0 && d.xp === 0 && d.topicsCompleted === 0) ? (
         <View style={styles.emptyBar}>
           <Feather name="bar-chart-2" size={28} color={colors.textDim} />
           <Text style={styles.emptyText}>No activity yet this week.{'\n'}Complete lessons to see your chart!</Text>
@@ -28,7 +34,7 @@ export function WeeklyActivityCard({
         <View style={styles.barChart}>
           {weeklyDays.map((d) => {
             const heightPct = maxMinutes > 0 ? (d.studyMinutes / maxMinutes) * 100 : 0;
-            const isToday = d.date === new Date().toISOString().split('T')[0];
+            const isToday = d.date === today;
             const active = d.studyMinutes > 0;
             return (
               <View key={d.date} style={styles.barItem}>
@@ -53,9 +59,9 @@ export function WeeklyActivityCard({
       {/* Weekly totals */}
       <View style={styles.weekTotals}>
         {[
-          { label: 'Total Study', val: formatStudyTime(weeklyDays.reduce((s, d) => s + d.studyMinutes, 0)), color: colors.primary },
-          { label: 'XP Earned',   val: `+${weeklyDays.reduce((s, d) => s + d.xp, 0)}`,                      color: colors.accentOrange },
-          { label: 'Topics',       val: String(weeklyDays.reduce((s, d) => s + d.topicsCompleted, 0)),       color: colors.accentOrange },
+          { label: 'Total Study', val: formatStudyTime(totals.minutes), color: colors.primary },
+          { label: 'XP Earned', val: `+${totals.xp}`, color: colors.accentOrange },
+          { label: 'Topics This Week', val: String(totals.topics), color: colors.accentOrange },
         ].map(s => (
           <View key={s.label} style={styles.weekTotal}>
             <Text style={[styles.weekTotalVal, { color: s.color }]}>{s.val}</Text>

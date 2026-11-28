@@ -27,13 +27,13 @@ describe('StudentDataContext — XP consistency across a failed sync', () => {
     const fetchMock = jest.fn((url: string, opts?: any) => {
       // Initial GET on login: server already has 100 XP.
       if (!opts || opts.method === undefined) {
-        return Promise.resolve({ ok: true, json: async () => ({ xpPoints: 100 }) } as any);
+        return Promise.resolve({ ok: true, json: async () => ({ xpPoints: 100, completedTopics: [] }) } as any);
       }
       // The addXP sync PUT genuinely fails (network blip) — server XP stays 100.
       if (opts.method === 'PUT') {
         return Promise.reject(new Error('network error'));
       }
-      return Promise.resolve({ ok: true, json: async () => ({ xpPoints: 100 }) } as any);
+      return Promise.resolve({ ok: true, json: async () => ({ xpPoints: 100, completedTopics: [] }) } as any);
     });
     global.fetch = fetchMock as any;
 

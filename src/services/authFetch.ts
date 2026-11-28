@@ -1,13 +1,16 @@
 // Adds the signed-in user's Firebase ID token to every request to our own services.
 // Never blocks a request: no user, a slow Firebase restore or a token error just sends it unchanged.
 
+import { LEGACY_ACCOUNT_BACKEND } from '../config/localServices';
+
 const OWN_SERVICE = /^(https:\/\/aivorah-[a-z0-9-]+\.onrender\.com|http:\/\/localhost:\d+)(\/|$)/i;
 const RESTORE_WAIT_MS = 3000;
 
 type TokenSource = { currentUser: { getIdToken(): Promise<string> } | null; authStateReady?: () => Promise<void> };
 
 export function isOwnServiceUrl(url: string): boolean {
-  return OWN_SERVICE.test(url);
+  return OWN_SERVICE.test(url) ||
+    (LEGACY_ACCOUNT_BACKEND !== undefined && url.startsWith(`${LEGACY_ACCOUNT_BACKEND}/user/`));
 }
 
 async function currentToken(auth: TokenSource): Promise<string | null> {

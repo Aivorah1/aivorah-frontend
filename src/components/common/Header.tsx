@@ -47,6 +47,11 @@ interface HeaderProps {
   onSearchChange?: (text: string) => void;
   onNotificationPress?: () => void;
   notificationCount?: number;
+  mobileNavigationOnly?: boolean;
+  /** @deprecated Mobile page titles are compact by default. */
+  compactMobileTitle?: boolean;
+  /** Lets a screen place its mobile title in its scroll content. */
+  renderContent?: (mobileTitle?: React.ReactNode) => React.ReactNode;
   /** Extra header actions, shown before the notification bell (Website Redesign, Phase 4). */
   actions?: React.ReactNode;
 }
@@ -62,9 +67,11 @@ export default function Header({
   onSearchChange,
   onNotificationPress,
   notificationCount = 0,
+  mobileNavigationOnly = false,
+  renderContent,
   actions,
 }: HeaderProps) {
-  const { isMobile } = useResponsive();
+  const { isMobile, width } = useResponsive();
   const { colors, portal } = useTheme();
   // Redesigned portals (student, teacher) share these nav/header styles.
   const isStudentPortal = !!portal; // student, teacher or parent
@@ -73,9 +80,11 @@ export default function Header({
   // the page title sits on its own row below.
   const isStudentRole = !!portal; // every signed-in portal is redesigned (Phases 3–7)
   const studentMobile = isStudentRole && isMobile;
+  const narrowNav = studentMobile && width < 400;
   const { user, updateUser, logout } = useAuth();
   const navigation = useNavigation<any>();
-  const styles = useMemo(() => makeStyles(colors, isStudentPortal, isStudentRole, studentMobile), [colors, isStudentPortal, isStudentRole, studentMobile]);
+  const styles = useMemo(() => makeStyles(colors, isStudentPortal, isStudentRole, studentMobile, narrowNav), [colors, isStudentPortal, isStudentRole, studentMobile, narrowNav]);
+  const menuPress = showBack && onMenuPress ? onMenuPress : navigation.toggleDrawer ?? onMenuPress;
 
   function handleBack() {
     if (onBack) {
@@ -235,7 +244,7 @@ const [editingName, setEditingName] = useState(false);
   }
 
   const leftEl = (
-        <View style={styles.left}>
+        <View style={[styles.left, studentMobile && styles.mobileTitleLeft]}>
           {showBack ? (
             <TouchableOpacity style={styles.menuBtn} onPress={handleBack} accessibilityRole="button" accessibilityLabel="Go back">
               {isStudentRole
@@ -243,13 +252,13 @@ const [editingName, setEditingName] = useState(false);
                 : <Feather name="arrow-left" size={20} color={colors.textMuted} />}
             </TouchableOpacity>
           ) : isMobile && !isStudentRole && (
-            <TouchableOpacity style={styles.menuBtn} onPress={onMenuPress} testID="header-menu-button">
+            <TouchableOpacity style={styles.menuBtn} onPress={onMenuPress ?? navigation.toggleDrawer} testID="header-menu-button" accessibilityRole="button" accessibilityLabel="Open menu">
               <Feather name="menu" size={20} color={colors.textMuted} />
             </TouchableOpacity>
           )}
           <View style={[{ flexDirection: 'column' }, isStudentRole && { flexShrink: 1, minWidth: 0 }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-              <Text style={styles.title}>{title}</Text>
+              <Text style={[styles.title, studentMobile && styles.mobilePageTitle]}>{title}</Text>
               {user?.role && (
                 <View style={[
                   styles.roleBadge,
@@ -270,7 +279,7 @@ const [editingName, setEditingName] = useState(false);
                 </View>
               )}
             </View>
-            {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+            {subtitle ? <Text style={[styles.subtitle, studentMobile && styles.mobilePageSubtitle]}>{subtitle}</Text> : null}
           </View>
         </View>
   );
@@ -544,12 +553,12 @@ const [editingName, setEditingName] = useState(false);
             activeOpacity={0.7}
             testID="header-profile-button"
           >
-            {renderAvatarCircle(studentMobile ? 32 : 36)}
+            {renderAvatarCircle(narrowNav ? 28 : studentMobile ? 32 : 36)}
           </TouchableOpacity>
 
-          {isStudentRole && <PortalThemeSwitch />}
+          {isStudentRole && <PortalThemeSwitch size={narrowNav ? 'sm' : 'md'} />}
           {studentMobile && (
-            <TouchableOpacity style={styles.menuBtn} onPress={onMenuPress} testID="header-menu-button" accessibilityRole="button" accessibilityLabel="Open menu">
+            <TouchableOpacity style={styles.menuBtn} onPress={menuPress} testID="header-menu-button" accessibilityRole="button" accessibilityLabel="Toggle menu">
               <Icon name="menu" size={24} color={colors.textHeading} />
             </TouchableOpacity>
           )}
@@ -721,36 +730,40 @@ const [editingName, setEditingName] = useState(false);
   );
 
   if (studentMobile) {
-    return (
-      <View style={styles.mobileWrap}>
-        <View style={styles.mobileTop}>
-          <Text style={styles.wordmark} accessibilityRole="header">Aivorah</Text>
-          {rightEl}
-        </View>
-        {/* Page actions sit beside the title on phones, so the top row keeps
-            its menu button (Website Redesign, Phase 4). */}
-        {actions ? (
-          <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10 }}>
-            <View style={{ flex: 1, minWidth: 0 }}>{leftEl}</View>
-            {actions}
-          </View>
-        ) : leftEl}
+    const pageTitle = (
+      <View style={[styles.mobilePageHeader, !renderContent && styles.mobilePageHeaderInset]}>
+        {leftEl}
       </View>
+    );
+    return (
+      <>
+        <View style={styles.mobileWrap}>
+          <View style={styles.mobileTop}>
+            <Text style={styles.wordmark} accessibilityRole="header">Aivorah</Text>
+            {rightEl}
+          </View>
+        </View>
+        {!renderContent && !mobileNavigationOnly && pageTitle}
+        {renderContent?.(mobileNavigationOnly ? undefined : pageTitle)}
+      </>
     );
   }
   return (
-    <View style={styles.container}>
-      {leftEl}
-      {rightEl}
-    </View>
+    <>
+      <View style={styles.container}>
+        {leftEl}
+        {rightEl}
+      </View>
+      {renderContent?.()}
+    </>
   );
 }
 
-const makeStyles = (c: AppColors, s = false, st = false, sm = false) => StyleSheet.create({
-  mobileWrap: { backgroundColor: c.bgDark, borderBottomWidth: 1, borderBottomColor: c.borderColor, paddingHorizontal: 16, paddingTop: 10, paddingBottom: 12, gap: 10 },
-  mobileTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
+const makeStyles = (c: AppColors, s = false, st = false, sm = false, narrowNav = false) => StyleSheet.create({
+  mobileWrap: { backgroundColor: c.bgDark, borderBottomWidth: 1, borderBottomColor: c.borderColor, paddingHorizontal: narrowNav ? 10 : 16, paddingTop: 10, paddingBottom: 12 },
+  mobileTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: narrowNav ? 4 : 8 },
   wordmark: {
-    fontSize: 25, fontWeight: '600', color: c.textHeading, letterSpacing: -0.4, flexShrink: 0,
+    fontSize: narrowNav ? 22 : 25, fontWeight: '600', color: c.textHeading, letterSpacing: -0.4, flexShrink: narrowNav ? 1 : 0,
     fontFamily: Platform.OS === 'web' ? '"Fraunces", Georgia, serif' : undefined,
   },
   container: {
@@ -766,6 +779,11 @@ const makeStyles = (c: AppColors, s = false, st = false, sm = false) => StyleShe
     ...(st ? { flexWrap: 'wrap', rowGap: 10, columnGap: 16 } : null),
   },
   left: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, ...(st ? { flexShrink: 1, flexGrow: 1, flexBasis: 360, minWidth: 0 } : null) },
+  mobilePageHeader: { paddingVertical: 10 },
+  mobilePageHeaderInset: { paddingHorizontal: 16 },
+  mobileTitleLeft: { flexBasis: 'auto', flexGrow: 0 },
+  mobilePageTitle: { fontSize: 20, lineHeight: 25, flexShrink: 1 },
+  mobilePageSubtitle: { fontSize: 13, lineHeight: 17, marginTop: 2 },
   menuBtn: {
     width: s ? 44 : 36, height: s ? 44 : 36, borderRadius: s ? 12 : radius.sm,
     backgroundColor: sm ? 'transparent' : c.cardDark, alignItems: 'center', justifyContent: 'center',
@@ -820,7 +838,7 @@ const makeStyles = (c: AppColors, s = false, st = false, sm = false) => StyleShe
   roleBadgeTextAdmin: {
     color: c.accentYellow,
   },
-  right: { flexDirection: 'row', alignItems: 'center', gap: sm ? 6 : spacing.md, ...(st ? { flexShrink: 0, gap: sm ? 6 : 10 } : null) },
+  right: { flexDirection: 'row', alignItems: 'center', gap: st ? narrowNav ? 4 : sm ? 6 : 10 : spacing.md, ...(st ? { flexShrink: 0 } : null) },
   searchWrapper: {
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: c.cardDark, borderWidth: 1, borderColor: c.borderColor,
@@ -829,7 +847,7 @@ const makeStyles = (c: AppColors, s = false, st = false, sm = false) => StyleShe
   searchIcon: { marginRight: 6 },
   searchInput: { flex: 1, color: c.textMain, fontSize: 13 },
   iconBtn: {
-    width: st ? 40 : 36, height: st ? 40 : 36, borderRadius: st ? 20 : 18,
+    width: narrowNav ? 32 : st ? 40 : 36, height: narrowNav ? 32 : st ? 40 : 36, borderRadius: st ? 20 : 18,
     backgroundColor: c.cardDark, borderWidth: 1, borderColor: c.borderColor,
     alignItems: 'center', justifyContent: 'center',
   },
@@ -841,7 +859,7 @@ const makeStyles = (c: AppColors, s = false, st = false, sm = false) => StyleShe
   },
   notifCount: { fontSize: 9, fontWeight: '800', color: '#fff' },
   avatar: {
-    width: 36, height: 36, borderRadius: 18,
+    width: narrowNav ? 32 : 36, height: narrowNav ? 32 : 36, borderRadius: 18,
     backgroundColor: c.accentYellow + '12', borderWidth: 2, borderColor: c.accentYellow + '50',
     alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
   },

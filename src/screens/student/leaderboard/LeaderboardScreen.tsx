@@ -53,93 +53,96 @@ export default function LeaderboardScreen({ navigation }: any) {
           title="Leaderboard" 
           subtitle="See how you rank among your peers" 
           searchPlaceholder="Search students..." 
-          onMenuPress={() => navigation.openDrawer()} 
+          onMenuPress={() => navigation.openDrawer()}
+          renderContent={mobileTitle => (
+            <ScrollView
+              contentContainerStyle={styles.content}
+              showsVerticalScrollIndicator={false}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={() => fetchLeaderboard(true)}
+                  tintColor={colors.accentYellow}
+                />
+              }
+            >
+              {mobileTitle}
+              {/* Top bar: live badge + school chip */}
+              <View style={styles.topBar}>
+                <View style={styles.liveRow}>
+                  <View style={[styles.liveDot, { backgroundColor: colors.accentGreen }]} />
+                  <Text style={[styles.liveText, { color: colors.accentGreen }]}>LIVE</Text>
+                  <Text style={styles.liveTitle}>Rankings</Text>
+                </View>
+                {!!mySchool && (
+                  <View style={styles.schoolChip}>
+                    <Feather name="home" size={13} color={gold} />
+                    <Text style={styles.schoolChipText} numberOfLines={1}>{mySchool}</Text>
+                  </View>
+                )}
+              </View>
+
+              {/* Scope tabs */}
+              <View style={styles.tabsRow}>
+                {TABS.map(t => {
+                  const active = t.key === tab;
+                  return (
+                    <TouchableOpacity
+                      key={t.key}
+                      onPress={() => setTab(t.key)}
+                      activeOpacity={0.8}
+                      style={[styles.tab, active && { backgroundColor: gold + '1A', borderColor: gold + '55' }]}
+                    >
+                      <Feather name={t.icon} size={13} color={active ? gold : colors.textMuted} />
+                      <Text style={[styles.tabText, { color: active ? gold : colors.textMuted }]}>{t.label}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+
+              <View style={[styles.columns, !wide && { flexDirection: 'column' }]}>
+                <View style={{ flex: 1, gap: spacing.lg }}>
+                  {/* Podium */}
+                  {podium && (
+                    <LeaderboardPodium
+                      podium={podium}
+                      studentId={studentId}
+                      colors={colors}
+                    />
+                  )}
+
+                  {/* Table */}
+                  <LeaderboardTable
+                    leaderboard={leaderboard}
+                    loading={loading}
+                    studentId={studentId}
+                    wide={wide}
+                    colors={colors}
+                  />
+                </View>
+
+                {/* Rank Card */}
+                {wide ? (
+                  <View style={{ width: 300 }}>
+                    <LeaderboardRankCard
+                      myEntry={myEntry}
+                      aboveEntry={aboveEntry}
+                      loading={loading}
+                      colors={colors}
+                    />
+                  </View>
+                ) : (
+                  <LeaderboardRankCard
+                    myEntry={myEntry}
+                    aboveEntry={aboveEntry}
+                    loading={loading}
+                    colors={colors}
+                  />
+                )}
+              </View>
+            </ScrollView>
+          )}
         />
-        <ScrollView
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl 
-              refreshing={refreshing} 
-              onRefresh={() => fetchLeaderboard(true)} 
-              tintColor={colors.accentYellow} 
-            />
-          }
-        >
-          {/* Top bar: live badge + school chip */}
-          <View style={styles.topBar}>
-            <View style={styles.liveRow}>
-              <View style={[styles.liveDot, { backgroundColor: colors.accentGreen }]} />
-              <Text style={[styles.liveText, { color: colors.accentGreen }]}>LIVE</Text>
-              <Text style={styles.liveTitle}>Rankings</Text>
-            </View>
-            {!!mySchool && (
-              <View style={styles.schoolChip}>
-                <Feather name="home" size={13} color={gold} />
-                <Text style={styles.schoolChipText} numberOfLines={1}>{mySchool}</Text>
-              </View>
-            )}
-          </View>
-
-          {/* Scope tabs */}
-          <View style={styles.tabsRow}>
-            {TABS.map(t => {
-              const active = t.key === tab;
-              return (
-                <TouchableOpacity 
-                  key={t.key} 
-                  onPress={() => setTab(t.key)} 
-                  activeOpacity={0.8}
-                  style={[styles.tab, active && { backgroundColor: gold + '1A', borderColor: gold + '55' }]}
-                >
-                  <Feather name={t.icon} size={13} color={active ? gold : colors.textMuted} />
-                  <Text style={[styles.tabText, { color: active ? gold : colors.textMuted }]}>{t.label}</Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-
-          <View style={[styles.columns, !wide && { flexDirection: 'column' }]}>
-            <View style={{ flex: 1, gap: spacing.lg }}>
-              {/* Podium */}
-              {podium && (
-                <LeaderboardPodium 
-                  podium={podium} 
-                  studentId={studentId} 
-                  colors={colors} 
-                />
-              )}
-
-              {/* Table */}
-              <LeaderboardTable 
-                leaderboard={leaderboard} 
-                loading={loading} 
-                studentId={studentId} 
-                wide={wide} 
-                colors={colors} 
-              />
-            </View>
-
-            {/* Rank Card */}
-            {wide ? (
-              <View style={{ width: 300 }}>
-                <LeaderboardRankCard 
-                  myEntry={myEntry} 
-                  aboveEntry={aboveEntry} 
-                  loading={loading} 
-                  colors={colors} 
-                />
-              </View>
-            ) : (
-              <LeaderboardRankCard 
-                myEntry={myEntry} 
-                aboveEntry={aboveEntry} 
-                loading={loading} 
-                colors={colors} 
-              />
-            )}
-          </View>
-        </ScrollView>
       </View>
     </ScreenLayout>
   );

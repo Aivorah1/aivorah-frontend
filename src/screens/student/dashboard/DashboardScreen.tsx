@@ -432,6 +432,15 @@ export default function DashboardScreen({ navigation, route }: any) {
   // ─────────────────────────────────────────────────────────
   // Render
   // ─────────────────────────────────────────────────────────
+  const dashboardError = error !== '' && (
+    <View style={[styles.stateCenter, { paddingVertical: 12 }, isMobile && !childOverride && styles.mobileError]}>
+      <Text style={[styles.stateSub, { color: BRAND.red }]}>{error} — showing your last known curriculum.</Text>
+      <TouchableOpacity style={styles.retryBtn} onPress={() => setError('')} activeOpacity={0.82}>
+        <Feather name="refresh-cw" size={13} color="#fff" />
+        <Text style={styles.retryText}>Retry</Text>
+      </TouchableOpacity>
+    </View>
+  );
   return (
     <ScreenLayout>
       <View style={styles.screen}>
@@ -439,165 +448,163 @@ export default function DashboardScreen({ navigation, route }: any) {
         <View style={styles.blobTL} pointerEvents="none" />
         <View style={styles.blobBR} pointerEvents="none" />
 
-     <Header
-  title={childOverride ? `${firstName}'s Dashboard` : `${getGreeting()}, ${firstName}! 👋`}
-  subtitle={childOverride ? `${curriculumName} · ${studentGrade}` : `${studentGrade} • Keep going, you're making great progress!`}
-  showSearch={false}
-  // On mobile the hamburger menu already doubled as "back" here, but on web/
-  // desktop onMenuPress is never wired to a visible button at all (it only
-  // renders on isMobile) — so a parent viewing a child's dashboard had no
-  // visible way back to My Kids. showBack renders a proper back arrow on
-  // every platform, and onBack sends them straight to My Kids explicitly
-  // rather than relying on navigation history.
-  showBack={!!childOverride}
-  onBack={childOverride ? () => navigation.navigate('ParentMyKids') : undefined}
-  onMenuPress={childOverride ? () => navigation.goBack() : () => navigation.openDrawer()}
-  notificationCount={childOverride ? 0 : unreadCount}
-/>
+        <Header
+        title={childOverride ? `${firstName}'s Dashboard` : `${getGreeting()}, ${firstName}! 👋`}
+        subtitle={childOverride ? `${curriculumName} · ${studentGrade}` : `${studentGrade} • Keep going, you're making great progress!`}
+        showSearch={false}
+        // On mobile the hamburger menu already doubled as "back" here, but on web/
+        // desktop onMenuPress is never wired to a visible button at all (it only
+        // renders on isMobile) — so a parent viewing a child's dashboard had no
+        // visible way back to My Kids. showBack renders a proper back arrow on
+        // every platform, and onBack sends them straight to My Kids explicitly
+        // rather than relying on navigation history.
+        showBack={!!childOverride}
+        onBack={childOverride ? () => navigation.navigate('ParentMyKids') : undefined}
+        onMenuPress={childOverride ? () => navigation.goBack() : () => navigation.openDrawer()}
+        notificationCount={childOverride ? 0 : unreadCount}
+          renderContent={mobileTitle => (
+            <>
+                {/* ── Main content ─────────────────────────────────────
+                    Always rendered immediately — `curriculum` is never null (it starts
+                    as either the prefetched cache or a static fallback, see useState
+                    above), so there is no reason to block the whole screen behind a
+                    spinner while the real fetch is still in flight. Real numbers swap
+                    in silently via setCurriculum once the network call resolves.
+                    Previously this blocked on `loading`, which showed a full-screen
+                    "Loading your dashboard" spinner on every login because the
+                    curriculum prefetch (fired in AuthContext right after setUser)
+                    rarely wins the race against React Navigation mounting this
+                    screen a moment later — defeating the whole point of prefetching. */}
+                {!mobileTitle && dashboardError}
+                {curriculum ? (
+                  <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollPad} showsVerticalScrollIndicator={false}>
+                    <View style={[styles.pageWrap, contentMax ? { maxWidth: contentMax } : undefined]}>
+                      {mobileTitle}
+                      {mobileTitle && dashboardError}
 
-        {/* ── Main content ─────────────────────────────────────
-            Always rendered immediately — `curriculum` is never null (it starts
-            as either the prefetched cache or a static fallback, see useState
-            above), so there is no reason to block the whole screen behind a
-            spinner while the real fetch is still in flight. Real numbers swap
-            in silently via setCurriculum once the network call resolves.
-            Previously this blocked on `loading`, which showed a full-screen
-            "Loading your dashboard" spinner on every login because the
-            curriculum prefetch (fired in AuthContext right after setUser)
-            rarely wins the race against React Navigation mounting this
-            screen a moment later — defeating the whole point of prefetching. */}
-        {error !== '' && (
-          <View style={[styles.stateCenter, { paddingVertical: 12 }]}>
-            <Text style={[styles.stateSub, { color: BRAND.red }]}>{error} — showing your last known curriculum.</Text>
-            <TouchableOpacity style={styles.retryBtn} onPress={() => setError('')} activeOpacity={0.82}>
-              <Feather name="refresh-cw" size={13} color="#fff" />
-              <Text style={styles.retryText}>Retry</Text>
-            </TouchableOpacity>
-          </View>
-        )}
+                      <Animated.View style={{
+                        opacity: heroAnim,
+                        transform: [{ translateY: heroAnim.interpolate({ inputRange: [0, 1], outputRange: [20, 0] }) }],
+                      }}>
+                        <DashboardOverview
+                          colors={colors}
+                          isDark={isDark}
+                          compactTop={!!mobileTitle}
+                          goals={GOALS}
+                          masteryLine={masteryLine}
+                          stats={stats}
+                          levelProgress={levelProgress}
+                          maxLevel={maxLevel}
+                          weekXP={weekXP}
+                          resume={resumeRef ? { ref: resumeRef, onOpen: () => openLesson(resumeRef) } : null}
+                          cta={pathComplete
+                            ? { label: 'Explore Challenges', icon: 'trophy', onPress: () => navigation.navigate('Challenges') }
+                            : !resumeRef
+                              ? { label: 'Start Learning', icon: 'play', onPress: () => navigation.navigate('LearningPaths') }
+                              : null}
+                        />
+                      </Animated.View>
 
-        {curriculum && (
-          <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollPad} showsVerticalScrollIndicator={false}>
-            <View style={[styles.pageWrap, contentMax ? { maxWidth: contentMax } : undefined]}>
+                      {/* ══ BODY ══════════════════════════════════════ */}
+                      <Animated.View style={[styles.body, {
+                        opacity: bodyAnim,
+                        transform: [{ translateY: bodyAnim.interpolate({ inputRange: [0, 1], outputRange: [28, 0] }) }],
+                      }]}>
 
-              <Animated.View style={{
-                opacity: heroAnim,
-                transform: [{ translateY: heroAnim.interpolate({ inputRange: [0, 1], outputRange: [20, 0] }) }],
-              }}>
-                <DashboardOverview
-                  colors={colors}
-                  isDark={isDark}
-                  goals={GOALS}
-                  masteryLine={masteryLine}
-                  stats={stats}
-                  levelProgress={levelProgress}
-                  maxLevel={maxLevel}
-                  weekXP={weekXP}
-                  resume={resumeRef ? { ref: resumeRef, onOpen: () => openLesson(resumeRef) } : null}
-                  cta={pathComplete
-                    ? { label: 'Explore Challenges', icon: 'trophy', onPress: () => navigation.navigate('Challenges') }
-                    : !resumeRef
-                      ? { label: 'Start Learning', icon: 'play', onPress: () => navigation.navigate('LearningPaths') }
-                      : null}
-                />
-              </Animated.View>
+                        {/* ── MY LEARNING PATHS ─────────────────────────
+                            Web-only widget (native builds resume from the Resume card
+                            in the overview row above). Website Redesign, Phase 3: sits
+                            right under the overview row, as on the board. */}
+                        {Platform.OS === 'web' && continueLearning && (
+                          <ContinueLearningCard
+                            colors={colors}
+                            isDark={isDark}
+                            continueLearning={continueLearning}
+                            chapterDone={chapterProgress.find(c => c.subject === continueLearning.current.subject && c.chapterIndex === continueLearning.current.chapter.chapterIndex)?.doneCount ?? 0}
+                            quizScore={perfForTopic(mergedPerf, continueLearning.current.topic.name, continueLearning.current.subject)?.avgScore ?? null}
+                            studentGrade={studentGrade}
+                            onOpen={openLesson}
+                            onViewAll={() => navigation.navigate('LearningPaths')}
+                          />
+                        )}
 
-              {/* ══ BODY ══════════════════════════════════════ */}
-              <Animated.View style={[styles.body, {
-                opacity: bodyAnim,
-                transform: [{ translateY: bodyAnim.interpolate({ inputRange: [0, 1], outputRange: [28, 0] }) }],
-              }]}>
+                        <GoalsCard
+                          styles={styles}
+                          isMobile={isMobile}
+                          isDark={isDark}
+                          goals={GOALS}
+                          cardBorder={cardBorder}
+                          goalText={goalText}
+                          goalMutedText={goalMutedText}
+                          goalDimText={goalDimText}
+                          goalRingTrack={goalRingTrack}
+                          navigation={navigation}
+                        />
 
-                {/* ── MY LEARNING PATHS ─────────────────────────
-                    Web-only widget (native builds resume from the Resume card
-                    in the overview row above). Website Redesign, Phase 3: sits
-                    right under the overview row, as on the board. */}
-                {Platform.OS === 'web' && continueLearning && (
-                  <ContinueLearningCard
-                    colors={colors}
-                    isDark={isDark}
-                    continueLearning={continueLearning}
-                    chapterDone={chapterProgress.find(c => c.subject === continueLearning.current.subject && c.chapterIndex === continueLearning.current.chapter.chapterIndex)?.doneCount ?? 0}
-                    quizScore={perfForTopic(mergedPerf, continueLearning.current.topic.name, continueLearning.current.subject)?.avgScore ?? null}
-                    studentGrade={studentGrade}
-                    onOpen={openLesson}
-                    onViewAll={() => navigation.navigate('LearningPaths')}
-                  />
-                )}
+                        <PerformanceCard
+                          styles={styles}
+                          colors={colors}
+                          isDark={isDark}
+                          cardBg={cardBg}
+                          cardBorder={cardBorder}
+                          avgScore={avgScore}
+                          masteredTopics={masteredTopics}
+                          topicsGoal={topicsGoal}
+                          consistency={consistency}
+                          bestTopic={bestTopic}
+                          bestChapter={bestChapter}
+                          weeklyConsistency={weeklyConsistency}
+                          barSubjects={barSubjects}
+                          barSubjectFilter={effectiveBarSubjectFilter}
+                          setBarSubjectFilter={setBarSubjectFilter}
+                          barTopics={barTopics}
+                          perfInsight={perfInsight}
+                        />
 
-                <GoalsCard
-                  styles={styles}
-                  isMobile={isMobile}
-                  isDark={isDark}
-                  goals={GOALS}
-                  cardBorder={cardBorder}
-                  goalText={goalText}
-                  goalMutedText={goalMutedText}
-                  goalDimText={goalDimText}
-                  goalRingTrack={goalRingTrack}
-                  navigation={navigation}
-                />
-
-                <PerformanceCard
-                  styles={styles}
-                  colors={colors}
-                  isDark={isDark}
-                  cardBg={cardBg}
-                  cardBorder={cardBorder}
-                  avgScore={avgScore}
-                  masteredTopics={masteredTopics}
-                  topicsGoal={topicsGoal}
-                  consistency={consistency}
-                  bestTopic={bestTopic}
-                  bestChapter={bestChapter}
-                  weeklyConsistency={weeklyConsistency}
-                  barSubjects={barSubjects}
-                  barSubjectFilter={effectiveBarSubjectFilter}
-                  setBarSubjectFilter={setBarSubjectFilter}
-                  barTopics={barTopics}
-                  perfInsight={perfInsight}
-                />
-
-                {/* ── QUICK ACTIONS ── hidden in parent child-view mode ──
-                    Mobile-only scope (Android/iOS native): Quick Actions is a
-                    web-only convenience grid. It stays visible on web at every
-                    viewport size (desktop, tablet, mobile-browser, TV) so the
-                    published site behavior is unchanged; native app builds hide
-                    it entirely. */}
-                {Platform.OS === 'web' && !childOverride && (
-                  <QuickActionsGrid styles={styles} colors={colors} isDark={isDark} cardBg={cardBg} navigation={navigation} />
-                )}
+                        {/* ── QUICK ACTIONS ── hidden in parent child-view mode ──
+                            Mobile-only scope (Android/iOS native): Quick Actions is a
+                            web-only convenience grid. It stays visible on web at every
+                            viewport size (desktop, tablet, mobile-browser, TV) so the
+                            published site behavior is unchanged; native app builds hide
+                            it entirely. */}
+                        {Platform.OS === 'web' && !childOverride && (
+                          <QuickActionsGrid styles={styles} colors={colors} isDark={isDark} cardBg={cardBg} navigation={navigation} />
+                        )}
 
 
-                {/* ── AI COACH BANNER ─────────────────────────── */}
-                <AICoachBanner styles={styles} pulseAnim={pulseAnim} navigation={navigation} />
+                        {/* ── AI COACH BANNER ─────────────────────────── */}
+                        <AICoachBanner styles={styles} pulseAnim={pulseAnim} navigation={navigation} />
 
-                {/* ── PROGRESS SNAPSHOT ───────────────────────── */}
-                {/* ── LEARNING PATH ───────────────────────────── */}
-                <LearningPathCard
-                  styles={styles}
-                  colors={colors}
-                  isDark={isDark}
-                  cardBg={cardBg}
-                  cardBorder={cardBorder}
-                  subtleBg={subtleBg}
-                  noContentGrade={noContentGrade}
-                  studentGrade={studentGrade}
-                  topicsGoal={topicsGoal}
-                  learningPathCurriculum={learningPathCurriculum}
-                  lessonSubjects={lessonSubjects}
-                  effectiveLessonSubjectFilter={effectiveLessonSubjectFilter}
-                  setLessonSubjectFilter={setLessonSubjectFilter}
-                  filteredChapterRows={filteredChapterRows}
-                  searchQuery={searchQuery}
-                  navigation={navigation}
-                />
+                        {/* ── PROGRESS SNAPSHOT ───────────────────────── */}
+                        {/* ── LEARNING PATH ───────────────────────────── */}
+                        <LearningPathCard
+                          styles={styles}
+                          colors={colors}
+                          isDark={isDark}
+                          cardBg={cardBg}
+                          cardBorder={cardBorder}
+                          subtleBg={subtleBg}
+                          noContentGrade={noContentGrade}
+                          studentGrade={studentGrade}
+                          topicsGoal={topicsGoal}
+                          learningPathCurriculum={learningPathCurriculum}
+                          lessonSubjects={lessonSubjects}
+                          effectiveLessonSubjectFilter={effectiveLessonSubjectFilter}
+                          setLessonSubjectFilter={setLessonSubjectFilter}
+                          filteredChapterRows={filteredChapterRows}
+                          searchQuery={searchQuery}
+                          navigation={navigation}
+                        />
 
-                <View style={{ height: 36 }} />
-              </Animated.View>
-            </View>
-          </ScrollView>
-        )}
+                        <View style={{ height: 36 }} />
+                      </Animated.View>
+                    </View>
+                  </ScrollView>
+                ) : mobileTitle}
+
+            </>
+          )}
+        />
 
       </View>
       
@@ -621,6 +628,7 @@ export const makeStyles = (c: AppColors, isMobile: boolean, isDark: boolean) => 
 
   // State screens
   stateCenter:   { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 32 },
+  mobileError:   { flex: 0 },
   stateIconWrap: { width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center', backgroundColor: BRAND.indigo + '18' },
   stateTitle:    { fontSize: 18, fontWeight: '700', color: c.textMain, fontFamily: fonts.serif },
   stateSub:      { fontSize: 13, color: c.textMuted, textAlign: 'center', lineHeight: 20 },
@@ -764,7 +772,7 @@ export const makeStyles = (c: AppColors, isMobile: boolean, isDark: boolean) => 
   // ── Quick actions ─────────────────────────────────────
   quickGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   quickCard: {
-    width: isMobile ? Math.floor((SCREEN_WIDTH - 28 - 28 - 10) / 2) : '32.1%',
+    ...(isMobile ? { flexBasis: '45%', flexGrow: 1, minWidth: 0 } : { width: '32.1%' }),
     borderWidth: 1, borderRadius: 18, padding: 14, gap: 8,
     shadowColor: '#000', shadowOpacity: isDark ? 0.15 : 0.06, shadowRadius: 10, shadowOffset: { width: 0, height: 3 },
   },

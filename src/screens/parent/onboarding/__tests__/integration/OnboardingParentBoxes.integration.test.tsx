@@ -3,8 +3,10 @@
 // "Complete Setup" gating (children are optional here).
 
 import React from 'react';
-import { render, screen, userEvent } from '@testing-library/react-native';
+import { fireEvent, render, screen, userEvent } from '@testing-library/react-native';
 import OnboardingParentBoxes from '../../OnboardingParentBoxes';
+
+let mockPendingRole: string | null = null;
 
 jest.mock('firebase/app', () => ({ initializeApp: jest.fn(), deleteApp: jest.fn() }));
 jest.mock('firebase/auth', () => ({
@@ -20,7 +22,7 @@ jest.mock('../../../../../context/AuthContext', () => ({
     logout: jest.fn(),
     cancelAddParentProfile: jest.fn(),
   }),
-  getPendingReturnRole: () => null,
+  getPendingReturnRole: () => mockPendingRole,
   setPendingReturnRole: jest.fn(),
 }));
 jest.mock('../../../../../context/ThemeContext', () => ({
@@ -28,10 +30,22 @@ jest.mock('../../../../../context/ThemeContext', () => ({
 }));
 
 beforeEach(() => {
+  mockPendingRole = null;
   global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({}) });
 });
 
 describe('OnboardingParentBoxes', () => {
+  test('opens required profile fields from the teacher welcome', async () => {
+    mockPendingRole = 'teacher';
+    await render(<OnboardingParentBoxes />);
+
+    expect(screen.getByText('Add Your Child')).toBeTruthy();
+    expect(screen.queryByPlaceholderText('Your name')).toBeNull();
+    await fireEvent.press(screen.getByRole('button', { name: 'Add Child' }));
+    expect(screen.getByPlaceholderText('Your name')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Skip for now & Finish', disabled: true })).toBeTruthy();
+  }, 45000);
+
   test('renders the personal info fields', async () => {
     await render(<OnboardingParentBoxes />);
     expect(screen.getByPlaceholderText('Your name')).toBeTruthy();

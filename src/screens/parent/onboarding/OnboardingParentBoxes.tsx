@@ -8,10 +8,14 @@
  * in hooks/, network calls in services/, sections in components/.
  */
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Platform, useWindowDimensions } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useAuth, getPendingReturnRole } from '../../../context/AuthContext';
 import { useTheme } from '../../../context/ThemeContext';
+import { fonts, type AppColors } from '../../../theme';
+import FontPresetMenu from '../../../components/common/FontPresetMenu';
+import PortalThemeSwitch from '../../../components/common/PortalThemeSwitch';
+import TealActionButton from '../../../components/common/TealActionButton';
 import { computeParentCompletion } from './utils/parentCompletion';
 import { PhoneOtpModal } from '../../onboarding/phoneOtpVerification';
 
@@ -27,18 +31,21 @@ import { ChildAccountCard } from './components/ChildAccountCard';
 import { AvatarCard } from './components/AvatarCard';
 import { ChildCredentialsModal } from './components/ChildCredentialsModal';
 import { LeaveConfirmModal } from './components/LeaveConfirmModal';
-
-const TEAL = '#5F8A86';
+import AddYourChild from './components/AddYourChild';
 
 export default function OnboardingParentBoxes() {
-  const { logout, cancelAddParentProfile } = useAuth();
+  const { user, logout, cancelAddParentProfile } = useAuth();
   // Teacher adding a parent profile → Back returns to the teacher dashboard
   // (no sign-out, nothing persisted), instead of the "leave home" sign-out modal.
   const isAddingParent = getPendingReturnRole() === 'teacher';
-  const { colors } = useTheme();
-  const styles = useStyles(colors);
+  const { colors, isDark } = useTheme();
+  const { width } = useWindowDimensions();
+  const teal = isDark ? '#A1E1D4' : '#1C6A60';
+  const styles = makeStyles(colors, teal, isDark, width < 600);
 
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  const [showForm, setShowForm] = useState(!isAddingParent);
+  const [focusChildName, setFocusChildName] = useState(false);
 
   const personal = usePersonalInfo();
   const childrenForm = useChildrenForm();
@@ -81,9 +88,16 @@ export default function OnboardingParentBoxes() {
   });
 
   return (
-    <View style={styles.screen}>
+    <View style={styles.screen} {...{ dataSet: { parentSetup: 'true' } }}>
+      {Platform.OS === 'web' && React.createElement('style', null, `
+        body[data-av-portal] [data-parent-setup] :focus-visible { outline: 2px solid ${teal} !important; outline-offset: 2px !important; }
+        @media (prefers-reduced-motion: no-preference) {
+          [data-parent-setup-form] { animation: av-parent-setup-enter 240ms ease-out both; }
+          @keyframes av-parent-setup-enter { from { opacity: 0; transform: translateY(5px); } }
+        }
+      `)}
       <ChildCredentialsModal
-        colors={colors} styles={styles} teal={TEAL}
+        colors={colors} styles={styles} teal={teal}
         visible={submit.showChildCreds}
         onClose={submit.confirmChildCredsAndFinish}
         creds={submit.createdChildCreds}
@@ -92,7 +106,7 @@ export default function OnboardingParentBoxes() {
         onShare={submit.shareCredentials}
       />
 
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
 
         {/* ── Header ── */}
         <View style={styles.topbar}>
@@ -101,133 +115,143 @@ export default function OnboardingParentBoxes() {
               onPress={() => setShowLeaveConfirm(true)}
               style={styles.backBtn}
               activeOpacity={0.7}
+              accessibilityRole="button"
               accessibilityLabel={isAddingParent ? 'Back to teacher dashboard' : 'Back to home page'}
             >
               <Feather name="arrow-left" size={18} color={colors.textMuted} />
               <Text style={styles.backTxt}>Back</Text>
             </TouchableOpacity>
-            <View style={styles.logoMark}><Feather name="zap" size={14} color="#0B0B0B" /></View>
             <Text style={styles.logoTxt}>Aivorah</Text>
             <View style={[styles.roleBadge, styles.roleBadgeParent]}>
               <Text style={[styles.roleBadgeText, styles.roleBadgeTextParent]}>Parent</Text>
             </View>
           </View>
-          <View style={styles.completionRow}>
-            <Text style={styles.completionLbl}>Profile Completion</Text>
-            <View style={styles.completionRing}>
-              <Text style={styles.completionPct}>{completionPct}%</Text>
+          <View style={styles.headerControls}>
+            <FontPresetMenu colors={colors} account={user?.email} buttonStyle={styles.fontButton} />
+            <PortalThemeSwitch />
+            <View style={styles.completionRow} accessibilityRole="progressbar" accessibilityLabel="Profile Completion"
+              accessibilityValue={{ min: 0, max: 100, now: completionPct }}>
+              <Text style={styles.completionLbl}>Profile Completion</Text>
+              <View style={styles.completionRing}>
+                <Text style={styles.completionPct}>{completionPct}%</Text>
+              </View>
             </View>
           </View>
         </View>
 
-        <View style={styles.greetWrap}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            <View style={{ backgroundColor: TEAL + '18', borderColor: TEAL + '40', borderWidth: 1, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 4 }}>
-              <Text style={{ color: TEAL, fontSize: 11, fontWeight: '800', letterSpacing: 1, textTransform: 'uppercase' }}>Parent Onboarding</Text>
+        {!showForm ? (
+          <AddYourChild testID="parent-onboarding-welcome"
+            onAdd={() => { setFocusChildName(personalDone); setShowForm(true); }}
+            secondaryAction={
+              <TouchableOpacity style={styles.secondaryAction} onPress={() => setShowForm(true)} accessibilityRole="button">
+                <Text style={styles.secondaryText}>Continue without adding a child</Text>
+              </TouchableOpacity>
+            }
+          />
+        ) : (
+          <View {...{ dataSet: { parentSetupForm: 'true' } }}>
+          <View style={styles.greetWrap}>
+            <Text accessibilityRole="header" style={styles.greetMain}>Set up your family profile</Text>
+            <Text style={styles.greetSub}>Complete your personal information. You can add a child now or from your dashboard later.</Text>
+          </View>
+
+          {/* ── Row 1: Personal Info / Your Child(ren) ── */}
+          <View style={[styles.rowWrap, styles.rowWrapStretch, { zIndex: 20 }]}>
+            <PersonalInfoCard
+              colors={colors} styles={styles} teal={teal} done={personalDone}
+              fullName={personal.fullName} setFullName={personal.setFullName}
+              country={personal.country} setCountry={personal.setCountry}
+              stateProv={personal.stateProv} setStateProv={personal.setStateProv}
+              city={personal.city} setCity={personal.setCity}
+              dob={personal.dob} setDob={personal.setDob}
+              mobile={personal.mobile} mobileCode={personal.mobileCode}
+              setMobileCode={personal.setMobileCode} onMobileChange={personal.onMobileChange}
+              mobileOtp={personal.mobileOtp}
+              locating={personal.locating} setLocating={personal.setLocating}
+            />
+            <ChildrenCard
+              colors={colors} styles={styles} teal={teal} autoFocusName={focusChildName}
+              childrenList={childrenForm.children} activeChildIdx={childrenForm.activeChildIdx}
+              activeChild={childrenForm.activeChild} selectChild={childrenForm.selectChild}
+              removeChild={childrenForm.removeChild} updateChild={childrenForm.updateChild}
+              addAnotherChild={childrenForm.addAnotherChild}
+              schoolLocating={childrenForm.schoolLocating} setSchoolLocating={childrenForm.setSchoolLocating}
+            />
+          </View>
+
+          {/* Sections 3 & 4 only appear once the parent starts adding a child
+              (keeps onboarding clean for parents who skip the optional child step). */}
+          {addingChildren && (<>
+            <View style={styles.rowWrap}>
+              <LearningProfileCard
+                styles={styles} done={curriculumDone}
+                childrenList={childrenForm.children} activeChildIdx={childrenForm.activeChildIdx}
+                activeChild={childrenForm.activeChild} selectChild={childrenForm.selectChild}
+                updateChild={childrenForm.updateChild}
+              />
+            </View>
+
+            <View style={styles.rowWrap}>
+              <ChildAccountCard
+                colors={colors} styles={styles} teal={teal} done={accountDone}
+                childrenList={childrenForm.children} activeChildIdx={childrenForm.activeChildIdx}
+                activeChild={childrenForm.activeChild} selectChild={childrenForm.selectChild}
+                updateChild={childrenForm.updateChild}
+                showChildPassword={childrenForm.showChildPassword} setShowChildPassword={childrenForm.setShowChildPassword}
+                otp={otp}
+              />
+            </View>
+          </>)}
+
+          {/* ── Row 4: Your Avatar ── */}
+          <View style={styles.rowWrap}>
+            <AvatarCard styles={styles} teal={teal} done={avatarDone} avatarStyle={personal.avatarStyle} setAvatarStyle={personal.setAvatarStyle} />
+          </View>
+
+          {submit.saveError ? <Text style={styles.errorTxt}>{submit.saveError}</Text> : null}
+
+          {/* ── Footer ── */}
+          <View style={styles.footer}>
+            <View style={styles.secureRow}>
+              <View style={styles.secureIcon}><Feather name="shield" size={14} color={teal} /></View>
+              <Text style={styles.secureTxt}>Your data is secure and never shared.</Text>
+            </View>
+            <View style={styles.footerBtns}>
+              {!requiredDone && (
+                <Text style={styles.requiredHint}>{(() => {
+                  const missing: string[] = [];
+                  if (!personalDone) missing.push('Personal Info');
+                  // Child sections only matter once a child has been started.
+                  if (!curriculumDone) {
+                    const who = startedChildren.filter((c) => !(c.curriculum.length > 0 && c.grade.length > 0)).map((c) => c.name.trim() || 'a child');
+                    missing.push(`Learning Profile (curriculum & grade${who.length ? ' for ' + who.join(', ') : ''})`);
+                  }
+                  if (!accountDone) {
+                    const who = startedChildren.filter((c) => {
+                      const age = c.age ? parseInt(c.age, 10) : 0;
+                      return age >= 14 ? !/^\S+@\S+\.\S+$/.test(c.linkEmail.trim()) : c.school.trim().length < 2;
+                    }).map((c) => c.name.trim() || 'a child');
+                    missing.push(`Child's Account${who.length ? ' for ' + who.join(', ') : ''}`);
+                  }
+                  return missing.length ? `Still needed: ${missing.join('; ')}` : 'Complete all sections above to continue';
+                })()}</Text>
+              )}
+              {requiredDone && !addingChildren && (
+                <Text style={styles.requiredHint}>Adding children is optional — you can add them anytime from your dashboard.</Text>
+              )}
+              <TealActionButton
+                label={submit.saving ? 'Saving…' : (addingChildren ? 'Complete Setup' : 'Skip for now & Finish')}
+                icon="arrow-right" disabled={!requiredDone} loading={submit.saving} onPress={() => submit.handleFinish(true)}
+              />
             </View>
           </View>
-          <Text style={styles.greetMain}>Welcome — let&apos;s set up your family profile</Text>
-          <Text style={styles.greetSub}>Fill in each section so we can connect you with your child&apos;s learning journey.</Text>
-        </View>
-
-        {/* ── Row 1: Personal Info / Your Child(ren) ── */}
-        <View style={[styles.rowWrap, styles.rowWrapStretch, { zIndex: 20 }]}>
-          <PersonalInfoCard
-            colors={colors} styles={styles} teal={TEAL} done={personalDone}
-            fullName={personal.fullName} setFullName={personal.setFullName}
-            country={personal.country} setCountry={personal.setCountry}
-            stateProv={personal.stateProv} setStateProv={personal.setStateProv}
-            city={personal.city} setCity={personal.setCity}
-            dob={personal.dob} setDob={personal.setDob}
-            mobile={personal.mobile} mobileCode={personal.mobileCode}
-            setMobileCode={personal.setMobileCode} onMobileChange={personal.onMobileChange}
-            mobileOtp={personal.mobileOtp}
-            locating={personal.locating} setLocating={personal.setLocating}
-          />
-          <ChildrenCard
-            colors={colors} styles={styles} teal={TEAL}
-            childrenList={childrenForm.children} activeChildIdx={childrenForm.activeChildIdx}
-            activeChild={childrenForm.activeChild} selectChild={childrenForm.selectChild}
-            removeChild={childrenForm.removeChild} updateChild={childrenForm.updateChild}
-            addAnotherChild={childrenForm.addAnotherChild}
-            schoolLocating={childrenForm.schoolLocating} setSchoolLocating={childrenForm.setSchoolLocating}
-          />
-        </View>
-
-        {/* Sections 3 & 4 only appear once the parent starts adding a child
-            (keeps onboarding clean for parents who skip the optional child step). */}
-        {addingChildren && (<>
-          <View style={styles.rowWrap}>
-            <LearningProfileCard
-              styles={styles} done={curriculumDone}
-              childrenList={childrenForm.children} activeChildIdx={childrenForm.activeChildIdx}
-              activeChild={childrenForm.activeChild} selectChild={childrenForm.selectChild}
-              updateChild={childrenForm.updateChild}
-            />
           </View>
-
-          <View style={styles.rowWrap}>
-            <ChildAccountCard
-              colors={colors} styles={styles} teal={TEAL} done={accountDone}
-              childrenList={childrenForm.children} activeChildIdx={childrenForm.activeChildIdx}
-              activeChild={childrenForm.activeChild} selectChild={childrenForm.selectChild}
-              updateChild={childrenForm.updateChild}
-              showChildPassword={childrenForm.showChildPassword} setShowChildPassword={childrenForm.setShowChildPassword}
-              otp={otp}
-            />
-          </View>
-        </>)}
-
-        {/* ── Row 4: Your Avatar ── */}
-        <View style={styles.rowWrap}>
-          <AvatarCard styles={styles} teal={TEAL} done={avatarDone} avatarStyle={personal.avatarStyle} setAvatarStyle={personal.setAvatarStyle} />
-        </View>
-
-        {submit.saveError ? <Text style={styles.errorTxt}>{submit.saveError}</Text> : null}
-
-        {/* ── Footer ── */}
-        <View style={styles.footer}>
-          <View style={styles.secureRow}>
-            <View style={styles.secureIcon}><Feather name="shield" size={14} color={TEAL} /></View>
-            <Text style={styles.secureTxt}>Your data is secure and never shared.</Text>
-          </View>
-          <View style={styles.footerBtns}>
-            {!requiredDone && (
-              <Text style={styles.requiredHint}>{(() => {
-                const missing: string[] = [];
-                if (!personalDone) missing.push('Personal Info');
-                // Child sections only matter once a child has been started.
-                if (!curriculumDone) {
-                  const who = startedChildren.filter((c) => !(c.curriculum.length > 0 && c.grade.length > 0)).map((c) => c.name.trim() || 'a child');
-                  missing.push(`Learning Profile (curriculum & grade${who.length ? ' for ' + who.join(', ') : ''})`);
-                }
-                if (!accountDone) {
-                  const who = startedChildren.filter((c) => {
-                    const age = c.age ? parseInt(c.age, 10) : 0;
-                    return age >= 14 ? !/^\S+@\S+\.\S+$/.test(c.linkEmail.trim()) : c.school.trim().length < 2;
-                  }).map((c) => c.name.trim() || 'a child');
-                  missing.push(`Child's Account${who.length ? ' for ' + who.join(', ') : ''}`);
-                }
-                return missing.length ? `Still needed: ${missing.join('; ')}` : 'Complete all sections above to continue';
-              })()}</Text>
-            )}
-            {requiredDone && !addingChildren && (
-              <Text style={styles.requiredHint}>Adding children is optional — you can add them anytime from your dashboard.</Text>
-            )}
-            <TouchableOpacity
-              style={[styles.completeBtn, !requiredDone && { opacity: 0.4 }]}
-              disabled={!requiredDone || submit.saving}
-              onPress={() => submit.handleFinish(true)} activeOpacity={0.85}>
-              <Text style={styles.completeTxt}>{submit.saving ? 'Saving...' : (addingChildren ? 'Complete Setup' : 'Skip for now & Finish')}</Text>
-              {!submit.saving && <Feather name="arrow-right" size={16} color="#fff" />}
-            </TouchableOpacity>
-          </View>
-        </View>
+        )}
       </ScrollView>
 
       {/* ── Leave confirmation (home page, or back-to-teacher-dashboard when adding a parent profile) ── */}
       <LeaveConfirmModal
-        styles={styles} teal={TEAL}
+        styles={styles} teal={teal}
         visible={showLeaveConfirm}
         onClose={() => setShowLeaveConfirm(false)}
         isAddingParent={isAddingParent}
@@ -257,17 +281,21 @@ export default function OnboardingParentBoxes() {
   );
 }
 
-function useStyles(colors: any) {
+function makeStyles(colors: AppColors, TEAL: string, isDark: boolean, compact: boolean) {
+  const surface = isDark ? '#242525' : '#FFFDF9';
+  const field = isDark ? '#1D1F1F' : '#F8F3EC';
   return StyleSheet.create({
-    screen: { flex: 1, backgroundColor: colors.bgDark },
-    scrollContent: { paddingHorizontal: 24, paddingTop: 24, paddingBottom: 40, maxWidth: 1280, width: '100%', alignSelf: 'center' },
+    screen: { flex: 1, backgroundColor: isDark ? '#1B1D1D' : '#FBF4EB' },
+    scrollContent: { paddingHorizontal: compact ? 16 : 28, paddingTop: compact ? 16 : 28, paddingBottom: 40, maxWidth: 1120, width: '100%', alignSelf: 'center' },
 
-    topbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 },
+    topbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 26 },
     logoRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    headerControls: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8 },
+    fontButton: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.borderColor, backgroundColor: surface },
     backBtn: {
       flexDirection: 'row', alignItems: 'center', gap: 4,
-      paddingVertical: 6, paddingHorizontal: 10, borderRadius: 8,
-      borderWidth: 1, borderColor: colors.borderColor, marginRight: 4,
+      minHeight: 40, paddingVertical: 6, paddingHorizontal: 10, borderRadius: 12,
+      borderWidth: 1, borderColor: colors.borderColor, marginRight: 4, backgroundColor: field,
     },
     backTxt: { fontSize: 13, fontWeight: '600', color: colors.textMuted },
     confirmOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center', padding: 24 },
@@ -281,12 +309,11 @@ function useStyles(colors: any) {
     },
     confirmTitle: { fontSize: 19, fontWeight: '800', color: colors.textMain, marginBottom: 10, textAlign: 'center' },
     confirmBody: { fontSize: 14, color: colors.textMuted, lineHeight: 21, textAlign: 'center', marginBottom: 24 },
-    confirmPrimary: { width: '100%', backgroundColor: TEAL, borderRadius: 12, paddingVertical: 14, alignItems: 'center', marginBottom: 10 },
-    confirmPrimaryTxt: { fontSize: 15, fontWeight: '700', color: '#0B0B0B' },
+    confirmPrimary: { width: '100%', backgroundColor: '#226B64', borderRadius: 12, paddingVertical: 14, alignItems: 'center', marginBottom: 10 },
+    confirmPrimaryTxt: { fontSize: 15, fontWeight: '700', color: '#FFF' },
     confirmSecondary: { width: '100%', paddingVertical: 12, alignItems: 'center', borderRadius: 12, borderWidth: 1, borderColor: colors.borderColor },
     confirmSecondaryTxt: { fontSize: 14, fontWeight: '600', color: colors.textMuted },
-    logoMark: { width: 28, height: 28, borderRadius: 8, backgroundColor: TEAL, alignItems: 'center', justifyContent: 'center' },
-    logoTxt: { fontSize: 16, fontWeight: '800', color: colors.textMain },
+    logoTxt: { fontSize: 22, fontWeight: '700', color: colors.textMain, ...(Platform.OS === 'web' ? { fontFamily: fonts.serif } : {}) },
     roleBadge: {
       paddingHorizontal: 8,
       paddingVertical: 2.5,
@@ -311,23 +338,26 @@ function useStyles(colors: any) {
     completionRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     completionLbl: { fontSize: 13, fontWeight: '600', color: colors.textMuted },
     completionRing: {
-      width: 38, height: 38, borderRadius: 19, borderWidth: 2, borderColor: TEAL,
-      alignItems: 'center', justifyContent: 'center',
+      minWidth: 40, minHeight: 38, paddingHorizontal: 4, borderRadius: 19, borderWidth: 2, borderColor: TEAL,
+      alignItems: 'center', justifyContent: 'center', backgroundColor: surface,
     },
     completionPct: { fontSize: 11, fontWeight: '800', color: TEAL },
 
-    greetWrap: { marginBottom: 24 },
-    greetMain: { fontSize: 24, fontWeight: '800', color: colors.textMain },
-    greetSub: { fontSize: 14, color: colors.textMuted, marginTop: 4 },
+    secondaryAction: { alignSelf: 'flex-start', minHeight: 40, justifyContent: 'center' },
+    secondaryText: { fontSize: 14, fontWeight: '600', color: TEAL, textDecorationLine: 'underline' },
+    greetWrap: { marginBottom: 20, padding: compact ? 16 : 22, borderRadius: 18, backgroundColor: isDark ? '#332824' : '#F9E9DC' },
+    greetMain: { fontSize: compact ? 26 : 32, fontWeight: '700', color: colors.textMain, ...(Platform.OS === 'web' ? { fontFamily: fonts.serif } : {}) },
+    greetSub: { fontSize: 15, lineHeight: 22, color: colors.textMuted, marginTop: 6 },
 
     rowWrap: { flexDirection: 'row', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap', marginBottom: 16 },
     rowWrapStretch: { alignItems: 'stretch' },
     card: {
-      backgroundColor: colors.cardDark, borderWidth: 1, borderColor: colors.borderColor,
-      borderRadius: 16, padding: 20, gap: 16,
+      backgroundColor: surface, borderWidth: 1, borderColor: colors.borderColor,
+      borderRadius: 18, padding: compact ? 14 : 20, gap: 16,
+      shadowColor: '#171414', shadowOffset: { width: 0, height: 3 }, shadowRadius: 8, shadowOpacity: isDark ? 0.16 : 0.06,
     },
-    card3: { flexGrow: 1, flexBasis: 320, minWidth: 280 },
-    cardFull: { flexGrow: 1, flexBasis: '100%', minWidth: 280 },
+    card3: { flexGrow: 1, flexShrink: 1, flexBasis: 340, minWidth: 0 },
+    cardFull: { flexGrow: 1, flexBasis: '100%', minWidth: 0 },
 
     cardHeaderRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
     cardIcon: {
@@ -342,13 +372,14 @@ function useStyles(colors: any) {
     },
 
     fieldGroup: { gap: 8 },
-    lbl: { fontSize: 12, fontWeight: '700', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.5 },
-    lblRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    lbl: { fontSize: 13, fontWeight: '700', color: colors.textMain },
+    lblRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 5, alignItems: 'center', justifyContent: 'space-between' },
     locateBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
     locateTxt: { fontSize: 11, fontWeight: '700', color: TEAL },
     input: {
-      height: 44, backgroundColor: colors.bgDark, borderWidth: 1, borderColor: colors.borderColor,
-      borderRadius: 10, paddingHorizontal: 14, fontSize: 14, color: colors.textMain,
+      height: 46, backgroundColor: field, borderWidth: 1, borderColor: colors.borderColor,
+      borderRadius: 12, paddingHorizontal: 12, fontSize: 16, color: colors.textMain,
+      ...(Platform.OS === 'web' ? { fontFamily: fonts.sans } : {}),
     },
     dropdown: {
       marginTop: 6,
@@ -366,7 +397,7 @@ function useStyles(colors: any) {
     },
     phoneCodeTxt: { fontSize: 14, fontWeight: '700', color: colors.textMain },
     phoneInput: { flex: 1, flexBasis: 0, minWidth: 0, flexShrink: 1 },
-    warnTxt: { color: '#ef4444', fontSize: 12, lineHeight: 17, marginTop: 4 },
+    warnTxt: { color: isDark ? '#FFA19C' : '#AD332A', fontSize: 12, lineHeight: 17, marginTop: 4 },
     verifyBtn: {
       height: 44, paddingHorizontal: 10, justifyContent: 'center', alignItems: 'center',
       borderRadius: 10, borderWidth: 1, borderColor: TEAL, flexShrink: 0,
@@ -428,7 +459,7 @@ function useStyles(colors: any) {
       backgroundColor: TEAL, alignItems: 'center', justifyContent: 'center',
     },
 
-    errorTxt: { color: '#ef4444', fontSize: 13, textAlign: 'center', marginBottom: 12 },
+    errorTxt: { color: isDark ? '#FFA19C' : '#AD332A', fontSize: 14, textAlign: 'center', marginBottom: 12 },
 
     footer: {
       flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
@@ -440,13 +471,8 @@ function useStyles(colors: any) {
       alignItems: 'center', justifyContent: 'center',
     },
     secureTxt: { fontSize: 13, color: colors.textMuted },
-    footerBtns: { flexDirection: 'row', alignItems: 'center', gap: 16 },
-    requiredHint: { fontSize: 12, color: colors.textMuted, maxWidth: 220, textAlign: 'right' },
-    completeBtn: {
-      flexDirection: 'row', alignItems: 'center', gap: 8,
-      backgroundColor: TEAL, paddingHorizontal: 22, paddingVertical: 14, borderRadius: 12,
-    },
-    completeTxt: { fontSize: 14, fontWeight: '800', color: '#0B0B0B' },
+    footerBtns: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 12 },
+    requiredHint: { fontSize: 13, lineHeight: 19, color: colors.textMuted, maxWidth: 270 },
 
     modalOverlay: {
       flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', alignItems: 'center', justifyContent: 'center', padding: 20,
@@ -458,8 +484,8 @@ function useStyles(colors: any) {
     modalTitle: { fontSize: 16, fontWeight: '800', color: colors.textMain },
     modalText: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
     modalBtn: {
-      backgroundColor: TEAL, borderRadius: 10, paddingVertical: 14, alignItems: 'center',
+      backgroundColor: '#226B64', borderRadius: 10, paddingVertical: 14, alignItems: 'center',
     },
-    modalBtnText: { fontSize: 14, fontWeight: '800', color: '#0B0B0B' },
+    modalBtnText: { fontSize: 14, fontWeight: '800', color: '#FFF' },
   });
 }

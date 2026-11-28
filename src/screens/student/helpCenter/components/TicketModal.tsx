@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Modal } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Modal, Platform, ScrollView } from 'react-native';
 import ActivityIndicator from '../../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
 import { spacing, radius } from '../../../../theme';
@@ -22,34 +22,40 @@ export default function TicketModal({
   visible, onClose, userEmail, subject, setSubject, message, setMessage, loading, onSubmit, colors,
 }: TicketModalProps) {
   const styles = makeStyles(colors);
+  const [subjectFocused, setSubjectFocused] = useState(false);
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
         <View style={[styles.modalBox, { backgroundColor: colors.cardDark, borderColor: colors.borderColor }]}>
-          <View style={styles.modalHeader}>
-            <Text style={[styles.modalTitle, { color: colors.textMain }]}>Submit Support Ticket</Text>
-            <TouchableOpacity onPress={onClose} accessibilityRole="button" accessibilityLabel="Close ticket form">
-              <Feather name="x" size={20} color={colors.textMuted} />
-            </TouchableOpacity>
-          </View>
-          <Text style={[styles.ticketNote, { color: colors.textMuted }]}>Submitting as: <Text style={{ color: colors.accentYellow }}>{userEmail || 'guest'}</Text></Text>
-          <Text style={[styles.modalArticlesLabel, { color: colors.textDim }]}>Subject</Text>
-          <View style={[styles.ticketInput, { borderColor: colors.borderColor, backgroundColor: colors.bgDark }]}>
-            <TextInput style={[styles.ticketTextInput, { color: colors.textMain }]} value={subject} onChangeText={setSubject} placeholder="Brief summary of your issue" placeholderTextColor={colors.textDim} autoFocus />
-          </View>
-          <Text style={[styles.modalArticlesLabel, { color: colors.textDim }]}>Describe your issue</Text>
-          <View style={[styles.ticketInput, { height: 100, alignItems: 'flex-start', paddingTop: spacing.md, borderColor: colors.borderColor, backgroundColor: colors.bgDark }]}>
-            <TextInput style={[styles.ticketTextInput, { color: colors.textMain, textAlignVertical: 'top' }]} value={message} onChangeText={setMessage} placeholder="Please provide as much detail as possible..." placeholderTextColor={colors.textDim} multiline numberOfLines={4} />
-          </View>
-          <View style={styles.modalBtns}>
-            <TouchableOpacity style={[styles.modalCancelBtn, { borderColor: colors.borderColor }]} onPress={onClose}>
-              <Text style={[styles.modalCancelText, { color: colors.textMuted }]}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.modalSaveBtn, { backgroundColor: colors.accentYellow }]} onPress={onSubmit} disabled={loading}>
-              {loading ? <ActivityIndicator color={colors.onPrimary} size="small" /> : <Text style={styles.modalSaveText}>Submit Ticket</Text>}
-            </TouchableOpacity>
-          </View>
+          <ScrollView contentContainerStyle={styles.modalContent} keyboardShouldPersistTaps="handled">
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, { color: colors.textMain }]}>Submit Support Ticket</Text>
+              <TouchableOpacity onPress={onClose} accessibilityRole="button" accessibilityLabel="Close ticket form">
+                <Feather name="x" size={20} color={colors.textMuted} />
+              </TouchableOpacity>
+            </View>
+            <Text style={[styles.ticketNote, { color: colors.textMuted }]}>Submitting as: <Text style={{ color: colors.accentYellow }}>{userEmail || 'guest'}</Text></Text>
+            <Text style={[styles.modalArticlesLabel, { color: colors.textDim }]}>Subject</Text>
+            <View style={[styles.ticketInput, { borderColor: colors.borderColor, backgroundColor: colors.bgDark }, subjectFocused && styles.focusedSubject]}>
+              <TextInput style={[styles.ticketTextInput, styles.subjectTextInput, { color: colors.textMain }]}
+                accessibilityLabel="Subject" value={subject} onChangeText={setSubject}
+                onFocus={() => setSubjectFocused(true)} onBlur={() => setSubjectFocused(false)}
+                placeholder="Brief summary of your issue" placeholderTextColor={colors.textDim} autoFocus />
+            </View>
+            <Text style={[styles.modalArticlesLabel, { color: colors.textDim }]}>Describe your issue</Text>
+            <View style={[styles.ticketInput, { height: 100, alignItems: 'flex-start', paddingTop: spacing.md, borderColor: colors.borderColor, backgroundColor: colors.bgDark }]}>
+              <TextInput style={[styles.ticketTextInput, { color: colors.textMain, textAlignVertical: 'top' }]} value={message} onChangeText={setMessage} placeholder="Please provide as much detail as possible..." placeholderTextColor={colors.textDim} multiline numberOfLines={4} />
+            </View>
+            <View style={styles.modalBtns}>
+              <TouchableOpacity style={[styles.modalCancelBtn, { borderColor: colors.borderColor }]} onPress={onClose}>
+                <Text style={[styles.modalCancelText, { color: colors.textMuted }]}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.modalSaveBtn, { backgroundColor: colors.accentYellow }]} onPress={onSubmit} disabled={loading}>
+                {loading ? <ActivityIndicator color={colors.onPrimary} size="small" /> : <Text style={styles.modalSaveText}>Submit Ticket</Text>}
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
         </View>
       </View>
     </Modal>
@@ -58,13 +64,19 @@ export default function TicketModal({
 
 const makeStyles = (c: AppColors) => StyleSheet.create({
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.65)', alignItems: 'center', justifyContent: 'center', padding: spacing.xl },
-  modalBox: { borderWidth: 1, borderRadius: radius.xl, padding: spacing.xl, width: '100%', maxWidth: 480 },
+  modalBox: { borderWidth: 1, borderRadius: radius.xl, width: '100%', maxWidth: 480, maxHeight: '100%' },
+  modalContent: { padding: spacing.xl },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.sm },
   modalTitle: { fontSize: 17, fontWeight: '700' },
   modalArticlesLabel: { fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: spacing.md, marginTop: spacing.md },
   ticketNote: { fontSize: 13, marginBottom: spacing.sm },
   ticketInput: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderRadius: radius.md, paddingHorizontal: spacing.lg, minHeight: 46 },
   ticketTextInput: { flex: 1, fontSize: 14, paddingVertical: spacing.md },
+  subjectTextInput: { minWidth: 0, ...(Platform.OS === 'web' ? { outlineWidth: 0 } : {}) },
+  focusedSubject: {
+    borderColor: c.accentOrange,
+    ...(Platform.OS === 'web' ? { boxShadow: `0 0 0 1px ${c.accentOrange}` } : {}),
+  },
   modalBtns: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.xl },
   modalCancelBtn: { flex: 1, height: 46, borderRadius: radius.md, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
   modalCancelText: { fontSize: 14, fontWeight: '600' },

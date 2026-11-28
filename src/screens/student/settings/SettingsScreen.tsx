@@ -103,72 +103,75 @@ export default function SettingsScreen({ navigation, route }: any) {
           subtitle="Manage your preferences and account details."
           searchPlaceholder="Search settings..."
           onMenuPress={() => navigation.openDrawer()}
+          renderContent={mobileTitle => (
+            <ScrollView
+              ref={scrollRef}
+              style={styles.scroll}
+              contentContainerStyle={styles.content}
+              showsVerticalScrollIndicator={false}
+            >
+              {mobileTitle}
+              <ConnectSchoolBanner />
+              <View style={styles.columns}>
+                <View style={styles.col}>
+                  <SectionHeader icon="user" label="Profile & Account" color={colors.accentYellow} styles={styles} />
+                  <ProfileCard
+                    user={user}
+                    levelLabel={levelLabel}
+                    photoUrl={photo.photoUrl}
+                    uploading={photo.uploading}
+                    onPickPhoto={photo.handlePickPhoto}
+                    onOpenModal={openModal}
+                    colors={colors}
+                    styles={styles}
+                  />
+
+                  <SectionHeader icon="moon" label="Appearance" color={colors.accentYellow} styles={styles} />
+                  <AppearanceCard themeMode={themeMode} setThemeMode={setThemeMode} colors={colors} styles={styles} />
+                </View>
+
+                <View style={styles.col}>
+                  <View onLayout={e => { securityY.current = e.nativeEvent.layout.y; }}>
+                    <SectionHeader icon="shield" label="Security" color={colors.accentGreen} styles={styles} />
+                    <SecurityCard
+                      isPasswordUser={isPasswordUser}
+                      recoverySaved={recoveryEmail.recoverySaved}
+                      onOpenModal={openModal}
+                      colors={colors}
+                      styles={styles}
+                    />
+                  </View>
+
+                  <View ref={notifRef} onLayout={e => { notifY.current = e.nativeEvent.layout.y; }}>
+                    <SectionHeader icon="bell" label="Notifications" color={colors.accentYellow} styles={styles} />
+                    <NotificationsCard
+                      assignmentAlerts={notifPrefs.assignmentAlerts}
+                      challengeUpdates={notifPrefs.challengeUpdates}
+                      onToggleAssignmentAlerts={notifPrefs.toggleAssignmentAlerts}
+                      onToggleChallengeUpdates={notifPrefs.toggleChallengeUpdates}
+                      colors={colors}
+                      styles={styles}
+                    />
+                  </View>
+                </View>
+              </View>
+
+              {/* ── Account Actions ── */}
+              <View style={styles.actionsRow}>
+                <TouchableOpacity style={styles.actionBtn} onPress={() => setSignOutModalVisible(true)} activeOpacity={0.8} testID="settings-signout-button">
+                  <Feather name="log-out" size={17} color={colors.accentRed} />
+                  <Text style={[styles.actionBtnText, { color: colors.accentRed }]}>Sign Out</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.actionBtn} onPress={deleteAccount.openDeleteModal} activeOpacity={0.8} testID="settings-delete-account-button">
+                  <Feather name="trash-2" size={17} color={colors.accentRed} />
+                  <Text style={[styles.actionBtnText, { color: colors.accentRed }]}>Delete Account</Text>
+                </TouchableOpacity>
+              </View>
+
+              <Text style={styles.versionText}>Aivorah v1.0.0 · Build 2024</Text>
+            </ScrollView>
+          )}
         />
-        <ScrollView
-          ref={scrollRef}
-          style={styles.scroll}
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
-        >
-          <ConnectSchoolBanner />
-          <View style={styles.columns}>
-            <View style={styles.col}>
-              <SectionHeader icon="user" label="Profile & Account" color={colors.accentYellow} styles={styles} />
-              <ProfileCard
-                user={user}
-                levelLabel={levelLabel}
-                photoUrl={photo.photoUrl}
-                uploading={photo.uploading}
-                onPickPhoto={photo.handlePickPhoto}
-                onOpenModal={openModal}
-                colors={colors}
-                styles={styles}
-              />
-
-              <SectionHeader icon="moon" label="Appearance" color={colors.accentYellow} styles={styles} />
-              <AppearanceCard themeMode={themeMode} setThemeMode={setThemeMode} colors={colors} styles={styles} />
-            </View>
-
-            <View style={styles.col}>
-              <View onLayout={e => { securityY.current = e.nativeEvent.layout.y; }}>
-                <SectionHeader icon="shield" label="Security" color={colors.accentGreen} styles={styles} />
-                <SecurityCard
-                  isPasswordUser={isPasswordUser}
-                  recoverySaved={recoveryEmail.recoverySaved}
-                  onOpenModal={openModal}
-                  colors={colors}
-                  styles={styles}
-                />
-              </View>
-
-              <View ref={notifRef} onLayout={e => { notifY.current = e.nativeEvent.layout.y; }}>
-                <SectionHeader icon="bell" label="Notifications" color={colors.accentYellow} styles={styles} />
-                <NotificationsCard
-                  assignmentAlerts={notifPrefs.assignmentAlerts}
-                  challengeUpdates={notifPrefs.challengeUpdates}
-                  onToggleAssignmentAlerts={notifPrefs.toggleAssignmentAlerts}
-                  onToggleChallengeUpdates={notifPrefs.toggleChallengeUpdates}
-                  colors={colors}
-                  styles={styles}
-                />
-              </View>
-            </View>
-          </View>
-
-          {/* ── Account Actions ── */}
-          <View style={styles.actionsRow}>
-            <TouchableOpacity style={styles.actionBtn} onPress={() => setSignOutModalVisible(true)} activeOpacity={0.8} testID="settings-signout-button">
-              <Feather name="log-out" size={17} color={colors.accentRed} />
-              <Text style={[styles.actionBtnText, { color: colors.accentRed }]}>Sign Out</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.actionBtn} onPress={deleteAccount.openDeleteModal} activeOpacity={0.8} testID="settings-delete-account-button">
-              <Feather name="trash-2" size={17} color={colors.accentRed} />
-              <Text style={[styles.actionBtnText, { color: colors.accentRed }]}>Delete Account</Text>
-            </TouchableOpacity>
-          </View>
-
-          <Text style={styles.versionText}>Aivorah v1.0.0 · Build 2024</Text>
-        </ScrollView>
       </View>
 
       <NameModal
