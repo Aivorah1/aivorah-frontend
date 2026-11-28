@@ -9,7 +9,7 @@ import { LEGACY_ACCOUNT_BACKEND, USE_LOCAL_SERVICES } from './localServices';
 // account got suspended for billing). Temporary URL until the account's custom
 // domain/naming is sorted out — Render appended a random suffix since the
 // original name is still claimed by the suspended account.
-export const LIVE_SERVICE = 'https://aivorah-auth-service-6zno.onrender.com';
+export const LIVE_SERVICE = 'https://aivorah-auth-service-1.onrender.com';
 
 const AUTH_SERVER_URL =
   USE_LOCAL_SERVICES ? 'http://localhost:4001' : (LEGACY_ACCOUNT_BACKEND ?? LIVE_SERVICE);
