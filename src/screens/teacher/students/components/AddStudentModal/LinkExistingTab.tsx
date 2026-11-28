@@ -37,7 +37,7 @@ export default function LinkExistingTab({
       </Text>
 
       {/* Search bar */}
-      <View style={styles.modalInput}>
+      <View style={styles.modalInput} {...{ dataSet: { studentField: 'search' } }}>
         <Feather name="search" size={14} color={colors.textDim} />
         <TextInput
           testID="teacher-students-link-search-input"

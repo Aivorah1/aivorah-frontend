@@ -13,7 +13,7 @@ export function getCuratedSyllabus(curriculum: string, grade: string, subject: s
   return chapters.length > 0 ? chapters : null;
 }
 
-export async function fetchPublishedSyllabus(curriculum: string, grade: string, subject: string): Promise<DbUnit[]> {
+export async function fetchPublishedSyllabus(curriculum: string, grade: string, subject: string, strict = false): Promise<DbUnit[]> {
   // IB DP, IB MYP, and Cambridge Grade 6+ have no teacher-uploaded
   // syllabus_chapters rows — their content lives in Qdrant (see
   // aivorah-learning-paths-service routes/curriculum.js), so they read from
@@ -26,7 +26,10 @@ export async function fetchPublishedSyllabus(curriculum: string, grade: string, 
     ? `/curriculum/syllabus?grade=${encodeURIComponent(grade)}&subject=${encodeURIComponent(subject)}&curriculum=${encodeURIComponent(curriculum)}`
     : `/teacher/syllabus/current?grade=${encodeURIComponent(grade)}&subject=${encodeURIComponent(subject)}&curriculum=${encodeURIComponent(curriculum)}`;
   const res = await fetch(`${LEARNING_PATHS_SERVER_URL}${path}`);
-  if (!res.ok) return [];
+  if (!res.ok) {
+    if (strict) throw new Error('Could not load published syllabus');
+    return [];
+  }
   const data = await res.json();
   // Keep chapters that have no lessons yet. The server now returns the book's
   // FULL chapter list (empty ones flagged `pending`), and dropping those here
@@ -41,5 +44,6 @@ export async function fetchPublishedSyllabus(curriculum: string, grade: string, 
   // generic "being processed" screen instead of showing their real chapter
   // titles as pending — the exact anti-pattern the per-chapter `pending` flag
   // above was already introduced to avoid.
+  if (strict && !Array.isArray(data.units)) throw new Error('Invalid published syllabus response');
   return data.units || [];
 }

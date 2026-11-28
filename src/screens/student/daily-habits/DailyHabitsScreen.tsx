@@ -35,81 +35,83 @@ export default function DailyHabitsScreen({ navigation }: any) {
           showBack={true}
           onMenuPress={() => navigation.openDrawer()}
           showSearch={false}
+          renderContent={mobileTitle => (
+            <ScrollView
+              contentContainerStyle={styles.content}
+              showsVerticalScrollIndicator={false}
+              refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={TEAL} />}
+            >
+              {mobileTitle}
+              {loading && (
+                <View style={styles.center}>
+                  <ActivityIndicator size="large" color={TEAL} />
+                </View>
+              )}
+
+              {!loading && !!error && (
+                <View style={styles.center}>
+                  <Feather name="alert-circle" size={28} color={colors.accentRed} />
+                  <Text style={[styles.errorHint, { color: colors.textMuted }]}>{error}</Text>
+                </View>
+              )}
+
+              {!loading && !error && data && (
+                <>
+                  <HabitStatsRow
+                    streak={data.streak}
+                    totalCoins={data.totalCoins}
+                    completedCount={completedCount}
+                    totalHabits={totalHabits}
+                    textMuted={colors.textMuted}
+                    styles={styles}
+                  />
+
+                  <HabitProgressCard
+                    allDone={allDone}
+                    completedCount={completedCount}
+                    totalHabits={totalHabits}
+                    coinsEarned={data.today?.coinsEarned ?? 0}
+                    progressPct={progressPct}
+                    streak={data.streak}
+                    streakBonus={data.streakBonus}
+                    cardDark={colors.cardDark}
+                    borderColor={colors.borderColor}
+                    textMain={colors.textMain}
+                    styles={styles}
+                  />
+
+                  <Text style={[styles.sectionTitle, { color: colors.primary }]}>TODAY&apos;S HABITS</Text>
+
+                  <HabitGrid
+                    tasks={parentTasks}
+                    completed={completed}
+                    checking={checking}
+                    coinPop={coinPop}
+                    onToggle={toggleHabit}
+                    cardDark={colors.cardDark}
+                    textMain={colors.textMain}
+                    textMuted={colors.textMuted}
+                    textDim={colors.textDim}
+                    emptyBorderColor={colors.borderColor}
+                    styles={styles}
+                  />
+
+                  <HabitJournalCard
+                    journalText={data.journalText}
+                    cardDark={colors.cardDark}
+                    borderColor={colors.borderColor}
+                    textMain={colors.textMain}
+                    textMuted={colors.textMuted}
+                    textDim={colors.textDim}
+                    styles={styles}
+                  />
+
+                  <MotivationFooter streak={data.streak} textMuted={colors.textMuted} styles={styles} />
+                </>
+              )}
+            </ScrollView>
+          )}
         />
-
-        <ScrollView
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={TEAL} />}
-        >
-          {loading && (
-            <View style={styles.center}>
-              <ActivityIndicator size="large" color={TEAL} />
-            </View>
-          )}
-
-          {!loading && !!error && (
-            <View style={styles.center}>
-              <Feather name="alert-circle" size={28} color={colors.accentRed} />
-              <Text style={[styles.errorHint, { color: colors.textMuted }]}>{error}</Text>
-            </View>
-          )}
-
-          {!loading && !error && data && (
-            <>
-              <HabitStatsRow
-                streak={data.streak}
-                totalCoins={data.totalCoins}
-                completedCount={completedCount}
-                totalHabits={totalHabits}
-                textMuted={colors.textMuted}
-                styles={styles}
-              />
-
-              <HabitProgressCard
-                allDone={allDone}
-                completedCount={completedCount}
-                totalHabits={totalHabits}
-                coinsEarned={data.today?.coinsEarned ?? 0}
-                progressPct={progressPct}
-                streak={data.streak}
-                streakBonus={data.streakBonus}
-                cardDark={colors.cardDark}
-                borderColor={colors.borderColor}
-                textMain={colors.textMain}
-                styles={styles}
-              />
-
-              <Text style={[styles.sectionTitle, { color: colors.primary }]}>TODAY&apos;S HABITS</Text>
-
-              <HabitGrid
-                tasks={parentTasks}
-                completed={completed}
-                checking={checking}
-                coinPop={coinPop}
-                onToggle={toggleHabit}
-                cardDark={colors.cardDark}
-                textMain={colors.textMain}
-                textMuted={colors.textMuted}
-                textDim={colors.textDim}
-                emptyBorderColor={colors.borderColor}
-                styles={styles}
-              />
-
-              <HabitJournalCard
-                journalText={data.journalText}
-                cardDark={colors.cardDark}
-                borderColor={colors.borderColor}
-                textMain={colors.textMain}
-                textMuted={colors.textMuted}
-                textDim={colors.textDim}
-                styles={styles}
-              />
-
-              <MotivationFooter streak={data.streak} textMuted={colors.textMuted} styles={styles} />
-            </>
-          )}
-        </ScrollView>
       </View>
     </ScreenLayout>
   );

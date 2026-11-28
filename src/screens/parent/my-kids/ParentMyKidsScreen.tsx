@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl, Modal, TextInput } from 'react-native';
 import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { Feather } from '@expo/vector-icons';
@@ -8,11 +8,19 @@ import { useTheme } from '../../../context/ThemeContext';
 import { ChildCard } from './components/ChildCard';
 import { useMyKids } from './hooks/useMyKids';
 import { makeStyles } from './styles';
+import AddYourChild from '../onboarding/components/AddYourChild';
 
-export default function ParentMyKidsScreen({ navigation }: any) {
+export default function ParentMyKidsScreen({ navigation, route }: any) {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const k = useMyKids();
+  const openAddChild = route?.params?.openAddChild === true;
+  const { openModal } = k;
+  useEffect(() => {
+    if (!openAddChild) return;
+    navigation.setParams({ openAddChild: undefined });
+    openModal('create');
+  }, [navigation, openAddChild, openModal]);
 
   return (
     <ScreenLayout>
@@ -29,7 +37,7 @@ export default function ParentMyKidsScreen({ navigation }: any) {
           showsVerticalScrollIndicator={false}
           refreshControl={<RefreshControl refreshing={k.refreshing} onRefresh={() => { k.setRefreshing(true); k.fetchChildren(); }} tintColor={colors.accentYellow} />}
         >
-          <View style={styles.headerRow}>
+          {k.children.length > 0 && <View style={styles.headerRow}>
             <View style={{ flex: 1 }}>
               <Text style={styles.pageTitle}>Managed Accounts</Text>
               <Text style={styles.pageSubtitle}>View progress, manage controls, and update settings for your children.</Text>
@@ -38,7 +46,7 @@ export default function ParentMyKidsScreen({ navigation }: any) {
               <Feather name="user-plus" size={16} color="#fff" />
               <Text style={styles.addChildBtnTxt}>Add Child</Text>
             </TouchableOpacity>
-          </View>
+          </View>}
 
           {k.loading ? (
             <ActivityIndicator color={colors.accentYellow} style={{ paddingVertical: 48 }} />
@@ -58,18 +66,7 @@ export default function ParentMyKidsScreen({ navigation }: any) {
                 />
               ))}
 
-              {k.children.length === 0 && (
-                <View style={styles.emptyState}>
-                  <Feather name="book-open" size={40} color={colors.primary} />
-                  <Text style={styles.emptyTitle}>No children linked yet</Text>
-                  <Text style={styles.emptySub}>Create a new child account, or link one that already exists, to track learning, tasks, attendance and progress.</Text>
-                  <TouchableOpacity testID="my-kids-empty-add" onPress={() => k.openModal('create')} activeOpacity={0.8} accessibilityRole="button"
-                    style={{ marginTop: 4, minHeight: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingHorizontal: 20, borderRadius: 12, backgroundColor: colors.primary }}>
-                    <Feather name="plus" size={18} color={colors.onPrimary} />
-                    <Text style={{ fontSize: 16, fontWeight: '700', color: colors.onPrimary }}>Add Child</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
+              {k.children.length === 0 && <AddYourChild testID="my-kids-empty" onAdd={() => k.openModal('create')} />}
             </View>
           )}
         </ScrollView>

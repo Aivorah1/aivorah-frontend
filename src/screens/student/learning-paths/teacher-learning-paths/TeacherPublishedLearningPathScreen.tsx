@@ -22,34 +22,38 @@ export default function TeacherPublishedLearningPathScreen({ route, navigation }
 
   return (
     <ScreenLayout>
-      <Header title={title || 'Learning Path'} onMenuPress={() => navigation.openDrawer?.()} />
-      <ScrollView contentContainerStyle={styles.container}>
-        {status === 'loading' && <ActivityIndicator testID="teacher-lp-detail-loading" color={colors.primary} />}
+      <Header title={title || 'Learning Path'} onMenuPress={() => navigation.openDrawer?.()}
+        renderContent={mobileTitle => (
+          <ScrollView contentContainerStyle={styles.container}>
+            {mobileTitle}
+            {status === 'loading' && <ActivityIndicator testID="teacher-lp-detail-loading" color={colors.primary} />}
 
-        {status === 'not_found' && (
-          <Text testID="teacher-lp-detail-not-found" style={styles.dimText}>
-            This learning path isn&apos;t available right now.
-          </Text>
-        )}
+            {status === 'not_found' && (
+              <Text testID="teacher-lp-detail-not-found" style={styles.dimText}>
+                This learning path isn&apos;t available right now.
+              </Text>
+            )}
 
-        {status === 'forbidden' && (
-          <Text testID="teacher-lp-detail-forbidden" style={styles.dimText}>
-            You don&apos;t have access to this learning path.
-          </Text>
-        )}
+            {status === 'forbidden' && (
+              <Text testID="teacher-lp-detail-forbidden" style={styles.dimText}>
+                You don&apos;t have access to this learning path.
+              </Text>
+            )}
 
-        {status === 'error' && (
-          <Text testID="teacher-lp-detail-error" style={styles.errorText}>{errorMessage}</Text>
-        )}
+            {status === 'error' && (
+              <Text testID="teacher-lp-detail-error" style={styles.errorText}>{errorMessage}</Text>
+            )}
 
-        {status === 'ok' && learningPath && learningPath.content.units.length === 0 && (
-          <Text testID="teacher-lp-detail-empty" style={styles.dimText}>This learning path has no content yet.</Text>
-        )}
+            {status === 'ok' && learningPath && learningPath.content.units.length === 0 && (
+              <Text testID="teacher-lp-detail-empty" style={styles.dimText}>This learning path has no content yet.</Text>
+            )}
 
-        {status === 'ok' && learningPath && learningPath.content.units.length > 0 && (
-          <TeacherPathTopics content={learningPath.content} pathKey={curriculumId} colors={colors} navigation={navigation} />
+            {status === 'ok' && learningPath && learningPath.content.units.length > 0 && (
+              <TeacherPathTopics content={learningPath.content} pathKey={curriculumId} colors={colors} navigation={navigation} />
+            )}
+          </ScrollView>
         )}
-      </ScrollView>
+      />
     </ScreenLayout>
   );
 }

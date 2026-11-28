@@ -82,7 +82,13 @@ describe('StudentDataContext — startTopicActivity (B001/B002/B003 fix)', () =>
     expect(screen.getByTestId('started')).toHaveTextContent('Fractions'); // not duplicated
   });
 
-  test('In Progress -> Completed: passing a quiz moves status to Completed, not back to Not Started', async () => {
+  test.each([true, false])('only a server-confirmed completion changes the topic status (confirmed: %s)', async (confirmed) => {
+    if (confirmed) {
+      global.fetch = jest.fn(async (url: string) => ({
+        ok: true,
+        json: async () => ({ id: 'student-1', completedTopics: url.endsWith('/complete-lesson') ? ['Fractions'] : [] }),
+      })) as any;
+    }
     const user = userEvent.setup();
     await render(<StudentDataProvider><Harness /></StudentDataProvider>);
     await waitFor(() => expect(screen.getByTestId('explored')).toHaveTextContent('0'));
@@ -92,6 +98,6 @@ describe('StudentDataContext — startTopicActivity (B001/B002/B003 fix)', () =>
 
     await user.press(screen.getByTestId('complete'));
 
-    await waitFor(() => expect(screen.getByTestId('isInProgress')).toHaveTextContent('false')); // now Completed, not In Progress
+    await waitFor(() => expect(screen.getByTestId('isInProgress')).toHaveTextContent(String(!confirmed)));
   });
 });

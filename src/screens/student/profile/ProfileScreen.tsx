@@ -33,72 +33,73 @@ export default function ProfileScreen({ navigation }: any) {
   return (
     <ScreenLayout>
       <View style={styles.screen}>
-        <Header title="My Profile" />
+        <Header title="My Profile" renderContent={mobileTitle => (
+          <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+            {mobileTitle}
 
-        <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+            <ProfileHero
+              styles={styles}
+              colors={colors}
+              isDark={isDark}
+              user={p.user}
+              photoUrl={p.photoUrl}
+              uploading={p.uploading}
+              currentAvatar={p.currentAvatar}
+              heroGreen={heroGreen}
+              heroGold={heroGold}
+              onEditPress={() => p.setEditVisible(true)}
+              onPickPhoto={p.handlePickPhoto}
+              onNavigateSubscription={() => navigation.navigate('Subscription')}
+            />
 
-          <ProfileHero
-            styles={styles}
-            colors={colors}
-            isDark={isDark}
-            user={p.user}
-            photoUrl={p.photoUrl}
-            uploading={p.uploading}
-            currentAvatar={p.currentAvatar}
-            heroGreen={heroGreen}
-            heroGold={heroGold}
-            onEditPress={() => p.setEditVisible(true)}
-            onPickPhoto={p.handlePickPhoto}
-            onNavigateSubscription={() => navigation.navigate('Subscription')}
-          />
+            <AvatarPickerCard
+              styles={styles}
+              colors={colors}
+              isDark={isDark}
+              avatars={p.AVATARS}
+              selAvatar={p.selAvatar}
+              photoUrl={p.photoUrl}
+              onSelectAvatar={p.handleSelectAvatar}
+            />
 
-          <AvatarPickerCard
-            styles={styles}
-            colors={colors}
-            isDark={isDark}
-            avatars={p.AVATARS}
-            selAvatar={p.selAvatar}
-            photoUrl={p.photoUrl}
-            onSelectAvatar={p.handleSelectAvatar}
-          />
+            <LearningStyleCard
+              styles={styles}
+              colors={colors}
+              isDark={isDark}
+              learningStyles={LEARNING_STYLES}
+              learningStyle={p.learningStyle}
+              onSelect={p.handleSelectLearningStyle}
+            />
 
-          <LearningStyleCard
-            styles={styles}
-            colors={colors}
-            isDark={isDark}
-            learningStyles={LEARNING_STYLES}
-            learningStyle={p.learningStyle}
-            onSelect={p.handleSelectLearningStyle}
-          />
+            <SubjectsCard
+              styles={styles}
+              colors={colors}
+              isDark={isDark}
+              subjectOptions={SUBJECT_OPTIONS}
+              interests={p.interests}
+              onToggleInterest={p.toggleInterest}
+            />
 
-          <SubjectsCard
-            styles={styles}
-            colors={colors}
-            isDark={isDark}
-            subjectOptions={SUBJECT_OPTIONS}
-            interests={p.interests}
-            onToggleInterest={p.toggleInterest}
-          />
+            <LearningBuddyCard
+              styles={styles}
+              colors={colors}
+              isDark={isDark}
+              savedBuddy={p.savedBuddy}
+              onOpenCustomize={() => p.setBuddyModalVisible(true)}
+            />
 
-          <LearningBuddyCard
-            styles={styles}
-            colors={colors}
-            isDark={isDark}
-            savedBuddy={p.savedBuddy}
-            onOpenCustomize={() => p.setBuddyModalVisible(true)}
-          />
+            <AccountCard
+              styles={styles}
+              colors={colors}
+              isDark={isDark}
+              onNotifications={() => navigation?.navigate?.('Settings', { section: 'notifications' })}
+              onPrivacy={() => navigation?.navigate?.('Settings', { section: 'security' })}
+              onHelpCenter={() => navigation?.navigate?.('HelpCenter')}
+              onSignOut={() => p.setSignOutVisible(true)}
+            />
 
-          <AccountCard
-            styles={styles}
-            colors={colors}
-            isDark={isDark}
-            onNotifications={() => navigation?.navigate?.('Settings', { section: 'notifications' })}
-            onPrivacy={() => navigation?.navigate?.('Settings', { section: 'security' })}
-            onHelpCenter={() => navigation?.navigate?.('HelpCenter')}
-            onSignOut={() => p.setSignOutVisible(true)}
-          />
-
-        </ScrollView>
+          </ScrollView>
+        )} />
 
         <LearningBuddyModal
           styles={styles}

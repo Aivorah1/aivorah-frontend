@@ -18,9 +18,10 @@ import {
 import { initials, pastelBg, pastelText } from '../utils/avatar';
 import { isGroupIcon } from '../utils/icons';
 
-export default function ChannelThreadView({ channel, onBack }: {
+export default function ChannelThreadView({ channel, onBack, compact }: {
   channel: { id: string; name: string; iconLabel?: string; memberCount?: number };
   onBack: () => void;
+  compact?: boolean;
 }) {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -111,7 +112,10 @@ export default function ChannelThreadView({ channel, onBack }: {
   return (
     <View style={styles.wrap}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={onBack} style={{ marginRight: 4 }}><Feather name="chevron-left" size={22} color={colors.textMuted} /></TouchableOpacity>
+        <TouchableOpacity onPress={onBack} accessibilityRole="button" accessibilityLabel="Back to conversations"
+          style={[{ marginRight: 4 }, compact && { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }]}>
+          <Feather name="chevron-left" size={22} color={colors.textMuted} />
+        </TouchableOpacity>
         <View style={[styles.groupBadge, { backgroundColor: pastelBg(channel.name) }]}><Feather name={isGroupIcon(channel.iconLabel) ? channel.iconLabel : 'users'} size={16} color={pastelText(channel.name)} /></View>
         <Text style={styles.title} numberOfLines={1}>{channel.name}</Text>
         <TouchableOpacity style={styles.membersBtn} onPress={openMembers}><Feather name="users" size={15} color={colors.textMuted} /><Text style={styles.membersBtnText}>{channel.memberCount ?? ''}</Text></TouchableOpacity>
@@ -135,7 +139,10 @@ export default function ChannelThreadView({ channel, onBack }: {
 
       {canPost ? (
         <View style={styles.composer}>
-          <TextInput testID="messages-channel-input" style={styles.composerInput} value={draft} onChangeText={setDraft} placeholder="Write a message…" placeholderTextColor={colors.textDim} multiline />
+          <TextInput testID="messages-channel-input" accessibilityLabel="Message"
+            style={[styles.composerInput, compact && { minWidth: 0, minHeight: 44, fontSize: 16, lineHeight: 22 }]}
+            value={draft} onChangeText={setDraft} placeholder="Write a message…" placeholderTextColor={colors.textDim}
+            multiline {...(compact && Platform.OS === 'web' ? { rows: 1 } : {})} />
           <TouchableOpacity testID="messages-channel-send-button" style={[styles.sendBtn, (!draft.trim() || sending) && { opacity: 0.5 }]} disabled={!draft.trim() || sending} onPress={send}>
             {sending ? <ActivityIndicator size="small" color="#fff" /> : <Feather name="send" size={16} color="#fff" />}
           </TouchableOpacity>

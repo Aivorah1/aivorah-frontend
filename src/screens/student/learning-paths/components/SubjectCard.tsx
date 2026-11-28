@@ -6,10 +6,12 @@ import { useTheme } from '../../../../context/ThemeContext';
 import { cardStyles } from '../styles';
 import { subjectMeta } from '../utils';
 import type { SubjectData } from '../types';
+import type { SubjectProgress } from '../subjectProgress';
 
 export default function SubjectCard({
   data,
   completedSet,
+  progress,
   onPress,
   width,
   isBlocked,
@@ -17,6 +19,7 @@ export default function SubjectCard({
 }: {
   data: SubjectData;
   completedSet: Set<string>;
+  progress?: Omit<SubjectProgress, 'subject'> | null;
   onPress: () => void;
   width: `${number}%` | number;
   isBlocked?: boolean;
@@ -27,8 +30,10 @@ export default function SubjectCard({
   // Student Portal: neutral card surfaces in both themes (no gold/tinted blocks).
   const neutral = portal === 'student' || portal === 'teacher' || portal === 'parent'; // Teacher (Phase 4) and Parent (Phase 5) reuse this card
   const meta = subjectMeta(data.subject);
-  const done = data.topics.reduce((acc, topic) => acc + (completedSet.has(topic.topic) ? 1 : 0), 0);
-  const pct = data.topicCount > 0 ? Math.round((done / data.topicCount) * 100) : 0;
+  const done = progress === undefined ? data.topics.reduce((acc, topic) => acc + (completedSet.has(topic.topic) ? 1 : 0), 0) : progress?.done ?? 0;
+  const pct = progress === undefined
+    ? (data.topicCount > 0 ? Math.round((done / data.topicCount) * 100) : 0)
+    : progress?.pct ?? null;
   const accent = neutral ? colors.primary : isDark ? meta.accentDark : meta.accentLight;
   const ink = neutral ? colors.textHeading : '#1C2A28';
   const sub = neutral ? colors.textMuted : '#3A5A56';
@@ -57,19 +62,22 @@ export default function SubjectCard({
             <Feather name={meta.icon} size={18} color={accent} />
           </View>
           <View style={[cardStyles.pctPill, { borderColor: accent + '88', backgroundColor: chip }]}>
-            <Text style={[cardStyles.pctText, { color: accent }]}>{pct}%</Text>
+            <Text style={[cardStyles.pctText, { color: accent }]}>{pct === null ? '—' : `${pct}%`}</Text>
           </View>
         </View>
         <Text testID="subject-card-name" style={[cardStyles.subjectName, { color: ink }]} numberOfLines={3}>{data.subject}</Text>
         {!!data.books?.length && (
           <Text testID="subject-card-book" style={[cardStyles.statMini, { color: sub }]} numberOfLines={2}>{data.books.join(' · ')}</Text>
         )}
-        <View style={cardStyles.statRow}>
+        <View style={[cardStyles.statRow, progress !== undefined && { flexWrap: 'wrap', columnGap: 8 }]}>
           <Text style={[cardStyles.statMini, { color: sub }]}>{countLabel}</Text>
-          <Text style={[cardStyles.statMini, { color: sub }]}>{done} completed</Text>
+          {progress?.pct === null && <Text style={[cardStyles.statMini, { color: sub }]}>Topic totals unavailable</Text>}
+          {pct !== null && <Text style={[cardStyles.statMini, { color: sub }]}>
+            {progress ? `${done} / ${progress.total} topics complete` : `${done} completed`}
+          </Text>}
         </View>
         <View style={[cardStyles.track, { backgroundColor: neutral ? colors.cardHover : accent + '40' }]}>
-          <View style={[cardStyles.fill, { width: `${pct}%`, backgroundColor: accent }]} />
+          <View style={[cardStyles.fill, { width: `${pct ?? 0}%`, backgroundColor: accent }]} />
         </View>
 
         {isBlocked && (

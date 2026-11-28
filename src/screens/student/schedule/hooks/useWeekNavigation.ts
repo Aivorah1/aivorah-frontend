@@ -63,6 +63,11 @@ export function useWeekNavigation(scrollToNow?: MutableRefObject<((animated?: bo
     setWeekBase(new Date(year, month - 1, day));
   }
 
+  function syncPickerMonth() {
+    setCalYear(weekBase.getFullYear());
+    setCalMonth(weekBase.getMonth() + 1);
+  }
+
   // Auto-scroll to today whenever the current week is in view (mount + week change),
   // exactly like the Parent schedule.
   useEffect(() => {
@@ -76,7 +81,7 @@ export function useWeekNavigation(scrollToNow?: MutableRefObject<((animated?: bo
     calYear, calMonth, calWeeks,
     colWidth, gridHeight,
     hScrollRef, vScrollRef, didInitialScrollRef,
-    prevWeek, nextWeek, goToday, prevMonth, nextMonth, selectDate,
+    prevWeek, nextWeek, goToday, prevMonth, nextMonth, selectDate, syncPickerMonth,
     scrollToToday, scrollToCurrentTime,
   };
 }

@@ -6,12 +6,19 @@ import { fetchEventsForDate, deleteEvent as deleteEventApi } from '../services/s
 import { dateISO } from '../utils/scheduleUtils';
 
 export function useScheduleEvents(week: WeekDay[], userEmail: string | undefined, firstLoadDoneRef: MutableRefObject<boolean>) {
-  const [eventsMap, setEventsMap] = useState<Record<string, ScheduleEvent[]>>({});
+  const [eventsMap, setEventsState] = useState<Record<string, ScheduleEvent[]>>({});
   const [loading, setLoading] = useState(false);
   const [nowTime, setNowTime] = useState(new Date());
   const notifiedEventsRef = useRef<Set<string>>(new Set());
+  const fetchVersion = useRef(0);
+  const setEventsMap = useCallback<React.Dispatch<React.SetStateAction<Record<string, ScheduleEvent[]>>>>((update) => {
+    // A refresh started before a local create/edit/delete must not undo that change.
+    fetchVersion.current += 1;
+    setEventsState(update);
+  }, []);
 
   const fetchEvents = useCallback(async () => {
+    const version = ++fetchVersion.current;
     // Only show the full-page spinner on the very first load.
     // All subsequent fetches (week change, focus, poll) run silently in background.
     if (!firstLoadDoneRef.current) setLoading(true);
@@ -24,20 +31,23 @@ export function useScheduleEvents(week: WeekDay[], userEmail: string | undefined
       for (const { date, events } of dayResults) {
         map[date] = events;
       }
-      setEventsMap(map);
+      if (version === fetchVersion.current) setEventsState(map);
     } catch {}
-    if (!firstLoadDoneRef.current) {
+    if (version === fetchVersion.current) {
       firstLoadDoneRef.current = true;
       setLoading(false);
     }
-  }, [week, userEmail]);
+  }, [week, userEmail, firstLoadDoneRef]);
 
   useEffect(() => {
     // data fetching effect — setState happens inside fetchEvents, not synchronously here
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchEvents();
     const interval = setInterval(() => fetchEvents(), 30 * 1000);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      fetchVersion.current += 1;
+    };
   }, [fetchEvents]);
 
   useFocusEffect(useCallback(() => { fetchEvents(); }, [fetchEvents]));
@@ -82,7 +92,7 @@ export function useScheduleEvents(week: WeekDay[], userEmail: string | undefined
       ...prev,
       [dateStr]: (prev[dateStr] ?? []).filter(e => e.id !== id),
     }));
-  }, []);
+  }, [setEventsMap]);
 
   return { eventsMap, setEventsMap, loading, nowTime, fetchEvents, removeEvent };
 }

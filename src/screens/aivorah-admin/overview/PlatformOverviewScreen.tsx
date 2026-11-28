@@ -6,6 +6,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import Header from '../../../components/common/Header';
 import ScreenLayout from '../../../components/common/ScreenLayout';
 import { useTheme } from '../../../context/ThemeContext';
+import { useResponsive } from '../../../hooks/useResponsive';
 import { makeStyles } from './styles';
 import { usePlatformOverview } from './hooks/usePlatformOverview';
 import KpiCard from './components/KpiCard';
@@ -21,6 +22,7 @@ type StudentSegment = 'all' | 'b2b' | 'b2c';
 
 export default function PlatformOverviewScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { isMobile } = useResponsive();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const {
     data, charts, loading, error, load,
@@ -80,18 +82,24 @@ export default function PlatformOverviewScreen({ navigation }: any) {
     downloadCsv('aivorah-students.csv', csv);
   }
 
+  const pageHeader = <Header title="Platform Overview" subtitle="Registered accounts and school-by-school activity, platform-wide." onMenuPress={() => navigation?.openDrawer?.()} />;
+  const refreshButton = (
+    <TouchableOpacity testID="overview-refresh-button" style={styles.refreshBtn} onPress={() => load()} activeOpacity={0.8}>
+      <Feather name="refresh-cw" size={14} color={colors.textMain} />
+      <Text style={styles.refreshBtnText}>Refresh</Text>
+    </TouchableOpacity>
+  );
+
   return (
     <ScreenLayout>
       <View style={styles.screen}>
-        <View style={styles.headerRow}>
-          <View style={{ flex: 1 }}>
-            <Header title="Platform Overview" subtitle="Registered accounts and school-by-school activity, platform-wide." onMenuPress={() => navigation?.openDrawer?.()} />
+        {isMobile ? pageHeader : (
+          <View style={styles.headerRow}>
+            <View style={{ flex: 1 }}>{pageHeader}</View>
+            {refreshButton}
           </View>
-          <TouchableOpacity testID="overview-refresh-button" style={styles.refreshBtn} onPress={() => load()} activeOpacity={0.8}>
-            <Feather name="refresh-cw" size={14} color={colors.textMain} />
-            <Text style={styles.refreshBtnText}>Refresh</Text>
-          </TouchableOpacity>
-        </View>
+        )}
+        {isMobile && <View style={{ alignItems: 'flex-end', paddingHorizontal: loading || error ? 16 : 0 }}>{refreshButton}</View>}
 
         {loading ? (
           <ActivityIndicator size="large" color={colors.accentYellow} style={{ marginTop: 40 }} />

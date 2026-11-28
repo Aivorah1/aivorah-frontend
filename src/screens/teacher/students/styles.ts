@@ -1,5 +1,5 @@
 import { StyleSheet, Platform } from 'react-native';
-import { spacing, radius } from '../../../theme';
+import { spacing, radius, fonts } from '../../../theme';
 import type { AppColors } from '../../../theme';
 
 export const dialogStyles = StyleSheet.create({
@@ -123,29 +123,28 @@ export const makeStyles = (c: AppColors) => StyleSheet.create({
   emptyAddBtnText: { fontSize: 14, fontWeight: '700', color: c.onPrimary },
 
   // Modal
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.65)', alignItems: 'center', justifyContent: 'center', padding: spacing.xl },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.65)', alignItems: 'center', justifyContent: 'center', padding: spacing.lg },
   modalBox: { backgroundColor: c.cardDark, borderWidth: 1, borderColor: c.borderColor, borderRadius: radius.xl, padding: spacing.xl, width: '100%', maxWidth: 480 },
-  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.lg },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  modalClose: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   modalTitle: { fontSize: 17, fontWeight: '700', color: c.textMain },
   modalNote: { fontSize: 13, color: c.textMuted, lineHeight: 20, marginBottom: spacing.md },
-  modalTabs: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.lg },
+  modalTabs: { flexDirection: 'row', gap: 6, marginBottom: 20 },
   modalTab: {
-    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
-    paddingVertical: 10, borderRadius: radius.md, borderWidth: 1,
-    borderColor: c.borderColor, backgroundColor: 'transparent',
+    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap',
+    gap: 4, minHeight: 44, paddingVertical: 6, paddingHorizontal: 4, borderRadius: 16, borderWidth: 1,
   },
-  modalTabActive: { borderColor: c.accentYellow, backgroundColor: c.accentYellow + '18' },
-  modalTabText: { fontSize: 13, fontWeight: '600', color: c.textMuted },
+  modalTabText: { fontSize: 12, fontWeight: '700', textAlign: 'center' },
   modalFieldLabel: { fontSize: 12, fontWeight: '600', color: c.textMuted, marginBottom: 4 },
   modalInput: {
     flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
     backgroundColor: c.bgDark, borderWidth: 1, borderColor: c.borderColor,
     borderRadius: radius.md, height: 46, paddingHorizontal: spacing.md,
   },
-  modalTextInput: { flex: 1, fontSize: 14, color: c.textMain, ...(Platform.OS === 'web' ? { outlineStyle: 'none' as any } : {}) },
+  modalTextInput: { flex: 1, minWidth: 0, fontSize: 16, color: c.textMain, ...(Platform.OS === 'web' ? { outlineStyle: 'none' as const, fontFamily: fonts.sans } : {}) },
   modalOption: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 10, paddingVertical: 8, borderRadius: 8, borderWidth: 1, marginTop: 4,
+    paddingHorizontal: 10, minHeight: 40, gap: 4, paddingVertical: 8, borderRadius: 10, borderWidth: 1, marginTop: 4,
   },
   modalBtns: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.lg },
   modalCancelBtn: { flex: 1, height: 46, borderRadius: radius.md, borderWidth: 1, borderColor: c.borderColor, alignItems: 'center', justifyContent: 'center' },

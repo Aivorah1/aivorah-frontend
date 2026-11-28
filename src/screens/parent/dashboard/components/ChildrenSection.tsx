@@ -6,6 +6,7 @@ import Icon from '../../../../components/common/Icon';
 import type { AppColors } from '../../../../theme';
 import type { ChildData } from '../types';
 import ChildCard from './ChildCard';
+import AddYourChild from '../../onboarding/components/AddYourChild';
 
 export default function ChildrenSection({
   childrenList, childrenLoading, selectedChild, onSelectChild, onViewCreds, onAddChild,
@@ -17,24 +18,13 @@ export default function ChildrenSection({
 }) {
   const child = selectedChild;
 
+  if (!childrenLoading && childrenList.length === 0) {
+    return <AddYourChild onAdd={onAddChild} />;
+  }
+
   return (
     <View style={[s.childSection, isWide && { flex: 1 }]}>
       <Text style={s.sectionTitle}>My Children</Text>
-      {!childrenLoading && childrenList.length === 0 ? (
-        // Website Redesign, Phase 5: a clear, compact card with the action easy to find.
-        <View testID="parent-no-children" style={{ marginTop: 12, alignItems: 'center', gap: 8, paddingVertical: 28, paddingHorizontal: 20, borderRadius: 22, borderWidth: 1, borderColor: colors.borderColor, backgroundColor: colors.cardDark }}>
-          <Icon name="book-open" size={36} color={colors.textHeading} />
-          <Text style={{ fontSize: 18, fontWeight: '700', color: colors.textHeading, textAlign: 'center' }}>No children linked yet</Text>
-          <Text style={{ fontSize: 14.5, lineHeight: 21, color: colors.textMuted, textAlign: 'center', maxWidth: 420 }}>
-            Add a child to track learning, tasks, attendance and progress.
-          </Text>
-          <TouchableOpacity onPress={onAddChild} activeOpacity={0.8} accessibilityRole="button"
-            style={{ marginTop: 8, minHeight: 46, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingHorizontal: 22, borderRadius: 999, backgroundColor: colors.primary }}>
-            <Icon name="plus" size={18} color={colors.onPrimary} />
-            <Text style={{ fontSize: 16, fontWeight: '700', color: colors.onPrimary }}>Add Child</Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.childScroll}>
         {childrenLoading ? (
           <ActivityIndicator color={colors.accentYellow} style={{ marginTop: 40, marginLeft: 8 }} />
@@ -56,7 +46,6 @@ export default function ChildrenSection({
           </>
         )}
       </ScrollView>
-      )}
 
       {/* ── Child interest insights ── */}
       {child.id ? (() => {

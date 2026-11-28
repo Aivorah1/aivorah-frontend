@@ -169,7 +169,10 @@ export default function ParentDashboardScreen({ navigation, route }: any) {
               selectedChild={selectedChild}
               onSelectChild={setSelectedChild}
               onViewCreds={fetchCreds}
-              onAddChild={() => navigation.navigate('ParentMyKids')}
+              onAddChild={() => {
+                if (children.length) navigation.navigate('ParentMyKids');
+                else navigation.navigate('ParentMyKids', { openAddChild: true });
+              }}
               isWide={isWide}
               colors={colors}
               s={s}

@@ -1,5 +1,5 @@
 import { StyleSheet, Platform } from 'react-native';
-import { spacing, radius, typography } from '../../../theme';
+import { spacing, radius, typography, fonts } from '../../../theme';
 import type { AppColors } from '../../../theme';
 
 export const makeStyles = (c: AppColors) => StyleSheet.create({
@@ -12,6 +12,14 @@ export const makeStyles = (c: AppColors) => StyleSheet.create({
     borderRightColor: c.borderColor,
     backgroundColor: c.cardDark,
   },
+  sidebarCompact: { width: '100%', minWidth: 0, borderRightWidth: 0 },
+  compactSearchInput: { minWidth: 0, minHeight: 22, fontSize: 16, fontFamily: fonts.sans },
+  compactFilters: { flexWrap: 'wrap', borderBottomWidth: 1, borderBottomColor: c.borderColor },
+  compactFilterText: { fontSize: 12 },
+  compactNewBtn: { justifyContent: 'center', minHeight: 44, marginHorizontal: spacing.md, marginBottom: 8, marginTop: 4, borderRadius: 22, backgroundColor: c.accentYellow },
+  compactNewBtnText: { color: c.onPrimary, fontSize: 14, fontWeight: '700' },
+  compactEmojiPicker: { position: 'relative', bottom: 0, elevation: 0 },
+  backToInbox: { width: 44, height: 44, justifyContent: 'center', alignItems: 'center', borderRadius: 12, borderWidth: 1, borderColor: c.borderColor },
   sidebarHeader: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -161,7 +169,7 @@ export const makeStyles = (c: AppColors) => StyleSheet.create({
   emptySubText: { fontSize: 12, color: c.textDim, textAlign: 'center', lineHeight: 18 },
 
   // ── Chat panel ──
-  chatPanel: { flex: 1, backgroundColor: c.bgDark },
+  chatPanel: { flex: 1, minWidth: 0, backgroundColor: c.bgDark },
   noConvoState: {
     flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.md,
   },

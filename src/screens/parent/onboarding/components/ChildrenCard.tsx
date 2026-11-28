@@ -10,7 +10,7 @@ const FOREST = '#5A8A70';
 export function ChildrenCard({
   colors, styles, teal = TEAL, forest = FOREST,
   childrenList, activeChildIdx, activeChild, selectChild, removeChild, updateChild, addAnotherChild,
-  schoolLocating, setSchoolLocating,
+  schoolLocating, setSchoolLocating, autoFocusName = false,
 }: {
   colors: any; styles: any; teal?: string; forest?: string;
   childrenList: ChildEntry[]; activeChildIdx: number; activeChild: ChildEntry;
@@ -18,6 +18,7 @@ export function ChildrenCard({
   updateChild: (field: keyof ChildEntry, value: string) => void;
   addAnotherChild: () => void;
   schoolLocating: boolean; setSchoolLocating: (v: boolean) => void;
+  autoFocusName?: boolean;
 }) {
   return (
     <View style={[styles.card, styles.card3]}>
@@ -45,7 +46,7 @@ export function ChildrenCard({
       <View style={styles.fieldGroup}>
         <Text style={styles.lbl}>Child&apos;s Full Name</Text>
         <TextInput style={styles.input} value={activeChild.name} onChangeText={(v) => updateChild('name', v)}
-          placeholder="Enter your child's name" placeholderTextColor={colors.textDim} autoCapitalize="words" />
+          placeholder="Enter your child's name" placeholderTextColor={colors.textDim} autoCapitalize="words" autoFocus={autoFocusName} />
       </View>
       <View style={styles.fieldGroup}>
         <Text style={styles.lbl}>Child&apos;s Age</Text>

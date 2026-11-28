@@ -4,7 +4,7 @@
 // OnboardingStudentBoxes.integration.test.tsx).
 
 import React from 'react';
-import { render, screen, waitFor, userEvent, act, fireEvent } from '@testing-library/react-native';
+import { render, screen, waitFor, userEvent, act } from '@testing-library/react-native';
 import TeacherDashboardScreen from '../../TeacherDashboardScreen';
 
 jest.mock('@react-navigation/native', () => ({
@@ -86,11 +86,11 @@ describe('TeacherDashboardScreen', () => {
     expect(screen.getAllByText('2').length).toBeGreaterThan(0);
   }, 15000);
 
-  test('+ New Assignment opens the New Assignment chooser on Assignments', async () => {
+  test('keeps the New Assignment action out of the dashboard header', async () => {
     await render(<TeacherDashboardScreen navigation={navigation} />);
     await waitFor(() => expect(screen.getByText('Teacher Dashboard')).toBeTruthy(), { timeout: 10000 });
-    await fireEvent.press(screen.getByTestId('dashboard-new-assignment'));
-    expect(navigation.navigate).toHaveBeenCalledWith('TeacherAssignments', expect.objectContaining({ openNew: expect.any(Number) }));
+    expect(screen.queryByTestId('dashboard-new-assignment')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'New Assignment' })).toBeNull();
   }, 15000);
 
   test('Student Overview card shows the real total/active/needs-attention counts', async () => {

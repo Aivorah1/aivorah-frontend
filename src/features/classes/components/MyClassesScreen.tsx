@@ -52,55 +52,59 @@ export default function MyClassesScreen({ navigation }: any) {
   return (
     <ScreenLayout>
       <View style={styles.screen}>
-        <Header title={title} subtitle="Homeroom, portfolio and updates for your class" onMenuPress={() => navigation?.openDrawer?.()} />
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          {isB2C ? (
-            <IndependentAccountEmpty feature="classes" />
-          ) : loading ? (
-            <ActivityIndicator color={colors.accentYellow} style={{ marginTop: 40 }} />
-          ) : error ? (
-            <View style={styles.emptyBox}>
-              <Feather name="alert-circle" size={28} color={colors.textDim} />
-              <Text style={styles.emptyText}>{error}</Text>
-              <TouchableOpacity onPress={load} style={styles.retryBtn} accessibilityRole="button">
-                <Text style={styles.retryText}>Retry</Text>
-              </TouchableOpacity>
-            </View>
-          ) : classes.length === 0 ? (
-            <View style={styles.emptyBox}>
-              <Feather name="layers" size={28} color={colors.textDim} />
-              <Text style={styles.emptyText}>
-                No class assigned yet. Ask your school administrator to set a homeroom teacher for your grade & section.
-              </Text>
-            </View>
-          ) : (
-            classes.map((c, i) => (
-              <TouchableOpacity
-                key={`${c.grade}-${c.section}-${c.studentId || i}`}
-                style={styles.card}
-                activeOpacity={0.75}
-                accessibilityRole="button"
-                onPress={() => navigation?.navigate?.('ClassDetail', {
-                  grade: c.grade, section: c.section, label: c.label, code: c.code,
-                  classTeacherEmail: c.classTeacherEmail,
-                  studentId: c.studentId, studentName: c.studentName,
-                })}
-              >
-                {c.studentName && <Text style={styles.studentLabel}>{c.studentName}&apos;s classes</Text>}
-                <View style={styles.cardRow}>
-                  <View style={styles.badge}>
-                    <Text style={styles.badgeText}>{(c.grade || '').replace(/[^0-9A-Za-z]/g, '').slice(0, 2) || 'CL'}</Text>
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.cardTitle}>{c.label}</Text>
-                    <Text style={styles.cardSubtitle}>{c.code}</Text>
-                  </View>
-                  <Feather name="chevron-right" size={18} color={colors.textDim} />
+        <Header title={title} subtitle="Homeroom, portfolio and updates for your class" onMenuPress={() => navigation?.openDrawer?.()}
+          renderContent={mobileTitle => (
+            <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+              {mobileTitle}
+              {isB2C ? (
+                <IndependentAccountEmpty feature="classes" />
+              ) : loading ? (
+                <ActivityIndicator color={colors.accentYellow} style={{ marginTop: 40 }} />
+              ) : error ? (
+                <View style={styles.emptyBox}>
+                  <Feather name="alert-circle" size={28} color={colors.textDim} />
+                  <Text style={styles.emptyText}>{error}</Text>
+                  <TouchableOpacity onPress={load} style={styles.retryBtn} accessibilityRole="button">
+                    <Text style={styles.retryText}>Retry</Text>
+                  </TouchableOpacity>
                 </View>
-              </TouchableOpacity>
-            ))
+              ) : classes.length === 0 ? (
+                <View style={styles.emptyBox}>
+                  <Feather name="layers" size={28} color={colors.textDim} />
+                  <Text style={styles.emptyText}>
+                    No class assigned yet. Ask your school administrator to set a homeroom teacher for your grade & section.
+                  </Text>
+                </View>
+              ) : (
+                classes.map((c, i) => (
+                  <TouchableOpacity
+                    key={`${c.grade}-${c.section}-${c.studentId || i}`}
+                    style={styles.card}
+                    activeOpacity={0.75}
+                    accessibilityRole="button"
+                    onPress={() => navigation?.navigate?.('ClassDetail', {
+                      grade: c.grade, section: c.section, label: c.label, code: c.code,
+                      classTeacherEmail: c.classTeacherEmail,
+                      studentId: c.studentId, studentName: c.studentName,
+                    })}
+                  >
+                    {c.studentName && <Text style={styles.studentLabel}>{c.studentName}&apos;s classes</Text>}
+                    <View style={styles.cardRow}>
+                      <View style={styles.badge}>
+                        <Text style={styles.badgeText}>{(c.grade || '').replace(/[^0-9A-Za-z]/g, '').slice(0, 2) || 'CL'}</Text>
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.cardTitle}>{c.label}</Text>
+                        <Text style={styles.cardSubtitle}>{c.code}</Text>
+                      </View>
+                      <Feather name="chevron-right" size={18} color={colors.textDim} />
+                    </View>
+                  </TouchableOpacity>
+                ))
+              )}
+            </ScrollView>
           )}
-        </ScrollView>
+        />
       </View>
     </ScreenLayout>
   );

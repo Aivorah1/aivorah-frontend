@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, StyleSheet, RefreshControl, ScrollView, Modal, Platform, Pressable } from 'react-native';
+import { View, StyleSheet, RefreshControl, ScrollView, Modal, Platform } from 'react-native';
 import ActivityIndicator from '../../../components/common/AivorahLoader';
 import { spacing, radius, fonts } from '../../../theme';
 import type { AppColors } from '../../../theme';
@@ -7,12 +7,10 @@ import Header from '../../../components/common/Header';
 import ScreenLayout from '../../../components/common/ScreenLayout';
 import { useAuth } from '../../../context/AuthContext';
 import { useTheme } from '../../../context/ThemeContext';
-import { useResponsive } from '../../../hooks/useResponsive';
 
 import { useTeacherDashboardData } from './hooks/useTeacherDashboardData';
 import { buildDashboardStats } from './utils/buildDashboardStats';
 import { useTeacherTopicHelp } from './hooks/useTeacherTopicHelp';
-import Icon from '../../../components/common/Icon';
 import { WelcomeShapes } from '../../../components/common/WelcomeShapes';
 import AISuggestedActionCard from './components/AISuggestedActionCard';
 import StudentOverviewCard from './components/StudentOverviewCard';
@@ -29,7 +27,6 @@ import { renderChallengeModal } from './components/modals/ChallengeModals';
 export default function TeacherDashboardScreen({ navigation }: any) {
   const { user } = useAuth();
   const { colors, isDark } = useTheme();
-  const { isMobile } = useResponsive();
   const gold = colors.accentYellow;
   const styles = useMemo(() => makeStyles(colors), [colors]);
 
@@ -103,19 +100,6 @@ export default function TeacherDashboardScreen({ navigation }: any) {
           searchPlaceholder="Search students, assignments..."
           onMenuPress={() => navigation.openDrawer()}
           notificationCount={allNeedsAttention.length || undefined}
-          actions={
-            <Pressable
-              testID="dashboard-new-assignment"
-              onPress={() => navigation.navigate('TeacherAssignments' as any, { openNew: Date.now() })}
-              accessibilityRole="button"
-              accessibilityLabel="New Assignment"
-              style={(state: any) => [styles.newAssignBtn, isMobile && styles.newAssignCompact, (state.hovered || state.focused) && { borderColor: colors.textHeading }]}
-            >
-              <Icon name="plus" size={isMobile ? 18 : 17} color={colors.textHeading} />
-              {/* On phones the header row is full, so the button shows its icon only. */}
-              {!isMobile && <Text style={styles.newAssignText}>New Assignment</Text>}
-            </Pressable>
-          }
         />
 
         <ScrollView
@@ -271,12 +255,6 @@ export const makeStyles = (c: AppColors) => StyleSheet.create({
   bulletRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, minHeight: 24 },
   bulletDot: { width: 7, height: 7, borderRadius: 4, marginTop: 7 },
   bulletText: { flex: 1, fontSize: 14, lineHeight: 21, color: c.textMain },
-  newAssignBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 40, paddingHorizontal: 16,
-    borderRadius: 999, borderWidth: 1.5, borderColor: c.borderColor, backgroundColor: c.cardDark,
-  },
-  newAssignText: { fontSize: 14.5, fontWeight: '700', color: c.textHeading },
-  newAssignCompact: { width: 36, minHeight: 36, paddingHorizontal: 0, justifyContent: 'center' },
   flex1: { flex: 1 },
   card: {
     backgroundColor: c.cardDark, borderWidth: 1,

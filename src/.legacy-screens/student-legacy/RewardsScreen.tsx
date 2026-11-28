@@ -84,115 +84,118 @@ export default function RewardsScreen({ navigation }: any) {
         title="Rewards"
         subtitle="Earn credits · Redeem goodies"
         onMenuPress={() => navigation.openDrawer()}
-      />
-      <ScrollView
-        style={{ flex: 1, backgroundColor: colors.bgDark }}
-        contentContainerStyle={s.content}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* ── Hero credits card ─────────────────────────────── */}
-        <View style={[s.heroCard, { backgroundColor: TEAL + '18', borderColor: TEAL + '35' }]}>
-          <View style={[s.heroIconCircle, { backgroundColor: TEAL + '25' }]}>
-            <Feather name="award" size={32} color={TEAL} />
-          </View>
-          <Text style={[s.heroCredits, { color: titleColor }]}>{credits}</Text>
-          <Text style={[s.heroCreditsLabel, { color: TEAL }]}>Aivorah Credits</Text>
-          <View style={[s.xpRow, { backgroundColor: GOLD + '15', borderColor: GOLD + '35' }]}>
-            <Feather name="star" size={12} color={GOLD} />
-            <Text style={[s.xpRowText, { color: GOLD }]}>{stats.xpPoints} XP  ·  100 XP = 1 Credit</Text>
-          </View>
-
-          {/* Brand tagline */}
-          <View style={[s.taglineBox, { backgroundColor: colors.bgDark + 'aa', borderColor: borderCol }]}>
-            <Feather name="lock" size={12} color={colors.textMuted} />
-            <Text style={[s.taglineText, { color: colors.textMuted }]}>
-              You earn it, you can't buy it.
-            </Text>
-          </View>
-        </View>
-
-        {/* ── How to earn credits ───────────────────────────── */}
-        <Text style={[s.sectionLabel, { color: colors.textMuted }]}>HOW TO EARN CREDITS</Text>
-        <View style={[s.earnCard, { backgroundColor: cardBg, borderColor: borderCol }]}>
-          {HOW_TO_EARN.map((item, i) => (
-            <View key={item.label}>
-              <View style={s.earnRow}>
-                <View style={[s.earnIcon, { backgroundColor: item.color + '18' }]}>
-                  <Feather name={item.icon} size={16} color={item.color} />
-                </View>
-                <Text style={[s.earnLabel, { color: titleColor }]}>{item.label}</Text>
-                <View style={[s.earnBadge, { backgroundColor: item.color + '18', borderColor: item.color + '40' }]}>
-                  <Text style={[s.earnBadgeText, { color: item.color }]}>{item.credits}</Text>
-                </View>
+        renderContent={mobileTitle => (
+          <ScrollView
+            style={{ flex: 1, backgroundColor: colors.bgDark }}
+            contentContainerStyle={s.content}
+            showsVerticalScrollIndicator={false}
+          >
+            {mobileTitle}
+            {/* ── Hero credits card ─────────────────────────────── */}
+            <View style={[s.heroCard, { backgroundColor: TEAL + '18', borderColor: TEAL + '35' }]}>
+              <View style={[s.heroIconCircle, { backgroundColor: TEAL + '25' }]}>
+                <Feather name="award" size={32} color={TEAL} />
               </View>
-              {i < HOW_TO_EARN.length - 1 && (
-                <View style={[s.divider, { backgroundColor: borderCol }]} />
-              )}
+              <Text style={[s.heroCredits, { color: titleColor }]}>{credits}</Text>
+              <Text style={[s.heroCreditsLabel, { color: TEAL }]}>Aivorah Credits</Text>
+              <View style={[s.xpRow, { backgroundColor: GOLD + '15', borderColor: GOLD + '35' }]}>
+                <Feather name="star" size={12} color={GOLD} />
+                <Text style={[s.xpRowText, { color: GOLD }]}>{stats.xpPoints} XP  ·  100 XP = 1 Credit</Text>
+              </View>
+
+              {/* Brand tagline */}
+              <View style={[s.taglineBox, { backgroundColor: colors.bgDark + 'aa', borderColor: borderCol }]}>
+                <Feather name="lock" size={12} color={colors.textMuted} />
+                <Text style={[s.taglineText, { color: colors.textMuted }]}>
+                  You earn it, you can't buy it.
+                </Text>
+              </View>
             </View>
-          ))}
-        </View>
 
-        {/* ── Merchandise ───────────────────────────────────── */}
-        <Text style={[s.sectionLabel, { color: colors.textMuted }]}>REDEEM YOUR CREDITS</Text>
-        <View style={s.merchGrid}>
-          {MERCH.map(item => {
-            const canAfford = credits >= item.credits;
-            return (
-              <View
-                key={item.label}
-                style={[
-                  s.merchCard,
-                  {
-                    backgroundColor: isDark ? colors.cardDark : item.color + '0C',
-                    borderColor: canAfford ? item.color + '50' : borderCol,
-                  },
-                ]}
-              >
-                <View style={[s.merchIconCircle, { backgroundColor: canAfford ? item.color + '20' : colors.cardHover }]}>
-                  <Feather name={item.icon} size={24} color={canAfford ? item.color : colors.textDim} />
+            {/* ── How to earn credits ───────────────────────────── */}
+            <Text style={[s.sectionLabel, { color: colors.textMuted }]}>HOW TO EARN CREDITS</Text>
+            <View style={[s.earnCard, { backgroundColor: cardBg, borderColor: borderCol }]}>
+              {HOW_TO_EARN.map((item, i) => (
+                <View key={item.label}>
+                  <View style={s.earnRow}>
+                    <View style={[s.earnIcon, { backgroundColor: item.color + '18' }]}>
+                      <Feather name={item.icon} size={16} color={item.color} />
+                    </View>
+                    <Text style={[s.earnLabel, { color: titleColor }]}>{item.label}</Text>
+                    <View style={[s.earnBadge, { backgroundColor: item.color + '18', borderColor: item.color + '40' }]}>
+                      <Text style={[s.earnBadgeText, { color: item.color }]}>{item.credits}</Text>
+                    </View>
+                  </View>
+                  {i < HOW_TO_EARN.length - 1 && (
+                    <View style={[s.divider, { backgroundColor: borderCol }]} />
+                  )}
                 </View>
+              ))}
+            </View>
 
-                <Text style={[s.merchLabel, { color: canAfford ? titleColor : colors.textMuted }]}>{item.label}</Text>
-                <Text style={[s.merchDesc, { color: colors.textMuted }]}>{item.desc}</Text>
+            {/* ── Merchandise ───────────────────────────────────── */}
+            <Text style={[s.sectionLabel, { color: colors.textMuted }]}>REDEEM YOUR CREDITS</Text>
+            <View style={s.merchGrid}>
+              {MERCH.map(item => {
+                const canAfford = credits >= item.credits;
+                return (
+                  <View
+                    key={item.label}
+                    style={[
+                      s.merchCard,
+                      {
+                        backgroundColor: isDark ? colors.cardDark : item.color + '0C',
+                        borderColor: canAfford ? item.color + '50' : borderCol,
+                      },
+                    ]}
+                  >
+                    <View style={[s.merchIconCircle, { backgroundColor: canAfford ? item.color + '20' : colors.cardHover }]}>
+                      <Feather name={item.icon} size={24} color={canAfford ? item.color : colors.textDim} />
+                    </View>
 
-                <View style={[s.creditCost, { backgroundColor: canAfford ? item.color + '18' : colors.cardHover }]}>
-                  <Feather name="award" size={11} color={canAfford ? item.color : colors.textDim} />
-                  <Text style={[s.creditCostText, { color: canAfford ? item.color : colors.textDim }]}>
-                    {item.credits} credits
-                  </Text>
-                </View>
+                    <Text style={[s.merchLabel, { color: canAfford ? titleColor : colors.textMuted }]}>{item.label}</Text>
+                    <Text style={[s.merchDesc, { color: colors.textMuted }]}>{item.desc}</Text>
 
-                {/* Redeem button */}
-                <TouchableOpacity
-                  style={[
-                    s.redeemBtn,
-                    {
-                      backgroundColor: canAfford ? item.color + '18' : colors.cardHover,
-                      borderColor: canAfford ? item.color + '40' : borderCol,
-                    },
-                  ]}
-                  activeOpacity={0.7}
-                  disabled
-                >
-                  <Feather name="clock" size={12} color={canAfford ? item.color : colors.textDim} />
-                  <Text style={[s.redeemBtnText, { color: canAfford ? item.color : colors.textDim }]}>
-                    Coming Soon
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            );
-          })}
-        </View>
+                    <View style={[s.creditCost, { backgroundColor: canAfford ? item.color + '18' : colors.cardHover }]}>
+                      <Feather name="award" size={11} color={canAfford ? item.color : colors.textDim} />
+                      <Text style={[s.creditCostText, { color: canAfford ? item.color : colors.textDim }]}>
+                        {item.credits} credits
+                      </Text>
+                    </View>
 
-        {/* ── Bottom note ───────────────────────────────────── */}
-        <View style={[s.noteCard, { backgroundColor: TEAL + '0C', borderColor: TEAL + '30' }]}>
-          <Feather name="info" size={14} color={TEAL} />
-          <Text style={[s.noteText, { color: colors.textMuted }]}>
-            Physical rewards are shipped directly to your school address. Top performers each term will receive their goodies from the Aivorah team!
-          </Text>
-        </View>
+                    {/* Redeem button */}
+                    <TouchableOpacity
+                      style={[
+                        s.redeemBtn,
+                        {
+                          backgroundColor: canAfford ? item.color + '18' : colors.cardHover,
+                          borderColor: canAfford ? item.color + '40' : borderCol,
+                        },
+                      ]}
+                      activeOpacity={0.7}
+                      disabled
+                    >
+                      <Feather name="clock" size={12} color={canAfford ? item.color : colors.textDim} />
+                      <Text style={[s.redeemBtnText, { color: canAfford ? item.color : colors.textDim }]}>
+                        Coming Soon
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                );
+              })}
+            </View>
 
-      </ScrollView>
+            {/* ── Bottom note ───────────────────────────────────── */}
+            <View style={[s.noteCard, { backgroundColor: TEAL + '0C', borderColor: TEAL + '30' }]}>
+              <Feather name="info" size={14} color={TEAL} />
+              <Text style={[s.noteText, { color: colors.textMuted }]}>
+                Physical rewards are shipped directly to your school address. Top performers each term will receive their goodies from the Aivorah team!
+              </Text>
+            </View>
+
+          </ScrollView>
+        )}
+      />
     </ScreenLayout>
   );
 }

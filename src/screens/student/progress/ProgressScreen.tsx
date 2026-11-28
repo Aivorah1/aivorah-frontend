@@ -11,8 +11,8 @@ import { useStudentData, xpForNextLevel } from '../../../context/StudentDataCont
 import { useTheme } from '../../../context/ThemeContext';
 
 import { useWeeklyActivity } from './hooks/useWeeklyActivity';
-import { useChapterProgress } from './hooks/useChapterProgress';
-import { computeOverallPct, computeSubjectStats, computeMaxMinutes, computeAchievements } from './utils/progressCalculations';
+import { useStudentSubjectProgress } from '../learning-paths/hooks/useStudentSubjectProgress';
+import { subjectColor, subjectIcon, computeMaxMinutes, computeAchievements } from './utils/progressCalculations';
 import { ProgressHero } from './components/ProgressHero';
 import { WeeklyActivityCard } from './components/WeeklyActivityCard';
 import { SubjectPerformanceSection } from './components/SubjectPerformanceSection';
@@ -23,24 +23,29 @@ import { AchievementsGrid } from './components/AchievementsGrid';
 
 export default function ProgressScreen({ navigation }: any) {
   const { user } = useAuth();
-  const { stats, studentId, statsLoadError, refreshStats } = useStudentData();
+  const { stats, studentId, statsLoading, statsLoadError, refreshStats, activityRevision } = useStudentData();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
 
   const firstName = user?.name?.split(' ')[0] || 'there';
 
-  const { weeklyDays, loading } = useWeeklyActivity(studentId);
+  const weekly = useWeeklyActivity(studentId, activityRevision);
+  const { weeklyDays } = weekly;
 
   // ── Derived real values ───────────────────────────────────
 
-  const completedSet = useMemo(() => new Set(stats.completedTopics ?? []), [stats.completedTopics]);
-  // B005: denominator is the Dashboard's chapter list, not stats.totalTopics (server Qdrant lookup that returns 0 when Qdrant is down).
-  const chapters = useChapterProgress(user?.grade, user?.curriculum, studentId, user?.email, completedSet);
-  const totalChapters = chapters?.length ?? 0;
-  const masteredChapters = chapters?.filter(c => c.mastered).length ?? 0;
-  const overallPct = computeOverallPct(masteredChapters, totalChapters);
-
-  const subjectStats = useMemo(() => computeSubjectStats(chapters), [chapters]);
+  const completedSet = useMemo(() => new Set((stats.completedTopics ?? []).filter(Boolean)), [stats.completedTopics]);
+  const subjects = useStudentSubjectProgress(user?.curriculum ?? '', user?.grade ?? '', completedSet, user?.email);
+  const showProgress = !statsLoading && !statsLoadError && !subjects.loading && !subjects.warning;
+  const totalChapters = subjects.progress.reduce((sum, item) => sum + item.totalChapters, 0);
+  const completedChapters = subjects.progress.reduce((sum, item) => sum + item.completedChapters, 0);
+  const subjectStats = subjects.progress.map(({ subject, ...metrics }) => ({
+    ...metrics,
+    pct: showProgress ? metrics.pct : null,
+    name: subject.subject,
+    color: subjectColor(subject.subject),
+    icon: subjectIcon(subject.subject),
+  }));
 
   // Weekly bar chart — real study minutes per day
   const maxMinutes = useMemo(() => computeMaxMinutes(weeklyDays), [weeklyDays]);
@@ -51,7 +56,7 @@ export default function ProgressScreen({ navigation }: any) {
 
   const achievements = useMemo(() => computeAchievements(stats, completedSet.size), [stats, completedSet]);
 
-  if (loading) {
+  if (statsLoading) {
     return (
       <ScreenLayout>
         <View style={[styles.screen, { alignItems: 'center', justifyContent: 'center' }]}>
@@ -67,56 +72,67 @@ export default function ProgressScreen({ navigation }: any) {
       <View style={styles.screen}>
         <Header
           title="My Progress"
+          compactMobileTitle
           subtitle={`Track your growth and achievements, ${firstName}.`}
           searchPlaceholder="Search topics or stats..."
           onMenuPress={() => navigation.openDrawer()}
-        />
-        <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+          renderContent={mobileTitle => (
+            <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+              {mobileTitle}
 
-          {statsLoadError && (
-            <TouchableOpacity
-              style={styles.loadErrorBanner}
-              onPress={refreshStats}
-              activeOpacity={0.8}
-              testID="stats-load-error-banner"
-            >
-              <Feather name="wifi-off" size={16} color="#C8551C" />
-              <Text style={styles.loadErrorText}>
-                Couldn&apos;t load your latest progress. Tap to retry.
-              </Text>
-              <Feather name="refresh-cw" size={14} color="#C8551C" />
-            </TouchableOpacity>
+              {statsLoadError && (
+                <TouchableOpacity
+                  style={styles.loadErrorBanner}
+                  onPress={refreshStats}
+                  activeOpacity={0.8}
+                  testID="stats-load-error-banner"
+                >
+                  <Feather name="wifi-off" size={16} color="#C8551C" />
+                  <Text style={styles.loadErrorText}>
+                    Couldn&apos;t load your latest progress. Tap to retry.
+                  </Text>
+                  <Feather name="refresh-cw" size={14} color="#C8551C" />
+                </TouchableOpacity>
+              )}
+
+              {!statsLoadError && <ProgressHero
+                styles={styles}
+                overallPct={showProgress ? subjects.overallPct : null}
+                completedCount={completedSet.size}
+                completedChapters={completedChapters}
+                totalChapters={showProgress && subjects.overallPct !== null ? totalChapters : 0}
+                currentStreak={stats.currentStreak}
+                level={stats.level}
+                xpPoints={stats.xpPoints}
+                studyTimeMinutes={stats.studyTimeMinutes}
+                xpCurrent={xpInfo.current}
+                xpNeeded={xpInfo.needed}
+                xpProgress={xpProgress}
+              />}
+
+              {weekly.error ? (
+                <TouchableOpacity style={styles.loadErrorBanner} accessibilityRole="button" onPress={weekly.retry}>
+                  <Text style={styles.loadErrorText}>Couldn&apos;t load weekly activity. Tap to retry.</Text>
+                </TouchableOpacity>
+              ) : weekly.loading ? (
+                <Text style={styles.emptyText}>Loading weekly activity…</Text>
+              ) : <WeeklyActivityCard
+                styles={styles}
+                colors={colors}
+                weeklyDays={weeklyDays}
+                maxMinutes={maxMinutes}
+              />}
+
+              <SubjectPerformanceSection styles={styles} subjectStats={subjectStats} navigation={navigation}
+                loading={subjects.loading} error={subjects.error || subjects.warning} onRetry={subjects.retry} />
+
+              {!statsLoadError && <CompletedTopicsSection styles={styles} colors={colors} completedSet={completedSet} />}
+
+              {!statsLoadError && <AchievementsGrid styles={styles} colors={colors} achievements={achievements} />}
+
+            </ScrollView>
           )}
-
-          <ProgressHero
-            styles={styles}
-            overallPct={overallPct}
-            completedCount={completedSet.size}
-            masteredChapters={masteredChapters}
-            totalChapters={totalChapters}
-            currentStreak={stats.currentStreak}
-            level={stats.level}
-            xpPoints={stats.xpPoints}
-            studyTimeMinutes={stats.studyTimeMinutes}
-            xpCurrent={xpInfo.current}
-            xpNeeded={xpInfo.needed}
-            xpProgress={xpProgress}
-          />
-
-          <WeeklyActivityCard
-            styles={styles}
-            colors={colors}
-            weeklyDays={weeklyDays}
-            maxMinutes={maxMinutes}
-          />
-
-          <SubjectPerformanceSection styles={styles} subjectStats={subjectStats} navigation={navigation} />
-
-          <CompletedTopicsSection styles={styles} colors={colors} completedSet={completedSet} navigation={navigation} />
-
-          <AchievementsGrid styles={styles} colors={colors} achievements={achievements} />
-
-        </ScrollView>
+        />
       </View>
     </ScreenLayout>
   );
@@ -158,8 +174,8 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
   xpLabel: { fontSize: 13, color: c.textMuted, fontWeight: '600' },
   xpTrack: { height: 6, backgroundColor: c.cardHover, borderRadius: 3, overflow: 'hidden' },
   xpFill: { height: '100%', borderRadius: 3, backgroundColor: c.primary },
-  heroStats: { flexDirection: 'row', justifyContent: 'space-around' },
-  heroStat: { alignItems: 'center', gap: 4 },
+  heroStats: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-around', gap: spacing.md },
+  heroStat: { alignItems: 'center', gap: 4, minWidth: 70 },
   heroStatVal: { fontSize: 20, fontWeight: '700', letterSpacing: -0.5 },
   heroStatLabel: { fontSize: 12, color: c.textMuted },
 
@@ -185,9 +201,9 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
   barLabel: { fontSize: 12, color: c.textMuted },
 
   weekTotals: { flexDirection: 'row', justifyContent: 'space-around', borderTopWidth: 1, borderTopColor: c.borderColor, paddingTop: spacing.lg },
-  weekTotal: { alignItems: 'center', gap: 2 },
+  weekTotal: { flex: 1, alignItems: 'center', gap: 2 },
   weekTotalVal: { fontSize: 16, fontWeight: '700' },
-  weekTotalLabel: { fontSize: 13, color: c.textMuted },
+  weekTotalLabel: { fontSize: 13, color: c.textMuted, textAlign: 'center' },
 
   sectionRow:   { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing.md },
   sectionTitle: { fontSize: 16, fontWeight: '700', color: c.textMain, marginBottom: spacing.lg },
@@ -225,7 +241,7 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
     paddingVertical: 6,
     maxWidth: 200,
   },
-  topicChipText: { fontSize: 12, fontWeight: '600', color: c.textMain },
+  topicChipText: { flexShrink: 1, fontSize: 12, fontWeight: '600', color: c.textMain },
 
   achieveGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md, marginBottom: 20 },
   achieveCard: {

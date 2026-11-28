@@ -9,6 +9,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { useFocusEffect } from '@react-navigation/native';
 import ScreenLayout from '../../../components/common/ScreenLayout';
 import Header from '../../../components/common/Header';
+import TealActionButton from '../../../components/common/TealActionButton';
 import TEACHER_DASHBOARD_SERVER_URL from '../../../config/teacherDashboardServerUrl';
 
 import type { Assignment, StudentItem } from './types';
@@ -435,7 +436,7 @@ export default function TeacherAssignmentsScreen({ navigation, route }: any) {
 
           {/* Create button + Tabs row */}
           <View style={styles.actionsRow}>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabs}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabScroll} contentContainerStyle={styles.tabs}>
               {(inLibrary ? [...TABS, SHARED_TAB] : TABS).map((tab) => (
                 <TouchableOpacity
                   key={tab}
@@ -455,10 +456,7 @@ export default function TeacherAssignmentsScreen({ navigation, route }: any) {
               <Feather name="book-open" size={15} color={inLibrary ? '#0F0F0F' : gold} />
               <Text style={[styles.createBtnText, { color: inLibrary ? '#0F0F0F' : gold }]}>Library</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.createBtn} onPress={() => setShowModal(true)} activeOpacity={0.85}>
-              <Feather name="plus" size={15} color={colors.onPrimary} />
-              <Text style={styles.createBtnText}>New</Text>
-            </TouchableOpacity>
+            <TealActionButton label="New Assignment" icon="plus" onPress={() => setShowModal(true)} />
           </View>
 
           {/* ── QUIZ LIBRARY TAB ── */}
@@ -1029,7 +1027,8 @@ const makeStyles = (c: AppColors) => StyleSheet.create({
   statValue: { fontSize: 22, fontWeight: '800', letterSpacing: -0.5 },
   statLabel: { fontSize: 10, color: c.textDim, textAlign: 'center', fontWeight: '500' },
 
-  actionsRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  actionsRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: spacing.md },
+  tabScroll: { flexGrow: 1, flexShrink: 1, flexBasis: 230, minWidth: 0 },
   tabs: { gap: spacing.sm },
   tab: {
     paddingHorizontal: spacing.md, paddingVertical: 8,

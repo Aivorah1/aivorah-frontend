@@ -1,13 +1,13 @@
 import React, { useMemo, useState } from 'react';
-import { View } from 'react-native';
-import Header from '../../../components/common/Header';
+import { Platform, useWindowDimensions } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenLayout from '../../../components/common/ScreenLayout';
+import Header from '../../../components/common/Header';
 import { useTheme } from '../../../context/ThemeContext';
 import { useAuth } from '../../../context/AuthContext';
 import { useNotification } from '../../../context/NotificationContext';
 import { useIsFocused, useRoute, useNavigation } from '@react-navigation/native';
 import CreateChannelModal from '../../../features/channels/components/CreateChannelModal';
-import type { Channel } from '../../../features/channels/api/channelsApi';
 
 import { makeStyles } from './styles';
 import type { Contact } from './types';
@@ -38,6 +38,9 @@ export default function MessagesScreen(_props: any) {
   const userEmail = (user?.email || '').toLowerCase();
   const userName = user?.name || userEmail;
   const userRole = user?.role || 'teacher';
+  const { width, height } = useWindowDimensions();
+  const compact = (userRole === 'teacher' || userRole === 'super_admin') && width < 768;
+  const [keyboardInset, setKeyboardInset] = useState(0);
 
   const [showContacts, setShowContacts] = useState(false);
   const [showNewMenu, setShowNewMenu] = useState(false);
@@ -63,6 +66,21 @@ export default function MessagesScreen(_props: any) {
     refreshNotifications: refresh,
     loadConversations, setConversations, setChannels, loadChannels,
   });
+  const showThread = !compact || !!(thread.activeConvo || thread.activeChannel);
+
+  React.useEffect(() => {
+    if (!compact || !showThread || Platform.OS !== 'web' || typeof window === 'undefined') return;
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+    const sync = () => setKeyboardInset(Math.max(0, Math.round(window.innerHeight - viewport.height - viewport.offsetTop)));
+    sync();
+    viewport.addEventListener('resize', sync);
+    viewport.addEventListener('scroll', sync);
+    return () => {
+      viewport.removeEventListener('resize', sync);
+      viewport.removeEventListener('scroll', sync);
+    };
+  }, [compact, showThread]);
 
   // Deep-link from a "message from X" notification tap (see Header.tsx) —
   // opens X's conversation directly instead of leaving the screen on its
@@ -99,11 +117,19 @@ export default function MessagesScreen(_props: any) {
   function onNewPress() {
     const canCreate = userRole === 'teacher' || userRole === 'school_admin' || userRole === 'super_admin';
     if (canCreate) {
-      // Anchor the chooser just below the New button (not the screen edge).
-      newBtnRef.current?.measureInWindow?.((x: number, y: number, w: number, h: number) => {
-        setNewMenuPos({ top: y + h + 6, left: Math.max(12, x + w - 224) });
+      const button = newBtnRef.current;
+      if (!button?.measureInWindow) {
+        if (compact) setNewMenuPos({ top: Math.max(8, height - 156), left: Math.max(8, width - 240) });
+        setShowNewMenu(true);
+        return;
+      }
+      button.measureInWindow((x: number, y: number, w: number, h: number) => {
+        setNewMenuPos({
+          top: compact ? Math.max(8, Math.min(y - 106, height - 112)) : y + h + 6,
+          left: compact ? Math.max(8, Math.min(x + w - 224, width - 232)) : Math.max(12, x + w - 224),
+        });
+        setShowNewMenu(true);
       });
-      setShowNewMenu(true);
     } else { setShowContacts(true); loadContacts(); } // parents: direct New chat
   }
 
@@ -120,11 +146,16 @@ export default function MessagesScreen(_props: any) {
 
   return (
     <ScreenLayout>
-      <View style={styles.container}>
-        <ConversationList
+      {compact && <Header title="Messages" subtitle="Stay connected with Aivorah" mobileNavigationOnly={showThread} onMenuPress={() => navigation.openDrawer?.()} />}
+      <SafeAreaView
+        edges={compact && (!showThread || keyboardInset === 0) ? ['bottom'] : []}
+        style={[styles.container, compact && showThread && { paddingBottom: keyboardInset }]}
+      >
+        {(!compact || !showThread) && <ConversationList
           colors={colors}
           styles={styles}
           userRole={userRole}
+          compact={compact}
           loadingConvos={loadingConvos}
           unifiedInbox={unifiedInbox}
           activeConvoEmail={thread.activeConvo?.otherEmail ?? null}
@@ -141,17 +172,19 @@ export default function MessagesScreen(_props: any) {
           onOpenChannel={thread.openChannel}
           onOpenConversation={thread.openConversation}
           onAivorahBannerPress={onAivorahBannerPress}
-        />
+        />}
 
-        <ChatPanel
+        {showThread && <ChatPanel
           colors={colors}
           styles={styles}
+          compact={compact}
           userRole={userRole}
           userEmail={userEmail}
           activeChannel={thread.activeChannel}
           onCloseChannel={() => thread.setActiveChannel(null)}
           onChannelsReload={loadChannels}
           activeConvo={thread.activeConvo}
+          onBackToInbox={compact ? () => { thread.setShowEmoji(false); thread.setActiveConvo(null); } : undefined}
           loadingThread={thread.loadingThread}
           messages={thread.messages}
           flatListRef={thread.flatListRef}
@@ -175,8 +208,8 @@ export default function MessagesScreen(_props: any) {
           inputText={thread.inputText}
           setInputText={thread.setInputText}
           sendMessage={thread.sendMessage}
-        />
-      </View>
+        />}
+      </SafeAreaView>
 
       <EditMessageModal
         visible={!!thread.editingMsg}

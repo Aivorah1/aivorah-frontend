@@ -15,12 +15,13 @@ import CourseDetailModal from './components/CourseDetailModal';
 export default function TeacherLearningPathsScreen({ navigation }: any) {
   const { colors } = useTheme();
   const { width } = useWindowDimensions();
+  const isWide = width >= 980;
   const gold = colors.accentYellow;
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const mobile = width < 768;
+  const styles = useMemo(() => makeStyles(colors, !isWide, mobile), [colors, isWide, mobile]);
   const [active, setActive] = useState<TeacherCourse | null>(null);
 
   const { totalLessons, totalMinutes } = computeCourseStats(TEACHER_COURSES);
-  const isWide = width >= 980;
 
   return (
     <ScreenLayout hideAIPanel>

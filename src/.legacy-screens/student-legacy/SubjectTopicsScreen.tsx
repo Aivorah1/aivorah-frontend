@@ -508,90 +508,92 @@ export default function SubjectTopicsScreen({ navigation, route }: any) {
           subtitle={`${curriculum} · ${grade} · ${topics.length} Topics`}
           showBack={true}
           onMenuPress={() => navigation.openDrawer()}
-        />
-
-        <ScrollView
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* ── My Learning Path header + progress ── */}
-          <View style={[styles.pathHeader, isMobile && { flexDirection: 'column', alignItems: 'stretch' }]}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.pathTitle}>My Learning Path</Text>
-              <Text style={styles.pathSub}>Complete each topic step by step. Your progress is saved automatically.</Text>
-            </View>
-            <View style={[styles.progressCard, { borderColor: colors.borderColor }]}>
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.progressLabel, { color: colors.textMuted }]}>Your Progress</Text>
-                <Text style={[styles.progressPctText, { color: colors.textMain }]}>{pct}% Complete</Text>
-                <View style={[styles.progBarTrack, { backgroundColor: colors.borderColor }]}>
-                  <LinearGradient
-                    colors={['#3FA06A', '#24877B']}
-                    start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-                    style={[styles.progBarFill, { width: `${pct}%` as any }]}
-                  />
+          renderContent={mobileTitle => (
+            <ScrollView
+              contentContainerStyle={styles.content}
+              showsVerticalScrollIndicator={false}
+            >
+              {mobileTitle}
+              {/* ── My Learning Path header + progress ── */}
+              <View style={[styles.pathHeader, isMobile && { flexDirection: 'column', alignItems: 'stretch' }]}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.pathTitle}>My Learning Path</Text>
+                  <Text style={styles.pathSub}>Complete each topic step by step. Your progress is saved automatically.</Text>
+                </View>
+                <View style={[styles.progressCard, { borderColor: colors.borderColor }]}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.progressLabel, { color: colors.textMuted }]}>Your Progress</Text>
+                    <Text style={[styles.progressPctText, { color: colors.textMain }]}>{pct}% Complete</Text>
+                    <View style={[styles.progBarTrack, { backgroundColor: colors.borderColor }]}>
+                      <LinearGradient
+                        colors={['#3FA06A', '#24877B']}
+                        start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+                        style={[styles.progBarFill, { width: `${pct}%` as any }]}
+                      />
+                    </View>
+                  </View>
+                  <View style={[styles.owl, { backgroundColor: m.color + '22', borderColor: m.color + '55' }]}>
+                    <Feather name="feather" size={22} color={m.color} />
+                  </View>
                 </View>
               </View>
-              <View style={[styles.owl, { backgroundColor: m.color + '22', borderColor: m.color + '55' }]}>
-                <Feather name="feather" size={22} color={m.color} />
-              </View>
-            </View>
-          </View>
 
-          {/* ── Search within this subject's topics ── */}
-          {topics.length > 0 && (
-            <View style={[styles.searchBox, { borderColor: colors.borderColor, backgroundColor: colors.cardDark }]}>
-              <Feather name="search" size={15} color={colors.textMuted} style={{ marginRight: 8 }} />
-              <TextInput
-                style={[styles.searchInput, { color: colors.textMain }]}
-                placeholder={`Search ${subject} units or topics...`}
-                placeholderTextColor={colors.textDim}
-                value={searchText}
-                onChangeText={setSearchText}
-                returnKeyType="search"
-              />
-              {searchText.length > 0 && (
-                <TouchableOpacity onPress={() => setSearchText('')} hitSlop={{ top: 6, right: 6, bottom: 6, left: 6 }}>
-                  <Feather name="x" size={14} color={colors.textMuted} />
-                </TouchableOpacity>
+              {/* ── Search within this subject's topics ── */}
+              {topics.length > 0 && (
+                <View style={[styles.searchBox, { borderColor: colors.borderColor, backgroundColor: colors.cardDark }]}>
+                  <Feather name="search" size={15} color={colors.textMuted} style={{ marginRight: 8 }} />
+                  <TextInput
+                    style={[styles.searchInput, { color: colors.textMain }]}
+                    placeholder={`Search ${subject} units or topics...`}
+                    placeholderTextColor={colors.textDim}
+                    value={searchText}
+                    onChangeText={setSearchText}
+                    returnKeyType="search"
+                  />
+                  {searchText.length > 0 && (
+                    <TouchableOpacity onPress={() => setSearchText('')} hitSlop={{ top: 6, right: 6, bottom: 6, left: 6 }}>
+                      <Feather name="x" size={14} color={colors.textMuted} />
+                    </TouchableOpacity>
+                  )}
+                </View>
               )}
-            </View>
-          )}
 
-          {/* ── Topics grid ── */}
-          {topics.length === 0 ? (
-            <View style={styles.emptyBox}>
-              <Feather name="inbox" size={36} color={colors.textMuted} />
-              <Text style={[styles.dimText, { marginTop: 12, textAlign: 'center' }]}>
-                No topics found for {subject} in {grade} {curriculum}.
-              </Text>
-            </View>
-          ) : filteredTopics.length === 0 ? (
-            <View style={styles.emptyBox}>
-              <Feather name="search" size={32} color={colors.textMuted} />
-              <Text style={[styles.dimText, { marginTop: 12, textAlign: 'center' }]}>
-                No topics match "{searchText}" in {subject}.
-              </Text>
-            </View>
-          ) : (
-            <View style={styles.topicsGrid}>
-              {filteredTopics.map((t, i) => (
-                <TopicCard
-                  key={t.topic}
-                  index={i}
-                  t={t}
-                  done={completedSet.has(t.topic)}
-                  subject={subject}
-                  onModule={(modRoute) => handleModule(modRoute, t, i)}
-                  colors={colors}
-                  isDark={isDark}
-                  cardWidth={cardWidth}
-                />
-              ))}
-            </View>
-          )}
+              {/* ── Topics grid ── */}
+              {topics.length === 0 ? (
+                <View style={styles.emptyBox}>
+                  <Feather name="inbox" size={36} color={colors.textMuted} />
+                  <Text style={[styles.dimText, { marginTop: 12, textAlign: 'center' }]}>
+                    No topics found for {subject} in {grade} {curriculum}.
+                  </Text>
+                </View>
+              ) : filteredTopics.length === 0 ? (
+                <View style={styles.emptyBox}>
+                  <Feather name="search" size={32} color={colors.textMuted} />
+                  <Text style={[styles.dimText, { marginTop: 12, textAlign: 'center' }]}>
+                    No topics match "{searchText}" in {subject}.
+                  </Text>
+                </View>
+              ) : (
+                <View style={styles.topicsGrid}>
+                  {filteredTopics.map((t, i) => (
+                    <TopicCard
+                      key={t.topic}
+                      index={i}
+                      t={t}
+                      done={completedSet.has(t.topic)}
+                      subject={subject}
+                      onModule={(modRoute) => handleModule(modRoute, t, i)}
+                      colors={colors}
+                      isDark={isDark}
+                      cardWidth={cardWidth}
+                    />
+                  ))}
+                </View>
+              )}
 
-        </ScrollView>
+            </ScrollView>
+          )}
+        />
       </View>
     </ScreenLayout>
   );

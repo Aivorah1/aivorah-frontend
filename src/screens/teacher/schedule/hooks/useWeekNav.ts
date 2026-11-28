@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState, MutableRefObject } from 'react';
 import { ScrollView, useWindowDimensions } from 'react-native';
 import { buildWeek, dateISO } from '../utils/scheduleUtils';
-import { DAY_COL_WIDTH, HOUR_HEIGHT, TIME_LABEL_WIDTH, TIMELINE_START_HOUR } from '../constants';
+import { DAY_COL_WIDTH, TIME_LABEL_WIDTH } from '../constants';
 
 // `gridWidth`: the calendar's measured width, so the 7 day columns fill it exactly (the window size is only a first guess).
-export function useWeekNav(firstLoadDoneRef: MutableRefObject<boolean>, scrollToNow?: MutableRefObject<((animated?: boolean) => void) | null>, gridWidth?: number | null) {
+export function useWeekNav(firstLoadDoneRef: MutableRefObject<boolean>, scrollToNow?: MutableRefObject<((animated?: boolean) => void) | null>, gridWidth?: number | null, scrollOnToday = true) {
   const today = useMemo(() => new Date(), []);
   const todayISO = useMemo(() => dateISO(today), [today]);
   const [weekBase, setWeekBase] = useState(today);
@@ -35,7 +35,7 @@ export function useWeekNav(firstLoadDoneRef: MutableRefObject<boolean>, scrollTo
     const alreadyOnThisWeek = week.some(d => d.iso === todayISO);
     if (alreadyOnThisWeek) {
       scrollToTodayCol(now, colWidth);
-      scrollToCurrentTime();
+      if (scrollOnToday) scrollToCurrentTime();
     } else {
       setWeekBase(now);
     }

@@ -231,6 +231,7 @@ export function useNarration(listenSteps: ListenStep[], isPoem: boolean, lang?: 
     playSeqRef.current++;
     stopSpeaking();
     setListenPlaying(false);
+    setPaused(false);
     setListenStep(0);
     setSentenceIdx(0);
     setWordIdx(0);

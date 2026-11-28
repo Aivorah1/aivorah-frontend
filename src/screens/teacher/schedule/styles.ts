@@ -3,35 +3,44 @@ import { spacing, radius } from '../../../theme';
 import type { AppColors } from '../../../theme';
 import { HOUR_HEIGHT } from './constants';
 
-export const makeStyles = (c: AppColors) => StyleSheet.create({
+export const makeStyles = (c: AppColors, isDark = false, compact = false) => StyleSheet.create({
   screen:    { flex: 1, backgroundColor: c.bgDark },
-  headerRow: { flexDirection: 'row', alignItems: 'center', paddingRight: spacing.xl },
-  addEventBtnTop: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: c.accentYellow, paddingHorizontal: spacing.lg,
-    paddingVertical: 9, borderRadius: radius.lg,
-  },
-  addEventBtnTopText: { fontSize: 13, fontWeight: '700', color: c.onPrimary },
   scroll:   { flex: 1 },
-  content:  { padding: spacing.xl, paddingBottom: 40 },
+  content:  { padding: compact ? 14 : spacing.xl, paddingBottom: 40 },
   infoBanner: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     backgroundColor: c.accentCyan + '12', borderWidth: 1,
     borderColor: c.accentCyan + '30', borderRadius: radius.md,
-    padding: spacing.md, marginBottom: spacing.xl,
+    padding: compact ? 8 : spacing.md, marginBottom: compact ? 10 : spacing.lg,
   },
   infoText: { fontSize: 12, color: c.accentCyan, flex: 1 },
 
   // Week nav
+  weekControls: { gap: 12, marginBottom: spacing.lg },
+  weekToolbar: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 10, justifyContent: 'space-between' },
+  mobileWeekAction: { alignItems: 'flex-end' },
+  mobileWeekNavBar: { flexBasis: '100%', maxWidth: '100%' },
   weekNavBar: {
-    flexDirection: 'row', alignItems: 'center', gap: spacing.md,
+    flexDirection: 'row', alignItems: 'center', gap: 4, minWidth: 0, flexBasis: 290, flexGrow: 1, maxWidth: 485,
     backgroundColor: c.cardDark, borderWidth: 1, borderColor: c.borderColor,
-    borderRadius: radius.xl, padding: spacing.md, marginBottom: spacing.lg,
+    borderRadius: radius.lg, paddingHorizontal: 4,
   },
-  navArrow:     { padding: spacing.sm },
-  todayBtn:     { paddingHorizontal: spacing.md, paddingVertical: 6, borderRadius: radius.sm, borderWidth: 1, borderColor: c.borderColor },
+  navArrow:     { minWidth: 40, minHeight: 44, alignItems: 'center', justifyContent: 'center' },
+  todayBtn:     { paddingHorizontal: 6, minHeight: 36, justifyContent: 'center', borderRadius: radius.sm, borderWidth: 1, borderColor: c.borderColor },
   todayBtnText: { fontSize: 12, fontWeight: '600', color: c.textMuted },
-  weekLabel:    { flex: 1, fontSize: 13, fontWeight: '700', color: c.textMain, textAlign: 'center' },
+  weekLabel:    { flex: 1, minWidth: 0, fontSize: 13, fontWeight: '700', color: c.textMain, textAlign: 'center' },
+  dateStrip: { flexDirection: 'row', gap: 2, padding: 3, borderRadius: radius.lg, borderWidth: 1, borderColor: c.borderColor, backgroundColor: c.cardDark },
+  dateButton: { flex: 1, minWidth: 0, minHeight: 52, paddingHorizontal: 1, paddingVertical: 6, justifyContent: 'center', alignItems: 'center', borderRadius: 9, borderWidth: 1, borderColor: 'transparent' },
+  dateButtonSelected: { backgroundColor: isDark ? '#244A46' : '#DCEFE8', borderColor: isDark ? '#76BFAF' : '#499788' },
+  dateDay: { fontWeight: '700', fontSize: 13, color: c.textMain, textAlign: 'center' },
+  dateNumber: { fontSize: 11, color: c.textMuted, textAlign: 'center' },
+  dateTextSelected: { color: isDark ? '#BAEEE3' : '#155B53' },
+  agenda: { gap: 8, marginBottom: spacing.lg },
+  agendaHeading: { fontSize: 15, fontWeight: '700', color: c.textMain },
+  agendaEmpty: { color: c.textMuted, fontSize: 14, padding: 14, borderWidth: 1, borderColor: c.borderColor, borderRadius: radius.md, backgroundColor: c.cardDark },
+  agendaEvent: { minHeight: 52, flexDirection: 'row', alignItems: 'center', gap: 10, padding: 10, borderWidth: 1, borderColor: c.borderColor, borderRadius: radius.md, backgroundColor: c.cardDark },
+  agendaTime: { color: c.textMuted, fontSize: 12, flexShrink: 1 },
+  agendaTitle: { flex: 1, minWidth: 0, color: c.textMain, fontWeight: '700', fontSize: 14 },
 
   // Layout
   mainLayout:        { flexDirection: 'row', gap: spacing.xl },

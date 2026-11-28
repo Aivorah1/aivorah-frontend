@@ -1,5 +1,4 @@
-import { USE_LOCAL_SERVICES } from './localServices';
-import { Platform } from 'react-native';
+import { LEGACY_ACCOUNT_BACKEND, USE_LOCAL_SERVICES } from './localServices';
 
 // Auth microservice base URL (aivorah-auth-service) — /user/sync, /user/role,
 // /user/send-verification, /user/verify/:token, /user/check-verified,
@@ -10,11 +9,9 @@ import { Platform } from 'react-native';
 // account got suspended for billing). Temporary URL until the account's custom
 // domain/naming is sorted out — Render appended a random suffix since the
 // original name is still claimed by the suspended account.
-declare const __DEV__: boolean;
-
 export const LIVE_SERVICE = 'https://aivorah-auth-service-1.onrender.com';
 
 const AUTH_SERVER_URL =
-  USE_LOCAL_SERVICES ? 'http://localhost:4001' : LIVE_SERVICE;
+  USE_LOCAL_SERVICES ? 'http://localhost:4001' : (LEGACY_ACCOUNT_BACKEND ?? LIVE_SERVICE);
 
 export default AUTH_SERVER_URL;

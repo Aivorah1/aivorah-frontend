@@ -28,121 +28,123 @@ export default function BhagavathaStoriesScreen({ navigation }: any) {
           showBack={true}
           onMenuPress={() => navigation.openDrawer()}
           showSearch={false}
-        />
+          renderContent={mobileTitle => (
+            <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+              {mobileTitle}
 
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-
-          {/* Hero banner */}
-          <LinearGradient
-            colors={[TEAL + '30', FOREST + '18']}
-            start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-            style={styles.hero}
-          >
-            <View style={[styles.heroIcon, { backgroundColor: TEAL + '30', borderColor: TEAL + '50' }]}>
-              <Feather name="book-open" size={26} color={TEAL} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.heroTitle, { color: TEAL }]}>Bedtime Stories for Children</Text>
-              <Text style={[styles.heroSub, { color: colors.textMuted }]}>
-                Stories of devotion, courage and wisdom — narrated with love.
-              </Text>
-            </View>
-          </LinearGradient>
-
-          {loading && (
-            <View style={styles.center}>
-              <ActivityIndicator size="large" color={TEAL} />
-              <Text style={[styles.hint, { color: colors.textMuted }]}>Loading stories…</Text>
-            </View>
-          )}
-
-          {!!error && (
-            <View style={styles.center}>
-              <Feather name="alert-circle" size={28} color={colors.accentRed} />
-              <Text style={[styles.hint, { color: colors.textMuted }]}>{error}</Text>
-            </View>
-          )}
-
-          {/* Grouped by collection */}
-          {!loading && !error && Object.entries(grouped).map(([collection, items]) => {
-            const collColor = COLLECTION_PASTEL[collection] ?? TEAL;
-            return (
-              <View key={collection} style={styles.section}>
-                <View style={styles.sectionHeader}>
-                  <View style={[styles.sectionDot, { backgroundColor: collColor }]} />
-                  <Text style={[styles.sectionTitle, { color: collColor }]}>{collection}</Text>
-                  <View style={[styles.sectionLine, { backgroundColor: collColor + '30' }]} />
+              {/* Hero banner */}
+              <LinearGradient
+                colors={[TEAL + '30', FOREST + '18']}
+                start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+                style={styles.hero}
+              >
+                <View style={[styles.heroIcon, { backgroundColor: TEAL + '30', borderColor: TEAL + '50' }]}>
+                  <Feather name="book-open" size={26} color={TEAL} />
                 </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.heroTitle, { color: TEAL }]}>Bedtime Stories for Children</Text>
+                  <Text style={[styles.heroSub, { color: colors.textMuted }]}>
+                    Stories of devotion, courage and wisdom — narrated with love.
+                  </Text>
+                </View>
+              </LinearGradient>
 
-                <View style={isWide ? styles.grid : styles.list}>
-                {items.map(story => {
-                  const grad = PASTEL_GRAD[story.coverColor] ?? ['#9FB2A4', '#C8551C'];
-                  return (
-                    <TouchableOpacity
-                      key={story.id}
-                      style={[styles.card, isWide && styles.cardWide, {
-                        backgroundColor: colors.cardDark,
-                        borderColor: colors.borderColor,
-                      }]}
-                      onPress={() => navigation.navigate('StoryReader', { storyId: story.id, storyTitle: story.title })}
-                      activeOpacity={0.88}
-                    >
-                      {/* Cover image or gradient */}
-                      {story.coverImageUrl ? (
-                        <Image
-                          source={{ uri: story.coverImageUrl.startsWith('http') ? story.coverImageUrl : `${SERVER_URL}${story.coverImageUrl}` }}
-                          style={styles.cardIcon}
-                          resizeMode="cover"
-                        />
-                      ) : (
-                        <LinearGradient
-                          colors={grad}
-                          start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-                          style={styles.cardIcon}
+              {loading && (
+                <View style={styles.center}>
+                  <ActivityIndicator size="large" color={TEAL} />
+                  <Text style={[styles.hint, { color: colors.textMuted }]}>Loading stories…</Text>
+                </View>
+              )}
+
+              {!!error && (
+                <View style={styles.center}>
+                  <Feather name="alert-circle" size={28} color={colors.accentRed} />
+                  <Text style={[styles.hint, { color: colors.textMuted }]}>{error}</Text>
+                </View>
+              )}
+
+              {/* Grouped by collection */}
+              {!loading && !error && Object.entries(grouped).map(([collection, items]) => {
+                const collColor = COLLECTION_PASTEL[collection] ?? TEAL;
+                return (
+                  <View key={collection} style={styles.section}>
+                    <View style={styles.sectionHeader}>
+                      <View style={[styles.sectionDot, { backgroundColor: collColor }]} />
+                      <Text style={[styles.sectionTitle, { color: collColor }]}>{collection}</Text>
+                      <View style={[styles.sectionLine, { backgroundColor: collColor + '30' }]} />
+                    </View>
+
+                    <View style={isWide ? styles.grid : styles.list}>
+                    {items.map(story => {
+                      const grad = PASTEL_GRAD[story.coverColor] ?? ['#9FB2A4', '#C8551C'];
+                      return (
+                        <TouchableOpacity
+                          key={story.id}
+                          style={[styles.card, isWide && styles.cardWide, {
+                            backgroundColor: colors.cardDark,
+                            borderColor: colors.borderColor,
+                          }]}
+                          onPress={() => navigation.navigate('StoryReader', { storyId: story.id, storyTitle: story.title })}
+                          activeOpacity={0.88}
                         >
-                          <View style={styles.cardIconInner}>
-                            <Feather
-                              name={safeIcon(story.coverIcon) as any}
-                              size={26}
-                              color="#fff"
+                          {/* Cover image or gradient */}
+                          {story.coverImageUrl ? (
+                            <Image
+                              source={{ uri: story.coverImageUrl.startsWith('http') ? story.coverImageUrl : `${SERVER_URL}${story.coverImageUrl}` }}
+                              style={styles.cardIcon}
+                              resizeMode="cover"
                             />
-                          </View>
-                        </LinearGradient>
-                      )}
+                          ) : (
+                            <LinearGradient
+                              colors={grad}
+                              start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+                              style={styles.cardIcon}
+                            >
+                              <View style={styles.cardIconInner}>
+                                <Feather
+                                  name={safeIcon(story.coverIcon) as any}
+                                  size={26}
+                                  color="#fff"
+                                />
+                              </View>
+                            </LinearGradient>
+                          )}
 
-                      {/* Info */}
-                      <View style={styles.cardInfo}>
-                        <Text style={[styles.cardTitle, { color: colors.textMain }]} numberOfLines={1}>
-                          {story.title}
-                        </Text>
-                        <Text style={[styles.cardSub, { color: colors.textMuted }]} numberOfLines={2}>
-                          {story.subtitle}
-                        </Text>
-                        <View style={styles.cardMeta}>
-                          <View style={[styles.metaBadge, { backgroundColor: grad[0] + '20', borderColor: grad[0] + '50' }]}>
-                            <Feather name="book" size={9} color={grad[0]} />
-                            <Text style={[styles.metaText, { color: grad[0] }]}>{story.pageCount} pages</Text>
+                          {/* Info */}
+                          <View style={styles.cardInfo}>
+                            <Text style={[styles.cardTitle, { color: colors.textMain }]} numberOfLines={1}>
+                              {story.title}
+                            </Text>
+                            <Text style={[styles.cardSub, { color: colors.textMuted }]} numberOfLines={2}>
+                              {story.subtitle}
+                            </Text>
+                            <View style={styles.cardMeta}>
+                              <View style={[styles.metaBadge, { backgroundColor: grad[0] + '20', borderColor: grad[0] + '50' }]}>
+                                <Feather name="book" size={9} color={grad[0]} />
+                                <Text style={[styles.metaText, { color: grad[0] }]}>{story.pageCount} pages</Text>
+                              </View>
+                              <View style={[styles.metaBadge, { backgroundColor: colors.borderColor, borderColor: 'transparent' }]}>
+                                <Feather name="users" size={9} color={colors.textDim} />
+                                <Text style={[styles.metaText, { color: colors.textDim }]}>Age {story.ageGroup}</Text>
+                              </View>
+                            </View>
                           </View>
-                          <View style={[styles.metaBadge, { backgroundColor: colors.borderColor, borderColor: 'transparent' }]}>
-                            <Feather name="users" size={9} color={colors.textDim} />
-                            <Text style={[styles.metaText, { color: colors.textDim }]}>Age {story.ageGroup}</Text>
+
+                          {/* Arrow */}
+                          <View style={[styles.cardArrow, { backgroundColor: grad[0] + '18' }]}>
+                            <Feather name="chevron-right" size={18} color={grad[0]} />
                           </View>
-                        </View>
-                      </View>
+                        </TouchableOpacity>
+                      );
+                    })}
+                    </View>
+                  </View>
+                );
+              })}
 
-                      {/* Arrow */}
-                      <View style={[styles.cardArrow, { backgroundColor: grad[0] + '18' }]}>
-                        <Feather name="chevron-right" size={18} color={grad[0]} />
-                      </View>
-                    </TouchableOpacity>
-                  );
-                })}
-                </View>
-              </View>
-            );
-          })}
-
-        </ScrollView>
+            </ScrollView>
+          )}
+        />
       </View>
     </ScreenLayout>
   );
